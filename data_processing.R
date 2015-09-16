@@ -134,7 +134,6 @@ hist(global.data$unique.phon.pairs$TP, main="Global TP")
 ############################################################################
 # context results
 ############################################################################
-# get context results
 context.data <- context_results(contexts=contexts, df=df) # calls make_streams() and calc_MI()
 
 # present results
@@ -152,16 +151,6 @@ for(k in 1:length(colnames(contexts))){
   N.utt[k] <- context.data[[k]]$N.utterances
 }
 names(N.utt) <- colnames(contexts)
-
-# 
-# # present results
-# par(mfrow=c(1,2))
-# for(k in 1:length(names(nontext.data))){
-#   
-#   hist(nontext.data[[k]]$unique.phon.pairs$MI, main=paste("Mutual Information,\n", names(nontext.data)[k], "nontext"), xlim=c(min(global.data$unique.phon.pairs$MI), max(global.data$unique.phon.pairs$MI)))
-#   
-#   hist(nontext.data[[k]]$unique.phon.pairs$TP, main=paste("Transitional Probability,\n", names(nontext.data)[k], "nontext"), xlim=c(0,1))
-# }
 
 
 #####################
@@ -357,8 +346,6 @@ mean(filter(bootstrap.plot, criterion=="MI85" & measure=="precision")$d)
 
 
 #############
-#############
-#############
 combined.bootstrap.results <- as.data.frame(t(bootstrap.results[[1]]))
 combined.bootstrap.results$iter <- 1:nrow(combined.bootstrap.results)
 combined.bootstrap.results$context.corpus <- names(bootstrap.results)[1]
@@ -395,7 +382,7 @@ for(k in 1:length(colnames(contexts))){
 }
 
 ##################################################
-# NOTE: Swingley only considers a "word" segmented if it has BOTH high within-unit MI and also high frequency as a unit.
+# NOTE: Swingley 2005 only considers a "word" segmented if it has BOTH high within-unit MI and also high frequency as a unit.
 
 plot.data.con <- data.frame(context=names(context.data), TP85recall.mean=NA, TP85precision.mean=NA, MI85recall.mean=NA, MI85precision.mean=NA, TP85recall.sd=NA, TP85precision.sd=NA, MI85recall.sd=NA, MI85precision.sd=NA, N.utt=NA, group="context")
 for(k in 1:length(names(contexts))){
@@ -404,13 +391,6 @@ for(k in 1:length(names(contexts))){
   plot.data.con$N.utt[k] <- context.data[[k]]$N.utterances
 }
 
-# plot.data.non <- data.frame(context=names(context.data), TP85recall=NA, TP85precision=NA, MI85recall=NA, MI85precision=NA, N.utt=NA)
-# for(k in 1:length(names(contexts))){
-#   plot.data.non[k, 2:3] <- colMeans(nontext.data[[k]]$TP85$seg.results[,4:5], na.rm=T)
-#   plot.data.non[k, 4:5] <- colMeans(nontext.data[[k]]$MI85$seg.results[,4:5], na.rm=T)
-#   plot.data.non$N.utt[k] <- nontext.data[[k]]$N.utterances
-# }
-# plot.data.non$group <- "nontext"
 
 plot.data.non <- bootstrap.summary
 plot.data.non$N.utt <- plot.data.con$N.utt
@@ -445,7 +425,7 @@ summary(lm(mean ~ group*N.utt*criterion, data=plot.data))
 
 #####################################################
 # Do context vs. nontexts differ in accuracy?
-# Note, this should perhaps be a DST, not IST
+
 ggplot(plot.data, aes(x=group, y=mean, fill=context)) +
   geom_bar(aes(), stat="identity", position="dodge")+
   geom_errorbar(aes(ymax = mean + sd, ymin=mean - sd), width=.3, position=position_dodge(.9)) +
@@ -465,24 +445,6 @@ ggplot(plot.data, aes(x=criterion:variable, y=mean, fill=group)) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   labs(title="Error bars are +-SD", x=NULL, y=NULL)
 
-summary(lm(mean ~ group*variable*criterion, data=plot.data))
-summary(lm(mean ~ group*context*variable + N.utt, data=plot.data)) # controlling for the number of utterances
-
-summary(lm(mean ~ group, data=subset(plot.data, variable=="recall" & criterion=="TP85")))
-summary(lm(mean ~ group, data=subset(plot.data, variable=="recall" & criterion=="MI85")))
-summary(lm(mean ~ group, data=subset(plot.data, variable=="precision" & criterion=="TP85")))
-summary(lm(mean ~ group, data=subset(plot.data, variable=="precision" & criterion=="MI85")))
-
-
-
-
-#####################################################
-# how many words are there to find? check how many words were available in each group.
-
-#####################################################
-# display context info
-# what are the overlaps? Venn diagram showing size of corpora and overlap
-# how are contexts related over time (sequence plot)?
 
 #####################################################
 # Segmentation sucess by frequency
@@ -657,8 +619,6 @@ plot(graph.edgelist(as.matrix(overall.edge.list)))
 routines.edge.list <- context.data$routines$streams$phon.pairs[grepl("'bIg", context.data$routines$streams$phon.pairs[,1], fixed=T),]
 plot(graph.edgelist(as.matrix(routines.edge.list)))
 
-# source("/Users/TARDIS/Documents/STUDIES/TPs/data_processing_functions.r")
-
 network_plot(global.data, "global.data")
 network_plot(context.data$body.touch, "body.touch")
 
@@ -722,7 +682,7 @@ for(k in 1:length(names(contexts))){
 }
 
 tests
-# 
+
 # # reformat for printing as table
 tests.table <- data.frame(N.utt=N.utt , TP.KSstat = NA, TP.KSpval=NA, MI.KSstat=NA, MI.KSpval=NA)
   for(k in 1:length(names(context.data))){
@@ -732,18 +692,6 @@ tests.table$TP.KSpval <- ifelse(tests.table$TP.KSpval==0, ">.001", tests.table$T
 tests.table$MI.KSpval <- ifelse(tests.table$MI.KSpval==0, ">.001", tests.table$MI.KSpval)
 knitr::kable(tests.table)
 x
-# # test nontexts against each other, to check
-# nontext.tests <- vector("list", length(colnames(contexts))) # storage variable
-# names(tests) <- colnames(contexts)
-# for(k in 1:length(colnames(contexts))){
-#   message(paste("processing ", colnames(contexts)[k], "...", sep=""))
-#   
-#   nontext.tests[[k]]$nontext.pairs2.N <- nrow(nontext.data2[[k]]$phon.pairs)
-#   nontext.tests[[k]]$nontext.pairs.N <- nrow(nontext.data[[k]]$phon.pairs)
-#   
-#   nontext.tests[[k]]$test.MI <- ks.test(nontext.data2[[k]]$phon.pairs$MI, nontext.data[[k]]$phon.pairs$MI)
-#   nontext.tests[[k]]$test.TP <-ks.test(nontext.data2[[k]]$phon.pairs$TP, nontext.data[[k]]$phon.pairs$TP)
-# }
 
 
 # reformat data for plotting
@@ -790,7 +738,6 @@ freq.syl <- table(global.data$streams$phon.stream) # frequency of syllables
 # freq plots
 barplot(sort(freq.words, decreasing=TRUE)) 
 barplot(sort(freq.words, decreasing=TRUE)[1:100]) # top 100 words only 
-# barplot(sort(freq.bigrams, decreasing=TRUE)) # not working
 barplot(sort(freq.syl, decreasing=TRUE))
 barplot(sort(freq.syl, decreasing=TRUE)[1:100]) # top 100 syllables only 
 
@@ -815,10 +762,6 @@ ggplot(freq.summary, aes(x=Syllables, y=Mean.Freq))+
   geom_errorbar(aes(ymax = Mean.Freq + se, ymin=Mean.Freq - se), width=.3, position=position_dodge(.9)) +
   labs(title="Frequency by number of syllables\n(Error bars +-SE)")
 
-# frequency counts by context 
-# View(summarise(group_by(freq.words.df, context), types=n(), tokens=sum(Freq)))
-# View(arrange(filter(freq.words.df, context=="routines"), -Freq))
-# View(arrange(filter(freq.words.df, context=="mealtime"), -Freq))
 
 # contexts and ambiguity?
 context.syl.tokens <- list(NULL)
@@ -837,37 +780,6 @@ names(nontext.syl.tokens) <- names(context.data)
 
 N.utt
 
-# # presentation of results
-# 
-# # context-free results
-# TP <- read.csv("./full results/korman_TP.csv", row.names=1)
-# MI <- read.csv("./full results/korman_MI.csv", row.names=1)
-# 
-# # 100 syllables (100^2 entries), about 3 minutes, 500 (500^2 entries) syllables about 1 hour, whole set about 11 hours
-# hist(as.matrix(MI), breaks=30); abline(v=0, col="red")
-# length(which(is.na(MI)))/length(MI) # 99% of syllable pairs never occur
-# hist(as.matrix(TP), breaks=30)
-# length(which(is.na(TP)))/length(TP)
-
-
-# # curiosity re log tranformations
-# TP_log <- log2(TP)
-# hist(TP_log, breaks=30)
-# MI_raw <- 2^MI
-# hist(MI_raw, breaks=30) # almost everything is close to zero but the range is enormous
-# hist(MI_raw, breaks=300000, xlim=c(0,5)); abline(v=1, col="red") #zooming in
-
-```
-What if kids don't actually get 100,000 syllables? So TPs don't stabilize. And that's part of the system.
-
-How many syllables do kids hear in a day? Fernald's words per day times rate of monosyllabic words. Tokens.
-
-Chance for TPs? Shuffle corpus and recalculate.
-
-Get frequency dists for each syllable, get frequency dists for each word
-
-
-
 df$utterance <- row.names(df)
 df$y <- 1
 
@@ -877,157 +789,8 @@ fifth <- floor(nrow(df)/5)
 plot.data <- df[1:100, ]
 ggplot(plot.data, aes(x=utterance, y=y, color=context)) + 
   theme_bw() +
-  # geom_point(shape=124)
   geom_point()
 
 
-# ####################################################
-# # sequence plots (adapted from code by CF)
-# ####################################################
-# library(TraMineR)
-# # data have to to be organized as one sequence per row. 
-# seq <- t(as.matrix(data.frame(context=df$context)))
-# 
-# #set up info for sequence
-# seqstatl(seq)    #check the values in seq.  this is like unique() over all your rows
-# 
-# #have to define these three things in order for seqdef() to work below. it's just every unique value in your sequences
-# seq.alphabet = as.vector(unique(df$context))
-# seq.labels = as.vector(unique(df$context))
-# seq.scodes = as.vector(unique(df$context))
-# 
-# #create the sequence object. 
-# seq.seq = seqdef(seq, alphabet = seq.alphabet, states = seq.scodes, labels = seq.labels)
-# 
-# #plot the sequence
-# seqplot(seq.seq, cpal = c('green3', 'red2', 'gray87', 'blue3'), xtlab = '', type = 'I', ylab = '', withlegend = T, axes = F, yaxis = F)
-
-
-# 
-# context.data <- vector("list", length(colnames(contexts))) # storage variable
-# names(context.data) <- colnames(contexts)
-# 
-# for(k in 1:length(colnames(contexts))){
-# #  df.context <- filter(df, context==colnames(contexts)[k])
-#   df.context <- filter(df, df[ , which(colnames(df)==colnames(contexts)[k])] > 0)
-#   #View(df.context[,c(1,3:9)])
-#   
-#   context.data[[k]]$N.utterances <- nrow(df.context)
-#   # collapse phonological utterances into one continuous stream
-#   context.data[[k]]$phon.stream <- unlist(strsplit(df.context$phon, " "))
-# 
-#   # how many unique syllables are there?
-#   context.data[[k]]$syllables <- unique(context.data[[k]]$phon.stream)
-#   # context.data[[k]]$syllables <- sample(context.data[[k]]$syllables, 20) # for testing, just use some random syllables
-#   context.data[[k]]$N.syl <- length(context.data[[k]]$syllables)
-# 
-#   # make phone stream into a list of all of the bisyllable pairs that occur
-#   context.data[[k]]$phon.pairs <- data.frame(syl1=context.data[[k]]$phon.stream[1:length(context.data[[k]]$phon.stream)-1], syl2=context.data[[k]]$phon.stream[2:length(context.data[[k]]$phon.stream)])
-# 
-#   # collapse orthographic utterances into one stream
-#   context.data[[k]]$orth.stream <- unlist(strsplit(df.context$orth, " "))
-# 
-#   # how many unique words are there?
-#   context.data[[k]]$words <- unique(context.data[[k]]$orth.stream)
-#   context.data[[k]]$N.words <- length(context.data[[k]]$words)
-# 
-#   message(paste("processing ", colnames(contexts)[k], "...", sep=""))
-#   
-# #   # mutual information, and transitional probabilty. See Swingley (2005) p97
-# #   context.data[[k]]$MI <- matrix(nrow=context.data[[k]]$N.syl, ncol=context.data[[k]]$N.syl, dimnames=list(context.data[[k]]$syllables, context.data[[k]]$syllables))
-# #   context.data[[k]]$TP <- matrix(nrow=context.data[[k]]$N.syl, ncol=context.data[[k]]$N.syl, dimnames=list(context.data[[k]]$syllables, context.data[[k]]$syllables))
-# # 
-# #   p <- progress_estimated(n=context.data[[k]]$N.syl) # print progress bar while working
-# #   for(i in 1:context.data[[k]]$N.syl){
-# #     for(j in 1:context.data[[k]]$N.syl){
-# #       # AB <- filter(context.data[[k]]$phon.pairs, syl1==context.data[[k]]$syllables[i] & syl2==context.data[[k]]$syllables[j])
-# #       AB <- subset(context.data[[k]]$phon.pairs, syl1==context.data[[k]]$syllables[i] & syl2==context.data[[k]]$syllables[j])
-# #       p.AB <- nrow(AB)/nrow(context.data[[k]]$phon.pairs)
-# #       p.A <- length(which(context.data[[k]]$phon.stream == context.data[[k]]$syllables[i]))/length(context.data[[k]]$phon.stream)
-# #       p.B <- length(which(context.data[[k]]$phon.stream == context.data[[k]]$syllables[j]))/length(context.data[[k]]$phon.stream)
-# #       
-# #       context.data[[k]]$MI[i,j] <- ifelse(p.AB==0, NA, log2(p.AB/(p.A * p.B))) # if AB never occurs, enter NA, otherwise calculate MI
-# #       context.data[[k]]$TP[i,j] <- ifelse(p.AB==0, NA, p.AB/(p.A)) # if AB never occurs, enter NA, otherwise calculate TP
-# #     }
-# #     print(p$tick()) # advance progress bar
-# #   }
-# 
-# ############################
-# # OPTION 2
-# ############################
-#     p <- progress_estimated(n=nrow(context.data[[k]]$phon.pairs)) # print progress bar while working
-#     for(i in 1:nrow(context.data[[k]]$phon.pairs)){
-#       AB <- filter(context.data[[k]]$phon.pairs, syl1==syl1[i] & syl2==syl2[i])
-#       p.AB <- nrow(AB)/nrow(context.data[[k]]$phon.pairs)
-#       p.A <- length(which(context.data[[k]]$phon.stream == context.data[[k]]$phon.pairs$syl1[i]))/length(context.data[[k]]$phon.stream)
-#       p.B <- length(which(context.data[[k]]$phon.stream == context.data[[k]]$phon.pairs$syl2[i]))/length(context.data[[k]]$phon.stream)
-#       
-#       context.data[[k]]$phon.pairs$MI[i] <- ifelse(p.AB==0, NA, log2(p.AB/(p.A * p.B))) # if AB never occurs, enter NA, otherwise calculate MI
-#       context.data[[k]]$phon.pairs$TP[i] <- ifelse(p.AB==0, NA, p.AB/(p.A)) # if AB never occurs, enter NA, otherwise calculate TP
-#       print(p$tick()) # advance progress bar
-#     }
-# 
-# context.data[[k]]$freq.bigrams <- summarise(group_by(phon.pairs, syl1, syl2), count=n()) # frequency of bigrams
-# context.data[[k]]$freq.words <- table(orth.stream) # frequency of words
-# context.data[[k]]$freq.syl <- table(phon.stream)
-# }
-
-# presenting the results
-# 
-# par(mfrow=c(1,2))
-# for(k in 1:length(colnames(contexts))){
-#   hist(context.data[[k]]$phon.pairs$MI, main=paste("Mutual Information,\n", colnames(contexts)[k], "context"), xlim=c(min(phon.pairs$MI), max(phon.pairs$MI)))
-#   
-#   hist(context.data[[k]]$phon.pairs$TP, main=paste("Transitional Probability,\n", colnames(contexts)[k], "context"), xlim=c(0,1))
-# }
-# # 
-# hist(context.data$mealtime$MI, xlab="", main="Mutual Information,\nmealtime context", xlim=c(min(as.matrix(MI), na.rm=T), max(as.matrix(MI), na.rm=T)))
-# hist(context.data$mealtime$TP, xlab="", main="Transitional Probabilities,\nmealtime context")
-# 
-# hist(context.data$people$MI, xlab="", main="Mutual Information,\npeople context", xlim=c(min(as.matrix(MI), na.rm=T), max(as.matrix(MI), na.rm=T)))
-# hist(context.data$people$TP, xlab="", main="Transitional Probabilities,\npeople context")
-# 
-# hist(context.data$routines$MI, xlab="", main="Mutual Information,\nroutines context", xlim=c(min(as.matrix(MI), na.rm=T), max(as.matrix(MI), na.rm=T)))
-# hist(context.data$routines$TP, xlab="", main="Transitional Probabilities,\nroutines context")
-# 
-# hist(context.data$bathtime$MI, xlab="", main="Mutual Information,\nbathtime context", xlim=c(min(as.matrix(MI), na.rm=T), max(as.matrix(MI), na.rm=T)))
-# hist(context.data$bathtime$TP, xlab="", main="Transitional Probabilities,\nbathtime context")
-# 
-# hist(context.data$bedtime$MI, xlab="", main="Mutual Information,\nbedtime context", xlim=c(min(as.matrix(MI), na.rm=T), max(as.matrix(MI), na.rm=T)))
-# hist(context.data$bedtime$TP, xlab="", main="Transitional Probabilities,\nbedtime context")
-# 
-# # context-free results
-# TP <- read.csv("./full results/korman_TP.csv", row.names=1)
-# MI <- read.csv("./full results/korman_MI.csv", row.names=1)
-# 
-# hist(as.matrix(MI), xlab="", main="Mutual Information,\ncontext-free (global)", xlim=c(min(as.matrix(MI), na.rm=T), max(as.matrix(MI), na.rm=T)))
-# hist(as.matrix(TP), xlab="", main="Transitional Probabilities,\ncontext-free (global)")
-
-
-# # how many utterances are in the average context corpus?
-# N.utt <- vector("numeric", length=length(colnames(contexts)))
-# names(N.utt) <- colnames(contexts)
-# for(k in 1:length(colnames(contexts))){
-#   N.utt[k] <- context.data[[k]]$N.utterances
-# }
-# ave.utts <- floor(mean(N.utt))
-
- 
-# # construct a corpus with the same number of utterances as a context corpus, but no key words seeding it
-# rows <- sample.int(ave.utts)
-# rows <- sample.int(N.utt[6])
-# length(rows)
-# sample <- df[rows,]
-# df <- sample
-# # overwrite df with sample, i.e. df <- sample, and then re-run the make_streams chunk and the calc_global_MI chunk
-
 filter(context.data$mealtime$unique.phon.pairs, syl1=="'mIlk") 
 filter(nontext.data[[1]]$unique.phon.pairs, syl1=="'mIlk") 
-
-
-# gotta have the window in the nontexts sampling
-
-
-# may also want to shuffle nontexts and see what happens
-
-# pull out all syllables that occur >1, see which contexts they show up in
