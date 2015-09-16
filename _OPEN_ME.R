@@ -3,7 +3,8 @@
 
 # Step 1: Load the functions
 # Copy-paste the following code to the console, and hit enter:
-source("coding_scripts.r")
+library(devtools)
+source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/coding_scripts.R")
 
 # Step 2: Begin coding!
 # Copy-paste the following code to the console, and hit enter:
