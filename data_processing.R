@@ -8,9 +8,9 @@ library(devtools)
 
 # read in the functions written for this analysis
 source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r")
-setwd("/Users/TARDIS/Documents/STUDIES/TPs")
+setwd("/Users/TARDIS/Documents/STUDIES/context_word_seg")
 
-contexts <- read.csv("/Users/TARDIS/Documents/STUDIES/TPs/words by contexts.csv")
+contexts <- read.csv("/Users/TARDIS/Documents/STUDIES/context_word_seg/words by contexts.csv")
 
 orth <- readLines("eng_korman_from_swingley2005/allEd11")
 phon <- readLines("eng_korman_from_swingley2005/syl_ko_6b") # note that "dear" is incorrectly entered as "'d7" here, and it should be "'d7R" according to the dict file.
@@ -43,7 +43,7 @@ df$phon <- gsub(pattern="'d7 ([^r])", replacement="'d7R \\1", df$phon) # need to
 
 unique(df[grep("dear", df$orth),]) # check all utterances with "dear" in them
 
-dict <- read.table("/Users/TARDIS/Documents/STUDIES/TPs/eng_korman_from_swingley2005/dict_all3.txt", sep=" ", quote="", comment.char ="")
+dict <- read.table("/Users/TARDIS/Documents/STUDIES/context_word_seg/eng_korman_from_swingley2005/dict_all3.txt", sep=" ", quote="", comment.char ="")
 colnames(dict) <- c("word", "phon")
 
 grep("dear", dict$word, value=T)
