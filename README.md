@@ -6,4 +6,6 @@ _OPEN_ME.r has instrutcions for RAs, including the code to access the coding_scr
     
 data_processing.r has the analysis code.
 
+data_processing_functions.r has a list of specialized functions called by data_processing.r
+
 words_by_contexts.csv is the list of key words (seed words) for each context. These lists are based on MCDI words supplemented with some especially frequent content words from the corpus that we expected would be associated with particular contexts – for example, milk was on the list for mealtime words, and wipe was on the list for diaper change words. 
