@@ -4,9 +4,10 @@ library(tidyr)
 library(ggplot2)
 library(reshape2)
 library(knitr)
+library(devtools)
 
 # read in the functions written for this analysis
-source("/Users/TARDIS/Documents/STUDIES/TPs/data_processing_functions.r")
+source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r")
 setwd("/Users/TARDIS/Documents/STUDIES/TPs")
 
 contexts <- read.csv("/Users/TARDIS/Documents/STUDIES/TPs/words by contexts.csv")
