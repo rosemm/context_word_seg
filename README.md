@@ -2,7 +2,8 @@
 
 coding_scripts.R has the functions research assistants use to code the transcripts. Instructions given to RAs working on this are saved in instructions_for_RAs.txt
     
-_OPEN_ME.r has instrutcions for RAs, including the code to access the coding_scripts.r file    
-    
+_OPEN_ME.r has instrutcions for RAs, including the code to access the coding_scripts.r file        
     
 data_processing.r has the analysis code.
+
+words_by_contexts.csv is the list of key words (seed words) for each context. These lists are based on MCDI words supplemented with some especially frequent content words from the corpus that we expected would be associated with particular contexts – for example, milk was on the list for mealtime words, and wipe was on the list for diaper change words. 
