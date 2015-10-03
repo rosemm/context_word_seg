@@ -1,0 +1,1 @@
+opts_knit$set(self.contained=FALSE)
