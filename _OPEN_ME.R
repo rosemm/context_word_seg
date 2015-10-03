@@ -3,6 +3,7 @@
 
 # Step 1: Load the functions
 # Copy-paste the following code to the console, and hit enter:
+if(!require(devtools)) install.packages("devtools")
 library(devtools)
 source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/coding_scripts.R")
 
