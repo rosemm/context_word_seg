@@ -13,5 +13,5 @@ words_by_contexts.csv is the list of key words (seed words) for each context. Th
 Some latex resources: 
 http://www.tug.org/pracjourn/2008-1/zahn/zahn.pdf
 http://mirror.jmu.edu/pub/CTAN/macros/latex/contrib/apa6/apa6.pdf
-http://mirror.math.ku.edu/tex-archive/biblio/bibtex/contrib/apacite/apacite.pdf
+http://merkel.zoneo.net/Latex/natbib.php
 http://yihui.name/knitr/demo/sweave/
