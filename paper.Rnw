@@ -15,7 +15,7 @@
   # Stangle('paper.Rnw')
   
   # update the bibliography file
-  file.copy(from='/Users/TARDIS/Dropbox/library.bib', to='/Users/TARDIS/Documents/STUDIES/context_word_seg/', overwrite=TRUE, recursive=FALSE, copy.mode=FALSE, copy.date=TRUE)
+file.copy(from='/Users/TARDIS/Dropbox/library.bib', to='/Users/TARDIS/Documents/STUDIES/context_word_seg/', overwrite=TRUE, recursive=FALSE, copy.mode=FALSE, copy.date=TRUE)
 
 # add citations I don't have in Mendeley
 add.cites <- cat('
@@ -26,6 +26,14 @@ add.cites <- cat('
   volume={5},
   pages={44--45},
   year={1984}
+}
+@lecture{Fausey2015,
+  author = {Fausey, Caitlin M. and Jayaraman, Swapnaa and Smith, Linda B.},
+  title = {{The changing rhythms of life: Activity cycles in the first two years of everyday experience}},
+  year = {2015},
+  address = {Philadelphia, PA},
+  howpublished= {Paper presented at the 2015 biennial meeting of the Society for Research in Child Development},
+  month={March}
 }
 @book{Box1987,
   title={Empirical model-building and response surfaces},
@@ -77,39 +85,14 @@ Word segmentation decisions based on syllable co-occurrence statistics were made
 To include a list in your text \begin{seriate} \item this, \item that, and \item the other thing \end{seriate} .
 Example citations \citep<e.g.,>[p.~11]{Roy2012}, 
 
-\begin{table}[h]
-\caption{Mean and standard deviation of points earned in different experimental groups}
-\begin{tabular}{llll} % add one "l" for each column in the table
-\hline\\
-& Difficult Stimuli & Easy Stimuli & Group 3 \\
-\hline\\
-Mean & 34 & -20 & 3.0\\
-Standard Deviation & 1.0 & 2.0 & 3.0\\
-\hline
-\end{tabular}
-\end{table}
 
-% To put a table in your document, you need to use this (somewhat ugly looking) latex table code. Play around with it by replacing the dummy values with the values you want. To learn more about how to make complex tables in Latex, see this tutorial https://www.sharelatex.com/learn/Tables. 
-
-\begin{table}[!htb]
-\caption{Mean and standard deviation of points earned in different experimental groups}
-\begin{tabular}{llll} % add one "l" for each column in the table
-\hline\\
-& Difficult Stimuli & Easy Stimuli & Group 3 \\
-\hline\\
-Mean & 34 & -20 & 3.0\\
-Standard Deviation & 1.0 & 2.0 & 3.0\\
-\hline
-\end{tabular}
-\end{table}
-% ------ End of Table Code
 
 \bibliography{library}
 
 \appendix
 \section{Context Key Words Lists}
 \label{app:KeyWords}
-{\renewcommand{\arraystretch}{.6} % this changes the vertical spacing in the table below (http://tex.stackexchange.com/questions/50332/vertical-spacing-of-a-table-cell)
+{\renewcommand{\arraystretch}{.6} % this changes the vertical spacing in the table below (see http://tex.stackexchange.com/questions/50332/vertical-spacing-of-a-table-cell)
 <<key_words, echo=FALSE, results='asis' >>=
 key_words <- read.csv("words by contexts.csv")
 library(xtable)
