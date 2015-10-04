@@ -10,6 +10,34 @@
 
 \begin{document}
 \SweaveOpts{concordance=TRUE}
+<< document_prep, echo=FALSE, message=FALSE, error=FALSE, results="hide" >>=
+  
+  # pull out all of the r code for this paper and save it as its own file:
+  # Stangle('paper.Rnw')
+  
+  # update the bibliography file
+  file.copy(from='/Users/TARDIS/Dropbox/library.bib', to='/Users/TARDIS/Documents/STUDIES/context_word_seg/', overwrite=TRUE, recursive=FALSE, copy.mode=FALSE, copy.date=TRUE)
+
+# add citations I don't have in Mendeley
+add.cites <- cat('
+@article{Korman1984,
+  title={Adaptive aspects of maternal vocalizations in differing contexts at ten weeks},
+  author={Korman, Myron},
+  journal={First language},
+  volume={5},
+  pages={44--45},
+  year={1984}
+}
+@book{Box1987,
+  title={Empirical model-building and response surfaces},
+  author={Box, George EP and Draper, Norman Richard},
+  volume={424},
+  year={1987},
+  publisher={Wiley New York}
+}', file='add.cites.bib')
+
+file.append('library.bib', 'add.cites.bib')
+@
 \maketitle    
 
 \section{Introduction}
