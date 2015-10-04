@@ -10,8 +10,10 @@ data_processing_functions.r has a list of specialized functions called by data_p
 
 words_by_contexts.csv is the list of key words (seed words) for each context. These lists are based on MCDI words supplemented with some especially frequent content words from the corpus that we expected would be associated with particular contexts – for example, milk was on the list for mealtime words, and wipe was on the list for diaper change words. 
 
+The manuscript draft is in paper.Rnw (a sweave file, combining Latex and R code)
+
 Some latex resources: 
-http://www.tug.org/pracjourn/2008-1/zahn/zahn.pdf
-http://mirror.jmu.edu/pub/CTAN/macros/latex/contrib/apa6/apa6.pdf
-http://merkel.zoneo.net/Latex/natbib.php
-http://yihui.name/knitr/demo/sweave/
+[http://www.tug.org/pracjourn/2008-1/zahn/zahn.pdf](http://www.tug.org/pracjourn/2008-1/zahn/zahn.pdf)
+[http://mirror.jmu.edu/pub/CTAN/macros/latex/contrib/apa6/apa6.pdf](http://mirror.jmu.edu/pub/CTAN/macros/latex/contrib/apa6/apa6.pdf)
+[http://merkel.zoneo.net/Latex/natbib.php](http://merkel.zoneo.net/Latex/natbib.php)
+[http://yihui.name/knitr/demo/sweave/](http://yihui.name/knitr/demo/sweave/)
