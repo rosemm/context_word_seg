@@ -109,6 +109,11 @@ Standard Deviation & 1.0 & 2.0 & 3.0\\
 \appendix
 \section{Context Key Words Lists}
 \label{app:KeyWords}
-% \input{words by contexts.csv}
+{\renewcommand{\arraystretch}{.6} % this changes the vertical spacing in the table below (http://tex.stackexchange.com/questions/50332/vertical-spacing-of-a-table-cell)
+<<key_words, echo=FALSE, results='asis' >>=
+key_words <- read.csv("words by contexts.csv")
+library(xtable)
+print(xtable(key_words), include.rownames=FALSE, floating=FALSE)
+@
 
 \end{document}
