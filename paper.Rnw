@@ -9,7 +9,6 @@
 \abstract{Put your abstract here.}
 
 \begin{document}
-\SweaveOpts{concordance=TRUE}
 << document_prep, echo=FALSE, message=FALSE, error=FALSE, results="hide" >>=
   
   # pull out all of the r code for this paper and save it as its own file:
