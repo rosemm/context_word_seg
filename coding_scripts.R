@@ -1,7 +1,7 @@
 # need to run transcript cleaning script first
 # this requires all of the raw .cha transcripts in a folder called "transcripts".
 CleanTranscripts <- function(wd="./transcripts/"){
-
+  
   files <- list.files(path=wd)
   Nfiles <- length(files)
   
@@ -50,11 +50,11 @@ CleanTranscripts <- function(wd="./transcripts/"){
     data$utterance <- as.character(data$utterance)
     
     data$speaker <- car::recode(data$speaker, recodes="
-                           '@Com'='(comment)'; 
-                           '@Sit'='(situation)';
-                           '@Act'='(activities)';
-                           '@New Ep'='(New Episode)';
-                           '%com'='(comment)' ")
+                                '@Com'='(comment)'; 
+                                '@Sit'='(situation)';
+                                '@Act'='(activities)';
+                                '@New Ep'='(New Episode)';
+                                '%com'='(comment)' ")
     
     data$utterance <-  ifelse(data$speaker=="(New Episode)", "...",  data$utterance )
     
@@ -104,7 +104,7 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=10){
     # select transcript
     # which files still have NAs for contexts?
     still_to_code <- dplyr::filter(coding_doc, pass==this_pass & is.na(context))
-    if(nrow(still_to_code)==0) stop("This pass is completed! Well done. Set this_pass to a higher number to keep coding.")
+    if(nrow(still_to_code)==0) this_pass=this_pass+1
     this.file <- sample(unique(still_to_code$file), 1) # pick one of the transcripts that isn't done yet, at random
     
     # select utterances 
@@ -112,10 +112,10 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=10){
     start_vals <- seq(from=start_at, to=Nutts, by=window_size) # the vector of starting values for coding windows
     start <- sample(start_vals, 1) # select a starting utterance at random from the starting values
     
-      # if that section has already been fully coded, select new starting values until you get some stuff that hasn't been coded yet
-      while( !anyNA(dplyr::filter(coding_doc, file==this.file & start-1 < UttNum & UttNum < start+window_size & pass==this_pass)$context ) ){
-        start <- sample(start_vals, 1) # select a new starting utterance at random from the starting values
-      }
+    # if that section has already been fully coded, select new starting values until you get some stuff that hasn't been coded yet
+    while( !anyNA(dplyr::filter(coding_doc, file==this.file & start-1 < UttNum & UttNum < start+window_size & pass==this_pass)$context ) ){
+      start <- sample(start_vals, 1) # select a new starting utterance at random from the starting values
+    }
     
     this.transcript <- transcripts[[this.file]]
     
@@ -129,13 +129,13 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=10){
     message("Read the transcript, then enter the context(s) for what is happening. \nFor multiple contexts, enter them with a semi-colon between each (for example, 'bath time ; playing').\nIf you can't enter any contexts at all (you can't tell what's happening), enter 'none'.\n")
     
     confirm <- FALSE
-      while(confirm==FALSE){
-        context_response <- readline("Context(s): ")
-        confirm_response <- readline("Confirm? (Y/N) ")
-        confirm <- grepl("y", confirm_response, ignore.case=T) # if they enter a y, then change confirm to TRUE (if they enter anything else, it will remain FALSE)
-        if(  !grepl("y", confirm_response, ignore.case=T) ) message("Please re-enter the context(s), and then confirm that it's correct.\n")
-        if(  grepl("n", confirm_response, ignore.case=T) ) message("Please re-enter the context(s) to correct the error.\n")
-      }
+    while(confirm==FALSE){
+      context_response <- readline("Context(s): ")
+      confirm_response <- readline("Confirm? (Y/N) ")
+      confirm <- grepl("y", confirm_response, ignore.case=T) # if they enter a y, then change confirm to TRUE (if they enter anything else, it will remain FALSE)
+      if(  !grepl("y", confirm_response, ignore.case=T) ) message("Please re-enter the context(s), and then confirm that it's correct.\n")
+      if(  grepl("n", confirm_response, ignore.case=T) ) message("Please re-enter the context(s) to correct the error.\n")
+    }
     
     # save context info
     this_doc <- data.frame(UttNum=start:(start+window_size-1), 
@@ -155,39 +155,42 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=10){
     # if a particular utterance has been coded previously, then set the pass to the next value that's still uncoded
     for(i in 1:nrow(this_doc)){
       check_passes <- dplyr::filter(check, UttNum==this_doc$UttNum[i])$pass
-      this_doc$pass[i] <- min(check_passes) # set pass to the lowest pass value that shows up in check for this utterance
       
-      # update coding_doc
-      coding_doc[coding_doc$UttNum==this_doc[i,]$UttNum & 
-                   coding_doc$file==this_doc[i,]$file & 
-                   coding_doc$pass==this_doc[i,]$pass,]$coder <- this_doc[i,]$coder
-      coding_doc[coding_doc$UttNum==this_doc[i,]$UttNum & 
-                   coding_doc$file==this_doc[i,]$file & 
-                   coding_doc$pass==this_doc[i,]$pass,]$date <- this_doc[i,]$date
-      coding_doc[coding_doc$UttNum==this_doc[i,]$UttNum & 
-                   coding_doc$file==this_doc[i,]$file & 
-                   coding_doc$pass==this_doc[i,]$pass,]$context <- this_doc[i,]$context
+      if (length(check_passes)>0) {
+        this_doc$pass[i] <- min(check_passes) # set pass to the lowest pass value that shows up in check for this utterance
+        
+        # update coding_doc
+        coding_doc[coding_doc$UttNum==this_doc[i,]$UttNum & 
+                     coding_doc$file==this_doc[i,]$file & 
+                     coding_doc$pass==this_doc[i,]$pass,]$coder <- this_doc[i,]$coder
+        coding_doc[coding_doc$UttNum==this_doc[i,]$UttNum & 
+                     coding_doc$file==this_doc[i,]$file & 
+                     coding_doc$pass==this_doc[i,]$pass,]$date <- this_doc[i,]$date
+        coding_doc[coding_doc$UttNum==this_doc[i,]$UttNum & 
+                     coding_doc$file==this_doc[i,]$file & 
+                     coding_doc$pass==this_doc[i,]$pass,]$context <- this_doc[i,]$context
+      }
     }
-      
     
-#       coding_doc$context <- ifelse(coding_doc$file==this.file & 
-#                                      start-1 < coding_doc$UttNum & 
-#                                      coding_doc$UttNum < start+window_size & 
-#                                      coding_doc$pass == this_pass &
-#                                      is.na(coding_doc$context), 
-#                                    context_response, coding_doc$context )
-#       coding_doc$coder <- ifelse(coding_doc$file==this.file & 
-#                                    start-1 < coding_doc$UttNum & 
-#                                    coding_doc$UttNum < start+window_size & 
-#                                    coding_doc$pass == this_pass &
-#                                    is.na(coding_doc$coder), 
-#                                  coder_response, coding_doc$coder )
-#       coding_doc$date <- ifelse(coding_doc$file==this.file & 
-#                                   start-1 < coding_doc$UttNum & 
-#                                   coding_doc$UttNum < start+window_size & 
-#                                   coding_doc$pass == this_pass &
-#                                   is.na(coding_doc$date), 
-#                                 date, coding_doc$date )
+    
+    #       coding_doc$context <- ifelse(coding_doc$file==this.file & 
+    #                                      start-1 < coding_doc$UttNum & 
+    #                                      coding_doc$UttNum < start+window_size & 
+    #                                      coding_doc$pass == this_pass &
+    #                                      is.na(coding_doc$context), 
+    #                                    context_response, coding_doc$context )
+    #       coding_doc$coder <- ifelse(coding_doc$file==this.file & 
+    #                                    start-1 < coding_doc$UttNum & 
+    #                                    coding_doc$UttNum < start+window_size & 
+    #                                    coding_doc$pass == this_pass &
+    #                                    is.na(coding_doc$coder), 
+    #                                  coder_response, coding_doc$coder )
+    #       coding_doc$date <- ifelse(coding_doc$file==this.file & 
+    #                                   start-1 < coding_doc$UttNum & 
+    #                                   coding_doc$UttNum < start+window_size & 
+    #                                   coding_doc$pass == this_pass &
+    #                                   is.na(coding_doc$date), 
+    #                                 date, coding_doc$date )
     
     
     Ncoded <- Ncoded + 1 # bump up the coding counter
@@ -201,7 +204,7 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=10){
       message(paste("\n", sample(encouragements,1), "\n")) 
       Sys.sleep(.75) # pause before loading the next transcript (this just makes it feel nicer)
     }
-      
+    
   }
   # write updated coding_doc to file
   write.table(coding_doc, file="coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
