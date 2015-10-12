@@ -18,30 +18,7 @@
 file.copy(from='/Users/TARDIS/Dropbox/library.bib', to='/Users/TARDIS/Documents/STUDIES/context_word_seg/', overwrite=TRUE, recursive=FALSE, copy.mode=FALSE, copy.date=TRUE)
 
 # add citations I don't have in Mendeley
-add.cites <- cat('
-@article{Korman1984,
-  title={Adaptive aspects of maternal vocalizations in differing contexts at ten weeks},
-  author={Korman, Myron},
-  journal={First language},
-  volume={5},
-  pages={44--45},
-  year={1984}
-}
-@lecture{Fausey2015,
-  author = {Fausey, Caitlin M. and Jayaraman, Swapnaa and Smith, Linda B.},
-  title = {{The changing rhythms of life: Activity cycles in the first two years of everyday experience}},
-  year = {2015},
-  address = {Philadelphia, PA},
-  howpublished= {Paper presented at the 2015 biennial meeting of the Society for Research in Child Development},
-  month={March}
-}
-@book{Box1987,
-  title={Empirical model-building and response surfaces},
-  author={Box, George EP and Draper, Norman Richard},
-  volume={424},
-  year={1987},
-  publisher={Wiley New York}
-}', file='add.cites.bib')
+source("/Users/TARDIS/Dropbox/library_addcites.R")
 
 file.append('library.bib', 'add.cites.bib')
 @
