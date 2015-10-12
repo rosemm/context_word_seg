@@ -138,11 +138,13 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=10){
     }
     
     # save context info
-    this_doc <- data.frame(UttNum=start:(start+window_size-1), 
+    this_doc <- data.frame(LineNum=NA,
+                           UttNum=start:(start+window_size-1), 
                            file=this.file, 
                            coder=coder_response, 
                            date=date, 
-                           context=context_response, pass=NA)
+                           context=context_response, 
+                           pass=NA)
     this_doc$file <- as.character(this_doc$file)
     this_doc$coder <- as.character(this_doc$coder)
     this_doc$context <- as.character(this_doc$context)
@@ -155,10 +157,11 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=10){
     # if a particular utterance has been coded previously, then set the pass to the next value that's still uncoded
     for(i in 1:nrow(this_doc)){
       check_passes <- dplyr::filter(check, UttNum==this_doc$UttNum[i])$pass
-      
+      max_pass <- max(dplyr::filter(coding_doc, file==this_doc$file[i] & UttNum==this_doc$UttNum[i])$pass) # the highest pass value available for this Utterance in the coding doc
+      this_doc$LineNum <- median(dplyr::filter(coding_doc, file==this_doc$file[i] & UttNum==this_doc$UttNum[i])$LineNum)
+        
       if (length(check_passes)>0) {
         this_doc$pass[i] <- min(check_passes) # set pass to the lowest pass value that shows up in check for this utterance
-        
         # update coding_doc
         coding_doc[coding_doc$UttNum==this_doc[i,]$UttNum & 
                      coding_doc$file==this_doc[i,]$file & 
@@ -169,32 +172,24 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=10){
         coding_doc[coding_doc$UttNum==this_doc[i,]$UttNum & 
                      coding_doc$file==this_doc[i,]$file & 
                      coding_doc$pass==this_doc[i,]$pass,]$context <- this_doc[i,]$context
+        }
+      if (length(check_passes)==0) {
+        this_doc$pass[i] <- max_pass + 1 # if this utterance has already been fully coded, add a new pass for it
+        # update coding_doc
+        coding_doc <- rbind(coding_doc, this_doc[i,])
       }
     }
     
     
-    #       coding_doc$context <- ifelse(coding_doc$file==this.file & 
-    #                                      start-1 < coding_doc$UttNum & 
-    #                                      coding_doc$UttNum < start+window_size & 
-    #                                      coding_doc$pass == this_pass &
-    #                                      is.na(coding_doc$context), 
-    #                                    context_response, coding_doc$context )
-    #       coding_doc$coder <- ifelse(coding_doc$file==this.file & 
-    #                                    start-1 < coding_doc$UttNum & 
-    #                                    coding_doc$UttNum < start+window_size & 
-    #                                    coding_doc$pass == this_pass &
-    #                                    is.na(coding_doc$coder), 
-    #                                  coder_response, coding_doc$coder )
-    #       coding_doc$date <- ifelse(coding_doc$file==this.file & 
-    #                                   start-1 < coding_doc$UttNum & 
-    #                                   coding_doc$UttNum < start+window_size & 
-    #                                   coding_doc$pass == this_pass &
-    #                                   is.na(coding_doc$date), 
-    #                                 date, coding_doc$date )
-    
     
     Ncoded <- Ncoded + 1 # bump up the coding counter
+    if(Ncoded %% 10 == 0) { # the number of coded sections is divisible by 10
+      message(paste("\nAwesome! You've coded ", Ncoded, " windows! I'll just save your progress real quick."))
+      # write updated coding_doc to file
+      write.table(coding_doc, file="coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+    }
     
+        
     # check whether to keep coding or quit
     code_another <- readline("\nCode another one? (Y/N) ")
     if (grepl("n", code_another, ignore.case=T )) {
@@ -206,6 +201,8 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=10){
     }
     
   }
+  
+  
   # write updated coding_doc to file
   write.table(coding_doc, file="coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
   
