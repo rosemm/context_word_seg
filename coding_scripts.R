@@ -99,15 +99,26 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=10){
   
   all_done <- FALSE 
   Ncoded <- 0
+  
   while(all_done==FALSE){
+    # whenever coding is done, stop and save.
+    if( nrow(dplyr::filter(coding_doc, is.na(context)))==0 ) {
+      message("Holy moley! The coding is DONE!! Wow, thank you!\n<3")
+      all_done <- TRUE
+    }
     
     # select transcript
+    message("Selecting transcript...")
     # which files still have NAs for contexts?
     still_to_code <- dplyr::filter(coding_doc, pass==this_pass & is.na(context))
-    if(nrow(still_to_code)==0) this_pass=this_pass+1
+    while(nrow(still_to_code)==0) {
+      this_pass=this_pass+1
+      still_to_code <- dplyr::filter(coding_doc, pass==this_pass & is.na(context))
+    }
     this.file <- sample(unique(still_to_code$file), 1) # pick one of the transcripts that isn't done yet, at random
     
     # select utterances 
+    message("Selecting utterances...")
     Nutts <- max(dplyr::filter(coding_doc, file==this.file)$UttNum) # the total number of utterances in this transcript
     start_vals <- seq(from=start_at, to=Nutts, by=window_size) # the vector of starting values for coding windows
     start <- sample(start_vals, 1) # select a starting utterance at random from the starting values
@@ -201,7 +212,6 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=10){
     }
     
   }
-  
   
   # write updated coding_doc to file
   write.table(coding_doc, file="coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
