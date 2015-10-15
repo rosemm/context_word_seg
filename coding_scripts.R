@@ -170,7 +170,10 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=10){
     # if a particular utterance has been coded previously, then set the pass to the next value that's still uncoded
     for(i in 1:nrow(this_doc)){
       still_to_code_this_doc_passes <- dplyr::filter(still_to_code_this_doc, UttNum==this_doc$UttNum[i])$pass
+      
       max_pass <- max(dplyr::filter(coding_doc, file==this_doc$file[i] & UttNum==this_doc$UttNum[i])$pass) # the highest pass value available for this Utterance in the coding doc
+      if( !is.integer(max_pass) ) max_pass <- max(coding_doc$pass) # in case there's an error above
+        
       this_doc$LineNum[i] <- median(dplyr::filter(coding_doc, file==this_doc$file[i] & UttNum==this_doc$UttNum[i])$LineNum)
         
       if (length(still_to_code_this_doc_passes)>0) {
