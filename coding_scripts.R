@@ -144,10 +144,13 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=10){
     confirm_response <- ""
     while(confirm==FALSE){
       context_response <- readline("Context(s): ")
-      confirm_response <- readline("Confirm? (Y/N) ")
+      if(grepl(pattern="[,/:]", x=context_response)){
+        confirm_response <- "n"
+        message("Only use semi colons (;) to separate contexts, no other punctuation.")
+      } else confirm_response <- readline("Confirm? (Y/N) ")
+      
       confirm <- grepl("y", confirm_response, ignore.case=T) # if they enter a y, then change confirm to TRUE (if they enter anything else, it will remain FALSE)
-      if(  !grepl("y", confirm_response, ignore.case=T) ) message("Please re-enter the context(s), and then confirm that it's correct.\n")
-      if(  grepl("n", confirm_response, ignore.case=T) ) message("Please re-enter the context(s) to correct the error.\n")
+      if(  !grepl("y", confirm_response, ignore.case=T) ) message("Please re-enter the context(s) to correct the error.\n")
     }
     
     # save context info
@@ -224,3 +227,4 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=10){
   time <- Sys.time() - date
   message(paste("You coded ", Ncoded, " windows in ", round(time[[1]],1), " ", attributes(time)$units, "! Well done! :)\nThank you, and bye!", sep=""))
 }
+
