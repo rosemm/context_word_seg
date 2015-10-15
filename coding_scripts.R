@@ -161,7 +161,7 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=10){
     this_doc$file <- as.character(this_doc$file)
     this_doc$coder <- as.character(this_doc$coder)
     this_doc$context <- as.character(this_doc$context)
-    check <- dplyr::filter(coding_doc, 
+    still_to_code_this_doc <- dplyr::filter(coding_doc, 
                            file==this.file & 
                              start-1 < UttNum & 
                              UttNum < start+window_size &  
@@ -169,12 +169,12 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=10){
     
     # if a particular utterance has been coded previously, then set the pass to the next value that's still uncoded
     for(i in 1:nrow(this_doc)){
-      check_passes <- dplyr::filter(check, UttNum==this_doc$UttNum[i])$pass
+      still_to_code_this_doc_passes <- dplyr::filter(still_to_code_this_doc, UttNum==this_doc$UttNum[i])$pass
       max_pass <- max(dplyr::filter(coding_doc, file==this_doc$file[i] & UttNum==this_doc$UttNum[i])$pass) # the highest pass value available for this Utterance in the coding doc
-      this_doc$LineNum <- median(dplyr::filter(coding_doc, file==this_doc$file[i] & UttNum==this_doc$UttNum[i])$LineNum)
+      this_doc$LineNum[i] <- median(dplyr::filter(coding_doc, file==this_doc$file[i] & UttNum==this_doc$UttNum[i])$LineNum)
         
-      if (length(check_passes)>0) {
-        this_doc$pass[i] <- min(check_passes) # set pass to the lowest pass value that shows up in check for this utterance
+      if (length(still_to_code_this_doc_passes)>0) {
+        this_doc$pass[i] <- min(still_to_code_this_doc_passes) # set pass to the lowest pass value that shows up in still_to_code_this_doc for this utterance
         # update coding_doc
         coding_doc[coding_doc$UttNum==this_doc[i,]$UttNum & 
                      coding_doc$file==this_doc[i,]$file & 
@@ -186,7 +186,7 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=10){
                      coding_doc$file==this_doc[i,]$file & 
                      coding_doc$pass==this_doc[i,]$pass,]$context <- this_doc[i,]$context
         }
-      if (length(check_passes)==0) {
+      if (length(still_to_code_this_doc_passes)==0) {
         this_doc$pass[i] <- max_pass + 1 # if this utterance has already been fully coded, add a new pass for it
         # update coding_doc
         coding_doc <- rbind(coding_doc, this_doc[i,])
