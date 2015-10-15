@@ -3,7 +3,9 @@
 ## Defining contexts by coder judgment
 coding_scripts.R has the functions research assistants use to code the transcripts. Instructions given to RAs working on this are saved in instructions_for_RAs.txt
     
-_OPEN_ME.r has instrutcions for RAs, including the code to access the coding_scripts.r file        
+_OPEN_ME.r has instrutcions for RAs, including the code to access the coding_scripts.r file 
+
+context_coding_cleaning.R has the functios for cleaning the RAs' context coding, and for compiling them all into one document.
     
 ## Defining context by key words    
 data_processing.r has the analysis code.
