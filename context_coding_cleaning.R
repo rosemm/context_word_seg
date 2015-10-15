@@ -1,7 +1,7 @@
 doc_doctor <- function(recursive=T){
   
   docs <- dir(pattern="coding_doc.txt", recursive=recursive)
-  message("Including the following coding documents:\n", paste(docs, collapse="\n"))
+  message("Including the following coding documents:\n", paste(docs, collapse="\n"), "\n")
   
     for(i in 1:length(docs)){
       # load the coding doc
@@ -53,11 +53,47 @@ collect_codes <- function(){
   return(master_doc)
 }
 
-process_codes <- function(master_doc){
+process_codes <- function(master_doc, cleaning_keys=read.table("context_cleaning_keys.txt", header=1, sep="\t", stringsAsFactors=F)){
+  # master_doc <- read.table("master_doc.txt", header=1, sep="\t", stringsAsFactors=F)
+  unique(master_doc$context)
+
+  # clean up some bad punctuation
+  master_doc$context <- gsub(pattern=",", x=master_doc$context, replacement=";", fixed=T)
+  master_doc$context <- gsub(pattern="/", x=master_doc$context, replacement=";", fixed=T)
+  
+  message(" Removing ", nrow(master_doc) - nrow(unique(master_doc)), " duplicate rows.")
+  master_doc <- unique(master_doc)
+
   master_doc$context <- as.factor(master_doc$context)
   library(tidyr)
-  maxcontexts <- 10
+  maxcontexts <- 10 # the maximum number of contexts that can be read for one window (30 utterances)
+  
   master_doc <- separate(master_doc, col=context, into=paste("context", 1:maxcontexts, sep="."), sep="[[:blank:]]*;[[:blank:]]*", extra="drop")
   master_doc <- gather(master_doc, key="contextnum", value="context", which(colnames(master_doc)==paste("context",1, sep=".")):which(colnames(master_doc)==paste("context",maxcontexts, sep=".")), na.rm=T)
-  contexts <- unique(master_doc$context)
+  
+  sort(unique(master_doc$context))
+  
+  # write.table(as.matrix(contexts, ncol=1), "context_cleaning_keys.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+
+  for(i in 1:nrow(cleaning_keys)){
+    rows <- grep(pattern=paste("^", cleaning_keys[i,1], "$", sep=""), x=master_doc$context, value=F)
+    master_doc[rows,] # just for checking
+    master_doc$context <- gsub(pattern=paste("^", cleaning_keys[i,1], "$", sep=""), x=master_doc$context, replacement=cleaning_keys[i,2])
+    master_doc[rows,] # just for checking
+  }
+  master_doc$context <- as.factor(master_doc$context)
+  summary(master_doc$context)
+  
+  # calculate the number of times each context is coded for each utterance
+  master_doc_calc <- master_doc %>%
+    unite(col=utt, file, UttNum) %>%
+    select(utt, context) %>%
+    mutate(hit=1) %>%
+    group_by(utt, context) %>%
+    summarize(hits = sum(hit)) %>%
+    spread(key=context, value=hits) 
+  
+master_doc_calc$total <- rowSums(x=master_doc_calc[,2:ncol(master_doc_calc)], na.rm=TRUE)  # total number of codes for each utterace
 }
+
+
