@@ -140,6 +140,8 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=10){
     message("Read the transcript, then enter the context(s) for what is happening. \nFor multiple contexts, enter them with a semi-colon between each (for example, 'bath time ; playing').\nIf you can't enter any contexts at all (you can't tell what's happening), enter 'none'.\n")
     
     confirm <- FALSE
+    context_response <- ""
+    confirm_response <- ""
     while(confirm==FALSE){
       context_response <- readline("Context(s): ")
       confirm_response <- readline("Confirm? (Y/N) ")
