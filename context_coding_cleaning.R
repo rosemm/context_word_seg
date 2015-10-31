@@ -1,5 +1,5 @@
 doc_doctor <- function(recursive=T){
-  
+  if(!require(dplyr) ) install.packages("dplyr")
   docs <- dir(pattern="coding_doc.txt", recursive=recursive)
   message("Including the following coding documents:\n", paste(docs, collapse="\n"), "\n")
   
@@ -13,29 +13,31 @@ doc_doctor <- function(recursive=T){
       # make all contexts lower case
       coding_doc$context <- tolower(coding_doc$context)
       
-      library(dplyr)
-      bads <- filter(coding_doc, (coder=="RM" | coder=="TEST" | coder=="" & !is.na(date)) | pass<1 ) 
-      goods <- filter(filter(coding_doc, !( coder=="RM" | coder=="TEST" | coder=="" & !is.na(date) ) | is.na(coder) ), pass >0)
-      message(nrow(bads), " bad cases found.")
-      
-      correct_errors <- FALSE
-      correct_errors <- grepl(readline("Do you wish to correct these cases now? \nDoing so will overwrite your old coding file with the new clean one. \n(y/n): "), "y")
-      
-      if(correct_errors){
-        bads$coder <- NA
-        bads$date <- NA
-        bads$context <- NA
+      bads <- dplyr::filter(coding_doc, (coder=="RM" | coder=="TEST" | coder=="" & !is.na(date)) | pass<1 ) 
+      goods <- dplyr::filter(filter(coding_doc, !( coder=="RM" | coder=="TEST" | coder=="" & !is.na(date) ) | is.na(coder) ), pass >0)
+      if(nrow(bads)>0){
+        message(nrow(bads), " bad cases found.")
         
-        if ( nrow(coding_doc) != nrow(goods) + nrow(bads) )  stop("oh no!")
-        coding_doc <- rbind(goods, bads)
+        correct_errors <- FALSE
+        correct_errors <- grepl(readline("Do you wish to correct these cases now? \nDoing so will overwrite your old coding file with the new clean one. \n(y/n): "), "y")
         
-        message(nrow(filter(coding_doc, coder=="RM" | coder=="TEST" | coder=="" & !is.na(date))), " bad cases left. :)")
-        
-        # write updated coding_doc to file
-        message("Writing the squeaky clean doc...")
-        write.table(coding_doc, file=docs[i], quote=F, col.names=T, row.names=F, append=F, sep="\t")
-    }
+        if(correct_errors){
+          bads$coder <- NA
+          bads$date <- NA
+          bads$context <- NA
+          
+          if ( nrow(coding_doc) != nrow(goods) + nrow(bads) )  stop("oh no!")
+          coding_doc <- rbind(goods, bads)
+          
+          message(nrow(filter(coding_doc, coder=="RM" | coder=="TEST" | coder=="" & !is.na(date))), " bad cases left. :)")
+          
+          # write updated coding_doc to file
+          message("Writing the squeaky clean doc...")
+          write.table(coding_doc, file=docs[i], quote=F, col.names=T, row.names=F, append=F, sep="\t")
+        }
+      }
   }
+  message("All done!\n")
 }
 
 collect_codes <- function(){
@@ -92,8 +94,16 @@ process_codes <- function(master_doc, cleaning_keys=read.table("context_cleaning
     group_by(utt, context) %>%
     summarize(hits = sum(hit)) %>%
     spread(key=context, value=hits) 
-  
-master_doc_calc$total <- rowSums(x=master_doc_calc[,2:ncol(master_doc_calc)], na.rm=TRUE)  # total number of codes for each utterace
+
+contextcols <- 2:ncol(master_doc_calc) # the column numbers for all columns identifying contexts
+
+master_doc_calc$total <- rowSums(x=master_doc_calc[,contextcols], na.rm=TRUE)  # total number of codes for each utterace
+master_doc_calc$max <- apply(master_doc_calc[contextcols], 1, function(x) max(x, na.rm=T))
+master_doc_calc$maxes <-  apply(master_doc_calc[c(contextcols, which(colnames(master_doc_calc)=="max"))], 1, function(x) length(which(x[1:(length(x)-1)]==x[length(x)]))) # how many contexts have the same value as the max context?
+master_doc_calc$which <- apply(master_doc_calc[contextcols], 1, which.max)
+master_doc_calc$which <- ifelse(master_doc_calc$maxes>1, NA, master_doc_calc$which)
+master_doc_calc$context <- colnames(master_doc_calc)[master_doc_calc$which + 1 ]
+master_doc_calc$context_weight <- master_doc_calc$max/master_doc_calc$total
 }
 
 
