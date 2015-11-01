@@ -55,7 +55,11 @@ collect_codes <- function(){
   return(master_doc)
 }
 
+# write.table(master_doc, file="master_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+
 process_codes <- function(master_doc, cleaning_keys=read.table("context_cleaning_keys.txt", header=1, sep="\t", stringsAsFactors=F)){
+  if(!require(tidyr)) install.packages("tidyr"); library(tidyr)
+  
   # master_doc <- read.table("master_doc.txt", header=1, sep="\t", stringsAsFactors=F)
   unique(master_doc$context)
 
@@ -64,16 +68,47 @@ process_codes <- function(master_doc, cleaning_keys=read.table("context_cleaning
   master_doc$context <- gsub(pattern="/", x=master_doc$context, replacement=";", fixed=T)
   
   message(" Removing ", nrow(master_doc) - nrow(unique(master_doc)), " duplicate rows.")
-  master_doc <- unique(master_doc)
+  master_doc <- unique(master_doc) # there are duplicate rows because of copying the coding docs when I was originally starting the RAs on coding
 
   master_doc$context <- as.factor(master_doc$context)
-  library(tidyr)
+  
   maxcontexts <- 10 # the maximum number of contexts that can be read for one window (30 utterances)
   
-  master_doc <- separate(master_doc, col=context, into=paste("context", 1:maxcontexts, sep="."), sep="[[:blank:]]*;[[:blank:]]*", extra="drop")
-  master_doc <- gather(master_doc, key="contextnum", value="context", which(colnames(master_doc)==paste("context",1, sep=".")):which(colnames(master_doc)==paste("context",maxcontexts, sep=".")), na.rm=T)
+  master_doc <- tidyr::separate(master_doc, col=context, into=paste("context", 1:maxcontexts, sep="."), sep="[[:blank:]]*;[[:blank:]]*", extra="drop")
+  master_doc <- tidyr::gather(master_doc, key="contextnum", value="context", which(colnames(master_doc)==paste("context",1, sep=".")):which(colnames(master_doc)==paste("context",maxcontexts, sep=".")), na.rm=T)
   
   sort(unique(master_doc$context))
+  new_contexts <- sort(unique(master_doc$context))[!sort(unique(master_doc$context)) %in% cleaning_keys$context_raw]
+  message(length(new_contexts), " new contexts (not already in context_cleaning_keys.txt)")
+  if(length(new_contexts) > 0) {
+    add_contexts <- FALSE
+    add_contexts <- grepl(readline("Do you wish to add these contexts now? (y/n): "), "y")
+    
+    if(add_contexts){
+      new_contexts <- data.frame(context_raw=new_contexts, context_clean=NA)
+      message("\nEnter the clean context code for each new context \n")
+      for(i in 1:nrow(new_contexts)){
+        
+        change <- readline(paste("Change '", new_contexts[i,1], "'? (y/n) ", sep=""))
+        
+        if( change == "n" ) {
+          new_contexts[i,2] <- as.character(new_contexts[i,1]) # make clean code the same as raw code if change is "no" 
+        } else if( change == "y" ){
+          
+          replace_confirm <- FALSE
+          while(!replace_confirm){
+            clean_code <- readline("Replace with: ")
+            replace_confirm <- readline("Confirm? (y/n) ") =="y"
+          }
+          new_contexts[i,2] <- clean_code
+        } else stop("Error. Change must be y or n")
+      }
+      cleaning_keys <- rbind(cleaning_keys, new_contexts)
+      write.table(cleaning_keys, "context_cleaning_keys.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+      message("New contexts added! :) \n")
+    } 
+  }
+  
   
   # write.table(as.matrix(contexts, ncol=1), "context_cleaning_keys.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
