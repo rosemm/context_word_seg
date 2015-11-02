@@ -57,6 +57,8 @@ for(i in 1:nrow(dict)){
   dict$N.syl[i] <- length(strsplit(as.character(dict$phon[i]), split="-", fixed=TRUE)[[1]])
   }
 
+if(length(df$orth[grepl(x=df$orth, pattern="[[:upper:]]")]) >0 ) df$orth <- tolower(df$orth)
+if(length(df$orth[grepl(x=df$phon, pattern="-", fixed=T)]) >0 )  df$phon <- gsub(x=df$phon, pattern="-", replacement=" ", fixed=T)
 # add frequency for each word
 dict$freq.orth <- rep(NA, nrow(dict))
 for(i in 1:nrow(dict)){
@@ -109,7 +111,7 @@ print(p$tick()) # advance progress bar
 df <- expand_windows(df) 
 
 # classify utterances by context (ignore nontext columns)
-context.columns <- (3):(2+length(colnames(contexts)))
+context.columns <- which(colnames(df) == colnames(contexts)[1]):(which(colnames(df) == colnames(contexts)[1]) - 1 + length(colnames(contexts)))
 df$sum <- rowSums(df[,context.columns]) # identify utterances with key words from more than one context (ambiguous)
 
 df$context <- ifelse(df$sum > 1.5, "ambiguous", 

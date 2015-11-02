@@ -16,7 +16,7 @@ nontext_cols <- function(df, context_names){
 expand_windows <- function(df){
   p <- progress_estimated(n=length(3:(nrow(df)-2))) # print progress bar while working
   for(i in 3:(nrow(df)-2)){
-    for(j in 3:ncol(df)){
+    for(j in which(colnames(df) == colnames(contexts)[1]):ncol(df)){
       df[i,j] <- ifelse(df[i,j]==1, df[i,j], # if it is already marked 1, leave it
                         ifelse(df[(i-2),j]==1, 1.5, # if the utterance 2 before it is marked 1, mark 1.5
                                ifelse(df[(i-1),j]==1, 1.5, # if the utterance 1 before it is marked 1, mark 1.5
@@ -49,8 +49,12 @@ calc_MI = function(phon.pairs, phon.stream){
 }
 
 make_streams = function(df){
+  # add utterance boundary marker 
+  phon.utts <- paste(df$phon, "##")
   # collapse phonological utterances into one continuous stream
-  phon.stream <- unlist(strsplit(df$phon, " "))
+  phon.stream <- unlist(strsplit(phon.utts, " "))
+  # delete "syllables" that are just empty space
+  phon.stream <- phon.stream[ !grepl(pattern="^$", x=phon.stream) ]
   
   # how many unique syllables are there?
   syllables <- unique(phon.stream)
@@ -59,6 +63,8 @@ make_streams = function(df){
   
   # make phone stream into a list of all of the bisyllable pairs that occur
   phon.pairs <- data.frame(syl1=phon.stream[1:length(phon.stream)-1], syl2=phon.stream[2:length(phon.stream)])
+  # delete rows that code for utterance boundary (the result is that syllable pairs across utterance boundaries are simply unattested)
+  phon.pairs <- dplyr::filter(phon.pairs, syl1 !="##" & syl2 !="##")
   
   # collapse orthographic utterances into one stream
   orth.stream <- unlist(strsplit(df$orth, " "))

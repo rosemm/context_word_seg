@@ -1,3 +1,4 @@
+source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/coding_scripts.r")
 coding_doc <- BlankDoc(for.coding=F)
 coding_doc <- coding_doc %>%
   unite(utt, file, UttNum) %>%
@@ -106,4 +107,4 @@ for(i in 1:length(missed.phon) ){
 message("\n...now ", nrow(coding_doc_clean), " utterances in coding_doc_clean. ", 100*round(nrow(coding_doc_clean)/nrow(coding_doc), 4), "% utterances remain\n")
 
 # write.table(coding_doc_clean, file="utt_orth_phon_KEY.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
-
+# key <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
