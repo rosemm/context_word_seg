@@ -332,13 +332,7 @@ for(k in 1:length(colnames(contexts))){
                                                        NA)))), context.est))
 }
  
-bootstrap.plot$t <- with(bootstrap.plot, (context.est - mean)/(sd/sqrt(iter)))
-bootstrap.plot$d <- with(bootstrap.plot, (context.est - mean)/sd)
-bootstrap.plot$pval <- 2*pt(abs(bootstrap.plot$t), df=iter-1, lower.tail=F)
-bootstrap.plot$stars <- ifelse(bootstrap.plot$pval < .001, "***",
-                               ifelse(bootstrap.plot$pval < .01, "**",
-                                      ifelse(bootstrap.plot$pval < .05, "*",
-                                             "")))
+
 kable(bootstrap.plot)
 kable(filter(bootstrap.plot, criterion=="MI85"))
 
@@ -364,6 +358,12 @@ combined.bootstrap.results <- combined.bootstrap.results %>%
   extract(col=key, into=c("criterion", "measure"), regex="([A-Z]{2}[0-9]{2})([a-z]+)" ) 
 combined.bootstrap.results$criterion <- as.factor(combined.bootstrap.results$criterion)
 combined.bootstrap.results$measure <- as.factor(combined.bootstrap.results$measure)
+
+# Can add p-value calculation here for bootstrapped results
+combined.bootstrap.results <- combined.bootstrap.results %>%
+  group_by(criterion, measure, context.corpus) %>%
+  left_join(y=bootstrap.plot) %>%
+  mutate(n=n(), pval= ) # NOT WORKING YET!
 #############
 ggplot(filter(combined.bootstrap.results, criterion=="MI85"), aes(x=context.corpus, y=value))+
   geom_boxplot() +
