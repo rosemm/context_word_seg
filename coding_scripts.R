@@ -66,6 +66,42 @@ CleanTranscripts <- function(wd="./transcripts/"){
   return(transcripts)
 }
 
+BlankDoc <- function(wd="./transcripts/"){
+  # write blank coding_doc.txt for coders to code from
+  if(!require(dplyr)) install.packages("dplyr")
+  
+  coding_doc <- data.frame(LineNum=NULL, UttNum=NULL, file=NULL)
+  
+  transcripts <- CleanTranscripts()
+  
+  files <- list.files(path=wd)
+  Nfiles <- length(files)
+  
+  for(f in 1:Nfiles){
+    this_coding_doc <- data.frame(dplyr::filter(dplyr::select(transcripts[[f]], LineNum, UttNum), !is.na(UttNum) ) )
+    this_coding_doc$file <- files[f]
+    coding_doc <- rbind(coding_doc, this_coding_doc)
+  }
+  
+  coding_doc$coder <- NA
+  coding_doc$date <- NA
+  coding_doc$context <- NA
+  
+  # each utterance should be coded multiple times if there is overlap between windows. 
+  # duplicate the coding rows for each time an utterance should be coded
+  coding_doc1 <- coding_doc
+  coding_doc1$pass <- 1
+  coding_doc2 <- coding_doc
+  coding_doc2$pass <- 2
+  coding_doc3 <- coding_doc
+  coding_doc3$pass <- 3
+  
+  coding_doc_file <- rbind(coding_doc1, coding_doc2, coding_doc3)
+
+  return(coding_doc_file)
+}
+# write.table(coding_doc_file, file="coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+
 
 CodeContexts <- function(this_pass=1, window_size=30, slide_by=10){
   # check whether packages need to be installed
