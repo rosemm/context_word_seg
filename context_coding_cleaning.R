@@ -52,33 +52,60 @@ collect_codes <- function(){
     if( nrow(dplyr::filter(coded, coder=="RM" | coder=="TEST" | coder=="" & !is.na(date))) != 0 ) stop("Run doc_doctor first. There are bad cases here.")
     if(i==1) master_doc <- coded else master_doc <- rbind(master_doc, coded)
   }
-  return(master_doc)
-}
-
-# write.table(master_doc, file="master_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
-
-process_codes <- function(master_doc, cleaning_keys=read.table("context_cleaning_keys.txt", header=1, sep="\t", stringsAsFactors=F)){
-  if(!require(tidyr)) install.packages("tidyr"); library(tidyr)
-  
-  # master_doc <- read.table("master_doc.txt", header=1, sep="\t", stringsAsFactors=F)
-  unique(master_doc$context)
-
   # clean up some bad punctuation
   master_doc$context <- gsub(pattern=",", x=master_doc$context, replacement=";", fixed=T)
   master_doc$context <- gsub(pattern="/", x=master_doc$context, replacement=";", fixed=T)
   
   message(" Removing ", nrow(master_doc) - nrow(unique(master_doc)), " duplicate rows.")
   master_doc <- unique(master_doc) # there are duplicate rows because of copying the coding docs when I was originally starting the RAs on coding
+  
+  return(master_doc)
+}
 
-  master_doc$context <- as.factor(master_doc$context)
+# setwd("/Users/TARDIS/Documents/STUDIES/context_word_seg")
+# write.table(master_doc, file="master_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+
+process_codes <- function(master_doc, cleaning_keys=read.table("context_cleaning_keys.txt", header=1, sep="\t", stringsAsFactors=F)){
+  if(!require(tidyr)) install.packages("tidyr"); library(tidyr)
+  if(!require(dplyr)) install.packages("dplyr"); library(dplyr)
+  if(!require(psych)) install.packages("psych"); library(psych)
+  if(!require(GPArotation)) install.packages("GPArotation"); library(GPArotation)
+  
+  
+  # master_doc <- read.table("master_doc.txt", header=1, sep="\t", stringsAsFactors=F)
+  
+  RA_info <- master_doc %>%
+    tidyr::unite( utt, file, UttNum) %>%
+    dplyr::select(utt, coder, context, pass) %>%
+    group_by(coder) %>%
+    dplyr::summarize(n_utts_codes=n())
+
+  message("\nRAs have coded this many utterances:\n") ; print(as.data.frame(RA_info))
+  
+# only keep utterances that have been coded at least three times
+  keep <- master_doc %>%
+    tidyr::unite( utt, file, UttNum) %>%
+    dplyr::select(utt, coder, context, pass) %>%
+    group_by(utt) %>%
+    dplyr::summarize(n=n()) %>%
+    dplyr::filter(n>2) %>%
+    dplyr::select(utt)
+  
+master_doc_keep <- merge(tidyr::unite(master_doc, utt, file, UttNum), keep, by="utt", all.y=TRUE, all.x=FALSE )
+  
+message("Removing ", nrow(master_doc)-nrow(master_doc_keep) , " utterances because they have been coded fewer than 3 times across all coders.")    
+
+  unique(master_doc_keep$context)
+
+  master_doc_keep$context <- as.factor(master_doc_keep$context)
   
   maxcontexts <- 10 # the maximum number of contexts that can be read for one window (30 utterances)
   
-  master_doc <- tidyr::separate(master_doc, col=context, into=paste("context", 1:maxcontexts, sep="."), sep="[[:blank:]]*;[[:blank:]]*", extra="drop")
-  master_doc <- tidyr::gather(master_doc, key="contextnum", value="context", which(colnames(master_doc)==paste("context",1, sep=".")):which(colnames(master_doc)==paste("context",maxcontexts, sep=".")), na.rm=T)
+  master_doc_keep <- tidyr::separate(master_doc_keep, col=context, into=paste("context", 1:maxcontexts, sep="."), sep="[[:blank:]]*;[[:blank:]]*", extra="drop")
+  master_doc_keep <- tidyr::gather(master_doc_keep, key="contextnum", value="context", which(colnames(master_doc_keep)==paste("context",1, sep=".")):which(colnames(master_doc_keep)==paste("context",maxcontexts, sep=".")), na.rm=T)
   
-  sort(unique(master_doc$context))
-  new_contexts <- sort(unique(master_doc$context))[!sort(unique(master_doc$context)) %in% cleaning_keys$context_raw]
+  sort(unique(master_doc_keep$context))
+  new_contexts <- unique(master_doc_keep$context)[!unique(master_doc_keep$context) %in% cleaning_keys$context_raw]
   message(length(new_contexts), " new contexts (not already in context_cleaning_keys.txt)")
   if(length(new_contexts) > 0) {
     add_contexts <- FALSE
@@ -104,41 +131,62 @@ process_codes <- function(master_doc, cleaning_keys=read.table("context_cleaning
         } else stop("Error. Change must be y or n")
       }
       cleaning_keys <- rbind(cleaning_keys, new_contexts)
-      write.table(cleaning_keys, "context_cleaning_keys.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+      cleaning_keys <- dplyr::arrange(cleaning_keys, context_raw)
+      write.table(cleaning_keys, "context_cleaning_key2s.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
       message("New contexts added! :) \n")
     } 
   }
   
-  
   # write.table(as.matrix(contexts, ncol=1), "context_cleaning_keys.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
   for(i in 1:nrow(cleaning_keys)){
-    rows <- grep(pattern=paste("^", cleaning_keys[i,1], "$", sep=""), x=master_doc$context, value=F)
-    master_doc[rows,] # just for checking
-    master_doc$context <- gsub(pattern=paste("^", cleaning_keys[i,1], "$", sep=""), x=master_doc$context, replacement=cleaning_keys[i,2])
-    master_doc[rows,] # just for checking
+    rows <- grep(pattern=paste("^", cleaning_keys[i,1], "$", sep=""), x=master_doc_keep$context, value=F)
+    master_doc_keep[rows,] # just for checking
+    master_doc_keep$context <- gsub(pattern=paste("^", cleaning_keys[i,1], "$", sep=""), x=master_doc_keep$context, replacement=cleaning_keys[i,2])
+    master_doc_keep[rows,] # just for checking
   }
-  master_doc$context <- as.factor(master_doc$context)
-  summary(master_doc$context)
+  master_doc_keep$context <- as.factor(master_doc_keep$context)
+  summary(master_doc_keep$context)
   
   # calculate the number of times each context is coded for each utterance
-  master_doc_calc <- master_doc %>%
-    unite(col=utt, file, UttNum) %>%
+  master_doc_calc <- master_doc_keep %>%
     select(utt, context) %>%
     mutate(hit=1) %>%
     group_by(utt, context) %>%
     summarize(hits = sum(hit)) %>%
-    spread(key=context, value=hits) 
+    spread(key=context, value=hits, fill = 0) 
 
 contextcols <- 2:ncol(master_doc_calc) # the column numbers for all columns identifying contexts
-
 master_doc_calc$total <- rowSums(x=master_doc_calc[,contextcols], na.rm=TRUE)  # total number of codes for each utterace
+
+# PCA
+master_doc_prop <- master_doc_calc %>%
+  mutate_each(funs(./total),  contextcols) # making each hit the proportion of all hits for that utterance rather than count
+
+cor <- cor(master_doc_prop[, contextcols])
+heatmap(cor, symm=T, cexRow = 1 + 1/log10(nrow(cor)), cexCol = 1 + 1/log10(nrow(cor)))
+
+pca <- prcomp(x=master_doc_prop[, contextcols] )
+screeplot(pca, npcs = 15, type="lines")
+
+nfactors=6 # the number of components to extract (based on screeplot above)
+pca_o <- principal(cor, nfactors=nfactors, n.obs=nrow(master_doc_calc), rotate="varimax") # orthogonal components
+pca_c <- principal(cor, nfactors=nfactors, n.obs=nrow(master_doc_calc), rotate="promax") # correlated components
+print(pca_o$loadings, sort=T)
+print(pca_c$loadings, sort=T)
+round(pca_c$r.scores, 3)
+
+# calc most endorsed context for each utterance
 master_doc_calc$max <- apply(master_doc_calc[contextcols], 1, function(x) max(x, na.rm=T))
 master_doc_calc$maxes <-  apply(master_doc_calc[c(contextcols, which(colnames(master_doc_calc)=="max"))], 1, function(x) length(which(x[1:(length(x)-1)]==x[length(x)]))) # how many contexts have the same value as the max context?
 master_doc_calc$which <- apply(master_doc_calc[contextcols], 1, which.max)
-master_doc_calc$which <- ifelse(master_doc_calc$maxes>1, NA, master_doc_calc$which)
+master_doc_calc$which <- ifelse(master_doc_calc$maxes>1, NA, master_doc_calc$which) # don't pick a context for utterances where there's a tie
 master_doc_calc$context <- colnames(master_doc_calc)[master_doc_calc$which + 1 ]
 master_doc_calc$context_weight <- master_doc_calc$max/master_doc_calc$total
+
+
+
+
 }
 
 

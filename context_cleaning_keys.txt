@@ -1,196 +1,1 @@
-context_raw	context_clean
-after naptime	post-nap
-after sleep	post-sleep
-babbling	babbling
-baking	cooking
-batg	bathtime
-bath	bathtime
-bath time	bathtime
-bathing	bathtime
-bathroom	bathroom
-bathtime	bathtime
-bed time	bedtime
-bedtime	bedtime
-before bath	pre-bath
-before bedtime	pre-bedtime
-brushing	brushing hair
-brushing hair	brushing hair
-burping	burping
-changing	diaper change
-changing diaper	diaper change
-chewing	chewing
-clean up	clean up
-cleaning	cleaning
-comforting	soothing
-communicating	talking
-consoling	soothing
-cooking	cooking
-crying	crying
-defecating	defecating
-diaper change	diaper change
-diapering	diaper change
-dinner time	mealtime
-doing chores	housework
-drawing attention	drawing attention
-dressing	dressing
-drinking	drinking
-eating	mealtime
-entertaining	entertaining
-feeding	mealtime
-fussing	fussing
-gas	gas
-getting dressed	dressing
-getting ready	getting ready
-getting sick	spitting up
-going to sleep	bedtime
-grooming	grooming
-guided observation	guided observation
-hearing	hearing
-hiccups	hiccups
-housework	housework
-interaction	talking
-joint attention	joint attention
-meal	mealtime
-meal time	mealtime
-mealtime	mealtime
-moving	moving
-music	music
-nap time	nap time
-napping	nap time
-nibbling	mealtime
-none	none
-observing	observing
-peeing	peeing
-play	playtime
-play time	playtime
-playing	playtime
-playtime	playtime
-post-changing	post-diaper change
-post-feeding	post-feeding
-pre-bath	pre-bath
-pre-bathing	pre-bath
-pre-bedtime	pre-bedtime
-pre-change	pre-change
-pre-dressing	pre-dressing
-pre-feeding	pre-feeding
-putting to bed	bedtime
-reading	storytime
-rolling	rolling
-shopping	shopping
-shouting	shouting
-sick	sick
-singing	singing
-sleeptime	bedtime
-sneezing	sneezing
-soothing	soothing
-spitting up	spitting up
-storytime	storytime
-taking pictures	taking pictures
-talking	talking
-taping	taping
-tea time	mealtime
-teasing	teasing
-teething	teething
-television	TV
-tickling	tickling
-waking	waking up
-waking up	waking up
-watching television	TV
-watching tv	TV
-yawning	yawning
-yelling	shouting
-after bath	post-bath
-after bathtime	post-bedtime
-after diapering	post-diaper
-after eating	post-mealtime
-after feeding	post-mealtime
-after meal	post-mealtime
-after mealtime	post-mealtime
-after nap	post-nap
-applying teething gel	applying teething gel
-baptism	baptism
-BATH	bath
-before diapering	pre-diaper
-before meal	pre-mealtime
-before meal time	pre-mealtime
-being upset	fussing
-blowing bubbles	blowing bubbles
-blowing raspberries	blowing raspberries
-bouncing	bouncing
-breastfeeding	mealtime
-car trip	car
-changing clothes	changing clothes
-chiding	chiding
-cleaning the child	cleaning the child
-cleaning up	cleaning
-coaxing words from baby	talking
-coming home	coming home
-conversing	talking
-conversing with child	talking
-coughing	coughing
-crawling	crawling
-cuddling	cuddling
-directing attention	directing attention
-driving	car
-drooling	drooling
-drying	drying
-drying after bath	drying
-excreting waste	pooping
-exercising	exercising
-feeding time	mealtime
-getting attention	directing attention
-getting up	getting up
-going potty	going potty
-hiccuping	hiccups
-hiccupping	hiccups
-holding child	holding child
-house chores	housework
-in crib	in crib
-kicking	kicking
-laughing	laughing
-laying outside	outside
-learning words	learning words
-looking	looking
-lying	lying
-messing up	messing up
-mom eating	mom eating
-outside	outside
-playing outside	outside
-playing with ball	playing
-playing with pet	playing
-pooping	pooping
-post bath	post-bath
-post meal	post-mealtime
-post-bath	post-bath
-post-meal	post-mealtime
-potty training	potty training
-pre bath	pre-bath
-pre-doctors visit	pre-doctors visit
-pre-meal	pre-mealtime
-preparing for bedtime	pre-bedtime
-putting on the bib	putting on the bib
-relieving hiccups	hiccups
-relieving tummy ache	relieving tummy ache
-rolling around	rolling around
-rolling over	rolling over
-smiling	smiling
-snack	mealtime
-soothng	soothng
-sothing	soothing
-speaking	talking
-sucking	sucking
-sucking thumb	sucking thumb
-swimming	swimming
-swinging	swinging
-taking photo	taking pictures
-taking photos	taking pictures
-talking photos	taking pictures
-talking to child	talking
-thumb sucking	sucking thumb
-thumb-sucking	sucking thumb
-undressing	undressing
-waiting for food	pre-mealtime
-washing	washing
-washing dishes	washing dishes
-washing face	washing face
-watching TV	TV
+context_raw	context_cleanafter bath	post-bathafter bathtime	post-bedtimeafter diapering	post-diaperafter eating	post-mealtimeafter feeding	post-mealtimeafter meal	post-mealtimeafter mealtime	post-mealtimeafter nap	post-napafter naptime	post-napafter sleep	post-napapplying teething gel	applying teething gelbabbling	babblingbaking	cookingbaptism	baptismbatg	bathtimebath	bathtimeBATH	bathtimebath time	bathtimebathing	bathtimebathroom	bathroombathtime	bathtimebed time	bedtimebedtime	bedtimebefore bath	pre-bathbefore bedtime	pre-bedtimebefore diapering	pre-diaperbefore meal	pre-mealtimebefore meal time	pre-mealtimebeing upset	fussingblowing bubbles	blowing bubblesblowing raspberries	blowing raspberriesbouncing	bouncingbreastfeeding	mealtimebrushing	brushing hairbrushing hair	brushing hairburping	burpingcar trip	carchanging	diaper changechanging clothes	changing clotheschanging diaper	diaper changechewing	chewingchiding	chidingclean up	clean upcleaning	cleaningcleaning the child	cleaning the childcleaning up	cleaningcoaxing words from baby	talkingcomforting	soothingcoming home	coming homecommunicating	talkingconsoling	soothingconversing	talkingconversing with child	talkingcooking	cookingcoughing	coughingcrawling	crawlingcrying	cryingcuddling	cuddlingdefecating	defecatingdiaper change	diaper changediapering	diaper changedinner time	mealtimedirecting attention	directing attentiondoing chores	houseworkdrawing attention	directing attentiondressing	dressingdrinking	drinkingdriving	cardrooling	droolingdrying	dryingdrying after bath	dryingeating	mealtimeentertaining	entertainingexcreting waste	poopingexercising	exercisingfeeding	mealtimefeeding time	mealtimefussing	fussinggas	gasgetting attention	directing attentiongetting dressed	dressinggetting ready	getting readygetting sick	spitting upgetting up	post-napgoing potty	going pottygoing to sleep	bedtimegrooming	groomingguided observation	directing attentionhearing	hearinghiccuping	hiccupshiccupping	hiccupshiccups	hiccupsholding child	holding childhouse chores	houseworkhousework	houseworkin crib	in cribinteraction	talkingjoint attention	joint attentionkicking	kickinglaughing	laughinglaying outside	outsidelearning words	learning wordslooking	lookinglying	lyingmeal	mealtimemeal time	mealtimemealtime	mealtimemessing up	messing upmom eating	mom eatingmoving	movingmusic	musicnap time	nap timenapping	nap timenibbling	mealtimenone	noneobserving	observingoutside	outsidepeeing	peeingplay	playtimeplay time	playtimeplaying	playtimeplaying outside	outsideplaying with ball	playingplaying with pet	playingplaytime	playtimepooping	poopingpost bath	post-bathpost meal	post-mealtimepost-bath	post-bathpost-changing	post-diaperpost-feeding	post-feedingpost-meal	post-mealtimepotty training	potty trainingpre bath	pre-bathpre-bath	pre-bathpre-bathing	pre-bathpre-bedtime	pre-bedtimepre-change	pre-changepre-doctors visit	pre-doctors visitpre-dressing	pre-dressingpre-feeding	pre-feedingpre-meal	pre-mealtimepreparing for bedtime	pre-bedtimeputting on the bib	putting on the bibputting to bed	bedtimereading	storytimerelieving hiccups	hiccupsrelieving tummy ache	relieving tummy acherolling	rollingrolling around	rollingrolling over	rollingshopping	shoppingshouting	shoutingsick	sicksinging	singingsleeptime	bedtimesmiling	smilingsnack	mealtimesneezing	sneezingsoothing	soothingsoothng	soothngsothing	soothingspeaking	talkingspitting up	spitting upstorytime	storytimesucking	suckingsucking thumb	sucking thumbswimming	swimmingswinging	swingingtaking photo	taking picturestaking photos	taking picturestaking pictures	taking picturestalking	talkingtalking photos	taking picturestalking to child	talkingtaping	tapingtea time	mealtimeteasing	teasingteething	teethingtelevision	TVthumb sucking	sucking thumbthumb-sucking	sucking thumbtickling	ticklingundressing	undressingwaiting for food	pre-mealtimewaking	waking upwaking up	waking upwashing	washingwashing dishes	washing disheswashing face	washing facewatching television	TVwatching tv	TVwatching TV	TVyawning	yawningyelling	shouting
