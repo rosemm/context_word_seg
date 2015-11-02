@@ -126,15 +126,24 @@ segment_speech <- function(cutoff, stat, unique.phon.pairs, phon.stream, conside
     unique.phon.pairs$seg <- unique.phon.pairs$MIseg
   } else {stop("ERROR: Enter stat='TP' or stat='MI' only")}
   
+  
   seg.phon.stream <- phon.stream
   
   for(i in 2:length(phon.stream)){
-    seg <- dplyr::filter(unique.phon.pairs, syl1==phon.stream[i-1] & syl2==phon.stream[i])$seg
+    
+    seg <- ifelse(phon.stream[i]=="##" | phon.stream[i-1]=="##", 1, # utterance boundaries are given as word boundaries
+                  dplyr::filter(unique.phon.pairs, syl1==phon.stream[i-1] & syl2==phon.stream[i])$seg)
     
     if(length(seg) > 1) stop(paste("ERROR at ", i, "th element of phon.stream: more than one entry for seg", sep=""))
     
-    seg.phon.stream[i]<- ifelse(seg==1, paste(",", phon.stream[i], sep="" ), phon.stream[i]) # if seg=1 for this phon pair, then insert a comma before the second syllable
+    seg.phon.stream[i]<- ifelse(seg==1, 
+                                paste0(",", phon.stream[i]), 
+                                phon.stream[i]) # if seg=1 for this phon pair, then insert a comma before the second syllable
   }
+  
+  # drop utterance boundary markers (the segmentation is still coded on the syllable after the utt boundary)
+  seg.phon.stream <- seg.phon.stream[ seg.phon.stream != ",##"]
+  
   return(seg.phon.stream)
 }
 
