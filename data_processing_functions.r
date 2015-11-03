@@ -157,7 +157,7 @@ assess_seg <- function(seg.phon.stream, words, dict){
   unique.units <- data.frame(phon=unique(units) )
   
   # compare extracted units to dictionary words
-  this.dict <- filter(dict, word %in% words)[,c("word", "phon", "context")] 
+  this.dict <- filter(dict, word %in% words)[,c("word", "phon")] 
   
   # number of hits and false alarms
   unique.units$precision <- ifelse(unique.units$phon %in% this.dict$phon, 1, 0) # if this segmented unit is in the dict it's a hit, if it's not in the dictionary it's a false alarm
