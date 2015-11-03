@@ -9,5 +9,5 @@
    
 ## Run R:
 ## we merge R output with stdout from PBS, which gets then logged via -o option
-module load R
+module add R
 R CMD BATCH --no-save --no-restore "<%= rscript %>" /dev/stdout
