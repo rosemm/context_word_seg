@@ -1,1831 +1,1831 @@
-word	phon
-'ave	'{v
-'ere	'7R
-a	@
-aah	'#
-aah-ooh	'#-'u
-able	'1-bP
-about	@-'b6t
-abubbies	@-'bV-bIz
-accidents	'{k-sI-d@nts
-ache	'1k
-act	'{kt
-addict	'{-dIkt
-aeroplane	'8-r@-pl1n
-afraid	@-'fr1d
-after	'#f-t@R
-afternoon	'#f-t@-'nun
-again	@-'gEn
-ahead	@-'hEd
-ahhbo	'#-b5
-ahuh	@-'h5
-ain't	'1nt
-air	'8R
-alan	'{-lIn
-all	'$l
-allowed	@-'l6d
-alone	@-'l5n
-along	@-'lQN
-already	$l-'rE-dI
-alright	$l-'r2t
-also	'$l-s5
-always	'$l-w1z
-am	'{m
-an	@n
-and	@nd
-angry	'{N-grI
-annoy	@-'n4
-annoyed	@-'n4d
-annoying	@-'n4-IN
-another	@-'nV-D@R
-ant	'{nt
-anthony	'{n-T5-ni
-any	'E-nI
-anybody	'E-nI-"bQ-dI
-anymore	E-nI-'m$R
-anyone	'E-nI-wVn
-anything	'E-nI-TIN
-anywhere	'E-nI-w8R
-apple	'{-pP
-are	'#R
-aren't	'#nt
-arm	'#m
-armie	'#-mI
-armies	'#-mIz
-arms	'#mz
-around	@-'r6nd
-arrows	'{-r5z
-arsies	'#-siz
-as	@z
-ask	'#sk
-asking	'#-skIN
-asleep	@-'slip
-asleepies	@-'sli-piz
-astra	'{s-tr@
-astra's	'{s-tr@z
-at	@t
-atchoo	@-'Ju
-atishoo	@-'tI-Su
-attached	@-'t{Jt
-attention	@-'tEn-SH
-auntie	'#n-tI
-awake	@-'w1k
-away	@-'w1
-awful	'$-fUl
-awfully	'$-fU-lI
-awkward	'$-kw@d
-ayo	'#-j5
-babba	'b#-b#
-babe	'b1b
-babies	'b1-bIz
-baby	'b1-bI
-baby's	'b1-bIz
-babygro	'b1-bI-'gr5
-back	'b{k
-bacon	'b1-k@n
-bad	'b{d
-bald	'b$ld
-ball	'b$l
-ballet	'b{-l1
-balls	'b$lz
-banbury	'b{n-bV-rI
-bandy	'b{n-dI
-banged	'b{Nd
-bare	'b8R
-bash	'b{S
-bashing	'b{-SIN
-bath	'b#T
-bathing	'b1-DIN
-bathroom	'b#T-rUm
-baths	'b#Ts
-bathy	'b#-TI
-batman	'b{t-m@n
-baxter	'b{k-st@R
-be	'bi
-beady	'bi-dI
-bear	'b8R
-bear's	'b8z
-bears	'b8z
-beat	'bit
-beautiful	'bju-t@-fUl
-because	bI-'kQz
-bed	'bEd
-bedtime	'bEd-t2m
-beebo	'bi-b5
-been	'bin
-beep	'bip
-before	bI-'f$R
-begging	'bE-gIN
-being	'bi-IN
-believe	bI-'liv
-believed	bI-'livd
-bell	'bEl
-belly	'bE-lI
-belong	bI-'lQN
-below	bI-'l5
-bend	'bEnd
-beside	bI-'s2d
-best	'bEst
-bet	'bEt
-better	'bE-t@R
-bib	'bIb
-bicycle	'b2-sI-kP
-big	'bIg
-bigger	'bI-g@R
-biggest	'bI-gIst
-bin	'bIn
-bird	'b3d
-birds	'b3dz
-birthday	'b3T-d1
-biscuit's	'bI-skIts
-bit	'bIt
-bite	'b2t
-biting	'b2-tIN
-bits	'bIts
-bitter	'bI-t@R
-black	'bl{k
-blankets	'bl{N-kIts
-bless	'blEs
-blimey	'bl2-mI
-blinds	'bl2ndz
-blisters	'blI-st@z
-blooming	'blu-mIN
-blouse	'bl6z
-blow	'bl5
-blowing	'bl5-IN
-blue	'blu
-bo	'b5
-bo's	'b5z
-bo-byes	'b5-'b1z
-bobo's	'b5-b5z
-body	'bQ-dI
-boiling	'b4-lIN
-bone	'b5n
-bones	'b5nz
-bonnet	'bQ-nIt
-boo	'bu
-boon	'bun
-bop	'bQp
-bored	'b$d
-boring	'b$-rIN
-borks	'b$ks
-bot	'bQt
-bot's	'bQts
-both	'b5T
-bother	'bQ-D@R
-bothered	'bQ-D@d
-bottle	'bQ-tP
-bottom	'bQ-t@m
-bottoms	'bQ-t@mz
-botty	'bQ-tI
-bought	'b$t
-bounce	'b6ns
-bouncie	'b6n-sI
-bouncing	'b6n-sIN
-bowl	'b5l
-boy	'b4
-boys	'b4z
-breakable	'br1-k@-bP
-breakfast	'brEk-f@st
-breathing	'bri-DIN
-bright	'br2t
-bring	'brIN
-brings	'brINz
-brothers	'brV-D@z
-brought	'br$t
-brown	'br6n
-brush	'brVS
-brushed	'brVSt
-bubble	'bV-bP
-bubbles	'bV-bPz
-bubbly	'bV-blI
-bucket	'bV-kIt
-bucky	'bV-kI
-bum	'bVm
-bump	'bVmp
-bunny	'bV-nI
-burp	'b3p
-burping	'b3-pIN
-burps	'b3ps
-busby	'bVz-bI
-business	'bIz-nIs
-busy	'bI-zI
-but	'bVt
-butterfly	'bV-t@-fl2
-button	'bV-tH
-by	'b2
-bye	'b2
-bye-bye	"b2-'b2
-c'mon	k@-'mQn
-cable	'k1-bP
-cake	'k1k
-cakes	'k1ks
-called	'k$ld
-calm	'k#m
-came	'k1m
-camera	'k{-m@-r@
-can	k@n
-can't	'k#nt
-car	'k#R
-card	'k#d
-cardigan	'k#-dI-g@n
-care	'k8R
-careful	'k8-fUl
-cares	'k8z
-carpet	'k#-pIt
-carry	'k{-rI
-carrycot	'k{-rI-kQt
-carrying	'k{-rI-IN
-cartoon	k#-'tun
-castle	'k#-sP
-castor	'k#-st@R
-cat	'k{t
-cats	'k{ts
-caught	'k$t
-cause	k@z
-cement	sI-'mEnt
-center	'sEn-t@R
-certain	's3-tH
-cha	J@
-chair	'J8R
-chair's	'J8z
-chance	'J#ns
-change	'J1n_
-changed	'J1n_d
-changing	'J1n-_IN
-charles	'J#lz
-cheek	'Jik
-cheeks	'Jiks
-cheeky	'Ji-kI
-chew	'Ju
-chewin'	'Ju-In
-chewing	'Ju-IN
-chicken	'JI-kIn
-chilly	'JI-lI
-chime	'J2m
-chin	'JIn
-chinny	'JI-nI
-chinywinywiny	'JI-nI-'wI-nI
-choice	'J4s
-choke	'J5k
-choked	'J5kt
-chops	'JQps
-chou	'J6
-chris	'krIs
-christ	'kr2st
-christopher	'krIs-t@-f@r
-christopher's	'krIs-t@-f@rz
-chubby	'JV-bI
-chuckles	'JV-kPz
-chucky	'JV-kI
-church	'J3J
-clap	'kl{p
-clark	'kl#k
-clean	'klin
-clever	'klE-v@R
-clevey	'klE-vI
-climb	'kl2m
-climbing	'kl2-mIN
-clinic	'klI-nIk
-closed	'kl5zd
-clothes	'kl5Dz
-cob	'kQb
-coffee	'kQ-fI
-cold	'k5ld
-colors	'kV-l@z
-come	'kVm
-comes	'kVmz
-comin	'kV-mIn
-coming	'kV-mIN
-compete	k@m-'pit
-complain	k@m-'pl1n
-complaining	k@m-'pl1-nIN
-complains	k@m-'pl1nz
-complaints	k@m-'pl1nts
-concentrate	'kQn-s@n-tr1t
-concentrating	'kQn-s@n-tr1-tIN
-conditions	k@n-'dI-SHz
-conduct	k@n-'dVkt
-confused	k@n-'fjuzd
-contact	'kQn-t{kt
-contemplating	'kQn-tEm-pl1-tIN
-cooing	'ku-IN
-cook	'kUk
-cooking	'kU-kIN
-copying	'kQ-pI-IN
-cor	'k$R
-cos	k@z
-cosy	'k5-zI
-cot	'kQt
-cough	'kQf
-coughs	'kQfs
-could	k@d
-countrymen	'kVn-trI-m@n
-couple	'kV-pP
-course	'k$s
-cover	'kV-v@R
-covered	'kV-v@d
-coy	'k4
-cradle	'kr1-dP
-crawl	'kr$l
-crawling	'kr$-lIN
-cream	'krim
-creamy	'kri-mI
-crease	'kris
-cricket	'krI-kIt
-critical	'krI-tI-kP
-crocodile	'krQ-k@-d2l
-crocodile's	'krQ-k@-d2lz
-crocodiles	'krQ-k@-d2lz
-cross	'krQs
-crosspatch	'krQs-p{J
-cruel	'kr9l
-crumbs	'krVmz
-crunch	'krVnJ
-cry	'kr2
-crying	'kr2-IN
-cuddle	'kV-dP
-cup	'kVp
-cupboard	'kV-b@d
-cuppa	'kV-p@
-cups	'kVps
-cupsy	'kVp-sI
-curlies	'k3-lIz
-curls	'k3lz
-curly	'k3-lI
-curtains	'k3-tHz
-curtsy	'k3t-sI
-cut	'kVt
-cycling	's2-klIN
-d'you	'djU
-dad	'd{d
-dad's	'd{dz
-daddies	'd{-dIz
-daddy	'd{-dI
-daddy's	'd{-dIz
-daft	'd#ft
-daisy	'd1-zI
-dance	'd#ns
-dancer	'd#n-s@R
-dancing	'd#n-sIN
-danish	'd1-nIS
-dark	'd#k
-darling	'd#-lIN
-day	'd1
-dead	'dEd
-dear	'd7R
-dearie	'd7-rI
-dearier	'd7-r7R
-deborah	'dE-b@-r@
-debra	'dE-br@
-decided	dI-'s2-dId
-dee	'di
-deep	'dip
-definitely	'dE-fI-nIt-lI
-delitt	d@-'lIt
-deserves	dI-'z3vz
-desperately	'dE-sp@-r@t-lI
-dessert	dI-'z3t
-did	'dId
-didn't	'dI-dHt
-difference	'dI-fr@ns
-different	'dI-fr@nt
-difficult	'dI-fI-k@lt
-din	'dIn
-din-dins	'dIn-dInz
-dinner	'dI-n@R
-dinners	'dI-n@z
-dins	'dInz
-dirty	'd3-tI
-disagreement	"dIs-@-'gri-m@nt
-disco	'dI-sk5
-dishes	'dI-SIz
-distract	dI-'str{kt
-distracting	dI-'str{k-tIN
-disturbing	dI-'st3-bIN
-dived	'd2vd
-do	'du
-doctors	'dQk-t@z
-does	'dVz
-doesn't	'dV-zHt
-doin	'du-In
-doing	'du-IN
-dollop	'dQ-l@p
-dolly	'dQ-lI
-dolly's	'dQ-lIz
-don't	'd5nt
-donald	'dQn-n@ld
-done	'dVn
-door	'd$R
-door's	'd$z
-doors	'd$z
-doot	'dut
-down	'd6n
-downstairs	"d6n-'st8z
-draw	'dr$
-drawers	'dr$z
-dreadful	'drEd-fUl
-dream	'drim
-dreaming	'dri-mIN
-dress	'drEs
-dressed	'drEst
-dressing	'drE-sIN
-dribbles	'drI-bPz
-dribbling	'drI-blIN
-dribbly	'drI-blI
-dried	'dr2d
-drink	'drINk
-drinkee	'drIN-kI
-drinkies	'drIN-kIz
-drinking	'drIN-kIN
-drinks	'drINks
-drip	'drIp
-dripping	'drI-pIN
-drips	'drIps
-drop	'drQp
-dropped	'drQpt
-drunk	'drVNk
-drunkard	'drVN-k@d
-dry	'dr2
-dub	'dVb
-duck	'dVk
-ducks	'dVks
-duh	'dV
-dummy	'dV-mI
-dumpling	'dVm-plIN
-during	'dj9-rIN
-dusty	'dV-stI
-dying	'd2-IN
-each	'iJ
-ear	'7R
-earlier	'3-l7R
-early	'3-lI
-ears	'7z
-easier	'i-z7R
-easy	'i-zI
-eat	'it
-eaten	'i-tH
-eating	'i-tIN
-edge	'E_
-egg	'Eg
-eh	'1
-either	'2-D@R
-elaine	i-'l1n
-electrocute	I-'lEk-tr@-kjut
-else	'Els
-end	'End
-energy	'E-n@-_I
-enjoy	In-'_4
-enjoyed	In-'_4d
-enjoying	In-'_4-IN
-enough	I-'nVf
-er	'3
-especially	I-'spE-S@-lI
-even	'i-vH
-evening	'i-vH-IN
-ever	'E-v@R
-every	'E-vrI
-everybody	'E-vrI-"bQ-dI
-everything	'E-vrI-TIN
-everywhere	'E-vrI-w8R
-except	Ik-'sEpt
-excited	Ik-'s2-tId
-exciting	Ik-'s2-tIN
-excuse	Ik-'skjuz
-exercises	'Ek-s@-s2-zIz
-expect	Ik-'spEkt
-extras	'Ek-str@z
-eye	'2
-eyelashes	'2-l{-SIz
-eyes	'2z
-face	'f1s
-faced	'f1st
-faces	'f1-sIz
-facies	'f1-sIz
-fair	'f8R
-faithful	'f1T-fUl
-fall	'f$l
-fallen	'f$-l@n
-falling	'f$-lIN
-fancy	'f{n-sI
-far	'f#R
-fascinated	'f{-sI-n1-tId
-fast	'f#st
-fat	'f{t
-fatty	'f{-tI
-fault	'f$lt
-favorite	'f1-v@-rIt
-feather	'fE-D@R
-fed	'fEd
-feed	'fid
-feeding	'fi-dIN
-feel	'fil
-feeling	'fi-lIN
-feels	'filz
-feet	'fit
-felix	'fi-lIks
-fever	'fi-v@R
-fierce	'f7s
-fight	'f2t
-fighting	'f2-tIN
-fill	'fIl
-filled	'fIld
-filling	'fI-lIN
-filling's	'fI-lINz
-film	'fIlm
-films	'fIlmz
-filthy	'fIl-TI
-find	'f2nd
-fine	'f2n
-finger	'fIN-g@R
-fingers	'fIN-g@z
-finish	'fI-nIS
-finished	'fI-nISt
-finishes	'fI-nI-SIz
-fire	'f2-@R
-first	'f3st
-fishes	'fI-SIz
-fisties	'fI-stIz
-fit	'fIt
-fits	'fIts
-five	'f2v
-flavor	'fl1-v@R
-floating	'fl5-tIN
-floor	'fl$R
-floppy	'flQ-pI
-flour	'fl6-@R
-flowers	'fl6-@z
-flown	'fl5n
-fluffy	'flV-fI
-fly	'fl2
-flying	'fl2-IN
-fold	'f5ld
-food	'fud
-foot	'fUt
-football	'fUt-b$l
-for	f@
-forget	f@-'gEt
-forgiven	f@-'gI-vH
-forthcoming	"f$T-'kV-mIN
-fourteen	"f$-'tin
-fresh	'frES
-friend	'frEnd
-friends	'frEndz
-fright	'fr2t
-frighten	'fr2-tH
-froggy	'frQ-gI
-from	frQm
-front	'frVnt
-frothing	'frQ-TIN
-frustrating	frV-'str1-tIN
-full	'fUl
-fun	'fVn
-funnier	'fV-n7R
-funny	'fV-nI
-furry	'f3-rI
-further	'f3-D@R
-fussing	'fV-sIN
-fuzzy	'fV-zI
-gained	'g1nd
-gam	'g{m
-game	'g1m
-games	'g1mz
-garden	'g#-dH
-gargler	'g#-gl@R
-gary	'd8-rI
-gave	'g1v
-gel	'_El
-gentle	'_En-tP
-get	'gEt
-gets	'gEts
-gettin	'gE-tIn
-getting	'gE-tIN
-giddy	'gI-dI
-gillian	'_I-lj@n
-gillian's	'_I-lj@nz
-girl	'g3l
-girl's	'g3lz
-girlie	'g3-lI
-girls	'g3lz
-give	'gIv
-given	'gI-vH
-giving	'gI-vIN
-glad	'gl{d
-glass	'gl#s
-glimpse	'glImps
-globe	'gl5b
-glove	'glVv
-gluey	'glu-I
-go	'g5
-gobble	'gQ-bP
-god	'gQd
-goes	'g5z
-goin	'g5-In
-going	'g5-IN
-golden	'g5l-d@n
-gone	'gQn
-gonna	'gQ-n@
-good	'gUd
-goodbye	"gUd-'b2
-goodies	'gU-dIz
-goodness	'gUd-nIs
-goose	'gus
-gorgeous	'g$-_@s
-gosh	'gQS
-got	'gQt
-gotta	'gQ-t@
-gou	'g6
-gown	'g6n
-grab	'gr{b
-gracious	'gr1-S@s
-granddad	'gr{n-d{d
-grandma	'gr{n-m#
-grease	'griz
-great	'gr1t
-greedy	'gri-dI
-grip	'grIp
-grotty	'grQ-tI
-grow	'gr5
-grown	'gr5n
-growth	'gr5T
-grub	'grVb
-grubby	'grV-bI
-grumpy	'grVm-pI
-grunt	'grVnt
-grunting	'grVn-tIN
-gums	'gVmz
-guts	'gVts
-guy	'g2
-ha	'h#
-had	'h{d
-hadn't	'h{-dHt
-hair	'h8R
-half	'h#f
-hand	'h{nd
-handies	'h{n-dIz
-hands	'h{ndz
-handy	'h{n-dI
-hang	'h{N
-hanging	'h{-NIN
-hanky	'h{N-kI
-hannah	'h{-n@
-hannah's	'h{-n@z
-happen	'h{-p@n
-happened	'h{-p@nd
-happening	'h{-p@-nIN
-happy	'h{-pI
-hard	'h#d
-has	'h{z
-hasn't	'h{-zHt
-hassles	'h{-sPz
-hat	'h{t
-have	'h{v
-haven't	'h{-vHt
-having	'h{-vIN
-hay	'h1
-he	'hi
-he'll	'hil
-he's	'hiz
-head	'hEd
-heads	'hEdz
-heady	'hE-dI
-health	'hElT
-hear	'h7R
-heavens	'hE-vHz
-heavily	'hE-vI-lI
-heavy	'hE-vI
-heehee	'hi-'hi
-hello	h@-'l5
-help	'hElp
-helping	'hEl-pIN
-helps	'hElps
-her	h3R
-here	'h7R
-here's	'h7z
-hey	'h1
-hey-ya	'h1-'jQ
-hi	'h2
-hiccup	'hI-kVp
-hiccups	'hI-kVps
-hick	'hIk
-hickies	'hI-kIz
-hidden	'hI-dH
-hide	'h2d
-hiding	'h2-dIN
-high	'h2
-hilda	'hIl-d@
-him	hIm
-his	hIz
-hit	'hIt
-hmm	'hF
-hmm-hmm	'hF-'hF
-ho	'h5
-hoi	'b4
-hold	'h5ld
-holding	'h5l-dIN
-hole	'h5l
-holes	'h5lz
-home	'h5m
-honest	'Q-nIst
-hop	'hQp
-hope	'h5p
-hopeless	'h5p-lIs
-hoping	'h5-pIN
-horny	'h$-nI
-horrible	'hQ-r@-bP
-horror	'hQ-r@R
-hot	'hQt
-hour	'6-@R
-house	'h6s
-how	'h6
-how'd	'h6d
-how's	'h6z
-huge	'hju_
-huh	'hV
-hungry	'hVN-grI
-hurry	'hV-rI
-hurt	'h3t
-i	'2
-i'd	'2d
-i'll	'2l
-i'm	'2m
-i've	'2v
-ideas	2-'d7z
-if	If
-in	'In
-in't	'Int
-indian	'In-dj@n
-inside	"In-'s2d
-inspect	In-'spEkt
-instead	In-'stEd
-insult	In-'sVlt
-interest	'In-tr@st
-interested	'In-tr@-stId
-interesting	'In-tr@-stIN
-into	'In-tu
-iray	'2-r1
-iron	'2-@n
-ironing	'2-@-nIN
-is	'Iz
-isn't	'I-zHt
-it	It
-it'll	'I-tP
-it's	'Its
-its	'Its
-jacket	'_{-kIt
-jamas	'_#-m@z
-jiggle	'_I-gP
-jiggled	'_I-gPd
-job	'_Qb
-johnson's	'_Qn-sHz
-join	'_4n
-joke	'_5k
-joseph	'_5-sEf
-joseph's	'_5-sEfs
-journey	'_3-nI
-juice	'_us
-julie	'_u-lI
-jump	'_Vmp
-jumper	'_Vm-p@R
-jumping	'_Vm-pIN
-just	'_Vst
-jutting	'_V-tIN
-keen	'kin
-keep	'kip
-keeping	'ki-pIN
-keeps	'kips
-keith	'kiT
-kettle	'kE-tP
-kick	'kIk
-kicked	'kIkt
-kickello	kI-'kE-l5
-kicking	'kI-kIN
-kidding	'kI-dIN
-kidney	'kId-nI
-killing	'kI-lIN
-kind	'k2nd
-king	'kIN
-kiss	'kIs
-kitchen	'kI-JIn
-kittens	'kI-tHz
-kitty	'kI-tI
-knacks	'n{ks
-knee	'ni
-knees	'niz
-knew	'nju
-knick	'nIk
-knicker	'nI-k@
-knock	'nQk
-knockers	'nQ-k@z
-knot	'nQt
-know	'n5
-knows	'n5z
-knuckles	'nV-kPz
-lad	'l{d
-lady	'l1-dI
-lambchahhh	'l{m-JQ
-lambchop	'l{m-JQp
-lambchop's	'l{m-JQps
-lambs	'l{mz
-lard	'l#d
-last	'l#st
-late	'l1t
-laugh	'l#f
-laughing	'l#-fIN
-laughs	'l#fs
-learnt	'l3nt
-least	'list
-leave	'liv
-leaving	'li-vIN
-left	'lEft
-leg	'lEg
-leggies	'lE-gIz
-leggy	'lE-gI
-legs	'lEgz
-lemon	'lE-m@n
-lend	'lEnd
-less	'lEs
-let	'lEt
-let's	'lEts
-lets	'lEts
-lewi	'lu-I
-lewis	'lu-Is
-liar	'l2-@R
-licking	'lI-kIN
-lie	'l2
-life	'l2f
-lift	'lIft
-lifting	'lIf-tIN
-lifty	'lIf-tI
-light	'l2t
-lights	'l2ts
-like	'l2k
-liked	'l2kt
-likes	'l2ks
-line	'l2n
-lip	'lIp
-listen	'lI-sH
-little	'lI-tP
-lives	'lIvz
-locks	'lQks
-lonely	'l5n-lI
-long	'lQN
-longer	'lQN-g@R
-look	'lUk
-looked	'lUkt
-looking	'lU-kIN
-looks	'lUks
-lorry	'lQ-rI
-lost	'lQst
-lot	'lQt
-lot's	'lQts
-lots	'lQts
-lou-lou	'lu-lu
-love	'lVv
-lovely	'lVv-lI
-loves	'lVvz
-lu	'lu
-lucky	'lV-kI
-lulu	'lu-lu
-lulu's	'lu-luz
-lump	'lVmp
-lunch	'lVnJ
-lunchtime	'lVnJ-t2m
-lying	'l2-IN
-machine	m@-'Sin
-mad	'm{d
-madam	'm{-d@m
-madame	'm{-d@m
-made	'm1d
-make	'm1k
-makes	'm1ks
-making	'm1-kIN
-man	'm{n
-man-sized	'm{n-s2zd
-manage	'm{-nI_
-managed	'm{-nI_d
-managing	'm{-nI-_IN
-many	'mE-nI
-margarine	"m#-_@-'rin
-mark	'm#k
-mat	'm{t
-match	'm{J
-mates	'm1ts
-mats	'm{ts
-matter	'm{-t@R
-may	'm1
-maybe	'm1-bi
-me	'mi
-meal	'mil
-mean	'min
-means	'minz
-measy	'mi-zI
-medium	'mi-dj@m
-meringue	m@-'r{N
-mess	'mEs
-messed	'mEst
-messing	'mE-sIN
-messy	'mE-sI
-microphone	'm2-kr@-f5n
-middle	'mI-dP
-midwife	'mId-w2f
-might	'm2t
-mike	'm2k
-milk	'mIlk
-milky	'mIl-kI
-mind	'm2nd
-minute	'mI-nIt
-minutes	'mI-nIts
-miringue	m@-'r{N
-misery	'mI-z@-rI
-miss	'mIs
-missed	'mIst
-mix	'mIks
-mixing	'mIk-sIN
-mm	'm
-moan	'm5n
-moaning	'm5-nIN
-mobile	'm5-b2l
-mobile's	'm5-b2lz
-moment	'm5-m@nt
-monday	'mVn-dI
-money	'mV-nI
-monkey	'mVN-kI
-monkey's	'mVN-kIz
-mood	'mud
-moose	'mus
-mop	'mQp
-more	'm$R
-morning	'm$-nIN
-most	'm5st
-mother	'mV-D@R
-mouse	'm6s
-mouth	'm6T
-mouthful	'm6T-fUl
-move	'muv
-mr	'mI-st@R
-much	'mVJ
-mucky	'mV-kI
-mum	'mVm
-mum's	'mVmz
-mumma	'mV-m@
-mummy	'mV-mI
-mummy'll	'mV-mI-@l
-mummy's	'mV-mIz
-mums	'mVmz
-music	'mju-zIk
-must	'mVst
-my	'm2
-myron	'2-r@n
-myron's	'2-r@nz
-n't	Ht
-n'ta	H-t@
-nails	'n1lz
-nap	'n{p
-nappies	'n{-pIz
-napps	'n{ps
-nappy	'n{-pI
-nasty	'n#-stI
-natasha	n@-'t#-S@
-natasha's	n@-'t#-S@z
-natural	'n{-Jr@l
-naughty	'n$-tI
-near	'n7R
-nearly	'n7-lI
-neasy	'ni-zI
-neck	'nEk
-necklace	'nEk-lIs
-need	'nid
-needs	'nidz
-never	'nE-v@R
-nevermind	'nE-v@R-'m2nd
-new	'nju
-newspaper	'njus-"p1-p@R
-newspapers	'njus-"p1-p@z
-next	'nEkst
-nibble	'nI-bP
-nice	'n2s
-nicely	'n2s-lI
-nicer	'n2-s@R
-nicky	'nI-kI
-night	'n2t
-nightnight	'n2t-'n2t
-nine	'n2n
-no	'n5
-nobody's	'n5-b@-dIz
-noise	'n4z
-noises	'n4-zIz
-none	'nVn
-normally	'n$-m@-lI
-nose	'n5z
-nosey	'n5-zI
-nosh	'nQS
-not	'nQt
-nother	'nV-D@R
-nothing	'nV-TIN
-notice	'n5-tIs
-nottingham	'nQ-tIN-@m
-now	'n6
-nowadays	'n6-@-d1z
-nuddy	'nV-dI
-nuisance	'nju-sHs
-o'clock	@-'klQk
-occupied	'Q-kjU-p2d
-of	@v
-off	'Qf
-oggle	'5-gP
-oh	'5
-oh-oh	'5-'5
-oi	'4
-oil	'4l
-okay	"5-'k1
-old	'5ld
-on	'Qn
-once	'wVns
-one	'wVn
-one'll	'V-nP
-one's	'wVnz
-ones	'wVnz
-only	'5n-lI
-ooh	'u
-ooops	'ups
-oop	'up
-oops	'Ups
-oops-a-daisy	"Ups-@-'d1-zI
-open	'5-p@n
-or	@R
-orchestra	'$-kIs-tr@
-other	'V-D@R
-ought	'$t
-ounces	'6n-sIz
-our	'6-@R
-out	'6t
-outside	"6t-'s2d
-oven	'V-vH
-over	'5-v@R
-ow	'6
-own	'5n
-packet	'p{-kIt
-packing	'p{-kIN
-paddy	'p{-dI
-page	'p1_
-painful	'p1n-fUl
-pains	'p1nz
-pants	'p{nts
-paper	'p1-p@R
-papers	'p1-p@z
-pardon	'p#-dH
-parents	'p8-r@nts
-parrot	'p{-r@t
-parrot's	'p{-r@ts
-parrots	'p{-r@ts
-past	'p#st
-pastry	'p1s-trI
-pat	'p{t
-pat-a-cake	'p{-tI-'k1k
-patch	'p{J
-patting	'p{-tIN
-paws	'p$z
-peace	'pis
-peck	'pEk
-peculiar	pI-'kju-lj@R
-peed	'pid
-peeing	'pi-IN
-peek-a-boo	'pi-k@-'bu
-peek-boo	'pi-'bu
-penny	'pE-nI
-people	'pi-pP
-peoples	'pi-pPz
-perch	'p3J
-perform	p@-'f$m
-performing	p@-'f$-mIN
-perhaps	p@-'h{ps
-person	'p3-sH
-persuade	p@-'sw1d
-pet	'pEt
-petal	'pE-tP
-phew	'fju
-phone	'f5n
-pick	'pIk
-picked	'pIkt
-pictures	'pIk-J@z
-pie	'p2
-pin	'pIn
-pinch	'pInJ
-pinching	'pIn-JIN
-place	'pl1s
-plants	'pl#nts
-plastic	'pl{-stIk
-play	'pl1
-playing	'pl1-IN
-playmate	'pl1-m1t
-plays	'pl1z
-please	'pliz
-pleased	'plizd
-plenty	'plEn-tI
-plug	'plVg
-point	'p4nt
-poke	'p5k
-poley	'p5-lI
-polly	'pQ-lI
-polly'd	'pQ-lId
-polly's	'pQ-lIz
-pollyleemy	'pQ-lI-'li-mI
-pony	'p5-nI
-pooh	'phu
-poopsie	'pup-sI
-poor	'p$R
-pop	'pQp
-popeye	'pQp-2
-poppers	'pQ-p@z
-poppit	'pQ-pIt
-pops	'pQps
-potimus	'pQ-t@-m@s
-pots	'pQts
-potty	'pQ-tI
-pound	'p6nd
-pour	'p$R
-powder	'p6-d@R
-praise	'pr1z
-pram	'pr{m
-precious	'prE-S@s
-pregnant	'prEg-n@nt
-present	'prE-zHt
-presto	'prE-st5
-pretend	prI-'tEnd
-pretty	'prI-tI
-price	'pr2s
-privilege	'prI-vI-lI_
-problems	'prQ-bl@mz
-prop	'prQp
-proper	'prQ-p@R
-properly	'prQ-p@-lI
-prove	'pruv
-proving	'pru-vIN
-pudding	'pU-dIN
-pull	'pUl
-pulling	'pU-lIN
-punch	'pVnJ
-pup	'pVp
-puppet	'pV-pIt
-push	'pUS
-pushed	'pUSt
-puss	'pUs
-pussy	'pU-sI
-pussycat	'pU-sI-k{t
-put	'pUt
-putting	'pU-tIN
-quack	'kw{k
-quick	'kwIk
-quiet	'kw2-@t
-quite	'kw2t
-rabbit	'r{-bIt
-radio	'r1-dI-5
-rain	'r1n
-raining	'r1-nIN
-rarely	'r8-lI
-rascal	'r#s-k@l
-raspberry	'r#z-b@-rI
-rattle	'r{-tP
-rattles	'r{-tPz
-rattling	'r{-tP-IN
-reach	'riJ
-read	'rid
-reading	'ri-dIN
-ready	'rE-dI
-real	'r7l
-realized	'r7-l2zd
-really	'r7-lI
-recipe	'rE-sI-pI
-reckon	'rE-k@n
-record	'rE-k$d
-red	'rEd
-reflection	rI-'flEk-SH
-relax	rI-'l{ks
-remember	rI-'mEm-b@R
-rest	'rEst
-restless	'rEst-lIs
-revolting	rI-'v5l-tIN
-rewind	'rI-'w2nd
-ribbon	'rI-b@n
-rich	'rIJ
-rid	'rId
-right	'r2t
-ring	'rIN
-rip	'rIp
-ripped	'rIpt
-roley	'r5-lI
-roll	'r5l
-rolling	'r5-lIN
-romans	'r5-m@nz
-roof	'ruf
-room	'rum
-rotten	'rQ-tH
-rough	'rVf
-round	'r6nd
-rub	'rVb
-rubbers	'rV-b@z
-rubbing	'rV-bIN
-rude	'rud
-rug	'rVg
-rules	'rulz
-rumbling	'rVm-blIN
-runs	'rVnz
-rusk	'rVsk
-rusky	'rVs-kI
-sack	's{k
-sackcloth	's{k-klQT
-sad	's{d
-said	'sEd
-salad	's{-l@d
-same	's1m
-sang	's{N
-satisfy	's{-tIs-f2
-saturday	's{-t@-dI
-saucepan	's$s-p@n
-sausage	'sQ-sI_
-saw	's$
-say	's1
-saying	's1-IN
-says	's1z
-scalp	'sk{lp
-school	'skul
-scream	'skrim
-screaming	'skri-mIN
-screwing	'skru-IN
-scruffs	'skrVfs
-sea	'si
-seaside	'si-s2d
-seatbelt	'sit-'bElt
-second	'sE-k@nd
-seconds	'sE-k@ndz
-see	'si
-seef	'sif
-seeing	'si-IN
-seen	'sin
-self	'sElf
-sell	'sEl
-send	'sEnd
-sending	'sEn-dIN
-sent	'sEnt
-serious	's7-r7s
-servants	's3-v@nts
-sew	's5
-sewing	's5-IN
-sh	S
-shake	'S1k
-shakes	'S1ks
-shaking	'S1-kIN
-shall	'S{l
-shame	'S1m
-shan't	'S#nt
-sharp	'S#p
-shawl	'S$l
-she	'Si
-she'll	'Sil
-she's	'Siz
-sheets	'Sits
-shining	'S2-nIN
-shirt	'S3t
-shirts	'S3ts
-shoes	'Suz
-shoo	'Su
-shoot	'Sut
-shooting	'Su-tIN
-should	'SUd
-shoulder	'S5l-d@R
-shouldn't	'SU-dHt
-shout	'S6t
-shouter	'S6-t@R
-shouting	'S6-tIN
-show	'S5
-showing	'S5-IN
-shrew	'Sru
-shunting	'SVn-tIN
-shush	'SUS
-shut	'SVt
-shy	'S2
-sick	'sIk
-sickly	'sIk-lI
-sicky	'sI-kI
-side	's2d
-sides	's2dz
-sigh	's2
-silent	's2-l@nt
-silly	'sI-lI
-sing	'sIN
-sister	'sI-st@R
-sit	'sIt
-sitting	'sI-tIN
-sixteen	"sIks-'tin
-size	's2z
-sized	's2zd
-skirt	'sk3t
-sky	'sk2
-sleep	'slip
-sleeping	'sli-pIN
-sleepy	'sli-pI
-slept	'slEpt
-slid	'slId
-slide	'sl2d
-slightest	'sl2-tIst
-slip	'slIp
-slipping	'slI-pIN
-sloppy	'slQ-pI
-slow	'sl5
-smacking	'sm{-kIN
-smell	'smEl
-smelly	'smE-lI
-smile	'sm2l
-smiles	'sm2lz
-smiling	'sm2-lIN
-smurf	'sm3f
-snails	'sn1lz
-sneeze	'sniz
-sneezies	'sni-zI
-sneezing	'sni-zIN
-snooze	'snuz
-snoozing	'snu-zIN
-snorting	'sn$-tIN
-snorty	'sn$-tI
-so	's5
-so's	's5z
-soaked	's5kt
-soaking	's5-kIN
-soap	's5p
-soapy	's5-pI
-sober	's5-b@R
-sock	'sQk
-socks	'sQks
-soft	'sQft
-soiled	's4ld
-solids	'sQ-lIdz
-somat	's5-mQt
-somat's	's5-mQts
-some	s@m
-somebody	'sVm-b@-dI
-someone	'sVm-wVn
-something	'sVm-TIN
-somewhere	'sVm-w8R
-song	'sQN
-soon	'sun
-sore	's$R
-sorry	'sQ-rI
-soul	's5l
-sound	's6nd
-sounds	's6ndz
-spin	'spIn
-spinach	'spI-nI_
-spit	'spIt
-splash	'spl{S
-splashing	'spl{-SIN
-splish	'splIS
-splosh	'splQS
-sponge	'spVn_
-sponser	'spQn-s@R
-sports	'sp$ts
-spuddies	'spV-dIz
-spuds	'spVdz
-squeaky	'skwi-kI
-squeeze	'skwiz
-squiggly	'skwI-gP-I
-stairs	'st8z
-stand	'st{nd
-standing	'st{n-dIN
-stands	'st{ndz
-star	'st#R
-staring	'st8-rIN
-start	'st#t
-starts	'st#ts
-starved	'st#vd
-stay	'st1
-staying	'st1-IN
-steak	'st1k
-stern	'st3n
-steve	'stiv
-stew	'stju
-stick	'stIk
-sticking	'stI-kIN
-sticks	'stIks
-stiff	'stIf
-still	'stIl
-stockport	'stQk-p$t
-stomach	'stV-m@k
-stone	'st5n
-stop	'stQp
-stopped	'stQpt
-stories	'st$-rIz
-story	'st$-rI
-straight	'str1t
-straighten	'str1-tH
-strangle	'str{N-gP
-strawberry	'str$-b@-rI
-stretch	'strEJ
-stretching	'strE-JIN
-striped	'str2pt
-strong	'strQN
-struggle	'strV-gP
-struggling	'strV-glIN
-stuck	'stVk
-stuff	'stVf
-stupid	'stju-pId
-substantial	s@b-'st{n-SP
-such	'sVJ
-suck	'sVk
-sucked	'sVkt
-suckin'	'sV-kIn
-sucking	'sV-kIN
-suds	'sVdz
-suit	'sut
-sun	'sVn
-sunbathe	'sVn-b1D
-sunhat	'sVn-'h{t
-sunlight	'sVn-l2t
-sunshine	'sVn-S2n
-supper	'sV-p@R
-suppose	s@-'p5z
-supposed	s@-'p5zd
-suprise	s@-'pr2z
-sure	'S$R
-surely	'S$-lI
-surprise	s@-'pr2z
-swallow	'swQ-l5
-swan	'swQn
-swearing	'sw8-rIN
-sweater's	'swE-t@z
-sweatheart	'swit-h#t
-sweeper	'swi-p@R
-sweepers	'swi-p@z
-sweeps	'swips
-sweepy	'swi-pI
-sweet	'swit
-sweetheart	'swit-h#t
-sweetie	'swi-tI
-sweetpea	'swit-pI
-swim	'swIm
-swimming	'swI-mIN
-swing	'swIN
-swinging	'swI-NIN
-sylvester	sil-'vE-st@R
-system	'sI-st@m
-t'ave	't{v
-t-shirt	'ti-'S3t
-ta	't#
-ta-ta's	't#-'t#
-tail	't1l
-take	't1k
-taken	't1-k@n
-takes	't1ks
-taking	't1-kIN
-talc	't{lk
-tale	't1l
-tales	't1lz
-talk	't$k
-talking	't$-kIN
-tape	't1p
-taste	't1st
-tastes	't1sts
-tasting	't1-stIN
-tasty	't1-stI
-tea	'ti
-tea-time	'ti-t2m
-teach	'tiJ
-teaches	'ti-JIz
-teaching	'ti-JIN
-teapot	'ti-pQt
-tears	't7z
-teasing	'ti-zIN
-ted	'tEd
-teddy	'tE-dI
-teddy's	'tE-dIz
-teeth	'tiT
-teething	'ti-DIN
-teggypegs	'tE-dI-pEgz
-telephone	'tE-lI-f5n
-television	'tE-lI-"vI-ZH
-tell	'tEl
-telling	'tE-lIN
-telly	'tE-lI
-temper	'tEm-p@R
-tempered	'tEm-p@d
-ten	'tEn
-tennis	'tE-nIs
-terrible	'tE-r@-bP
-terribly	'tE-r@-blI
-than	D@n
-thank	'T{Nk
-that	'D{t
-that'll	'D{-tP
-that's	'D{ts
-thats	'D{ts
-the	D@
-their	'D8
-them	'DEm
-then	'DEn
-there	'D8R
-there's	'D8z
-theres	'D8z
-these	'Diz
-they	'D1
-they'd	'D1d
-they'll	'D1-@l
-they're	'D1-@R
-they've	'D1v
-thicker	'TI-k@R
-thing	'TIN
-things	'TINz
-think	'TINk
-thinking	'TIN-kIN
-thinks	'TINks
-third	'T3d
-thirsty	'T3-stI
-this	'DIs
-thomas	'tQ-m@s
-those	'D5z
-though	'D5
-thought	'T$t
-three	'Tri
-throat	'Tr5t
-through	'Tru
-throw	'Tr5
-throwing	'Tr5-IN
-thu	'TV
-thumb	'TVm
-thumbs	'TVmz
-thunder	'TVn-d@R
-tickle	'tI-kP
-tickles	'tI-kPz
-tickling	'tI-klIN
-ticklish	'tI-kP-IS
-tickly	'tIk-lI
-tickly-poo	'tIk-lI-'pu
-ticks	'tIks
-ticky	'tI-kI
-tiddley	'tId-lI
-tied	't2d
-tight	't2t
-till	'tIl
-time	't2m
-tin	'tIn
-tiny	't2-nI
-tired	't2-@d
-tiredy	't2-@-dI
-tis	'tIz
-tissue	'tI-Su
-tit	'tIt
-tits	'tIts
-to	t@
-today	t@-'d1
-toe	't5
-toenails	't5-n1lz
-toes	't5z
-together	t@-'gE-D@R
-told	't5ld
-tomorrow	t@-'mQ-r5
-tongue	'tVN
-tonight	t@-'n2t
-tons	'tVnz
-too	'tu
-took	'tUk
-toot	'tut
-tooth	'tuT
-toothie's	'tu-Tiz
-top	'tQp
-tossles	'tQ-s@lz
-touch	'tVJ
-touching	'tV-JIN
-tour	't9R
-towel	't6-@l
-toy	't4
-toys	't4z
-trai	'tr1
-treasure	'trE-Z@R
-treasuroooo	'trE-Z@-'ru
-treazh	'trEZ
-tree	'tri
-trim	'trIm
-trouble	'trV-bP
-true	'tru
-try	'tr2
-trying	'tr2-IN
-tub	'tVb
-tuba	'tju-b@
-tubby	'tV-bI
-tuesday	'tjuz-dI
-tum	'tVm
-tumma	'tV-m@
-tummy	'tV-mI
-tummy'll	'tV-mI-@l
-turn	't3n
-turned	't3nd
-turning	't3-nIN
-tv	'ti-'vi
-twelve	'twElv
-twice	'tw2s
-twist	'twIst
-two	'tu
-type	't2p
-typical	'tI-pI-kP
-ugh	'Vx
-uh	'V
-uh-hmm	'V-h@m
-uh-huh	V-'hV
-uncle	'VN-kP
-unconsolable	'In-k@n-'s5-l@-bP
-under	'Vn-d@R
-underneath	"Vn-d@-'niT
-underskirt	'Vn-d@R-'sk3t
-undress	"Vn-'drEs
-unhappy	Vn-'h{-pI
-unintelligible	'Vn-In-'tE-lI-_@-bP
-unsettled	"Vn-'sE-tPd
-until	@n-'tIl
-up	'Vp
-ups	'Vps
-ups-a-daisy	'Vps-@-'d1-zI
-upset	Vp-'sEt
-upside	'Vp-s2d
-upstairs	"Vp-'st8z
-us	'Vs
-use	'jus
-usually	'ju-Z@-lI
-very	'vE-rI
-vest	'vEst
-vesty	'vE-stI
-viking	'v2-kIN
-vikings	'v2-kINz
-violent	'v2-@-l@nt
-visitors	'vI-zI-t@z
-wages	'w1-_Iz
-wait	'w1t
-waiting	'w1-tIN
-wake	'w1k
-waking	'w1-kIN
-walk	'w$k
-walkies	'w$-kIz
-walks	'w$ks
-want	'wQnt
-wanted	'wQn-tId
-wanting	'wQn-tIN
-wants	'wQnts
-warm	'w$m
-warning	'w$-nIN
-was	w@z
-wash	'wQS
-washed	'wQSt
-washing	'wQ-SIN
-wasn't	'wQ-zHt
-watch	'wQJ
-watched	'wQJt
-watching	'wQ-JIN
-water	'w$-t@R
-wave	'w1v
-waving	'w1-vIN
-way	'w1
-ways	'w1z
-we	'wi
-we'd	'wid
-we'll	'wil
-we're	'w7R
-we've	'wiv
-wear	'w8R
-weather	'wE-D@R
-wednesday	'wEnz-dI
-wee	'wi
-weeks	'wiks
-weewee	'wi-wi
-weigh	'w1
-weighed	'w1d
-well	'wEl
-went	'wEnt
-were	'w3R
-weren't	'w3nt
-wet	'wEt
-what	'wQt
-what'll	'wQ-tP
-what're	'wQ-t@R
-what's	'wQts
-what've	'wQ-t@v
-when	'wEn
-where	'w8R
-where're	'w8-r@R
-where's	'w8z
-where've	'w8-r@v
-whether	'wE-D@R
-whey	'w1
-which	'wIJ
-while	'w2l
-whiner	'w2-n@R
-whites	'w2ts
-whiz	'wIz
-who	'hu
-who're	'huR
-who's	'huz
-whoa	'w5
-whole	'h5l
-whoo	'hu
-whoop	'wup
-whoops	'wups
-whoops-a-daisy	'wups-@-'d1-zI
-whoopsie	'wup-sI
-whos	'huz
-whose	'huz
-why	'w2
-whyn't	'w2nt
-wicked	'wI-kId
-widdle	'wI-dP
-wide	'w2d
-wiggler	'wI-gP-@R
-will	'wIl
-win	'wIn
-wind	'wInd
-wind's	'w2ndz
-windies	'wIn-dIz
-window	'wIn-d5
-windows	'wIn-d5z
-windy	'wIn-dI
-wings	'wINz
-winking	'wIN-kIN
-wipe	'w2p
-wiped	'w2pt
-wire	'w2-@R
-wise	'w2z
-wish	'wIS
-with	'wID
-without	wI-'D6t
-wobble	'wQ-bP
-woke	'w5k
-woken	'w5-k@n
-won't	'w5nt
-wonder	'wVn-d@R
-wondering	'wVn-d@-rIN
-work	'w3k
-working	'w3-kIN
-works	'w3ks
-world	'w3ld
-worried	'wV-rId
-worry	'wV-rI
-worst	'w3st
-worth	'w3T
-wotsiting	'wQt-sI-tIN
-would	'wUd
-wouldn't	'wU-dHt
-wrap	'r{p
-wrestle	'rE-sP
-wrestling	'rE-slIN
-wriggler	'rI-gP-@R
-wrong	'rQN
-ya	j@
-yawn	'j$n
-yeah	'j8
-years	'j7z
-yellow	'jE-l5
-yes	'jEs
-yesterday	'jE-st@-dI
-yet	'jEt
-you	'ju
-you'd	'jud
-you'll	'jul
-you're	'j9R
-you've	'juv
-young	'jVN
-your	'j$R
-yours	'j$z
-yourself	j$-'sElf
-yum	'jVm
-zee	'zi
-zunc	'zVNk
-mummie	'mV-mI
-mummie's	'mV-mIz
-mummie'll	'mV-mI-@l
-tellie	'tE-lI
-handie	'h{n-dI
-pottie	'pQ-tI
-bathie	'b#-TI
-ruskie	'rVs-kI
-headie	'hE-dI
-chinnie	'JI-nI
-hankie	'h{N-kI
-nappie	'n{-pI
-drinkie	'drIN-kI
-rolly	'r5-lI
-rollie	'r5-lI
-polly	'p5-lI
-pollie	'p5-lI
-deary	'd7-rI
-hiccough	'hI-kVp
-hiccoughs	'hI-kVps
-poo	'phu
-lew	'lu
-&hmm	'hF
-&er	'3
-&eh	'1
-&ha	'h#
-&mm	'm
-&ah	'#
-&uh	'V
-&hah	'h#
-whee	'wi
-treas	'trEZ
-hee	'hi
-oo	'u
+word	phon	N.syl	freq.orth
+'ave	'{v	1	0
+'ere	'7R	1	0
+a	@	1	1015
+aah	'#	1	0
+aah-ooh	'#-'u	2	0
+able	'1-bP	2	3
+about	@-'b6t	2	59
+abubbies	@-'bV-bIz	3	0
+accidents	'{k-sI-d@nts	3	1
+ache	'1k	1	3
+act	'{kt	1	1
+addict	'{-dIkt	2	1
+aeroplane	'8-r@-pl1n	3	4
+afraid	@-'fr1d	2	2
+after	'#f-t@R	2	17
+afternoon	'#f-t@-'nun	3	7
+again	@-'gEn	2	87
+ahead	@-'hEd	2	1
+ahhbo	'#-b5	2	0
+ahuh	@-'h5	2	0
+ain't	'1nt	1	2
+air	'8R	1	6
+alan	'{-lIn	2	2
+all	'$l	1	152
+allowed	@-'l6d	2	2
+alone	@-'l5n	2	1
+along	@-'lQN	2	1
+already	$l-'rE-dI	3	1
+alright	$l-'r2t	2	166
+also	'$l-s5	2	1
+always	'$l-w1z	2	5
+am	'{m	1	52
+an	@n	1	18
+and	@nd	1	335
+angry	'{N-grI	2	1
+annoy	@-'n4	2	1
+annoyed	@-'n4d	2	3
+annoying	@-'n4-IN	3	1
+another	@-'nV-D@R	3	27
+ant	'{nt	1	1
+anthony	'{n-T5-ni	3	1
+any	'E-nI	2	38
+anybody	'E-nI-"bQ-dI	4	2
+anymore	E-nI-'m$R	3	10
+anyone	'E-nI-wVn	3	1
+anything	'E-nI-TIN	3	14
+anywhere	'E-nI-w8R	3	2
+apple	'{-pP	2	5
+are	'#R	1	747
+aren't	'#nt	1	101
+arm	'#m	1	13
+armie	'#-mI	2	5
+armies	'#-mIz	2	2
+arms	'#mz	1	18
+around	@-'r6nd	2	10
+arrows	'{-r5z	2	1
+arsies	'#-siz	2	0
+as	@z	1	14
+ask	'#sk	1	1
+asking	'#-skIN	2	2
+asleep	@-'slip	2	4
+asleepies	@-'sli-piz	3	0
+astra	'{s-tr@	2	11
+astra's	'{s-tr@z	2	2
+at	@t	1	157
+atchoo	@-'Ju	2	0
+atishoo	@-'tI-Su	3	0
+attached	@-'t{Jt	2	1
+attention	@-'tEn-SH	3	8
+auntie	'#n-tI	2	2
+awake	@-'w1k	2	6
+away	@-'w1	2	30
+awful	'$-fUl	2	16
+awfully	'$-fU-lI	3	1
+awkward	'$-kw@d	2	1
+ayo	'#-j5	2	4
+babba	'b#-b#	2	0
+babe	'b1b	1	3
+babies	'b1-bIz	2	5
+baby	'b1-bI	2	29
+baby's	'b1-bIz	2	1
+babygro	'b1-bI-'gr5	3	1
+back	'b{k	1	68
+bacon	'b1-k@n	2	1
+bad	'b{d	1	27
+bald	'b$ld	1	2
+ball	'b$l	1	10
+ballet	'b{-l1	2	2
+balls	'b$lz	1	2
+banbury	'b{n-bV-rI	3	1
+bandy	'b{n-dI	2	2
+banged	'b{Nd	1	1
+bare	'b8R	1	8
+bash	'b{S	1	14
+bashing	'b{-SIN	2	1
+bath	'b#T	1	47
+bathing	'b1-DIN	2	1
+bathroom	'b#T-rUm	2	0
+baths	'b#Ts	1	3
+bathy	'b#-TI	2	0
+batman	'b{t-m@n	2	1
+baxter	'b{k-st@R	2	1
+be	'bi	1	112
+beady	'bi-dI	2	1
+bear	'b8R	1	14
+bear's	'b8z	1	2
+bears	'b8z	1	1
+beat	'bit	1	1
+beautiful	'bju-t@-fUl	3	30
+because	bI-'kQz	2	7
+bed	'bEd	1	8
+bedtime	'bEd-t2m	2	1
+beebo	'bi-b5	2	0
+been	'bin	1	43
+beep	'bip	1	1
+before	bI-'f$R	2	5
+begging	'bE-gIN	2	1
+being	'bi-IN	2	20
+believe	bI-'liv	2	1
+believed	bI-'livd	2	1
+bell	'bEl	1	4
+belly	'bE-lI	2	17
+belong	bI-'lQN	2	1
+below	bI-'l5	2	3
+bend	'bEnd	1	2
+beside	bI-'s2d	2	1
+best	'bEst	1	4
+bet	'bEt	1	7
+better	'bE-t@R	2	66
+bib	'bIb	1	16
+bicycle	'b2-sI-kP	3	1
+big	'bIg	1	189
+bigger	'bI-g@R	2	3
+biggest	'bI-gIst	2	2
+bin	'bIn	1	1
+bird	'b3d	1	1
+birds	'b3dz	1	1
+birthday	'b3T-d1	2	1
+biscuit's	'bI-skIts	2	1
+bit	'bIt	1	40
+bite	'b2t	1	3
+biting	'b2-tIN	2	2
+bits	'bIts	1	7
+bitter	'bI-t@R	2	1
+black	'bl{k	1	1
+blankets	'bl{N-kIts	2	1
+bless	'blEs	1	25
+blimey	'bl2-mI	2	0
+blinds	'bl2ndz	1	1
+blisters	'blI-st@z	2	1
+blooming	'blu-mIN	2	1
+blouse	'bl6z	1	3
+blow	'bl5	1	5
+blowing	'bl5-IN	2	16
+blue	'blu	1	1
+bo	'b5	1	0
+bo's	'b5z	1	0
+bo-byes	'b5-'b1z	2	0
+bobo's	'b5-b5z	2	2
+body	'bQ-dI	2	4
+boiling	'b4-lIN	2	2
+bone	'b5n	1	2
+bones	'b5nz	1	1
+bonnet	'bQ-nIt	2	1
+boo	'bu	1	115
+boon	'bun	1	1
+bop	'bQp	1	9
+bored	'b$d	1	3
+boring	'b$-rIN	2	5
+borks	'b$ks	1	1
+bot	'bQt	1	4
+bot's	'bQts	1	0
+both	'b5T	1	6
+bother	'bQ-D@R	2	1
+bothered	'bQ-D@d	2	2
+bottle	'bQ-tP	2	8
+bottom	'bQ-t@m	2	18
+bottoms	'bQ-t@mz	2	1
+botty	'bQ-tI	2	2
+bought	'b$t	1	1
+bounce	'b6ns	1	6
+bouncie	'b6n-sI	2	2
+bouncing	'b6n-sIN	2	4
+bowl	'b5l	1	1
+boy	'b4	1	67
+boys	'b4z	1	4
+breakable	'br1-k@-bP	3	2
+breakfast	'brEk-f@st	2	7
+breathing	'bri-DIN	2	1
+bright	'br2t	1	2
+bring	'brIN	1	3
+brings	'brINz	1	1
+brothers	'brV-D@z	2	1
+brought	'br$t	1	2
+brown	'br6n	1	2
+brush	'brVS	1	4
+brushed	'brVSt	1	1
+bubble	'bV-bP	2	1
+bubbles	'bV-bPz	2	25
+bubbly	'bV-blI	2	2
+bucket	'bV-kIt	2	1
+bucky	'bV-kI	2	2
+bum	'bVm	1	8
+bump	'bVmp	1	1
+bunny	'bV-nI	2	4
+burp	'b3p	1	10
+burping	'b3-pIN	2	1
+burps	'b3ps	1	7
+busby	'bVz-bI	2	1
+business	'bIz-nIs	2	1
+busy	'bI-zI	2	5
+but	'bVt	1	35
+butterfly	'bV-t@-fl2	3	4
+button	'bV-tH	2	1
+by	'b2	1	10
+bye	'b2	1	19
+bye-bye	"b2-'b2	2	0
+c'mon	k@-'mQn	2	0
+cable	'k1-bP	2	0
+cake	'k1k	1	2
+cakes	'k1ks	1	1
+called	'k$ld	1	1
+calm	'k#m	1	5
+came	'k1m	1	2
+camera	'k{-m@-r@	3	17
+can	k@n	1	187
+can't	'k#nt	1	98
+car	'k#R	1	1
+card	'k#d	1	1
+cardigan	'k#-dI-g@n	3	2
+care	'k8R	1	2
+careful	'k8-fUl	2	2
+cares	'k8z	1	1
+carpet	'k#-pIt	2	2
+carry	'k{-rI	2	6
+carrycot	'k{-rI-kQt	3	3
+carrying	'k{-rI-IN	3	1
+cartoon	k#-'tun	2	1
+castle	'k#-sP	2	2
+castor	'k#-st@R	2	1
+cat	'k{t	1	2
+cats	'k{ts	1	3
+caught	'k$t	1	3
+cause	k@z	1	6
+cement	sI-'mEnt	2	1
+center	'sEn-t@R	2	1
+certain	's3-tH	2	1
+cha	J@	1	5
+chair	'J8R	1	9
+chair's	'J8z	1	2
+chance	'J#ns	1	2
+change	'J1n_	1	29
+changed	'J1n_d	1	8
+changing	'J1n-_IN	2	3
+charles	'J#lz	1	10
+cheek	'Jik	1	2
+cheeks	'Jiks	1	2
+cheeky	'Ji-kI	2	42
+chew	'Ju	1	5
+chewin'	'Ju-In	2	0
+chewing	'Ju-IN	2	4
+chicken	'JI-kIn	2	7
+chilly	'JI-lI	2	1
+chime	'J2m	1	4
+chin	'JIn	1	9
+chinny	'JI-nI	2	0
+chinywinywiny	'JI-nI-'wI-nI	4	0
+choice	'J4s	1	1
+choke	'J5k	1	2
+choked	'J5kt	1	1
+chops	'JQps	1	1
+chou	'J6	1	31
+chris	'krIs	1	2
+christ	'kr2st	1	1
+christopher	'krIs-t@-f@r	3	42
+christopher's	'krIs-t@-f@rz	3	2
+chubby	'JV-bI	2	2
+chuckles	'JV-kPz	2	2
+chucky	'JV-kI	2	1
+church	'J3J	1	2
+clap	'kl{p	1	22
+clark	'kl#k	1	1
+clean	'klin	1	36
+clever	'klE-v@R	2	79
+clevey	'klE-vI	2	1
+climb	'kl2m	1	2
+climbing	'kl2-mIN	2	2
+clinic	'klI-nIk	2	1
+closed	'kl5zd	1	1
+clothes	'kl5Dz	1	8
+cob	'kQb	1	1
+coffee	'kQ-fI	2	1
+cold	'k5ld	1	15
+colors	'kV-l@z	2	6
+come	'kVm	1	585
+comes	'kVmz	1	13
+comin	'kV-mIn	2	0
+coming	'kV-mIN	2	40
+compete	k@m-'pit	2	1
+complain	k@m-'pl1n	2	3
+complaining	k@m-'pl1-nIN	3	1
+complains	k@m-'pl1nz	2	1
+complaints	k@m-'pl1nts	2	1
+concentrate	'kQn-s@n-tr1t	3	1
+concentrating	'kQn-s@n-tr1-tIN	4	1
+conditions	k@n-'dI-SHz	3	1
+conduct	k@n-'dVkt	2	1
+confused	k@n-'fjuzd	2	2
+contact	'kQn-t{kt	2	1
+contemplating	'kQn-tEm-pl1-tIN	4	3
+cooing	'ku-IN	2	1
+cook	'kUk	1	4
+cooking	'kU-kIN	2	1
+copying	'kQ-pI-IN	3	1
+cor	'k$R	1	0
+cos	k@z	1	0
+cosy	'k5-zI	2	10
+cot	'kQt	1	0
+cough	'kQf	1	5
+coughs	'kQfs	1	1
+could	k@d	1	13
+countrymen	'kVn-trI-m@n	3	1
+couple	'kV-pP	2	2
+course	'k$s	1	2
+cover	'kV-v@R	2	1
+covered	'kV-v@d	2	1
+coy	'k4	1	4
+cradle	'kr1-dP	2	3
+crawl	'kr$l	1	2
+crawling	'kr$-lIN	2	1
+cream	'krim	1	4
+creamy	'kri-mI	2	1
+crease	'kris	1	1
+cricket	'krI-kIt	2	1
+critical	'krI-tI-kP	3	1
+crocodile	'krQ-k@-d2l	3	4
+crocodile's	'krQ-k@-d2lz	3	2
+crocodiles	'krQ-k@-d2lz	3	1
+cross	'krQs	1	15
+crosspatch	'krQs-p{J	2	0
+cruel	'kr9l	1	4
+crumbs	'krVmz	1	1
+crunch	'krVnJ	1	3
+cry	'kr2	1	22
+crying	'kr2-IN	2	14
+cuddle	'kV-dP	2	11
+cup	'kVp	1	5
+cupboard	'kV-b@d	2	3
+cuppa	'kV-p@	2	1
+cups	'kVps	1	1
+cupsy	'kVp-sI	2	6
+curlies	'k3-lIz	2	3
+curls	'k3lz	1	3
+curly	'k3-lI	2	2
+curtains	'k3-tHz	2	1
+curtsy	'k3t-sI	2	2
+cut	'kVt	1	2
+cycling	's2-klIN	2	1
+d'you	'djU	1	0
+dad	'd{d	1	14
+dad's	'd{dz	1	1
+daddies	'd{-dIz	2	4
+daddy	'd{-dI	2	35
+daddy's	'd{-dIz	2	29
+daft	'd#ft	1	5
+daisy	'd1-zI	2	1
+dance	'd#ns	1	12
+dancer	'd#n-s@R	2	2
+dancing	'd#n-sIN	2	1
+danish	'd1-nIS	2	1
+dark	'd#k	1	1
+darling	'd#-lIN	2	123
+day	'd1	1	14
+dead	'dEd	1	2
+dear	'd7R	1	524
+dearie	'd7-rI	2	13
+dearier	'd7-r7R	2	0
+deborah	'dE-b@-r@	3	2
+debra	'dE-br@	2	1
+decided	dI-'s2-dId	3	2
+dee	'di	1	0
+deep	'dip	1	1
+definitely	'dE-fI-nIt-lI	4	1
+delitt	d@-'lIt	2	2
+deserves	dI-'z3vz	2	1
+desperately	'dE-sp@-r@t-lI	4	1
+dessert	dI-'z3t	2	3
+did	'dId	1	174
+didn't	'dI-dHt	2	35
+difference	'dI-fr@ns	2	1
+different	'dI-fr@nt	2	4
+difficult	'dI-fI-k@lt	3	1
+din	'dIn	1	2
+din-dins	'dIn-dInz	2	0
+dinner	'dI-n@R	2	19
+dinners	'dI-n@z	2	1
+dins	'dInz	1	2
+dirty	'd3-tI	2	28
+disagreement	"dIs-@-'gri-m@nt	4	1
+disco	'dI-sk5	2	0
+dishes	'dI-SIz	2	1
+distract	dI-'str{kt	2	1
+distracting	dI-'str{k-tIN	3	1
+disturbing	dI-'st3-bIN	3	1
+dived	'd2vd	1	1
+do	'du	1	424
+doctors	'dQk-t@z	2	2
+does	'dVz	1	47
+doesn't	'dV-zHt	2	28
+doin	'du-In	2	0
+doing	'du-IN	2	111
+dollop	'dQ-l@p	2	2
+dolly	'dQ-lI	2	8
+dolly's	'dQ-lIz	2	1
+don't	'd5nt	1	207
+donald	'dQn-n@ld	2	8
+done	'dVn	1	25
+door	'd$R	1	8
+door's	'd$z	1	1
+doors	'd$z	1	1
+doot	'dut	1	1
+down	'd6n	1	84
+downstairs	"d6n-'st8z	2	9
+draw	'dr$	1	1
+drawers	'dr$z	1	2
+dreadful	'drEd-fUl	2	5
+dream	'drim	1	1
+dreaming	'dri-mIN	2	2
+dress	'drEs	1	4
+dressed	'drEst	1	1
+dressing	'drE-sIN	2	1
+dribbles	'drI-bPz	2	5
+dribbling	'drI-blIN	2	4
+dribbly	'drI-blI	2	3
+dried	'dr2d	1	1
+drink	'drINk	1	6
+drinkee	'drIN-kI	2	0
+drinkies	'drIN-kIz	2	1
+drinking	'drIN-kIN	2	1
+drinks	'drINks	1	1
+drip	'drIp	1	1
+dripping	'drI-pIN	2	1
+drips	'drIps	1	1
+drop	'drQp	1	5
+dropped	'drQpt	1	7
+drunk	'drVNk	1	1
+drunkard	'drVN-k@d	2	2
+dry	'dr2	1	19
+dub	'dVb	1	8
+duck	'dVk	1	8
+ducks	'dVks	1	2
+duh	'dV	1	0
+dummy	'dV-mI	2	3
+dumpling	'dVm-plIN	2	1
+during	'dj9-rIN	2	1
+dusty	'dV-stI	2	0
+dying	'd2-IN	2	4
+each	'iJ	1	1
+ear	'7R	1	1
+earlier	'3-l7R	2	3
+early	'3-lI	2	1
+ears	'7z	1	5
+easier	'i-z7R	2	1
+easy	'i-zI	2	2
+eat	'it	1	27
+eaten	'i-tH	2	2
+eating	'i-tIN	2	10
+edge	'E_	1	3
+egg	'Eg	1	1
+eh	'1	1	0
+either	'2-D@R	2	5
+elaine	i-'l1n	2	2
+electrocute	I-'lEk-tr@-kjut	4	1
+else	'Els	1	12
+end	'End	1	7
+energy	'E-n@-_I	3	1
+enjoy	In-'_4	2	3
+enjoyed	In-'_4d	2	2
+enjoying	In-'_4-IN	3	3
+enough	I-'nVf	2	15
+er	'3	1	0
+especially	I-'spE-S@-lI	4	1
+even	'i-vH	2	5
+evening	'i-vH-IN	3	1
+ever	'E-v@R	2	6
+every	'E-vrI	2	4
+everybody	'E-vrI-"bQ-dI	4	1
+everything	'E-vrI-TIN	3	5
+everywhere	'E-vrI-w8R	3	1
+except	Ik-'sEpt	2	1
+excited	Ik-'s2-tId	3	9
+exciting	Ik-'s2-tIN	3	1
+excuse	Ik-'skjuz	2	8
+exercises	'Ek-s@-s2-zIz	4	3
+expect	Ik-'spEkt	2	2
+extras	'Ek-str@z	2	2
+eye	'2	1	2
+eyelashes	'2-l{-SIz	3	2
+eyes	'2z	1	4
+face	'f1s	1	55
+faced	'f1st	1	1
+faces	'f1-sIz	2	2
+facies	'f1-sIz	2	1
+fair	'f8R	1	2
+faithful	'f1T-fUl	2	1
+fall	'f$l	1	2
+fallen	'f$-l@n	2	1
+falling	'f$-lIN	2	3
+fancy	'f{n-sI	2	3
+far	'f#R	1	1
+fascinated	'f{-sI-n1-tId	4	2
+fast	'f#st	1	5
+fat	'f{t	1	35
+fatty	'f{-tI	2	16
+fault	'f$lt	1	1
+favorite	'f1-v@-rIt	3	2
+feather	'fE-D@R	2	1
+fed	'fEd	1	13
+feed	'fid	1	10
+feeding	'fi-dIN	2	1
+feel	'fil	1	19
+feeling	'fi-lIN	2	1
+feels	'filz	1	1
+feet	'fit	1	35
+felix	'fi-lIks	2	1
+fever	'fi-v@R	2	1
+fierce	'f7s	1	1
+fight	'f2t	1	3
+fighting	'f2-tIN	2	2
+fill	'fIl	1	1
+filled	'fIld	1	1
+filling	'fI-lIN	2	6
+filling's	'fI-lINz	2	1
+film	'fIlm	1	2
+films	'fIlmz	1	1
+filthy	'fIl-TI	2	1
+find	'f2nd	1	8
+fine	'f2n	1	3
+finger	'fIN-g@R	2	9
+fingers	'fIN-g@z	2	23
+finish	'fI-nIS	2	3
+finished	'fI-nISt	2	12
+finishes	'fI-nI-SIz	3	1
+fire	'f2-@R	2	2
+first	'f3st	1	16
+fishes	'fI-SIz	2	1
+fisties	'fI-stIz	2	2
+fit	'fIt	1	2
+fits	'fIts	1	1
+five	'f2v	1	3
+flavor	'fl1-v@R	2	3
+floating	'fl5-tIN	2	2
+floor	'fl$R	1	8
+floppy	'flQ-pI	2	2
+flour	'fl6-@R	2	4
+flowers	'fl6-@z	2	3
+flown	'fl5n	1	1
+fluffy	'flV-fI	2	1
+fly	'fl2	1	1
+flying	'fl2-IN	2	2
+fold	'f5ld	1	1
+food	'fud	1	10
+foot	'fUt	1	11
+football	'fUt-b$l	2	1
+for	f@	1	197
+forget	f@-'gEt	2	6
+forgiven	f@-'gI-vH	3	1
+forthcoming	"f$T-'kV-mIN	3	1
+fourteen	"f$-'tin	2	1
+fresh	'frES	1	4
+friend	'frEnd	1	8
+friends	'frEndz	1	1
+fright	'fr2t	1	2
+frighten	'fr2-tH	2	4
+froggy	'frQ-gI	2	1
+from	frQm	1	18
+front	'frVnt	1	1
+frothing	'frQ-TIN	2	1
+frustrating	frV-'str1-tIN	3	1
+full	'fUl	1	11
+fun	'fVn	1	5
+funnier	'fV-n7R	2	1
+funny	'fV-nI	2	62
+furry	'f3-rI	2	1
+further	'f3-D@R	2	4
+fussing	'fV-sIN	2	1
+fuzzy	'fV-zI	2	2
+gained	'g1nd	1	3
+gam	'g{m	1	0
+game	'g1m	1	2
+games	'g1mz	1	3
+garden	'g#-dH	2	5
+gargler	'g#-gl@R	2	1
+gary	'd8-rI	2	0
+gave	'g1v	1	3
+gel	'_El	1	1
+gentle	'_En-tP	2	1
+get	'gEt	1	96
+gets	'gEts	1	1
+gettin	'gE-tIn	2	0
+getting	'gE-tIN	2	30
+giddy	'gI-dI	2	3
+gillian	'_I-lj@n	2	67
+gillian's	'_I-lj@nz	2	4
+girl	'g3l	1	226
+girl's	'g3lz	1	3
+girlie	'g3-lI	2	49
+girls	'g3lz	1	3
+give	'gIv	1	55
+given	'gI-vH	2	4
+giving	'gI-vIN	2	9
+glad	'gl{d	1	2
+glass	'gl#s	1	1
+glimpse	'glImps	1	1
+globe	'gl5b	1	3
+glove	'glVv	1	1
+gluey	'glu-I	2	1
+go	'g5	1	262
+gobble	'gQ-bP	2	3
+god	'gQd	1	4
+goes	'g5z	1	9
+goin	'g5-In	2	0
+going	'g5-IN	2	331
+golden	'g5l-d@n	2	1
+gone	'gQn	1	69
+gonna	'gQ-n@	2	25
+good	'gUd	1	215
+goodbye	"gUd-'b2	2	2
+goodies	'gU-dIz	2	1
+goodness	'gUd-nIs	2	12
+goose	'gus	1	1
+gorgeous	'g$-_@s	2	4
+gosh	'gQS	1	1
+got	'gQt	1	219
+gotta	'gQ-t@	2	1
+gou	'g6	1	0
+gown	'g6n	1	2
+grab	'gr{b	1	9
+gracious	'gr1-S@s	2	2
+granddad	'gr{n-d{d	2	4
+grandma	'gr{n-m#	2	2
+grease	'griz	1	1
+great	'gr1t	1	5
+greedy	'gri-dI	2	5
+grip	'grIp	1	1
+grotty	'grQ-tI	2	1
+grow	'gr5	1	1
+grown	'gr5n	1	1
+growth	'gr5T	1	1
+grub	'grVb	1	2
+grubby	'grV-bI	2	1
+grumpy	'grVm-pI	2	3
+grunt	'grVnt	1	1
+grunting	'grVn-tIN	2	4
+gums	'gVmz	1	1
+guts	'gVts	1	4
+guy	'g2	1	1
+ha	'h#	1	0
+had	'h{d	1	55
+hadn't	'h{-dHt	2	3
+hair	'h8R	1	27
+half	'h#f	1	12
+hand	'h{nd	1	26
+handies	'h{n-dIz	2	5
+hands	'h{ndz	1	39
+handy	'h{n-dI	2	1
+hang	'h{N	1	4
+hanging	'h{-NIN	2	1
+hanky	'h{N-kI	2	0
+hannah	'h{-n@	2	165
+hannah's	'h{-n@z	2	10
+happen	'h{-p@n	2	2
+happened	'h{-p@nd	2	9
+happening	'h{-p@-nIN	3	3
+happy	'h{-pI	2	28
+hard	'h#d	1	17
+has	'h{z	1	32
+hasn't	'h{-zHt	2	13
+hassles	'h{-sPz	2	1
+hat	'h{t	1	1
+have	'h{v	1	412
+haven't	'h{-vHt	2	53
+having	'h{-vIN	2	37
+hay	'h1	1	1
+he	'hi	1	131
+he'll	'hil	1	3
+he's	'hiz	1	46
+head	'hEd	1	26
+heads	'hEdz	1	2
+heady	'hE-dI	2	0
+health	'hElT	1	1
+hear	'h7R	1	16
+heavens	'hE-vHz	2	2
+heavily	'hE-vI-lI	3	1
+heavy	'hE-vI	2	3
+heehee	'hi-'hi	2	4
+hello	h@-'l5	2	529
+help	'hElp	1	6
+helping	'hEl-pIN	2	2
+helps	'hElps	1	1
+her	h3R	1	39
+here	'h7R	1	186
+here's	'h7z	1	9
+hey	'h1	1	739
+hey-ya	'h1-'jQ	2	0
+hi	'h2	1	4
+hiccup	'hI-kVp	2	0
+hiccups	'hI-kVps	2	10
+hick	'hIk	1	1
+hickies	'hI-kIz	2	4
+hidden	'hI-dH	2	1
+hide	'h2d	1	3
+hiding	'h2-dIN	2	10
+high	'h2	1	2
+hilda	'hIl-d@	2	2
+him	hIm	1	82
+his	hIz	1	14
+hit	'hIt	1	7
+hmm	'hF	1	0
+hmm-hmm	'hF-'hF	2	0
+ho	'h5	1	30
+hoi	'b4	1	0
+hold	'h5ld	1	80
+holding	'h5l-dIN	2	15
+hole	'h5l	1	1
+holes	'h5lz	1	1
+home	'h5m	1	8
+honest	'Q-nIst	2	1
+hop	'hQp	1	8
+hope	'h5p	1	3
+hopeless	'h5p-lIs	2	1
+hoping	'h5-pIN	2	1
+horny	'h$-nI	2	2
+horrible	'hQ-r@-bP	3	1
+horror	'hQ-r@R	2	1
+hot	'hQt	1	8
+hour	'6-@R	2	2
+house	'h6s	1	8
+how	'h6	1	27
+how'd	'h6d	1	1
+how's	'h6z	1	3
+huge	'hju_	1	1
+huh	'hV	1	17
+hungry	'hVN-grI	2	27
+hurry	'hV-rI	2	5
+hurt	'h3t	1	7
+i	'2	1	345
+i'd	'2d	1	2
+i'll	'2l	1	18
+i'm	'2m	1	52
+i've	'2v	1	19
+ideas	2-'d7z	2	1
+if	If	1	38
+in	'In	1	236
+in't	'Int	1	0
+indian	'In-dj@n	2	1
+inside	"In-'s2d	2	4
+inspect	In-'spEkt	2	1
+instead	In-'stEd	2	0
+insult	In-'sVlt	2	2
+interest	'In-tr@st	2	5
+interested	'In-tr@-stId	3	21
+interesting	'In-tr@-stIN	3	6
+into	'In-tu	2	8
+iray	'2-r1	2	1
+iron	'2-@n	2	3
+ironing	'2-@-nIN	3	8
+is	'Iz	1	576
+isn't	'I-zHt	2	129
+it	It	1	983
+it'll	'I-tP	2	6
+it's	'Its	1	213
+its	'Its	1	8
+jacket	'_{-kIt	2	1
+jamas	'_#-m@z	2	0
+jiggle	'_I-gP	2	1
+jiggled	'_I-gPd	2	3
+job	'_Qb	1	2
+johnson's	'_Qn-sHz	2	2
+join	'_4n	1	1
+joke	'_5k	1	1
+joseph	'_5-sEf	2	5
+joseph's	'_5-sEfs	2	2
+journey	'_3-nI	2	1
+juice	'_us	1	17
+julie	'_u-lI	2	3
+jump	'_Vmp	1	2
+jumper	'_Vm-p@R	2	4
+jumping	'_Vm-pIN	2	1
+just	'_Vst	1	108
+jutting	'_V-tIN	2	1
+keen	'kin	1	3
+keep	'kip	1	11
+keeping	'ki-pIN	2	2
+keeps	'kips	1	1
+keith	'kiT	1	31
+kettle	'kE-tP	2	2
+kick	'kIk	1	67
+kicked	'kIkt	1	2
+kickello	kI-'kE-l5	3	2
+kicking	'kI-kIN	2	21
+kidding	'kI-dIN	2	2
+kidney	'kId-nI	2	1
+killing	'kI-lIN	2	1
+kind	'k2nd	1	2
+king	'kIN	1	2
+kiss	'kIs	1	24
+kitchen	'kI-JIn	2	1
+kittens	'kI-tHz	2	2
+kitty	'kI-tI	2	1
+knacks	'n{ks	1	0
+knee	'ni	1	3
+knees	'niz	1	4
+knew	'nju	1	4
+knick	'nIk	1	0
+knicker	'nI-k@	2	0
+knock	'nQk	1	2
+knockers	'nQ-k@z	2	2
+knot	'nQt	1	1
+know	'n5	1	124
+knows	'n5z	1	3
+knuckles	'nV-kPz	2	2
+lad	'l{d	1	10
+lady	'l1-dI	2	1
+lambchahhh	'l{m-JQ	2	1
+lambchop	'l{m-JQp	2	25
+lambchop's	'l{m-JQps	2	2
+lambs	'l{mz	1	2
+lard	'l#d	1	3
+last	'l#st	1	7
+late	'l1t	1	3
+laugh	'l#f	1	23
+laughing	'l#-fIN	2	7
+laughs	'l#fs	1	3
+learnt	'l3nt	1	1
+least	'list	1	2
+leave	'liv	1	8
+leaving	'li-vIN	2	1
+left	'lEft	1	10
+leg	'lEg	1	4
+leggies	'lE-gIz	2	6
+leggy	'lE-gI	2	1
+legs	'lEgz	1	23
+lemon	'lE-m@n	2	6
+lend	'lEnd	1	1
+less	'lEs	1	1
+let	'lEt	1	20
+let's	'lEts	1	71
+lets	'lEts	1	2
+lewi	'lu-I	2	1
+lewis	'lu-Is	2	17
+liar	'l2-@R	2	1
+licking	'lI-kIN	2	1
+lie	'l2	1	11
+life	'l2f	1	4
+lift	'lIft	1	6
+lifting	'lIf-tIN	2	1
+lifty	'lIf-tI	2	1
+light	'l2t	1	4
+lights	'l2ts	1	3
+like	'l2k	1	199
+liked	'l2kt	1	1
+likes	'l2ks	1	2
+line	'l2n	1	1
+lip	'lIp	1	3
+listen	'lI-sH	2	2
+little	'lI-tP	2	173
+lives	'lIvz	1	1
+locks	'lQks	1	1
+lonely	'l5n-lI	2	1
+long	'lQN	1	21
+longer	'lQN-g@R	2	3
+look	'lUk	1	186
+looked	'lUkt	1	1
+looking	'lU-kIN	2	56
+looks	'lUks	1	10
+lorry	'lQ-rI	2	1
+lost	'lQst	1	9
+lot	'lQt	1	7
+lot's	'lQts	1	1
+lots	'lQts	1	0
+lou-lou	'lu-lu	2	0
+love	'lVv	1	8
+lovely	'lVv-lI	2	36
+loves	'lVvz	1	1
+lu	'lu	1	0
+lucky	'lV-kI	2	4
+lulu	'lu-lu	2	16
+lulu's	'lu-luz	2	1
+lump	'lVmp	1	2
+lunch	'lVnJ	1	13
+lunchtime	'lVnJ-t2m	2	1
+lying	'l2-IN	2	6
+machine	m@-'Sin	2	1
+mad	'm{d	1	2
+madam	'm{-d@m	2	3
+madame	'm{-d@m	2	5
+made	'm1d	1	6
+make	'm1k	1	61
+makes	'm1ks	1	18
+making	'm1-kIN	2	17
+man	'm{n	1	12
+man-sized	'm{n-s2zd	2	0
+manage	'm{-nI_	2	7
+managed	'm{-nI_d	2	1
+managing	'm{-nI-_IN	3	1
+many	'mE-nI	2	1
+margarine	"m#-_@-'rin	3	1
+mark	'm#k	1	2
+mat	'm{t	1	6
+match	'm{J	1	1
+mates	'm1ts	1	1
+mats	'm{ts	1	1
+matter	'm{-t@R	2	71
+may	'm1	1	3
+maybe	'm1-bi	2	2
+me	'mi	1	227
+meal	'mil	1	1
+mean	'min	1	5
+means	'minz	1	3
+measy	'mi-zI	2	0
+medium	'mi-dj@m	2	1
+meringue	m@-'r{N	2	9
+mess	'mEs	1	7
+messed	'mEst	1	2
+messing	'mE-sIN	2	2
+messy	'mE-sI	2	2
+microphone	'm2-kr@-f5n	3	2
+middle	'mI-dP	2	1
+midwife	'mId-w2f	2	2
+might	'm2t	1	4
+mike	'm2k	1	1
+milk	'mIlk	1	20
+milky	'mIl-kI	2	3
+mind	'm2nd	1	8
+minute	'mI-nIt	2	34
+minutes	'mI-nIts	2	10
+miringue	m@-'r{N	2	0
+misery	'mI-z@-rI	3	4
+miss	'mIs	1	11
+missed	'mIst	1	1
+mix	'mIks	1	3
+mixing	'mIk-sIN	2	1
+mm	'm	1	0
+moan	'm5n	1	1
+moaning	'm5-nIN	2	1
+mobile	'm5-b2l	2	6
+mobile's	'm5-b2lz	2	1
+moment	'm5-m@nt	2	5
+monday	'mVn-dI	2	1
+money	'mV-nI	2	0
+monkey	'mVN-kI	2	24
+monkey's	'mVN-kIz	2	2
+mood	'mud	1	1
+moose	'mus	1	2
+mop	'mQp	1	2
+more	'm$R	1	67
+morning	'm$-nIN	2	16
+most	'm5st	1	1
+mother	'mV-D@R	2	2
+mouse	'm6s	1	1
+mouth	'm6T	1	29
+mouthful	'm6T-fUl	2	1
+move	'muv	1	10
+mr	'mI-st@R	2	4
+much	'mVJ	1	13
+mucky	'mV-kI	2	5
+mum	'mVm	1	71
+mum's	'mVmz	1	8
+mumma	'mV-m@	2	2
+mummy	'mV-mI	2	67
+mummy'll	'mV-mI-@l	3	1
+mummy's	'mV-mIz	2	40
+mums	'mVmz	1	1
+music	'mju-zIk	2	2
+must	'mVst	1	10
+my	'm2	1	53
+myron	'2-r@n	2	15
+myron's	'2-r@nz	2	4
+n't	Ht	1	1
+n'ta	H-t@	2	1
+nails	'n1lz	1	3
+nap	'n{p	1	5
+nappies	'n{-pIz	2	2
+napps	'n{ps	1	0
+nappy	'n{-pI	2	0
+nasty	'n#-stI	2	14
+natasha	n@-'t#-S@	3	1
+natasha's	n@-'t#-S@z	3	1
+natural	'n{-Jr@l	2	1
+naughty	'n$-tI	2	9
+near	'n7R	1	1
+nearly	'n7-lI	2	36
+neasy	'ni-zI	2	1
+neck	'nEk	1	4
+necklace	'nEk-lIs	2	1
+need	'nid	1	22
+needs	'nidz	1	2
+never	'nE-v@R	2	10
+nevermind	'nE-v@R-'m2nd	3	0
+new	'nju	1	8
+newspaper	'njus-"p1-p@R	3	3
+newspapers	'njus-"p1-p@z	3	2
+next	'nEkst	1	8
+nibble	'nI-bP	2	4
+nice	'n2s	1	186
+nicely	'n2s-lI	2	4
+nicer	'n2-s@R	2	1
+nicky	'nI-kI	2	1
+night	'n2t	1	6
+nightnight	'n2t-'n2t	2	0
+nine	'n2n	1	2
+no	'n5	1	353
+nobody's	'n5-b@-dIz	3	1
+noise	'n4z	1	62
+noises	'n4-zIz	2	5
+none	'nVn	1	4
+normally	'n$-m@-lI	3	1
+nose	'n5z	1	20
+nosey	'n5-zI	2	0
+nosh	'nQS	1	4
+not	'nQt	1	200
+nother	'nV-D@R	2	0
+nothing	'nV-TIN	2	7
+notice	'n5-tIs	2	3
+nottingham	'nQ-tIN-@m	3	0
+now	'n6	1	183
+nowadays	'n6-@-d1z	3	1
+nuddy	'nV-dI	2	3
+nuisance	'nju-sHs	2	1
+o'clock	@-'klQk	2	1
+occupied	'Q-kjU-p2d	3	1
+of	@v	1	82
+off	'Qf	1	54
+oggle	'5-gP	2	2
+oh	'5	1	1084
+oh-oh	'5-'5	2	0
+oi	'4	1	0
+oil	'4l	1	1
+okay	"5-'k1	2	12
+old	'5ld	1	18
+on	'Qn	1	738
+once	'wVns	1	2
+one	'wVn	1	102
+one'll	'V-nP	2	1
+one's	'wVnz	1	2
+ones	'wVnz	1	2
+only	'5n-lI	2	23
+ooh	'u	1	0
+ooops	'ups	1	0
+oop	'up	1	17
+oops	'Ups	1	13
+oops-a-daisy	"Ups-@-'d1-zI	4	0
+open	'5-p@n	2	7
+or	@R	1	17
+orchestra	'$-kIs-tr@	3	1
+other	'V-D@R	2	14
+ought	'$t	1	0
+ounces	'6n-sIz	2	1
+our	'6-@R	2	4
+out	'6t	1	93
+outside	"6t-'s2d	2	12
+oven	'V-vH	2	3
+over	'5-v@R	2	76
+ow	'6	1	4
+own	'5n	1	5
+packet	'p{-kIt	2	1
+packing	'p{-kIN	2	1
+paddy	'p{-dI	2	9
+page	'p1_	1	2
+painful	'p1n-fUl	2	2
+pains	'p1nz	1	4
+pants	'p{nts	1	4
+paper	'p1-p@R	2	1
+papers	'p1-p@z	2	1
+pardon	'p#-dH	2	11
+parents	'p8-r@nts	2	1
+parrot	'p{-r@t	2	13
+parrot's	'p{-r@ts	2	1
+parrots	'p{-r@ts	2	1
+past	'p#st	1	2
+pastry	'p1s-trI	2	8
+pat	'p{t	1	1
+pat-a-cake	'p{-tI-'k1k	3	0
+patch	'p{J	1	14
+patting	'p{-tIN	2	2
+paws	'p$z	1	3
+peace	'pis	1	2
+peck	'pEk	1	1
+peculiar	pI-'kju-lj@R	3	1
+peed	'pid	1	1
+peeing	'pi-IN	2	1
+peek-a-boo	'pi-k@-'bu	3	0
+peek-boo	'pi-'bu	2	0
+penny	'pE-nI	2	4
+people	'pi-pP	2	5
+peoples	'pi-pPz	2	1
+perch	'p3J	1	2
+perform	p@-'f$m	2	1
+performing	p@-'f$-mIN	3	1
+perhaps	p@-'h{ps	2	1
+person	'p3-sH	2	1
+persuade	p@-'sw1d	2	1
+pet	'pEt	1	32
+petal	'pE-tP	2	6
+phew	'fju	1	1
+phone	'f5n	1	2
+pick	'pIk	1	2
+picked	'pIkt	1	1
+pictures	'pIk-J@z	2	2
+pie	'p2	1	22
+pin	'pIn	1	1
+pinch	'pInJ	1	1
+pinching	'pIn-JIN	2	2
+place	'pl1s	1	1
+plants	'pl#nts	1	1
+plastic	'pl{-stIk	2	1
+play	'pl1	1	65
+playing	'pl1-IN	2	4
+playmate	'pl1-m1t	2	0
+plays	'pl1z	1	1
+please	'pliz	1	9
+pleased	'plizd	1	1
+plenty	'plEn-tI	2	4
+plug	'plVg	1	2
+point	'p4nt	1	3
+poke	'p5k	1	3
+poley	'p5-lI	2	0
+polly	'pQ-lI	2	3
+polly'd	'pQ-lId	2	1
+polly's	'pQ-lIz	2	5
+pollyleemy	'pQ-lI-'li-mI	4	1
+pony	'p5-nI	2	2
+pooh	'phu	1	5
+poopsie	'pup-sI	2	1
+poor	'p$R	1	12
+pop	'pQp	1	6
+popeye	'pQp-2	2	1
+poppers	'pQ-p@z	2	1
+poppit	'pQ-pIt	2	1
+pops	'pQps	1	4
+potimus	'pQ-t@-m@s	3	0
+pots	'pQts	1	1
+potty	'pQ-tI	2	0
+pound	'p6nd	1	2
+pour	'p$R	1	3
+powder	'p6-d@R	2	2
+praise	'pr1z	1	1
+pram	'pr{m	1	16
+precious	'prE-S@s	2	7
+pregnant	'prEg-n@nt	2	1
+present	'prE-zHt	2	1
+presto	'prE-st5	2	1
+pretend	prI-'tEnd	2	2
+pretty	'prI-tI	2	21
+price	'pr2s	1	1
+privilege	'prI-vI-lI_	3	2
+problems	'prQ-bl@mz	2	1
+prop	'prQp	1	1
+proper	'prQ-p@R	2	2
+properly	'prQ-p@-lI	3	2
+prove	'pruv	1	2
+proving	'pru-vIN	2	1
+pudding	'pU-dIN	2	6
+pull	'pUl	1	11
+pulling	'pU-lIN	2	7
+punch	'pVnJ	1	8
+pup	'pVp	1	2
+puppet	'pV-pIt	2	2
+push	'pUS	1	16
+pushed	'pUSt	1	1
+puss	'pUs	1	1
+pussy	'pU-sI	2	2
+pussycat	'pU-sI-k{t	3	4
+put	'pUt	1	85
+putting	'pU-tIN	2	7
+quack	'kw{k	1	29
+quick	'kwIk	1	4
+quiet	'kw2-@t	2	5
+quite	'kw2t	1	12
+rabbit	'r{-bIt	2	3
+radio	'r1-dI-5	3	1
+rain	'r1n	1	5
+raining	'r1-nIN	2	1
+rarely	'r8-lI	2	1
+rascal	'r#s-k@l	2	5
+raspberry	'r#z-b@-rI	3	3
+rattle	'r{-tP	2	13
+rattles	'r{-tPz	2	1
+rattling	'r{-tP-IN	3	3
+reach	'riJ	1	5
+read	'rid	1	3
+reading	'ri-dIN	2	1
+ready	'rE-dI	2	29
+real	'r7l	1	2
+realized	'r7-l2zd	2	1
+really	'r7-lI	2	35
+recipe	'rE-sI-pI	3	4
+reckon	'rE-k@n	2	2
+record	'rE-k$d	2	1
+red	'rEd	1	5
+reflection	rI-'flEk-SH	3	0
+relax	rI-'l{ks	2	4
+remember	rI-'mEm-b@R	3	1
+rest	'rEst	1	5
+restless	'rEst-lIs	2	1
+revolting	rI-'v5l-tIN	3	1
+rewind	'rI-'w2nd	2	1
+ribbon	'rI-b@n	2	1
+rich	'rIJ	1	1
+rid	'rId	1	3
+right	'r2t	1	52
+ring	'rIN	1	2
+rip	'rIp	1	1
+ripped	'rIpt	1	1
+roley	'r5-lI	2	0
+roll	'r5l	1	16
+rolling	'r5-lIN	2	1
+romans	'r5-m@nz	2	1
+roof	'ruf	1	1
+room	'rum	1	10
+rotten	'rQ-tH	2	1
+rough	'rVf	1	3
+round	'r6nd	1	30
+rub	'rVb	1	9
+rubbers	'rV-b@z	2	3
+rubbing	'rV-bIN	2	1
+rude	'rud	1	2
+rug	'rVg	1	1
+rules	'rulz	1	1
+rumbling	'rVm-blIN	2	1
+runs	'rVnz	1	0
+rusk	'rVsk	1	19
+rusky	'rVs-kI	2	0
+sack	's{k	1	5
+sackcloth	's{k-klQT	2	0
+sad	's{d	1	2
+said	'sEd	1	5
+salad	's{-l@d	2	1
+same	's1m	1	1
+sang	's{N	1	1
+satisfy	's{-tIs-f2	3	1
+saturday	's{-t@-dI	3	0
+saucepan	's$s-p@n	2	1
+sausage	'sQ-sI_	2	3
+saw	's$	1	2
+say	's1	1	88
+saying	's1-IN	2	27
+says	's1z	1	8
+scalp	'sk{lp	1	10
+school	'skul	1	1
+scream	'skrim	1	1
+screaming	'skri-mIN	2	2
+screwing	'skru-IN	2	2
+scruffs	'skrVfs	1	1
+sea	'si	1	1
+seaside	'si-s2d	2	3
+seatbelt	'sit-'bElt	2	1
+second	'sE-k@nd	2	9
+seconds	'sE-k@ndz	2	2
+see	'si	1	140
+seef	'sif	1	0
+seeing	'si-IN	2	3
+seen	'sin	1	20
+self	'sElf	1	3
+sell	'sEl	1	4
+send	'sEnd	1	1
+sending	'sEn-dIN	2	2
+sent	'sEnt	1	1
+serious	's7-r7s	2	2
+servants	's3-v@nts	2	1
+sew	's5	1	1
+sewing	's5-IN	2	1
+sh	S	1	0
+shake	'S1k	1	18
+shakes	'S1ks	1	2
+shaking	'S1-kIN	2	1
+shall	'S{l	1	73
+shame	'S1m	1	14
+shan't	'S#nt	1	1
+sharp	'S#p	1	1
+shawl	'S$l	1	1
+she	'Si	1	108
+she'll	'Sil	1	6
+she's	'Siz	1	67
+sheets	'Sits	1	2
+shining	'S2-nIN	2	1
+shirt	'S3t	1	3
+shirts	'S3ts	1	0
+shoes	'Suz	1	1
+shoo	'Su	1	2
+shoot	'Sut	1	2
+shooting	'Su-tIN	2	1
+should	'SUd	1	20
+shoulder	'S5l-d@R	2	6
+shouldn't	'SU-dHt	2	3
+shout	'S6t	1	2
+shouter	'S6-t@R	2	1
+shouting	'S6-tIN	2	14
+show	'S5	1	10
+showing	'S5-IN	2	2
+shrew	'Sru	1	1
+shunting	'SVn-tIN	2	1
+shush	'SUS	1	10
+shut	'SVt	1	15
+shy	'S2	1	1
+sick	'sIk	1	13
+sickly	'sIk-lI	2	1
+sicky	'sI-kI	2	2
+side	's2d	1	9
+sides	's2dz	1	7
+sigh	's2	1	4
+silent	's2-l@nt	2	2
+silly	'sI-lI	2	15
+sing	'sIN	1	1
+sister	'sI-st@R	2	1
+sit	'sIt	1	35
+sitting	'sI-tIN	2	7
+sixteen	"sIks-'tin	2	1
+size	's2z	1	3
+sized	's2zd	1	2
+skirt	'sk3t	1	5
+sky	'sk2	1	1
+sleep	'slip	1	42
+sleeping	'sli-pIN	2	6
+sleepy	'sli-pI	2	27
+slept	'slEpt	1	4
+slid	'slId	1	1
+slide	'sl2d	1	2
+slightest	'sl2-tIst	2	1
+slip	'slIp	1	1
+slipping	'slI-pIN	2	3
+sloppy	'slQ-pI	2	2
+slow	'sl5	1	2
+smacking	'sm{-kIN	2	1
+smell	'smEl	1	3
+smelly	'smE-lI	2	3
+smile	'sm2l	1	127
+smiles	'sm2lz	1	37
+smiling	'sm2-lIN	2	10
+smurf	'sm3f	1	1
+snails	'sn1lz	1	1
+sneeze	'sniz	1	2
+sneezies	'sni-zI	2	2
+sneezing	'sni-zIN	2	1
+snooze	'snuz	1	4
+snoozing	'snu-zIN	2	1
+snorting	'sn$-tIN	2	2
+snorty	'sn$-tI	2	1
+so	's5	1	228
+so's	's5z	1	1
+soaked	's5kt	1	1
+soaking	's5-kIN	2	3
+soap	's5p	1	4
+soapy	's5-pI	2	4
+sober	's5-b@R	2	6
+sock	'sQk	1	2
+socks	'sQks	1	1
+soft	'sQft	1	7
+soiled	's4ld	1	1
+solids	'sQ-lIdz	2	2
+somat	's5-mQt	2	6
+somat's	's5-mQts	2	1
+some	s@m	1	89
+somebody	'sVm-b@-dI	3	2
+someone	'sVm-wVn	2	0
+something	'sVm-TIN	2	25
+somewhere	'sVm-w8R	2	3
+song	'sQN	1	2
+soon	'sun	1	7
+sore	's$R	1	4
+sorry	'sQ-rI	2	11
+soul	's5l	1	3
+sound	's6nd	1	4
+sounds	's6ndz	1	1
+spin	'spIn	1	1
+spinach	'spI-nI_	2	1
+spit	'spIt	1	4
+splash	'spl{S	1	21
+splashing	'spl{-SIN	2	3
+splish	'splIS	1	6
+splosh	'splQS	1	3
+sponge	'spVn_	1	2
+sponser	'spQn-s@R	2	0
+sports	'sp$ts	1	1
+spuddies	'spV-dIz	2	1
+spuds	'spVdz	1	1
+squeaky	'skwi-kI	2	1
+squeeze	'skwiz	1	1
+squiggly	'skwI-gP-I	3	1
+stairs	'st8z	1	1
+stand	'st{nd	1	9
+standing	'st{n-dIN	2	2
+stands	'st{ndz	1	1
+star	'st#R	1	2
+staring	'st8-rIN	2	1
+start	'st#t	1	5
+starts	'st#ts	1	1
+starved	'st#vd	1	1
+stay	'st1	1	2
+staying	'st1-IN	2	1
+steak	'st1k	1	1
+stern	'st3n	1	2
+steve	'stiv	1	1
+stew	'stju	1	2
+stick	'stIk	1	5
+sticking	'stI-kIN	2	1
+sticks	'stIks	1	1
+stiff	'stIf	1	1
+still	'stIl	1	36
+stockport	'stQk-p$t	2	1
+stomach	'stV-m@k	2	2
+stone	'st5n	1	1
+stop	'stQp	1	19
+stopped	'stQpt	1	5
+stories	'st$-rIz	2	15
+story	'st$-rI	2	29
+straight	'str1t	1	6
+straighten	'str1-tH	2	1
+strangle	'str{N-gP	2	1
+strawberry	'str$-b@-rI	3	1
+stretch	'strEJ	1	16
+stretching	'strE-JIN	2	1
+striped	'str2pt	1	1
+strong	'strQN	1	9
+struggle	'strV-gP	2	12
+struggling	'strV-glIN	2	3
+stuck	'stVk	1	5
+stuff	'stVf	1	3
+stupid	'stju-pId	2	1
+substantial	s@b-'st{n-SP	3	0
+such	'sVJ	1	9
+suck	'sVk	1	12
+sucked	'sVkt	1	2
+suckin'	'sV-kIn	2	0
+sucking	'sV-kIN	2	9
+suds	'sVdz	1	4
+suit	'sut	1	1
+sun	'sVn	1	5
+sunbathe	'sVn-b1D	2	1
+sunhat	'sVn-'h{t	2	0
+sunlight	'sVn-l2t	2	1
+sunshine	'sVn-S2n	2	13
+supper	'sV-p@R	2	2
+suppose	s@-'p5z	2	2
+supposed	s@-'p5zd	2	17
+suprise	s@-'pr2z	2	0
+sure	'S$R	1	12
+surely	'S$-lI	2	2
+surprise	s@-'pr2z	2	2
+swallow	'swQ-l5	2	2
+swan	'swQn	1	6
+swearing	'sw8-rIN	2	1
+sweater's	'swE-t@z	2	1
+sweatheart	'swit-h#t	2	0
+sweeper	'swi-p@R	2	2
+sweepers	'swi-p@z	2	3
+sweeps	'swips	1	4
+sweepy	'swi-pI	2	4
+sweet	'swit	1	1
+sweetheart	'swit-h#t	2	45
+sweetie	'swi-tI	2	5
+sweetpea	'swit-pI	2	3
+swim	'swIm	1	8
+swimming	'swI-mIN	2	8
+swing	'swIN	1	5
+swinging	'swI-NIN	2	1
+sylvester	sil-'vE-st@R	3	1
+system	'sI-st@m	2	1
+t'ave	't{v	1	0
+t-shirt	'ti-'S3t	2	0
+ta	't#	1	2
+ta-ta's	't#-'t#	2	0
+tail	't1l	1	3
+take	't1k	1	43
+taken	't1-k@n	2	4
+takes	't1ks	1	1
+taking	't1-kIN	2	9
+talc	't{lk	1	5
+tale	't1l	1	3
+tales	't1lz	1	4
+talk	't$k	1	23
+talking	't$-kIN	2	18
+tape	't1p	1	1
+taste	't1st	1	5
+tastes	't1sts	1	3
+tasting	't1-stIN	2	1
+tasty	't1-stI	2	3
+tea	'ti	1	13
+tea-time	'ti-t2m	2	0
+teach	'tiJ	1	1
+teaches	'ti-JIz	2	1
+teaching	'ti-JIN	2	1
+teapot	'ti-pQt	2	1
+tears	't7z	1	8
+teasing	'ti-zIN	2	3
+ted	'tEd	1	5
+teddy	'tE-dI	2	17
+teddy's	'tE-dIz	2	4
+teeth	'tiT	1	6
+teething	'ti-DIN	2	4
+teggypegs	'tE-dI-pEgz	3	2
+telephone	'tE-lI-f5n	3	2
+television	'tE-lI-"vI-ZH	4	3
+tell	'tEl	1	156
+telling	'tE-lIN	2	19
+telly	'tE-lI	2	0
+temper	'tEm-p@R	2	6
+tempered	'tEm-p@d	2	1
+ten	'tEn	1	2
+tennis	'tE-nIs	2	8
+terrible	'tE-r@-bP	3	3
+terribly	'tE-r@-blI	3	2
+than	D@n	1	7
+thank	'T{Nk	1	0
+that	'D{t	1	676
+that'll	'D{-tP	2	3
+that's	'D{ts	1	321
+thats	'D{ts	1	0
+the	D@	1	437
+their	'D8	1	2
+them	'DEm	1	51
+then	'DEn	1	412
+there	'D8R	1	813
+there's	'D8z	1	117
+theres	'D8z	1	0
+these	'Diz	1	38
+they	'D1	1	101
+they'd	'D1d	1	1
+they'll	'D1-@l	2	7
+they're	'D1-@R	2	24
+they've	'D1v	1	2
+thicker	'TI-k@R	2	2
+thing	'TIN	1	15
+things	'TINz	1	10
+think	'TINk	1	59
+thinking	'TIN-kIN	2	12
+thinks	'TINks	1	1
+third	'T3d	1	1
+thirsty	'T3-stI	2	4
+this	'DIs	1	364
+thomas	'tQ-m@s	2	1
+those	'D5z	1	57
+though	'D5	1	18
+thought	'T$t	1	2
+three	'Tri	1	12
+throat	'Tr5t	1	3
+through	'Tru	1	9
+throw	'Tr5	1	5
+throwing	'Tr5-IN	2	1
+thu	'TV	1	0
+thumb	'TVm	1	22
+thumbs	'TVmz	1	4
+thunder	'TVn-d@R	2	3
+tickle	'tI-kP	2	123
+tickles	'tI-kPz	2	10
+tickling	'tI-klIN	2	5
+ticklish	'tI-kP-IS	3	4
+tickly	'tIk-lI	2	6
+tickly-poo	'tIk-lI-'pu	3	0
+ticks	'tIks	1	1
+ticky	'tI-kI	2	25
+tiddley	'tId-lI	2	0
+tied	't2d	1	2
+tight	't2t	1	3
+till	'tIl	1	7
+time	't2m	1	41
+tin	'tIn	1	2
+tiny	't2-nI	2	2
+tired	't2-@d	2	43
+tiredy	't2-@-dI	3	1
+tis	'tIz	1	6
+tissue	'tI-Su	2	3
+tit	'tIt	1	3
+tits	'tIts	1	1
+to	t@	1	752
+today	t@-'d1	2	56
+toe	't5	1	1
+toenails	't5-n1lz	2	2
+toes	't5z	1	24
+together	t@-'gE-D@R	3	3
+told	't5ld	1	3
+tomorrow	t@-'mQ-r5	3	3
+tongue	'tVN	1	14
+tonight	t@-'n2t	2	9
+tons	'tVnz	1	1
+too	'tu	1	39
+took	'tUk	1	3
+toot	'tut	1	3
+tooth	'tuT	1	1
+toothie's	'tu-Tiz	2	1
+top	'tQp	1	3
+tossles	'tQ-s@lz	2	0
+touch	'tVJ	1	10
+touching	'tV-JIN	2	1
+tour	't9R	1	1
+towel	't6-@l	2	8
+toy	't4	1	3
+toys	't4z	1	4
+trai	'tr1	1	0
+treasure	'trE-Z@R	2	16
+treasuroooo	'trE-Z@-'ru	3	0
+treazh	'trEZ	1	0
+tree	'tri	1	1
+trim	'trIm	1	2
+trouble	'trV-bP	2	2
+true	'tru	1	1
+try	'tr2	1	25
+trying	'tr2-IN	2	45
+tub	'tVb	1	4
+tuba	'tju-b@	2	0
+tubby	'tV-bI	2	0
+tuesday	'tjuz-dI	2	1
+tum	'tVm	1	0
+tumma	'tV-m@	2	1
+tummy	'tV-mI	2	34
+tummy'll	'tV-mI-@l	3	1
+turn	't3n	1	13
+turned	't3nd	1	1
+turning	't3-nIN	2	1
+tv	'ti-'vi	2	1
+twelve	'twElv	1	1
+twice	'tw2s	1	1
+twist	'twIst	1	3
+two	'tu	1	35
+type	't2p	1	1
+typical	'tI-pI-kP	3	2
+ugh	'Vx	1	3
+uh	'V	1	0
+uh-hmm	'V-h@m	2	0
+uh-huh	V-'hV	2	0
+uncle	'VN-kP	2	1
+unconsolable	'In-k@n-'s5-l@-bP	5	1
+under	'Vn-d@R	2	18
+underneath	"Vn-d@-'niT	3	0
+underskirt	'Vn-d@R-'sk3t	3	2
+undress	"Vn-'drEs	2	1
+unhappy	Vn-'h{-pI	3	3
+unintelligible	'Vn-In-'tE-lI-_@-bP	6	0
+unsettled	"Vn-'sE-tPd	3	1
+until	@n-'tIl	2	2
+up	'Vp	1	216
+ups	'Vps	1	1
+ups-a-daisy	'Vps-@-'d1-zI	4	0
+upset	Vp-'sEt	2	4
+upside	'Vp-s2d	2	2
+upstairs	"Vp-'st8z	2	7
+us	'Vs	1	24
+use	'jus	1	0
+usually	'ju-Z@-lI	3	5
+very	'vE-rI	2	27
+vest	'vEst	1	4
+vesty	'vE-stI	2	5
+viking	'v2-kIN	2	1
+vikings	'v2-kINz	2	1
+violent	'v2-@-l@nt	3	2
+visitors	'vI-zI-t@z	3	1
+wages	'w1-_Iz	2	1
+wait	'w1t	1	20
+waiting	'w1-tIN	2	5
+wake	'w1k	1	2
+waking	'w1-kIN	2	2
+walk	'w$k	1	20
+walkies	'w$-kIz	2	1
+walks	'w$ks	1	0
+want	'wQnt	1	239
+wanted	'wQn-tId	2	5
+wanting	'wQn-tIN	2	1
+wants	'wQnts	1	6
+warm	'w$m	1	7
+warning	'w$-nIN	2	1
+was	w@z	1	110
+wash	'wQS	1	25
+washed	'wQSt	1	4
+washing	'wQ-SIN	2	5
+wasn't	'wQ-zHt	2	17
+watch	'wQJ	1	22
+watched	'wQJt	1	1
+watching	'wQ-JIN	2	10
+water	'w$-t@R	2	18
+wave	'w1v	1	3
+waving	'w1-vIN	2	1
+way	'w1	1	38
+ways	'w1z	1	2
+we	'wi	1	403
+we'd	'wid	1	2
+we'll	'wil	1	32
+we're	'w7R	1	36
+we've	'wiv	1	24
+wear	'w8R	1	1
+weather	'wE-D@R	2	1
+wednesday	'wEnz-dI	2	1
+wee	'wi	1	28
+weeks	'wiks	1	1
+weewee	'wi-wi	2	0
+weigh	'w1	1	2
+weighed	'w1d	1	2
+well	'wEl	1	147
+went	'wEnt	1	8
+were	'w3R	1	38
+weren't	'w3nt	1	5
+wet	'wEt	1	6
+what	'wQt	1	559
+what'll	'wQ-tP	2	2
+what're	'wQ-t@R	2	9
+what's	'wQts	1	328
+what've	'wQ-t@v	2	1
+when	'wEn	1	32
+where	'w8R	1	84
+where're	'w8-r@R	2	2
+where's	'w8z	1	79
+where've	'w8-r@v	2	3
+whether	'wE-D@R	2	3
+whey	'w1	1	1
+which	'wIJ	1	1
+while	'w2l	1	6
+whiner	'w2-n@R	2	1
+whites	'w2ts	1	1
+whiz	'wIz	1	1
+who	'hu	1	68
+who're	'huR	1	1
+who's	'huz	1	251
+whoa	'w5	1	2
+whole	'h5l	1	1
+whoo	'hu	1	5
+whoop	'wup	1	1
+whoops	'wups	1	20
+whoops-a-daisy	'wups-@-'d1-zI	4	0
+whoopsie	'wup-sI	2	2
+whos	'huz	1	0
+whose	'huz	1	8
+why	'w2	1	23
+whyn't	'w2nt	1	0
+wicked	'wI-kId	2	1
+widdle	'wI-dP	2	2
+wide	'w2d	1	6
+wiggler	'wI-gP-@R	3	3
+will	'wIl	1	66
+win	'wIn	1	2
+wind	'wInd	1	16
+wind's	'w2ndz	1	1
+windies	'wIn-dIz	2	20
+window	'wIn-d5	2	7
+windows	'wIn-d5z	2	1
+windy	'wIn-dI	2	16
+wings	'wINz	1	1
+winking	'wIN-kIN	2	1
+wipe	'w2p	1	8
+wiped	'w2pt	1	3
+wire	'w2-@R	2	2
+wise	'w2z	1	1
+wish	'wIS	1	5
+with	'wID	1	163
+without	wI-'D6t	2	4
+wobble	'wQ-bP	2	3
+woke	'w5k	1	2
+woken	'w5-k@n	2	5
+won't	'w5nt	1	29
+wonder	'wVn-d@R	2	7
+wondering	'wVn-d@-rIN	3	3
+work	'w3k	1	11
+working	'w3-kIN	2	10
+works	'w3ks	1	1
+world	'w3ld	1	2
+worried	'wV-rId	2	2
+worry	'wV-rI	2	2
+worst	'w3st	1	1
+worth	'w3T	1	2
+wotsiting	'wQt-sI-tIN	3	0
+would	'wUd	1	25
+wouldn't	'wU-dHt	2	8
+wrap	'r{p	1	2
+wrestle	'rE-sP	2	2
+wrestling	'rE-slIN	2	1
+wriggler	'rI-gP-@R	3	2
+wrong	'rQN	1	33
+ya	j@	1	221
+yawn	'j$n	1	14
+yeah	'j8	1	44
+years	'j7z	1	1
+yellow	'jE-l5	2	7
+yes	'jEs	1	1054
+yesterday	'jE-st@-dI	3	5
+yet	'jEt	1	9
+you	'ju	1	2505
+you'd	'jud	1	14
+you'll	'jul	1	35
+you're	'j9R	1	293
+you've	'juv	1	138
+young	'jVN	1	6
+your	'j$R	1	660
+yours	'j$z	1	11
+yourself	j$-'sElf	2	20
+yum	'jVm	1	20
+zee	'zi	1	1
+zunc	'zVNk	1	1
+mummie	'mV-mI	2	210
+mummie's	'mV-mIz	2	120
+mummie'll	'mV-mI-@l	3	0
+tellie	'tE-lI	2	1
+handie	'h{n-dI	2	2
+pottie	'pQ-tI	2	2
+bathie	'b#-TI	2	1
+ruskie	'rVs-kI	2	1
+headie	'hE-dI	2	1
+chinnie	'JI-nI	2	11
+hankie	'h{N-kI	2	1
+nappie	'n{-pI	2	50
+drinkie	'drIN-kI	2	1
+rolly	'r5-lI	2	3
+rollie	'r5-lI	2	0
+polly	'p5-lI	2	3
+pollie	'p5-lI	2	0
+deary	'd7-rI	2	0
+hiccough	'hI-kVp	2	4
+hiccoughs	'hI-kVps	2	8
+poo	'phu	1	13
+lew	'lu	1	0
+&hmm	'hF	1	288
+&er	'3	1	2
+&eh	'1	1	249
+&ha	'h#	1	6
+&mm	'm	1	324
+&ah	'#	1	66
+&uh	'V	1	3
+&hah	'h#	1	9
+whee	'wi	1	63
+treas	'trEZ	1	31
+hee	'hi	1	6
+oo	'u	1	2

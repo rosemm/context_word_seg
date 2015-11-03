@@ -23,6 +23,7 @@ for(d in 1:nrow(dict.add)){
 }
 dict.add$old.word <- NULL
 dict <- rbind(dict, dict.add)
+# write.table(dict, file="dict_all3_updated.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
 coding_doc <- coding_doc[!grepl(pattern="unintelligible", x=coding_doc$orth), ] # delete utterances with unintelligible content
 
