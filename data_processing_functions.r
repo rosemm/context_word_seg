@@ -1,9 +1,9 @@
 nontext_cols <- function(df, context_names){
-  nontexts<- vector("list", length(colnames(contexts))) # storage variable
+  nontexts<- vector("list", length(context_names)) # storage variable
   non <- NULL
   
   for(k in 1:length(context_names)){  
-    N.hits <- sum(df[[context_names[k]]])# the number of utterances that contain a keyword for that context
+    N.hits <- length(which(df[[context_names[k]]] == 1)) # the number of utterances that contain a keyword for that context
     nontexts[[k]] <- sample(x=as.numeric(row.names(df)), size=N.hits)
     col <- rep(0, nrow(df))
     col[nontexts[[k]]] <- 1
