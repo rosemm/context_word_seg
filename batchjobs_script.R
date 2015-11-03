@@ -121,9 +121,13 @@ batch_function <- function(){
       
       this.result <- as.data.frame(rbind(TPresults, MIresults))
       row.names(this.result) <- NULL
+      this.result$stat <- as.factor(as.character(this.result$stat))
       this.result$nontext <- names(nontext.data)[[k]]
       stat.results <- rbind(stat.results,this.result)
     } 
+    stat.results$nontext <- as.factor(as.character(stat.results$nontext))
+    stat.results$recall <- as.numeric(stat.results$recall)
+    stat.results$precision <- as.numeric(stat.results$precision)
     return(stat.results)
   }
   registerDoParallel()
