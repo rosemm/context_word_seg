@@ -1,5 +1,9 @@
 source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/coding_scripts.r")
+
+# use BlankDoc to turn all of the transcripts into one neat dataframe (but omit the coder columns)
 coding_doc <- BlankDoc(for.coding=F)
+
+
 coding_doc <- coding_doc %>%
   unite(utt, file, UttNum) %>%
   select(utt, orth=utterance)
@@ -67,6 +71,7 @@ translate_phon <- function(dict, orth, first=TRUE){ # translate orth to phon bas
     
   
   for(i in 1:nrow(dict)){
+    # for each entry in the "dictionary", find that orth word and replace it with the phon translation
     this.word <- as.character(dict$word[i])
     this.phon <- as.character(dict$phon[i])
     
