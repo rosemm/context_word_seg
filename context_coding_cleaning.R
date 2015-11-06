@@ -66,7 +66,7 @@ collect_codes <- function(){
 # setwd("/Users/TARDIS/Documents/STUDIES/context_word_seg")
 # write.table(master_doc, file="master_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
-process_codes <- function(master_doc, cleaning_keys=read.table("context_cleaning_keys.txt", header=1, sep="\t", stringsAsFactors=F)){
+process_codes <- function(master_doc, criterion=5, cleaning_keys=read.table("context_cleaning_keys.txt", header=1, sep="\t", stringsAsFactors=F)){
   if(!require(tidyr)) install.packages("tidyr"); library(tidyr)
   if(!require(dplyr)) install.packages("dplyr"); library(dplyr)
   if(!require(psych)) install.packages("psych"); library(psych)
@@ -83,20 +83,19 @@ process_codes <- function(master_doc, cleaning_keys=read.table("context_cleaning
 
   message("\nRAs have coded this many utterances:\n") ; print(as.data.frame(RA_info))
   
-# only keep utterances that have been coded at least three times
+# only keep utterances that have been coded at least [criterion] times
   keep <- master_doc %>%
     tidyr::unite( utt, file, UttNum) %>%
     dplyr::select(utt, coder, context, pass) %>%
     group_by(utt) %>%
     dplyr::summarize(n=n()) %>%
-    dplyr::filter(n>2) %>%
+    dplyr::filter(n > (criterion-1)) %>%
     dplyr::select(utt)
   
-master_doc_keep <- merge(tidyr::unite(master_doc, utt, file, UttNum), keep, by="utt", all.y=TRUE, all.x=FALSE )
+master_doc_keep <- merge(tidyr::unite(master_doc, utt, file, UttNum), keep, by="utt", all.x=FALSE, all.y=TRUE )
   
-message("Removing ", nrow(master_doc)-nrow(master_doc_keep) , " utterances because they have been coded fewer than 3 times across all coders.")    
-
-  unique(master_doc_keep$context)
+message("Removing ", nrow(master_doc)-nrow(master_doc_keep) , " utterances because they have been coded fewer than ", criterion, " times across all coders.\n")    
+message( round( nrow(keep)/13350, 4), "% of total utterances are included in analyses.\n" )
 
   master_doc_keep$context <- as.factor(master_doc_keep$context)
   
@@ -133,7 +132,7 @@ message("Removing ", nrow(master_doc)-nrow(master_doc_keep) , " utterances becau
       }
       cleaning_keys <- rbind(cleaning_keys, new_contexts)
       cleaning_keys <- dplyr::arrange(cleaning_keys, context_raw)
-      write.table(cleaning_keys, "context_cleaning_key2s.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+      write.table(cleaning_keys, "context_cleaning_keys.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
       message("New contexts added! :) \n")
     } 
   }
@@ -159,6 +158,10 @@ message("Removing ", nrow(master_doc)-nrow(master_doc_keep) , " utterances becau
 
 contextcols <- 2:ncol(master_doc_calc) # the column numbers for all columns identifying contexts
 master_doc_calc$total <- rowSums(x=master_doc_calc[,contextcols], na.rm=TRUE)  # total number of codes for each utterace
+
+return(master_doc_calc)
+}
+
 
 # PCA
 master_doc_prop <- master_doc_calc %>%
@@ -186,8 +189,7 @@ master_doc_calc$context <- colnames(master_doc_calc)[master_doc_calc$which + 1 ]
 master_doc_calc$context_weight <- master_doc_calc$max/master_doc_calc$total
 
 
-
-
-}
-
+# how much coding is done?
+nrow(master_doc_calc) # total number of utterances included in analyses
+nrow(master_doc_calc)/13350 # the percent of all utterances that are currently included in analyses
 
