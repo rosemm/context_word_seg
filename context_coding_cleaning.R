@@ -13,8 +13,9 @@ doc_doctor <- function(recursive=T){
       # make all contexts lower case
       coding_doc$context <- tolower(coding_doc$context)
       
-      bads <- dplyr::filter(coding_doc, (coder=="RM" | coder=="TEST" | coder=="" & !is.na(date)) | pass<1 ) 
-      goods <- dplyr::filter(filter(coding_doc, !( coder=="RM" | coder=="TEST" | coder=="" & !is.na(date) ) | is.na(coder) ), pass >0)
+      library(dplyr)
+      bads <- filter(coding_doc, ( coder=="RM" | coder=="TEST" | coder=="" & !is.na(date) | nchar(context) < 3 & !is.na(date) ) | pass < 1 ) # likely issues in the coding
+      goods <- filter(coding_doc, !( coder=="RM" | coder=="TEST" | coder=="" & !is.na(date) | nchar(context) < 3 & !is.na(date) ) | is.na(coder) & pass > 0) # the opposite of those issues
       if(nrow(bads)>0){
         message(nrow(bads), " bad cases found.")
         
