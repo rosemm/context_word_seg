@@ -3,45 +3,51 @@
 
 # http://aciss-computing.uoregon.edu/2013/09/04/how-to-submission-queues/
 
-
-# # typed in console:
-# cp /Library/Frameworks/R.framework/Versions/3.1/Resources/library/BatchJobs/etc/BatchJobs_global_config.R /Users/TARDIS/Documents/STUDIES/context_word_seg/.Batchjobs.R
-# # edit the first line of the resulting file (.Batchjobs.R) to look like this:    cluster.functions = makeClusterFunctionsTorque("simple.tmpl")
-
 ###################################
-# the code below gets pasted into the terminal after launching R on an ACISS node
+# First time: install BatchJobs
 ###################################
 library(devtools)
 install_github("tudo-r/BatchJobs")
 library(BatchJobs)
 
-# define the data and the function
-starts <- replicate(60, rnorm(100), simplify = FALSE)
-myFun  <- function(start) { 
-  mean(start) 
-}
+###########################################################
+# configure BatchJobs (do this on your local machine, and then use sftp to send .Batchjobs.R and simple.tmpl to your working directory on ACISS)
+###########################################################
+# set up batchjobs configuration for this project to override the global settings
+batch.conf <- readLines("/Library/Frameworks/R.framework/Versions/3.1/Resources/library/BatchJobs/etc/BatchJobs_global_config.R")
+batch.conf[1] <- "cluster.functions = makeClusterFunctionsTorque('simple.tmpl')"
+## to run debug function for BatchJobs, change the configuration file:
+# batch.conf[1] <- "cluster.functions = makeClusterFunctionsInteractive()"
+# batch.conf[7] <- "debug = TRUE"
 
-# create a registry
-reg <- makeRegistry(id = "batchtest")
+writeLines(batch.conf, ".BatchJobs.R", sep="\n") # write this file to the current working directory
 
-# map function and data to jobs and submit
-ids  <- batchMap(reg, myFun, starts)
-done <- submitJobs(reg, resources = list(nodes = 5, ppn=12))
+# from https://raw.githubusercontent.com/tudo-r/BatchJobs/master/examples/cfTorque/simple.tmpl
+simple <- "#PBS -N <%= job.name %>
+## merge standard error and output
+#PBS -j oe
+## direct streams to our logfile
+#PBS -o <%= log.file %>
+#PBS -l walltime=<%= resources$walltime %>,nodes=<%= resources$nodes %>,vmem=<%= resources$memory %>M
+## remove this line if your cluster does not support arrayjobs
+#PBS -t 1-<%= arrayjobs %>
 
-## if it all goes badly wrong run this to delete and start over
-removeRegistry(reg, ask="no")
+## Run R:
+## we merge R output with stdout from PBS, which gets then logged via -o option
+R CMD BATCH --no-save --no-restore '<%= rscript %>' /dev/stdout
+"
+
+writeLines(simple, "simple.tmpl", sep="\n")
 
 
-
-
-###################################
-# the code below gets pasted into the terminal after launching R on an ACISS node
-###################################
+###########################################################
+# the model (run this in R on ACISS)
+###########################################################
 library(BatchJobs)
-library(dplyr)
-library(tidyr)
-library(doParallel)
-loadConfig() # check configuration of BatchJobs (should be using local .BatcgJobs.R)
+getConfig()
+
+install.packages("dplyr", "tidyr", "doParallel")
+
 starts <- 1:10
 
 # copy utt_orth_phon_KEY.txt to server
@@ -51,23 +57,65 @@ starts <- 1:10
 # copy simple.tmpl
 # copy .BatchJobs.R
 
+
 batch_function <- function(starts){
   library(dplyr)
   library(tidyr)
   
-  #note that key should have the context columns already (from lists, human coding, or topic modeling, etc.)
-  key <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
-  df <- key
-  if(nrow(df) == 0) stop("df didn't load")
+  evaluation <- function(df, contexts){ # this is the function that should be done in parallel on the 12 cores of each node
+    #contexts <- df[1, c(4:ncol(df))]
+    
+    # pick nontexts
+    results <- nontext_cols(df=df, context_names=colnames(contexts)) # add the nontext col
+    non <- results[[1]]
+    nontexts <- results[[2]]
+    names(nontexts) <- paste("non.", colnames(contexts), sep="")
+    
+    # add nontext columns to dataframe
+    colnames(non) <- colnames(contexts)
+    df.non <- cbind(df[,1:3], non)
+    
+    # expand windows to + - 2 utterances before and after
+    df.non <- expand_windows(df.non)
+    
+    # calculate MIs and TPs
+    nontext.data <- context_results(contexts, df=df.non) # calls make_streams() and calc_MI()
+    
+    # segment speech
+    for(k in 1:length(names(nontext.data))){
+      
+      nontext.data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=.85, stat="TP", nontext.data[[k]]$unique.phon.pairs, nontext.data[[k]]$streams$phon.stream)
+      
+      nontext.data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=.85, stat="MI", nontext.data[[k]]$unique.phon.pairs, nontext.data[[k]]$streams$phon.stream)
+    }
+    
+    # assess segmentation
+    stat.results <- data.frame(recall=NULL, precision=NULL, stat=NULL, nontext=NULL)
+    for(k in 1:length(names(nontext.data))){
+      
+      nontext.data[[k]]$TP85$seg.results <- assess_seg(seg.phon.stream=nontext.data[[k]]$TP85$seg.phon.stream, words=nontext.data[[k]]$streams$words, dict=dict)
+      
+      TPresults <- colMeans(nontext.data[[k]]$TP85$seg.results[,3:4], na.rm=T)
+      TPresults$stat <- "TP"
+
+      nontext.data[[k]]$MI85$seg.results <- assess_seg(seg.phon.stream=nontext.data[[k]]$MI85$seg.phon.stream, words=nontext.data[[k]]$streams$words, dict=dict)
+      
+      MIresults <- colMeans(nontext.data[[k]]$MI85$seg.results[,3:4], na.rm=T)
+      MIresults$stat <- "MI"
+      
+      this.result <- as.data.frame(rbind(TPresults, MIresults))
+      row.names(this.result) <- NULL
+      this.result$stat <- as.factor(as.character(this.result$stat))
+      this.result$nontext <- names(nontext.data)[[k]]
+      stat.results <- rbind(stat.results,this.result)
+    } 
+    stat.results$nontext <- as.factor(as.character(stat.results$nontext))
+    stat.results$recall <- as.numeric(stat.results$recall)
+    stat.results$precision <- as.numeric(stat.results$precision)
+    return(stat.results)
+  }
   
-  dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
-  cols <- ncol(dict)
-  if(nrow(dict) == 0) stop("dict didn't load")
-  
-  contexts <- read.csv("words by contexts.csv")
-  if(nrow(contexts) == 0) stop("contexts didn't load")
-  
-  #source("data_processing_functions.r")
+  # source("data_processing_functions.r")
   nontext_cols <- function(df, context_names){
     nontexts<- vector("list", length(context_names)) # storage variable
     non <- NULL
@@ -83,7 +131,6 @@ batch_function <- function(starts){
     return(list(non, nontexts))
   }
   expand_windows <- function(df){
-    p <- progress_estimated(n=length(3:(nrow(df)-2))) # print progress bar while working
     for(i in 3:(nrow(df)-2)){
       for(j in which(colnames(df) == colnames(contexts)[1]):ncol(df)){
         df[i,j] <- ifelse(df[i,j]==1, df[i,j], # if it is already marked 1, leave it
@@ -94,13 +141,11 @@ batch_function <- function(starts){
         # note that utterances classified as a context based on their proximity to an utterance with a key word must be marked with something other than 1 to prevent them being used as key utterances in the next row
         
       }
-      print(p$tick()) # advance progress bar
     }
     return(df)
   }
   calc_MI = function(phon.pairs, phon.stream){
     # mutual information, and transitional probabilty. See Swingley (2005) p97
-    p <- progress_estimated(n=nrow(phon.pairs)) # print progress bar while working
     for(i in 1:nrow(phon.pairs)){
       AB <- filter(phon.pairs, syl1==syl1[i] & syl2==syl2[i])
       p.AB <- nrow(AB)/nrow(phon.pairs)
@@ -110,7 +155,6 @@ batch_function <- function(starts){
       phon.pairs$MI[i] <- ifelse(p.AB==0, NA, log2(p.AB/(p.A * p.B))) # if AB never occurs, enter NA, otherwise calculate MI
       phon.pairs$TP[i] <- ifelse(p.AB==0, NA, p.AB/(p.A)) # if AB never occurs, enter NA, otherwise calculate TP
       phon.pairs$freq[i] <- ifelse(p.AB==0, NA, nrow(AB)) # if AB never occurs, enter NA, otherwise enter freq
-      print(p$tick()) # advance progress bar
     }
     output <- unique(phon.pairs) # Only keep one instance of each syllable pair
     return(output)
@@ -255,68 +299,20 @@ batch_function <- function(starts){
     return(results)
   }
   
+  # note that key should have the context columns already (from lists, human coding, or topic modeling, etc.)
+  key <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
+  df <- key
+  if(nrow(df) == 0) stop("df didn't load")
   
+  dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
+  cols <- ncol(dict)
+  if(nrow(dict) == 0) stop("dict didn't load")
+  
+  contexts <- read.csv("words by contexts.csv")
+  if(nrow(contexts) == 0) stop("contexts didn't load")
+    
   iter <- 12 # the number of times to generate random samples
-  
-  evaluation <- function(df, contexts){ # this is the function that should be done in parallel on the 12 cores of each node
-    #contexts <- df[1, c(4:ncol(df))]
-    
-    # pick nontexts
-    results <- nontext_cols(df=df, context_names=colnames(contexts)) # add the nontext col
-    non <- results[[1]]
-    nontexts <- results[[2]]
-    names(nontexts) <- paste("non.", colnames(contexts), sep="")
-    
-    # add nontext columns to dataframe
-    colnames(non) <- colnames(contexts)
-    df.non <- cbind(df[,1:3], non)
-    
-    # expand windows to + - 2 utterances before and after
-    df.non <- expand_windows(df.non)
-    
-    # calculate MIs and TPs
-    nontext.data <- context_results(contexts, df=df.non) # calls make_streams() and calc_MI()
-    
-    # segment speech
-    for(k in 1:length(names(nontext.data))){
-      
-      message(paste("Segment speech! Processing ", names(nontexts)[k], "...", sep=""))
-      
-      nontext.data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=.85, stat="TP", nontext.data[[k]]$unique.phon.pairs, nontext.data[[k]]$streams$phon.stream)
-      
-      nontext.data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=.85, stat="MI", nontext.data[[k]]$unique.phon.pairs, nontext.data[[k]]$streams$phon.stream)
-    }
-    
-    # assess segmentation
-    stat.results <- data.frame(recall=NULL, precision=NULL, stat=NULL, nontext=NULL)
-    for(k in 1:length(names(nontext.data))){
-      
-      message(paste("Assess segmentation! Processing ", names(nontexts)[k], "...", sep=""))
-      message("TPs...")
-      
-      nontext.data[[k]]$TP85$seg.results <- assess_seg(seg.phon.stream=nontext.data[[k]]$TP85$seg.phon.stream, words=nontext.data[[k]]$streams$words, dict=dict)
-      
-      TPresults <- colMeans(nontext.data[[k]]$TP85$seg.results[,3:4], na.rm=T)
-      TPresults$stat <- "TP"
-      
-      message("MIs...")
-      nontext.data[[k]]$MI85$seg.results <- assess_seg(seg.phon.stream=nontext.data[[k]]$MI85$seg.phon.stream, words=nontext.data[[k]]$streams$words, dict=dict)
-      
-      MIresults <- colMeans(nontext.data[[k]]$MI85$seg.results[,3:4], na.rm=T)
-      MIresults$stat <- "MI"
-      
-      this.result <- as.data.frame(rbind(TPresults, MIresults))
-      row.names(this.result) <- NULL
-      this.result$stat <- as.factor(as.character(this.result$stat))
-      this.result$nontext <- names(nontext.data)[[k]]
-      stat.results <- rbind(stat.results,this.result)
-    } 
-    stat.results$nontext <- as.factor(as.character(stat.results$nontext))
-    stat.results$recall <- as.numeric(stat.results$recall)
-    stat.results$precision <- as.numeric(stat.results$precision)
-    return(stat.results)
-  }
-  
+
   library(doParallel)
   registerDoParallel()
   r <- foreach(1:iter, .combine = rbind) %dopar% evaluation(df, contexts)
@@ -325,10 +321,23 @@ batch_function <- function(starts){
 
 
 # create a registry
-reg_0 <- makeRegistry(id = "bootstrap_0")
+id <- "bootstrap"
+reg <- makeRegistry(id = id)
 
 # map function and data to jobs and submit
-ids  <- batchMap(reg_0, batch_function, starts)
-done <- submitJobs(reg_0, resources = list(nodes = 10, ppn=iter))
+ids  <- batchMap(reg, batch_function, starts)
+done <- submitJobs(reg, resources = list(nodes = 10, ppn=iter))
 
-showStatus(reg_0)
+showStatus(reg)
+
+results <- data.frame(V1=NULL)
+nodes <- list.files(paste0(id, "-files/jobs"))
+for(i in 1:length(nodes)){
+  if (i < 10){
+    load(paste0(id, "-files/jobs/0", i, "/", i, "-result.RData"))
+  } else {
+    load(paste0(id, "-files/jobs/", i, "/", i, "-result.RData"))
+  }
+  results <- rbind(results, result)
+}
+save(results, file="batchresults.RData")
