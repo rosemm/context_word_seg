@@ -1,4 +1,4 @@
-cluster.functions = makeClusterFunctionsTorque("simple.tmpl")
+cluster.functions = makeClusterFunctionsTorque('simple.tmpl')
 mail.start = "none"
 mail.done = "none"
 mail.error = "none"
