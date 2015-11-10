@@ -32,21 +32,20 @@ expand_windows <- function(df){
 
 calc_MI = function(phon.pairs, phon.stream){
   # mutual information, and transitional probabilty. See Swingley (2005) p97
-  library(tidyr)
   
-  temp.pairs <- unique(phon.pairs) # drop repeated rows to speed up processing
-  temp.pairs$p.A <- NA
-  temp.pairs$p.B <- NA
-  
-  p <- progress_estimated(n=nrow(temp.pairs)) # print progress bar while working
-  for(i in 1:nrow(temp.pairs)){
-    temp.pairs$p.A[i] <- length(which(phon.stream == phon.pairs$syl1[i]))/length(phon.stream)
-    temp.pairs$p.B[i] <- length(which(phon.stream == phon.pairs$syl2[i]))/length(phon.stream)
-    print(p$tick()) # advance progress bar
-  }
-  
-  # add p.A and p.B information back into the full phon.pairs object
-  phon.pairs <- left_join(phon.pairs, temp.pairs)
+  library(tidyr)  
+  # calculate the number of times each syllable (1 and 2) occurs
+  A.count <- phon.pairs %>%
+    group_by(syl1) %>%
+    summarize(A.freq=n())
+  B.count <- phon.pairs %>%
+    group_by(syl2) %>%
+    summarize(B.freq=n())
+  # NOTE: Since syllable transitions spanning an utterance boundary have been removed, this only counts freq of syl1 / all non-utterance-final syllables, and freq of syl 2 / all non-utterance-initial syllables
+  # This more closely approximates the sense of TP as conditional probability (see e.g. Saffran et al. 1996). 
+  # If all occurences of a syllable are counted (including utterance-final occurences for syl1 and utterance-initial occurences for syl2), then the TP can (and does) go far above 1 since there are many more units of syllables than bi-syllable pairs
+  phon.pairs <- left_join(phon.pairs, A.count)
+  phon.pairs <- left_join(phon.pairs, B.count)
   
   # add a column for the syllable pair (helps for joining this table with pairs.count later)
   phon.pairs <- phon.pairs %>%
@@ -60,17 +59,19 @@ calc_MI = function(phon.pairs, phon.stream){
   
   # calculate MI and TP
   phon.pairs <- phon.pairs %>%
-    mutate(p.AB=AB.freq/nrow(phon.pairs), MI=log2(p.AB/(p.A * p.B)), TP=p.AB/p.A ) %>%
-    select(syl1, syl2, AB.freq, MI, TP)
+    mutate(p.AB=AB.freq/nrow(phon.pairs), 
+           p.A=A.freq/nrow(phon.pairs), 
+           p.B=B.freq/nrow(phon.pairs),
+           MI=log2(p.AB/(p.A * p.B)), 
+           TP=p.AB/p.A ) 
   
   output <- unique(phon.pairs) # Only keep one instance of each syllable pair
   return(output)
 }
 
-
 make_streams = function(df){
-  # add utterance boundary marker 
-  phon.utts <- paste(df$phon, "##")
+  # add utterance boundary marker to the end of every utterance
+  phon.utts <- paste(df$phon, "###")
   # replace word-internal syllable boundaries "-" with space, the same as between-word boundaries
   phon.utts <- gsub(pattern="-", replacement=" ", x=phon.utts, fixed=T) 
   # collapse phonological utterances into one continuous stream
@@ -86,7 +87,7 @@ make_streams = function(df){
   # make phon stream into a list of all of the bisyllable pairs that occur
   phon.pairs <- data.frame(syl1=phon.stream[1:length(phon.stream)-1], syl2=phon.stream[2:length(phon.stream)])
   # delete rows that code for utterance boundary (the result is that syllable pairs across utterance boundaries are simply unattested)
-  phon.pairs <- dplyr::filter(phon.pairs, syl1 !="##" & syl2 !="##")
+  phon.pairs <- dplyr::filter(phon.pairs, syl1 !="###" & syl2 !="###")
   
   # collapse orthographic utterances into one stream
   orth.stream <- unlist(strsplit(df$orth, " "))
@@ -137,10 +138,10 @@ segment_speech <- function(cutoff, stat, unique.phon.pairs, phon.stream, conside
   
   # to consider frequency as well, only segment units that are above freqency threshold as well as above TP/MI threshold
   if(consider.freq){
-    freq.cutoff <- quantile(unique.phon.pairs$freq, cutoff)
+    freq.cutoff <- quantile(unique.phon.pairs$AB.freq, cutoff)
     message(paste("...frequency cutoff is", round(freq.cutoff, 3)))
-    unique.phon.pairs$seg <- ifelse(is.na(unique.phon.pairs$freq), NA,
-                                    ifelse(unique.phon.pairs$freq < freq.cutoff, 0, 
+    unique.phon.pairs$seg <- ifelse(is.na(unique.phon.pairs$AB.freq), NA,
+                                    ifelse(unique.phon.pairs$AB.freq < freq.cutoff, 0, 
                                            ifelse(unique.phon.pairs$MIseg==1 | unique.phon.pairs$TPseg==1, 1, 0)))
   } else if(stat=="TP") {
     unique.phon.pairs$seg <- unique.phon.pairs$TPseg
@@ -151,9 +152,10 @@ segment_speech <- function(cutoff, stat, unique.phon.pairs, phon.stream, conside
   
   seg.phon.stream <- phon.stream
   
+  p <- progress_estimated(n=length(phon.stream)-1) # print progress bar while working
   for(i in 2:length(phon.stream)){
     
-    seg <- ifelse(phon.stream[i]=="##" | phon.stream[i-1]=="##", 1, # utterance boundaries are given as word boundaries
+    seg <- ifelse(phon.stream[i]=="###" | phon.stream[i-1]=="###", 1, # utterance boundaries are given as word boundaries
                   dplyr::filter(unique.phon.pairs, syl1==phon.stream[i-1] & syl2==phon.stream[i])$seg)
     
     if(length(seg) > 1) stop(paste("ERROR at ", i, "th element of phon.stream: more than one entry for seg", sep=""))
@@ -161,6 +163,7 @@ segment_speech <- function(cutoff, stat, unique.phon.pairs, phon.stream, conside
     seg.phon.stream[i]<- ifelse(seg==1, 
                                 paste0(",", phon.stream[i]), 
                                 phon.stream[i]) # if seg=1 for this phon pair, then insert a comma before the second syllable
+    print(p$tick()) # advance progress bar
   }
   
   # drop utterance boundary markers (the segmentation is still coded on the syllable after the utt boundary)
