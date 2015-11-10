@@ -32,25 +32,47 @@ expand_windows <- function(df){
 
 calc_MI = function(phon.pairs, phon.stream){
   # mutual information, and transitional probabilty. See Swingley (2005) p97
-  p <- progress_estimated(n=nrow(phon.pairs)) # print progress bar while working
-  for(i in 1:nrow(phon.pairs)){
-    AB <- filter(phon.pairs, syl1==syl1[i] & syl2==syl2[i])
-    p.AB <- nrow(AB)/nrow(phon.pairs)
-    p.A <- length(which(phon.stream == phon.pairs$syl1[i]))/length(phon.stream)
-    p.B <- length(which(phon.stream == phon.pairs$syl2[i]))/length(phon.stream)
-    
-    phon.pairs$MI[i] <- ifelse(p.AB==0, NA, log2(p.AB/(p.A * p.B))) # if AB never occurs, enter NA, otherwise calculate MI
-    phon.pairs$TP[i] <- ifelse(p.AB==0, NA, p.AB/(p.A)) # if AB never occurs, enter NA, otherwise calculate TP
-    phon.pairs$freq[i] <- ifelse(p.AB==0, NA, nrow(AB)) # if AB never occurs, enter NA, otherwise enter freq
+  library(tidyr)
+  
+  temp.pairs <- unique(phon.pairs) # drop repeated rows to speed up processing
+  temp.pairs$p.A <- NA
+  temp.pairs$p.B <- NA
+  
+  p <- progress_estimated(n=nrow(temp.pairs)) # print progress bar while working
+  for(i in 1:nrow(temp.pairs)){
+    temp.pairs$p.A[i] <- length(which(phon.stream == phon.pairs$syl1[i]))/length(phon.stream)
+    temp.pairs$p.B[i] <- length(which(phon.stream == phon.pairs$syl2[i]))/length(phon.stream)
     print(p$tick()) # advance progress bar
   }
+  
+  # add p.A and p.B information back into the full phon.pairs object
+  phon.pairs <- left_join(phon.pairs, temp.pairs)
+  
+  # add a column for the syllable pair (helps for joining this table with pairs.count later)
+  phon.pairs <- phon.pairs %>%
+    unite(pair, syl1, syl2, sep="-", remove=F)
+  
+  # calculate the number of times this syllable pair occurs
+  pairs.count <- phon.pairs %>%
+    group_by(pair) %>%
+    summarize(AB.freq=n())
+  phon.pairs <- left_join(phon.pairs, pairs.count) # add the AB frequency counts to the phon.pairs table
+  
+  # calculate MI and TP
+  phon.pairs <- phon.pairs %>%
+    mutate(p.AB=AB.freq/nrow(phon.pairs), MI=log2(p.AB/(p.A * p.B)), TP=p.AB/p.A ) %>%
+    select(syl1, syl2, AB.freq, MI, TP)
+  
   output <- unique(phon.pairs) # Only keep one instance of each syllable pair
   return(output)
 }
 
+
 make_streams = function(df){
   # add utterance boundary marker 
   phon.utts <- paste(df$phon, "##")
+  # replace word-internal syllable boundaries "-" with space, the same as between-word boundaries
+  phon.utts <- gsub(pattern="-", replacement=" ", x=phon.utts, fixed=T) 
   # collapse phonological utterances into one continuous stream
   phon.stream <- unlist(strsplit(phon.utts, " "))
   # delete "syllables" that are just empty space
@@ -61,7 +83,7 @@ make_streams = function(df){
   # syllables <- sample(syllables, 200) # for testing, just use some random syllables
   N.syl <- length(syllables)
   
-  # make phone stream into a list of all of the bisyllable pairs that occur
+  # make phon stream into a list of all of the bisyllable pairs that occur
   phon.pairs <- data.frame(syl1=phon.stream[1:length(phon.stream)-1], syl2=phon.stream[2:length(phon.stream)])
   # delete rows that code for utterance boundary (the result is that syllable pairs across utterance boundaries are simply unattested)
   phon.pairs <- dplyr::filter(phon.pairs, syl1 !="##" & syl2 !="##")
@@ -85,7 +107,7 @@ context_results <- function(contexts, df){
     
     message(paste("processing ", names(contexts)[k], "...", sep=""))
     
-    df.context <- filter(df, df[ , which(colnames(df)==names(contexts)[k])] > 0) # select cases that have any value greater than 0 in the column that matches the name of context k
+    df.context <- dplyr::filter(df, df[ , which(colnames(df)==names(contexts)[k])] > 0) # select cases that have any value greater than 0 in the column that matches the name of context k
     
     context.data[[k]]$N.hits <- nrow(filter(df, df[ , which(colnames(df)==names(contexts)[k])] == 1)) # the number of utterances that contained a key word (does not include utterances before and after)
     
