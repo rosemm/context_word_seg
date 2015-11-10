@@ -27,6 +27,18 @@ expand_windows <- function(df){
     }
     print(p$tick()) # advance progress bar
   }
+  # the above code skips lines 1 and 2, so go ahead and fill those in now
+  for(j in which(colnames(df) == colnames(contexts)[1]):ncol(df)){
+    i <- 1
+    df[1,j] <- ifelse(df[i,j]==1, df[i,j], # if it is already marked 1, leave it
+                      ifelse(df[(i+1),j]==1, 1.5, # if the utterance 1 after it is marked 1, mark 1.5
+                             ifelse(df[(i+2),j]==1, 1.5, 0))) # if the utterance 2 after it is marked 1, mark 1.5. Otherwise mark 0.
+    i <- 2
+    df[2,j] <- ifelse(df[i,j]==1, df[i,j], # if it is already marked 1, leave it
+                      ifelse(df[(i-1),j]==1, 1.5, # if the utterance 1 before it is marked 1, mark 1.5
+                             ifelse(df[(i+1),j]==1, 1.5, # if the utterance 1 after it is marked 1, mark 1.5
+                                    ifelse(df[(i+2),j]==1, 1.5, 0)))) # if the utterance 2 after it is marked 1, mark 1.5. Otherwise mark 0.
+  }
   return(df)
 }
 
