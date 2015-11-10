@@ -162,7 +162,8 @@ CodeContexts <- function(this_pass=2, window_size=30, slide_by=5){
     start <- sample(start_vals, 1) # select a starting utterance at random from the starting values
     
     # if that section has already been fully coded, select new starting values until you get some stuff that hasn't been coded yet
-    while( !anyNA(dplyr::filter(coding_doc, file==this.file & start-1 < UttNum & UttNum < start+window_size & pass==this_pass)$context ) ){
+    wait <- Sys.time() # only keep looping for a max of 5 seconds, then just go with whatever's there
+    while( Sys.time() - wait < as.difftime(5, units = "secs") & !anyNA(dplyr::filter(coding_doc, file==this.file & start-1 < UttNum & UttNum < start+window_size & pass==this_pass)$context ) ){
       start <- sample(start_vals, 1) # select a new starting utterance at random from the starting values
     }
     
