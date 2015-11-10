@@ -13,36 +13,49 @@ setwd("/Users/TARDIS/Documents/STUDIES/context_word_seg")
 contexts <- read.csv("/Users/TARDIS/Documents/STUDIES/context_word_seg/words by contexts.csv")
 
 ######################################################################
-# translate orth to phon, and code context for each utterance by key-words list:
+# translate orth to phon (this also reads in the dict file):
 source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_orth_to_phon.R")
-source("data_processing_orth_to_phon.R")
+# source("data_processing_orth_to_phon.R")
+
 df <- coding_doc_clean
 ######################################################################
 
+######################################################################
+# code contexts in df by word lists
+######################################################################
+temp <- unique(df$orth) # to speed up processing, only code each unique utterance once (then we'll join it back to the full df)
+temp.codes <- data.frame(orth=temp)
+for(k in 1:length(names(contexts))){
+  
+  temp.codes[[names(contexts)[k]]] <- 0 # make a new column for this context
+  words <- as.character(unique(contexts[,k])) # this word list
+  words <- words[words !=""] # drop empty character element in the list
+  
+  for(w in 1:length(words)){
+    # for every orth entry that contains this word, put a 1 in this context's column
+    temp.codes[[names(contexts)[k]]][grep(pattern=paste0("\\<", words[w], "\\>"), x=temp.codes$orth )] <- 1 
+  }
+}
+df <- tidyr::left_join(df, temp.codes) # join temp.codes back to full df
+
+df <- expand_windows(df) # extend context codes 2 utterances before and after each hit
+
+
+######################################################################
 # add number of syllables for each word to dictionary
 dict$N.syl <- rep(NA, nrow(dict))
 for(i in 1:nrow(dict)){
   dict$N.syl[i] <- length(strsplit(as.character(dict$phon[i]), split="-", fixed=TRUE)[[1]])
   }
 
-if(length(df$orth[grepl(x=df$orth, pattern="[[:upper:]]")]) >0 ) df$orth <- tolower(df$orth)
-if(length(df$orth[grepl(x=df$phon, pattern="-", fixed=T)]) >0 )  df$phon <- gsub(x=df$phon, pattern="-", replacement=" ", fixed=T)
+if(length(df$orth[grepl(x=df$orth, pattern="[[:upper:]]")]) >0 ) df$orth <- tolower(df$orth) # make sure the orth stream is all lower case
+if(length(df$orth[grepl(x=df$phon, pattern="-", fixed=T)]) >0 )  df$phon <- gsub(x=df$phon, pattern="-", replacement=" ", fixed=T) # make sure all word-internal syllable boundaries "-" are represnted just the same as between-word syllable boundaries (space)
+
 # add frequency for each word
 dict$freq.orth <- rep(NA, nrow(dict))
 for(i in 1:nrow(dict)){
   dict$freq.orth[i] <- length(grep(paste("^",dict$word[i],"$", sep=""), x=strsplit(paste(df$orth, collapse=" "), split=" ", fixed=T)[[1]]))
   }
-
-
-# classify dictionary words by context
-context.columns <- (cols+1):(cols+length(colnames(contexts)))
-dict$sum <- rowSums(dict[,context.columns]) # identify words that are key words from more than one context (ambiguous) - there should be none of these for mutually exclusive lists.
-
-dict$context <- ifelse(dict$sum == 1, colnames(contexts)[apply(dict[,context.columns], 1, which.max)], 
-                     ifelse(dict$sum > 1, "ambiguous", 
-                            ifelse(dict$sum == 0, "none", NA)))
-dict$context <- as.factor(dict$context)
-summary(dict$context)
 
 
 ############################################################################
