@@ -228,6 +228,60 @@ assess_seg <- function(seg.phon.stream, words, dict){
   return(results)
 }
 
+# for bootstrapping nontexts:
+par_function <- function(df, contexts){ # this is the function that should be done in parallel on the 12 cores of each node
+  # contexts <- df[1, c(4:ncol(df))]
+  
+  # pick nontexts
+  results <- nontext_cols(df=df, context_names=colnames(contexts)) # add the nontext col
+  non <- results[[1]]
+  nontexts <- results[[2]]
+  names(nontexts) <- paste("non.", colnames(contexts), sep="")
+  
+  # add nontext columns to dataframe
+  colnames(non) <- colnames(contexts)
+  df.non <- cbind(df[,1:3], non)
+  
+  # expand windows to + - 2 utterances before and after
+  df.non <- expand_windows(df.non)
+  
+  # calculate MIs and TPs
+  nontext.data <- context_results(contexts, df=df.non) # calls make_streams() and calc_MI()
+  
+  # segment speech
+  for(k in 1:length(names(nontext.data))){
+    
+    nontext.data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=.85, stat="TP", nontext.data[[k]]$unique.phon.pairs, nontext.data[[k]]$streams$phon.stream)
+    
+    nontext.data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=.85, stat="MI", nontext.data[[k]]$unique.phon.pairs, nontext.data[[k]]$streams$phon.stream)
+  }
+  
+  # assess segmentation
+  stat.results <- data.frame(recall=NULL, precision=NULL, stat=NULL, nontext=NULL)
+  for(k in 1:length(names(nontext.data))){
+    
+    nontext.data[[k]]$TP85$seg.results <- assess_seg(seg.phon.stream=nontext.data[[k]]$TP85$seg.phon.stream, words=nontext.data[[k]]$streams$words, dict=dict)
+    
+    TPresults <- colMeans(nontext.data[[k]]$TP85$seg.results[,3:4], na.rm=T)
+    TPresults$stat <- "TP"
+    
+    nontext.data[[k]]$MI85$seg.results <- assess_seg(seg.phon.stream=nontext.data[[k]]$MI85$seg.phon.stream, words=nontext.data[[k]]$streams$words, dict=dict)
+    
+    MIresults <- colMeans(nontext.data[[k]]$MI85$seg.results[,3:4], na.rm=T)
+    MIresults$stat <- "MI"
+    
+    this.result <- as.data.frame(rbind(TPresults, MIresults))
+    row.names(this.result) <- NULL
+    this.result$stat <- as.factor(as.character(this.result$stat))
+    this.result$nontext <- names(nontext.data)[[k]]
+    stat.results <- rbind(stat.results,this.result)
+  } 
+  stat.results$nontext <- as.factor(as.character(stat.results$nontext))
+  stat.results$recall <- as.numeric(stat.results$recall)
+  stat.results$precision <- as.numeric(stat.results$precision)
+  return(stat.results)
+}
+
 check_seed_words <- function(seg.results){
   results <- dplyr::filter(seg.results, context!="none" & !is.na(context))
   return(results)
