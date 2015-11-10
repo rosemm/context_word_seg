@@ -12,46 +12,14 @@ setwd("/Users/TARDIS/Documents/STUDIES/context_word_seg")
 
 contexts <- read.csv("/Users/TARDIS/Documents/STUDIES/context_word_seg/words by contexts.csv")
 
-orth <- readLines("eng_korman_from_swingley2005/allEd11")
-phon <- readLines("eng_korman_from_swingley2005/syl_ko_6b") # note that "dear" is incorrectly entered as "'d7" here, and it should be "'d7R" according to the dict file.
+######################################################################
+# translate orth to phon, and code context for each utterance by key-words list:
+source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_orth_to_phon.R")
+source("data_processing_orth_to_phon.R")
+df <- coding_doc_clean
+######################################################################
 
-
-df <- data.frame(orth=orth, phon=phon, stringsAsFactors=F)
-
-# clean up
-df$orth <- sapply(strsplit(df$orth, "\t"), '[', 2) # split it at the tab and only keep the second part 
-df$orth <- substr(df$orth, start=1, stop=nchar(df$orth)-2) # remove the last two characters (space and punctuation)
-df$phon <- sapply(strsplit(df$phon, ": "), '[', 2) # split it at ": " and only keep the second part
-
-
-#####################
-# tidy bigrams in orthographic stream
-#####################
-df$orth <- gsub(pattern="oh dear", replacement="oh_dear", df$orth, fixed=TRUE)
-df$orth <- gsub(pattern="all gone", replacement="all_gone", df$orth, fixed=TRUE)
-df$orth <- gsub(pattern="thank you", replacement="thank_you", df$orth, fixed=TRUE)
-df$orth <- gsub(pattern="uh oh", replacement="uh_oh", df$orth, fixed=TRUE)
-df$orth <- gsub(pattern="patty cake", replacement="patty_cake", df$orth, fixed=TRUE)
-
-#####################
-# correct "dear" mistake
-#####################
-grep("dear", df$orth, value=T)
-df$phon <- gsub(pattern="'d7$", replacement="'d7R", df$phon) # when 'd7 occurs utterance-final, replace it with 'd7R (that's definitely "dear" and not "dearie" or "dearier")
-df$phon <- gsub(pattern="'d7 ([^r])", replacement="'d7R \\1", df$phon) # when 'd7 occurs and is NOT followed by an r after a space, replace it with 'd7R
-df$phon <- gsub(pattern="'d7 ([^r])", replacement="'d7R \\1", df$phon) # need to run this twice because of overlapping hits with "dear dear"
-
-unique(df[grep("dear", df$orth),]) # check all utterances with "dear" in them
-
-dict <- read.table("/Users/TARDIS/Documents/STUDIES/context_word_seg/eng_korman_from_swingley2005/dict_all3.txt", sep=" ", quote="", comment.char ="")
-colnames(dict) <- c("word", "phon")
-
-grep("dear", dict$word, value=T)
-dict[grep("dear", dict$word),]
-dict$phon <- as.character(dict$phon)
-dict[which(dict$word=="dear"),]$phon <- "'d7" # doesn't work
-
-# add number of syllables for each word
+# add number of syllables for each word to dictionary
 dict$N.syl <- rep(NA, nrow(dict))
 for(i in 1:nrow(dict)){
   dict$N.syl[i] <- length(strsplit(as.character(dict$phon[i]), split="-", fixed=TRUE)[[1]])
@@ -66,18 +34,6 @@ for(i in 1:nrow(dict)){
   }
 
 
-# add defined context for each word
-cols <- ncol(dict)
-for(i in 1:length(colnames(contexts))){
-  
-  dict <- cbind(dict, as.numeric(rep(NA, nrow(dict)))) # add a column of NAs to dict
-  colnames(dict)[cols+i] <- colnames(contexts)[i] # name that column after the current context
-  
-  key.words <- as.vector(contexts[,i][contexts[,i] != ""]) # drop empty cells from context columns to save just a vector of key words for this context
-  
-  dict[,cols+i] <- ifelse(dict$word %in% key.words, 1, 0) # if word occurs in the key.words, then mark 1 for this column, otherwise 0
-  }
-
 # classify dictionary words by context
 context.columns <- (cols+1):(cols+length(colnames(contexts)))
 dict$sum <- rowSums(dict[,context.columns]) # identify words that are key words from more than one context (ambiguous) - there should be none of these for mutually exclusive lists.
@@ -88,40 +44,6 @@ dict$context <- ifelse(dict$sum == 1, colnames(contexts)[apply(dict[,context.col
 dict$context <- as.factor(dict$context)
 summary(dict$context)
 
-
-# code context for each utterance
-p <- progress_estimated(n=length(colnames(contexts))) # print progress bar while working
-message("coding context for each utterance")
-for(k in 1:length(colnames(contexts))){
-  df[[colnames(contexts)[k]]] <- NA # add a column of NAs to df, name that column after the current context
-  
-# check each utterance for each context
-  key.words <- as.vector(contexts[,k][contexts[,k] != ""]) # drop empty cells from context columns to save just a vector of key words for this context
-
-  for(j in 1:nrow(df)){
-     df[[colnames(contexts)[k]]][j] <- ifelse(any(strsplit(df$orth[j], " ")[[1]] %in% key.words), 1, 0)
-  }
-print(p$tick()) # advance progress bar
-}
-
-
-#########################################################
-# expand context windows to utterance with key word +-2 utterances
-#########################################################
-df <- expand_windows(df) 
-
-# classify utterances by context (ignore nontext columns)
-context.columns <- which(colnames(df) == colnames(contexts)[1]):(which(colnames(df) == colnames(contexts)[1]) - 1 + length(colnames(contexts)))
-df$sum <- rowSums(df[,context.columns]) # identify utterances with key words from more than one context (ambiguous)
-
-df$context <- ifelse(df$sum > 1.5, "ambiguous", 
-                     ifelse(df$sum > 0, colnames(contexts)[apply(df[,context.columns], 1, which.max)], 
-                            ifelse(df$sum == 0, "none", NA)))
-df$context <- as.factor(df$context)
-summary(df$context)
-
-ambiguous.utterances <- filter(df,context=="ambiguous")
-# View(ambiguous.utterances)
 
 ############################################################################
 # global results
@@ -193,10 +115,10 @@ for(k in 1:length(names(context.data))){
 # assess segmentation
 ###############################
 global.data$TP85$seg.results <- assess_seg(seg.phon.stream=global.data$TP85$seg.phon.stream, words=global.data$streams$words, dict=dict)
-colMeans(global.data$TP85$seg.results[,4:5], na.rm=T)
+colMeans(global.data$TP85$seg.results[,3:4], na.rm=T)
 
 global.data$MI85$seg.results <- assess_seg(seg.phon.stream=global.data$MI85$seg.phon.stream, words=global.data$streams$words, dict=dict)
-colMeans(global.data$MI85$seg.results[,4:5], na.rm=T)
+colMeans(global.data$MI85$seg.results[,3:4], na.rm=T)
 
 
 for(k in 1:length(names(context.data))){
@@ -206,101 +128,55 @@ for(k in 1:length(names(context.data))){
       
   context.data[[k]]$TP85$seg.results <- assess_seg(seg.phon.stream=context.data[[k]]$TP85$seg.phon.stream, words=context.data[[k]]$streams$words, dict=dict)
   
-  print(colMeans(context.data[[k]]$TP85$seg.results[,4:5], na.rm=T))
+  print(colMeans(context.data[[k]]$TP85$seg.results[,3:4], na.rm=T))
   
   message("MIs...")
   context.data[[k]]$MI85$seg.results <- assess_seg(seg.phon.stream=context.data[[k]]$MI85$seg.phon.stream, words=context.data[[k]]$streams$words, dict=dict)
   
-  print(colMeans(context.data[[k]]$MI85$seg.results[,4:5], na.rm=T))
+  print(colMeans(context.data[[k]]$MI85$seg.results[,3:4], na.rm=T))
 }
 
+#####################################################
+# use batchjobs_script.r to run nontext comparison distributions on ACISS (HPC)
+# save resulting dataframe as nontext.results
+#####################################################
+library(tidyr)
+nontext.results <- nontext.results %>%
+  mutate(cutoff=85) %>%
+  unite(criterion, stat, cutoff, sep="", remove=F) %>%
+  gather(measure, value, recall:precision) %>%
+  rename(context=nontext)
 
-go <- Sys.time()
-
-iter <- 30 # the number of times to generate random nontexts
-
-# storage variable
-bootstrap.results <- vector("list", length(colnames(contexts)))  
-for(k in 1:length(colnames(contexts))){
-  bootstrap.results[[k]] <- matrix(ncol=iter, nrow=4, dimnames=list(c("TP85recall", "TP85precision", "MI85recall", "MI85precision")))
-}
-names(bootstrap.results) <- colnames(contexts)
-
-for(i in 1:iter){
-  message(paste("*********************\nIteration", i, "...\n*********************"))  
+context.results <- data.frame(context=NULL, criterion=NULL, measure=NULL, context.est=NULL)
+for (k in 1:length(names(context.data)) ){
   
-  # pick nontexts
-  results <- nontext_cols(df=df, context_names=colnames(contexts)) # add the nontext col
-  non <- results[[1]]
-  nontexts <- results[[2]]
+  criteria <- c("TP85", "MI85")
   
-  # add nontext columns to dataframe
-  df.non <- cbind(df, non)
-  names(nontexts) <- paste("non.", colnames(contexts), sep="")
-  
-  # expand windows to + - 2 utterances before and after
-  df.non <- expand_windows(df.non)
-  
-  # calculate MIs and TPs
-  nontext.data <- context_results(contexts=nontexts, df=df.non) # calls make_streams() and calc_MI()
-  
-  # segment speech
-  for(k in 1:length(names(nontext.data))){
+  for (c in 1:length(criteria)){
+    context.est <- colMeans(context.data[[k]][[criteria[c]]]$seg.results[,c(3:4)], na.rm=T)
+    estimates <- as.data.frame(context.est)
+    estimates$measure <- row.names(estimates)
+    estimates$context <- names(context.data)[k]
+    estimates$criterion <- criteria[c]
+    row.names(estimates) <- NULL
     
-    message(paste("Segment speech! Processing ", names(nontexts)[k], "...", sep=""))
-    
-    nontext.data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=.85, stat="TP", nontext.data[[k]]$unique.phon.pairs, nontext.data[[k]]$streams$phon.stream)
-    
-    nontext.data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=.85, stat="MI", nontext.data[[k]]$unique.phon.pairs, nontext.data[[k]]$streams$phon.stream)
+    context.results <- rbind(context.results, estimates) # add the results from this context and criterion to the rest
   }
-  
-  # assess segmentation
-  for(k in 1:length(names(nontext.data))){
-    
-    message(paste("processing ", names(nontexts)[k], "...", sep=""))
-    message("TPs...")
-    
-    nontext.data[[k]]$TP85$seg.results <- assess_seg(seg.phon.stream=nontext.data[[k]]$TP85$seg.phon.stream, words=nontext.data[[k]]$streams$words, dict=dict)
-    
-    TPresults <- colMeans(nontext.data[[k]]$TP85$seg.results[,4:5], na.rm=T)
-    
-    message("MIs...")
-    nontext.data[[k]]$MI85$seg.results <- assess_seg(seg.phon.stream=nontext.data[[k]]$MI85$seg.phon.stream, words=nontext.data[[k]]$streams$words, dict=dict)
-    
-    MIresults <- colMeans(nontext.data[[k]]$MI85$seg.results[,4:5], na.rm=T)
-    
-    
-    bootstrap.results[[k]][1,i] <- TPresults[1]
-    bootstrap.results[[k]][2,i] <- TPresults[2]
-    bootstrap.results[[k]][3,i] <- MIresults[1]
-    bootstrap.results[[k]][4,i] <- MIresults[2]
-  }
-}
+}  
 
-record_bootstrap_results(bootstrap.results, wd="./bootstrap_output/") # saves date-stamped files with the bootstrapping results, so I don't lose them :)
+full.results <- left_join(nontext.results, context.results)
+#####################################################
+# THE PLOT
+#####################################################
+ggplot(filter(full.results, criterion=="MI85"), aes(x=context, y=value))+
+  geom_boxplot() +
+  facet_wrap(~measure) +
+  geom_point(aes(x=context, y=context.est, color=context), size=4) + 
+  # geom_hline(data=global.plot, aes(yintercept=mean), linetype = 2) + 
+  theme(text = element_text(size=30), axis.ticks = element_blank(), axis.text.x = element_blank()) +
+  labs(x=NULL, y=NULL)
 
-message("How long did that take?")
-Sys.time() - go
-
-#bootstrap.results <- read_bootstrap_results(iter=60, contexts=contexts, wd="./bootstrap_output/")
-
-
-bootstrap.summary <- data.frame(context=rep(NA, length(colnames(contexts))), TP85recall.mean=NA, TP85precision.mean=NA, TP85recall.sd=NA, TP85precision.sd=NA, MI85recall.mean=NA, MI85precision.mean=NA, MI85recall.sd=NA, MI85precision.sd=NA) # storage variable
-
-for(k in 1:length(colnames(contexts))){
-  bootstrap.summary$context[k] <- names(bootstrap.results)[[k]]
-  bootstrap.summary$TP85recall.mean[k] <- rowMeans(bootstrap.results[[k]])[1]
-  bootstrap.summary$TP85precision.mean[k] <- rowMeans(bootstrap.results[[k]])[2]
-  bootstrap.summary$MI85recall.mean[k] <- rowMeans(bootstrap.results[[k]])[3]
-  bootstrap.summary$MI85precision.mean[k] <- rowMeans(bootstrap.results[[k]])[4]
-  bootstrap.summary$TP85recall.sd[k] <- sd(bootstrap.results[[k]][1,])
-  bootstrap.summary$TP85precision.sd[k] <- sd(bootstrap.results[[k]][2,])
-  bootstrap.summary$MI85recall.sd[k] <- sd(bootstrap.results[[k]][3,])
-  bootstrap.summary$MI85precision.sd[k] <- sd(bootstrap.results[[k]][4,])
-
-}
-bootstrap.summary$context <- as.factor(bootstrap.summary$context)
-
+#####################################################
 bootstrap.plot <- bootstrap.summary %>%
   gather(key="key", value="value", -context) %>%
   tidyr::extract(col=key, into=c("criterion", "measure", "stat"), regex="([A-Z]{2}[0-9]{2})([a-z]+).([a-z]+)") %>%
@@ -320,26 +196,9 @@ ggplot(bootstrap.plot, aes(x=context, y=mean)) +
 #####################################################
 # one-sample t-tests comparing each nontext dist to its context estimate
 #####################################################
-bootstrap.plot$context.est <- NA
-for(k in 1:length(colnames(contexts))){
-  context.resultsTP <- colMeans(context.data[[k]]$TP85$seg.results[,4:5], na.rm=T) 
-  context.resultsMI <- colMeans(context.data[[k]]$MI85$seg.results[,4:5], na.rm=T)
-  bootstrap.plot$context.est <- with(bootstrap.plot, ifelse(context==colnames(contexts)[k],
-                                ifelse(criterion=="TP85" & measure=="recall", context.resultsTP[which(attr(context.resultsTP, "names")=="recall")],
-                                  ifelse(criterion=="TP85" & measure=="precision", context.resultsTP[which(attr(context.resultsTP, "names")=="precision")],
-                                         ifelse(criterion=="MI85" & measure=="recall", context.resultsMI[which(attr(context.resultsTP, "names")=="recall")],
-                                                ifelse(criterion=="MI85" & measure=="precision", context.resultsMI[which(attr(context.resultsTP, "names")=="precision")],
-                                                       NA)))), context.est))
+for(k in 1:length(names(context.data))){
+  
 }
- 
-
-kable(bootstrap.plot)
-kable(filter(bootstrap.plot, criterion=="MI85"))
-
-
-# average effect size
-mean(filter(bootstrap.plot, criterion=="MI85" & measure=="recall")$d)
-mean(filter(bootstrap.plot, criterion=="MI85" & measure=="precision")$d)
 
 
 #############
