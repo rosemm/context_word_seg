@@ -1,4 +1,4 @@
-source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/coding_scripts.r")
+source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/coding_scripts.R")
 
 # use BlankDoc to turn all of the transcripts into one neat dataframe (but omit the coder columns)
 coding_doc <- BlankDoc(for.coding=F)
