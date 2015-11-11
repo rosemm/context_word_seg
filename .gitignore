@@ -20,3 +20,4 @@ transcripts/
 .DS_Store
 coding_doc.txt
 batchtest-files
+packrat/lib*/
