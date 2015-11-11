@@ -21,3 +21,5 @@ transcripts/
 coding_doc.txt
 batchtest-files
 packrat/lib*/
+plots/
+contexts
