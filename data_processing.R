@@ -56,7 +56,7 @@ for(k in 1:length(names(contexts))){
 }
 df <- left_join(df, temp.codes) # join temp.codes back to full df
 
-df <- expand_windows(df) # extend context codes 2 utterances before and after each hit
+df <- expand_windows(df, context.names=names(contexts)) # extend context codes 2 utterances before and after each hit
 
 
 ######################################################################
