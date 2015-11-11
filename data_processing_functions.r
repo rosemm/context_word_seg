@@ -112,17 +112,17 @@ make_streams = function(df){
   return(output)
 }
 
-context_results <- function(contexts, df){
-  context.data <- vector("list", length(names(contexts))) # storage variable
-  names(context.data) <- names(contexts)
+context_results <- function(context.names, df){
+  context.data <- vector("list", length(context.names)) # storage variable
+  names(context.data) <- context.names
   
-  for(k in 1:length(names(contexts))){
+  for(k in 1:length(context.names)){
     
-    message(paste("processing ", names(contexts)[k], "...", sep=""))
+    message(paste("processing ", context.names[k], "...", sep=""))
     
-    df.context <- dplyr::filter(df, df[ , which(colnames(df)==names(contexts)[k])] > 0) # select cases that have any value greater than 0 in the column that matches the name of context k
+    df.context <- dplyr::filter(df, df[ , which(colnames(df)==context.names[k])] > 0) # select cases that have any value greater than 0 in the column that matches the name of context k
     
-    context.data[[k]]$N.hits <- nrow(filter(df, df[ , which(colnames(df)==names(contexts)[k])] == 1)) # the number of utterances that contained a key word (does not include utterances before and after)
+    context.data[[k]]$N.hits <- nrow(filter(df, df[ , which(colnames(df)==context.names[k])] == 1)) # the number of utterances that contained a key word (does not include utterances before and after)
     
     context.data[[k]]$N.utterances <- nrow(df.context)
     
@@ -229,24 +229,24 @@ assess_seg <- function(seg.phon.stream, words, dict){
 }
 
 # for bootstrapping nontexts:
-par_function <- function(df, contexts){ # this is the function that should be done in parallel on the 12 cores of each node
-  # contexts <- df[1, c(4:ncol(df))]
+par_function <- function(df){ # this is the function that should be done in parallel on the 12 cores of each node
+  context.names <- colnames(df[4:ncol(df)])
   
   # pick nontexts
-  results <- nontext_cols(df=df, context_names=colnames(contexts)) # add the nontext col
+  results <- nontext_cols(df=df, context_names=context.names ) # add the nontext col
   non <- results[[1]]
   nontexts <- results[[2]]
-  names(nontexts) <- paste("non.", colnames(contexts), sep="")
+  names(nontexts) <- paste("non.", context.names, sep="")
   
   # add nontext columns to dataframe
-  colnames(non) <- colnames(contexts)
+  colnames(non) <- context.names
   df.non <- cbind(df[,1:3], non)
   
   # expand windows to + - 2 utterances before and after
   df.non <- expand_windows(df.non)
   
   # calculate MIs and TPs
-  nontext.data <- context_results(contexts, df=df.non) # calls make_streams() and calc_MI()
+  nontext.data <- context_results(context.names, df=df.non) # calls make_streams() and calc_MI()
   
   # segment speech
   for(k in 1:length(names(nontext.data))){
@@ -332,13 +332,13 @@ record_bootstrap_results <- function(bootstrap.results, wd="./bootstrap_output/"
 }
 
 read_bootstrap_results <- function(iter, contexts, wd="./bootstrap_output/"){
-  bootstrap.results <- vector("list", length(colnames(contexts)))  
-  for(k in 1:length(colnames(contexts))){
+  bootstrap.results <- vector("list", length(context.names))  
+  for(k in 1:length(context.names)){
     bootstrap.results[[k]] <- matrix(ncol=iter, nrow=4, dimnames=list(c("TP85recall", "TP85precision", "MI85recall", "MI85precision")))
   }
   files <- list.files(path=wd, ".txt")
   
-  if(length(files) != length(colnames(contexts))) stop("ERROR: The number of contexts in this folder does not match the number of contexts in the contexts argument.")
+  if(length(files) != length(context.names)) stop("ERROR: The number of contexts in this folder does not match the number of contexts in the contexts argument.")
   
   for(f in 1:length(files)){
    bootstrap.results[[f]] <- read.table(file=paste(wd, files[f], sep=""), sep="\t", header=F, row.names=1) 
