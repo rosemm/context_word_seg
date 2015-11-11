@@ -232,8 +232,6 @@ assess_seg <- function(seg.phon.stream, words, dict){
 par_function <- function(df, dict){ # this is the function that should be done in parallel on the 12 cores of each node
   context.names <- colnames(df[4:ncol(df)])
   
-  source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r")
-  
   # pick nontexts
   results <- nontext_cols(df=df, context_names=context.names ) # add the nontext col
   non <- results[[1]]
