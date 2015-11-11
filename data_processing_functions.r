@@ -243,7 +243,7 @@ par_function <- function(df){ # this is the function that should be done in para
   df.non <- cbind(df[,1:3], non)
   
   # expand windows to + - 2 utterances before and after
-  df.non <- expand_windows(df.non)
+  df.non <- expand_windows(df.non, context.names=context.names)
   
   # calculate MIs and TPs
   nontext.data <- context_results(context.names, df=df.non) # calls make_streams() and calc_MI()
