@@ -110,4 +110,4 @@ for(i in 1:length(nodes)){
   }
   results <- rbind(results, result)
 }
-# save(results, file="batchresults") # not working
+saveRDS(results, file="batchresults.rds") 
