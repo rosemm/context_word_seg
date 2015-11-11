@@ -11,14 +11,32 @@ source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/dat
 setwd("/Users/TARDIS/Documents/STUDIES/context_word_seg")
 
 contexts <- read.csv("/Users/TARDIS/Documents/STUDIES/context_word_seg/words by contexts.csv")
+######################################################################
+# only keep context words that actually occur in the corpus
+# (this is only relevant for presenting the list, e.g. in a talk - the code works fine with extra words in there)
+######################################################################
+contexts.list <- as.list(contexts)
+for(i in 1:length(names(contexts.list))){
+  this.context <- contexts.list[[i]][contexts.list[[i]] %in% global.data$streams$orth.stream] # the context words that show up in the corpus
+  this.context <- c(as.character(this.context), rep("", nrow(contexts)-length(this.context))) # add empty values at the end to make all of the columns the same length
+  contexts.list[[i]] <- this.context
+}
+contexts.occuring <- as.data.frame(contexts.list)
+contexts.occuring <- contexts.occuring[-which(apply(contexts.occuring,1,function(x)all(x==""))),] # remove empty rows at the end
+kable(contexts.occuring)
+write.table(contexts.occuring, file="contexts.occuring.csv", sep=",", row.names=F)
+
 
 ######################################################################
 # translate orth to phon (this also reads in the dict file):
+######################################################################
 source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_orth_to_phon.R")
 # source("data_processing_orth_to_phon.R")
 
 df <- coding_doc_clean
 ######################################################################
+
+
 
 ######################################################################
 # code contexts in df by word lists
@@ -36,13 +54,14 @@ for(k in 1:length(names(contexts))){
     temp.codes[[names(contexts)[k]]][grep(pattern=paste0("\\<", words[w], "\\>"), x=temp.codes$orth )] <- 1 
   }
 }
-df <- tidyr::left_join(df, temp.codes) # join temp.codes back to full df
+df <- left_join(df, temp.codes) # join temp.codes back to full df
 
 df <- expand_windows(df) # extend context codes 2 utterances before and after each hit
 
 
 ######################################################################
 # add number of syllables for each word to dictionary
+######################################################################
 dict$N.syl <- rep(NA, nrow(dict))
 for(i in 1:nrow(dict)){
   dict$N.syl[i] <- length(strsplit(as.character(dict$phon[i]), split="-", fixed=TRUE)[[1]])
@@ -72,7 +91,7 @@ hist(global.data$unique.phon.pairs$TP, main="Global TP")
 ############################################################################
 # context results
 ############################################################################
-context.data <- context_results(contexts=contexts, df=df) # calls make_streams() and calc_MI()
+context.data <- context_results(context.names=names(contexts), df=df) # calls make_streams() and calc_MI()
 
 # present results
 par(mfrow=c(1,2))
@@ -91,21 +110,6 @@ for(k in 1:length(colnames(contexts))){
 names(N.utt) <- colnames(contexts)
 
 
-#####################
-# only keep context words that actually occur in the corpus
-#####################
-contexts.list <- as.list(contexts)
-for(i in 1:length(names(contexts.list))){
-  this.context <- contexts.list[[i]][contexts.list[[i]] %in% global.data$streams$orth.stream] # the context words that show up in the corpus
-  this.context <- c(as.character(this.context), rep("", nrow(contexts)-length(this.context))) # add empty values at the end to make all of the columns the same length
-  contexts.list[[i]] <- this.context
-}
-contexts.occuring <- as.data.frame(contexts.list)
-contexts.occuring <- contexts.occuring[-which(apply(contexts.occuring,1,function(x)all(x==""))),] # remove empty rows at the end
-kable(contexts.occuring)
-write.table(contexts.occuring, file="contexts.occuring.csv", sep=",", row.names=F)
-
-
 #####################################
 # segment speech
 #####################################
@@ -122,7 +126,6 @@ for(k in 1:length(names(context.data))){
   context.data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=.85, stat="MI", context.data[[k]]$unique.phon.pairs, context.data[[k]]$streams$phon.stream)
   
 }
-
 
 ###############################
 # assess segmentation
