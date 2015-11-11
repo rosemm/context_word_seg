@@ -56,13 +56,13 @@ save(contexts, file = "contexts")
 # the model (run this in R on ACISS)
 ###########################################################
 library(BatchJobs)
-getConfig()
+# getConfig()
 
 # install.packages("dplyr", "tidyr", "doParallel")
 library(dplyr); library(tidyr); library(doParallel); library(devtools)
 sessionInfo() # to check
 
-starts <- 1:20
+starts <- 1:12
 
 
 batch_function <- function(starts){
@@ -80,28 +80,25 @@ batch_function <- function(starts){
   dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
   cols <- ncol(dict)
   if(nrow(dict) == 0) stop("dict didn't load")
-  
-  load(file = "contexts")
-  if(nrow(contexts) == 0) stop("contexts didn't load")
     
   iter <- 12 # the number of times to generate random samples
 
   library(doParallel)
   registerDoParallel()
-  r <- foreach(1:iter, .combine = rbind) %dopar% par_function(df=df, contexts=contexts)
+  r <- foreach(1:iter, .combine = rbind, .packages=c("dplyr", "tidyr", "devtools") ) %dopar% par_function(df=df, dict=dict)
   # save(r, file="bootstrap_results.data")
 }
 
 
 # create a registry
-id <- "bootstrap1"
-reg1 <- makeRegistry(id = id)
+id <- "bootstrap"
+reg <- makeRegistry(id = id)
 
 # map function and data to jobs and submit
-ids  <- batchMap(reg1, batch_function, starts)
-done <- submitJobs(reg1, resources = list(nodes = 10, ppn=iter))
+ids  <- batchMap(reg, batch_function, starts)
+done <- submitJobs(reg, resources = list(nodes = 10, ppn=iter))
 
-showStatus(reg1)
+showStatus(reg)
 
 results <- data.frame(V1=NULL)
 nodes <- list.files(paste0(id, "-files/jobs"))
@@ -113,4 +110,4 @@ for(i in 1:length(nodes)){
   }
   results <- rbind(results, result)
 }
-# save(results, file="batchresults.RData") # not working
+# save(results, file="batchresults") # not working
