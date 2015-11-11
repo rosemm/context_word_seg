@@ -18,6 +18,11 @@ doc_doctor <- function(recursive=T){
       goods <- filter(coding_doc, !( coder=="RM" | coder=="TEST" | coder=="" & !is.na(date) | nchar(context) < 3 & !is.na(date) ) | is.na(coder) & pass > 0) # the opposite of those issues
       if(nrow(bads)>0){
         message(nrow(bads), " bad cases found.")
+        print <- FALSE
+        print <- grepl(readline("Print bad cases for review now? (y/n) "), "y")
+        if(print){
+          print(as.matrix(bads))
+        }
         
         correct_errors <- FALSE
         correct_errors <- grepl(readline("Do you wish to correct these cases now? \nDoing so will overwrite your old coding file with the new clean one. \n(y/n): "), "y")
@@ -56,6 +61,7 @@ collect_codes <- function(){
   # clean up some bad punctuation
   master_doc$context <- gsub(pattern=",", x=master_doc$context, replacement=";", fixed=T)
   master_doc$context <- gsub(pattern="/", x=master_doc$context, replacement=";", fixed=T)
+  master_doc$context <- tolower(master_doc$context)
   
   message(" Removing ", nrow(master_doc) - nrow(unique(master_doc)), " duplicate rows.")
   master_doc <- unique(master_doc) # there are duplicate rows because of copying the coding docs when I was originally starting the RAs on coding
@@ -66,7 +72,7 @@ collect_codes <- function(){
 # setwd("/Users/TARDIS/Documents/STUDIES/context_word_seg")
 # write.table(master_doc, file="master_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
-process_codes <- function(master_doc, criterion=5, cleaning_keys=read.table("context_cleaning_keys.txt", header=1, sep="\t", stringsAsFactors=F)){
+process_codes <- function(master_doc, criterion=3, cleaning_keys=read.table("context_cleaning_keys.txt", header=1, sep="\t", stringsAsFactors=F)){
   if(!require(tidyr)) install.packages("tidyr"); library(tidyr)
   if(!require(dplyr)) install.packages("dplyr"); library(dplyr)
   if(!require(psych)) install.packages("psych"); library(psych)
