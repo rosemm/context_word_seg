@@ -156,6 +156,8 @@ for(k in 1:length(names(context.data))){
 # use batchjobs_script.r to run nontext comparison distributions on ACISS (HPC)
 # save resulting dataframe as nontext.results
 #####################################################
+nontext.results <- readRDS(file="batchresults.rds")
+
 library(tidyr)
 nontext.results <- nontext.results %>%
   mutate(cutoff=85) %>%
@@ -192,7 +194,31 @@ ggplot(filter(full.results, criterion=="MI85"), aes(x=context, y=value))+
   theme(text = element_text(size=30), axis.ticks = element_blank(), axis.text.x = element_blank()) +
   labs(x=NULL, y=NULL)
 
+# with histograms instead of boxplots, to examine the nontext distributions (for shape, skew, etc.)
+ggplot(filter(full.results, criterion=="MI85"), aes(x=value))+
+  geom_histogram() +
+  geom_vline(aes(color=context, xintercept=context.est), size=2) + 
+  facet_wrap(~ measure + context, scales="free", ncol=7) +
+  theme(text = element_text(size=20), axis.ticks = element_blank()) +
+  labs(x=NULL, y=NULL)
+
+# bootstrap p-values
+full.results$above.est <- ifelse(full.results$value > full.results$context.est, 1, 0)
+tests <- full.results %>%
+  group_by(context, criterion, measure) %>%
+  summarize(p.val = mean(above.est))
+tests$stars <- ifelse(tests$p.val < .001, "***",
+                      ifelse(tests$p.val < .01, "**",
+                             ifelse(tests$p.val < .05, "*", 
+                                    ifelse(tests$p.val < .1, "+", ""))))
+
+kable(filter(tests, criterion=="MI85")[,-2], digits=3)
+
 #####################################################
+
+
+
+
 bootstrap.plot <- bootstrap.summary %>%
   gather(key="key", value="value", -context) %>%
   tidyr::extract(col=key, into=c("criterion", "measure", "stat"), regex="([A-Z]{2}[0-9]{2})([a-z]+).([a-z]+)") %>%
