@@ -338,7 +338,7 @@ collect_codes <- function(){
 }
 
 new_codes <- function( raw_codes, cols=c("raw", "clean"), key_file ){
-  message(paste0("Checking to see if we need to update the cleaning key ", key_file, "..."))
+  message(paste0("Checking to see if we need to update the cleaning key ", key_file, "...")) 
           key <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
           
           message("\n(Note that the first column of the key needs to correspond to raw codes)\n")
