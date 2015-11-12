@@ -12,7 +12,7 @@ coding_doc <- coding_doc %>%
 # coding_doc <- read.table("utt_orth_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
 
 #################################
-# translate orth to phon
+# read in dict
 #################################
 
 dict <- read.table("eng_korman_from_swingley2005/dict_all3.txt", sep=" ", quote="", comment.char ="")
@@ -23,12 +23,26 @@ dict.add <- data.frame(word=    c("mummie", "mummie's", "mummie'll", "tellie", "
                        old.word=c("mummy",  "mummy's",  "mummy'll",  "telly",  "handy",  "potty",  "bathy",  "rusky",  "heady",  "chinny",  "hanky",  "nappy",  "drinkee", "roley", "roley",  "poley", "poley",  "dearie", "hiccup",   "hiccups",   "pooh", "lu",  "hmm",  "er",  "eh",  "ha",  "mm",  "aah", "uh",  "ha",   "wee",  "treazh", "he",  "ooh"),
                        phon=NA)
 for(d in 1:nrow(dict.add)){
+  # for each new entry, use the phon for its homophone's entry
  dict.add[d,]$phon <- as.character(dict[as.character(dict$word)==dict.add[d,]$old.word , ]$phon) 
 }
-dict.add$old.word <- NULL
-dict <- rbind(dict, dict.add)
-# write.table(dict, file="dict_all3_updated.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+dict.add$old.word <- NULL # drop the old word column, so this is just orth and phon, like the rest of the dict entries
+dict <- rbind(dict, dict.add) # add it to the dict
 
+
+# add number of syllables for each word to dictionary
+dict$N.syl <- NA
+for(i in 1:nrow(dict)){
+  dict$N.syl[i] <- length(strsplit(as.character(dict$phon[i]), split="-", fixed=TRUE)[[1]])
+}
+
+
+write.table(dict, file="dict_all3_updated.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+
+
+####################################################################
+# translate coding doc utterances
+####################################################################
 coding_doc <- coding_doc[!grepl(pattern="unintelligible", x=coding_doc$orth), ] # delete utterances with unintelligible content
 
 translate_phon <- function(dict, orth, first=TRUE){ # translate orth to phon based on dict
@@ -112,5 +126,5 @@ for(i in 1:length(missed.phon) ){
 }
 message("\n...now ", nrow(coding_doc_clean), " utterances in coding_doc_clean. ", 100*round(nrow(coding_doc_clean)/nrow(coding_doc), 4), "% utterances remain\n")
 
-# write.table(coding_doc_clean, file="utt_orth_phon_KEY.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+write.table(coding_doc_clean, file="utt_orth_phon_KEY.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 # key <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
