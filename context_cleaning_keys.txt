@@ -1,4 +1,5 @@
 context_raw	context_clean
+	TEST
 after bath	post-bath
 after bathtime	post-bedtime
 after diapering	post-diaper
@@ -25,15 +26,22 @@ bathtime	bathtime
 bed time	bedtime
 bedtime	bedtime
 before bath	pre-bath
+before bath time	pre-bath
 before bedtime	pre-bedtime
 before diapering	pre-diaper
 before feeding	pre-mealtime
+before going out	before leaving
+before leaving	before leaving
 before meal	pre-mealtime
 before meal time	pre-mealtime
 before mealtime	pre-mealtime
+before nap	pre-nap
+before napping	pre-bedtime
 before swimming	pre-swimming
 being tired	being tired
+being uncomfortable	fussing
 being upset	fussing
+biting	biting
 blowing bubbles	blowing bubbles
 blowing raspberries	blowing raspberries
 bounching	bouncing
@@ -49,6 +57,7 @@ changing clothes	changing clothes
 changing diaper	diaper change
 chewing	chewing
 chiding	chiding
+clapping	clapping
 clean up	clean up
 cleaning	cleaning
 cleaning the child	cleaning the child
@@ -60,12 +69,15 @@ communicating	talking
 consoling	soothing
 conversing	talking
 conversing with child	talking
+cooing	cooing
 cooking	cooking
 coughing	coughing
 crawling	crawling
 crying	crying
 cuddling	cuddling
-defecating	defecating
+Cuddling	cuddling
+dancing	dancing
+defecating	pooping
 diaper change	diaper change
 diapering	diaper change
 dinner time	mealtime
@@ -79,6 +91,7 @@ driving	car
 drooling	drooling
 drying	drying
 drying after bath	drying
+drying off	drying
 eating	mealtime
 end of mealtime	post-mealtime
 entertaining	entertaining
@@ -87,17 +100,22 @@ exercising	exercising
 feeding	mealtime
 Feeding	mealtime
 feeding time	mealtime
+filming	filming
 finishing bath	post-bath
+fussibg	fussing
 fussing	fussing
 gas	gas
 getting attention	directing attention
 getting dressed	dressing
+getting on clothes	changing clothes
 getting ready	getting ready
+getting ready for bed	pre-bedtime
 getting sick	spitting up
 getting up	post-nap
 going potty	going potty
 going to sleep	bedtime
 grooming	grooming
+grunting	grunting
 guided observation	directing attention
 hearing	hearing
 hiccuping	hiccups
@@ -109,13 +127,17 @@ house chores	housework
 housework	housework
 in crib	in crib
 in the kitchen	in the kitchen
+inactive	inactive
 interaction	talking
+ironing	ironing
 joint attention	joint attention
 kicking	kicking
+kissing	kissing
 laughing	laughing
 laying outside	outside
 learning words	learning words
 leaving	leaving
+listening	listening
 looking	looking
 lying	lying
 meal	mealtime
@@ -144,7 +166,7 @@ pooping	pooping
 post bath	post-bath
 post meal	post-mealtime
 post-bath	post-bath
-Post-bath	Post-bath
+Post-bath	post-bath
 post-bathing	post-bath
 post-changing	post-diaper
 post-feeding	post-feeding
@@ -165,6 +187,7 @@ preparing food	cooking
 preparing for bath	pre-bedtime
 preparing for bed	pre-bedtime
 preparing for bedtime	pre-bedtime
+putting down	pre-bedtime
 putting on the bib	putting on the bib
 putting to bed	bedtime
 reading	storytime
@@ -177,6 +200,8 @@ shopping	shopping
 shouting	shouting
 sick	sick
 singing	singing
+sleep time	bedtime
+sleeping	bedtime
 sleeptime	bedtime
 smiling	smiling
 snack	mealtime
@@ -184,11 +209,12 @@ snacktime	mealtime
 sneezing	sneezing
 soething	soothing
 soothing	soothing
-soothng	soothng
+soothng	soothing
 sothing	soothing
 speaking	talking
 spitting up	spitting up
 storytime	storytime
+stretching	stretching
 sucking	sucking
 sucking thumb	sucking thumb
 sunbathing	sunbathing
@@ -209,6 +235,7 @@ thumb sucking	sucking thumb
 thumb-sucking	sucking thumb
 ticking	tickling
 tickling	tickling
+touching	touching
 undressing	undressing
 waiting for food	pre-mealtime
 waking	waking up
@@ -217,6 +244,7 @@ walking	walking
 washing	washing
 washing dishes	washing dishes
 washing face	washing face
+watching	watching
 watching television	TV
 watching tv	TV
 watching TV	TV
