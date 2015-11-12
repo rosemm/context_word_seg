@@ -104,7 +104,6 @@ BlankDoc <- function(wd="./transcripts/", for.coding=TRUE){
 }
 # write.table(coding_doc, file="coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
-
 CodeContexts <- function(this_pass=2, window_size=30, slide_by=5){
   # check whether packages need to be installed
   list.of.packages <- c("dplyr", "car")
@@ -267,3 +266,200 @@ CodeContexts <- function(this_pass=2, window_size=30, slide_by=5){
   message(paste("You coded ", Ncoded, " windows in ", round(time[[1]],1), " ", attributes(time)$units, "! Well done! :)\nThank you, and bye!", sep=""))
 }
 
+doc_doctor <- function(recursive=T){
+  if(!require(dplyr) ) install.packages("dplyr")
+  docs <- dir(pattern="coding_doc.txt", recursive=recursive)
+  message("Including the following coding documents:\n", paste(docs, collapse="\n"), "\n")
+  
+  for(i in 1:length(docs)){
+    # load the coding doc
+    message("Checking ", docs[i], "...\n")
+    coding_doc <- read.table(docs[i], header=1, sep="\t", stringsAsFactors=F)
+    
+    # make all coder initials upper case
+    coding_doc$coder <- toupper(coding_doc$coder)
+    # make all contexts lower case
+    coding_doc$context <- tolower(coding_doc$context)
+    
+    library(dplyr)
+    bads <- filter(coding_doc, ( coder=="RM" | coder=="TEST" | coder=="" & !is.na(date) | nchar(context) < 3 & !is.na(date) ) | pass < 1 ) # likely issues in the coding
+    goods <- filter(coding_doc, !( coder=="RM" | coder=="TEST" | coder=="" & !is.na(date) | nchar(context) < 3 & !is.na(date) ) | is.na(coder) & pass > 0) # the opposite of those issues
+    if(nrow(bads)>0){
+      message(nrow(bads), " bad cases found.")
+      print <- FALSE
+      print <- grepl(readline("Print bad cases for review now? (y/n) "), "y")
+      if(print){
+        print(as.matrix(bads))
+      }
+      
+      correct_errors <- FALSE
+      correct_errors <- grepl(readline("Do you wish to correct these cases now? \nDoing so will overwrite your old coding file with the new clean one. \n(y/n): "), "y")
+      
+      if(correct_errors){
+        bads$coder <- NA
+        bads$date <- NA
+        bads$context <- NA
+        
+        if ( nrow(coding_doc) != nrow(goods) + nrow(bads) )  stop("oh no!")
+        coding_doc <- rbind(goods, bads)
+        
+        message(nrow(filter(coding_doc, coder=="RM" | coder=="TEST" | coder=="" & !is.na(date))), " bad cases left. :)")
+        
+        # write updated coding_doc to file
+        message("Writing the squeaky clean doc...")
+        write.table(coding_doc, file=docs[i], quote=F, col.names=T, row.names=F, append=F, sep="\t")
+      }
+    }
+  }
+  message("All done!\n")
+}
+
+collect_codes <- function(){
+  
+  docs <- dir(pattern="coding_doc.txt", recursive=TRUE)
+  message("Including the following coding documents:\n", paste(docs, collapse="\n"))
+  
+  # pull out the coded portion from each doc
+  for(i in 1:length(docs)){
+    doc <- read.table(docs[i], header=1, sep="\t", stringsAsFactors=F)
+    coded <- dplyr::filter(doc, !is.na(context))
+    if( nrow(dplyr::filter(coded, coder=="RM" | coder=="TEST" | coder=="" & !is.na(date))) != 0 ) stop("Run doc_doctor first. There are bad cases here.")
+    if(i==1) master_doc <- coded else master_doc <- rbind(master_doc, coded)
+  }
+  # clean up some bad punctuation
+  master_doc$context <- gsub(pattern=",", x=master_doc$context, replacement=";", fixed=T)
+  master_doc$context <- gsub(pattern="/", x=master_doc$context, replacement=";", fixed=T)
+  master_doc$context <- tolower(master_doc$context)
+  
+  message(" Removing ", nrow(master_doc) - nrow(unique(master_doc)), " duplicate rows.")
+  master_doc <- unique(master_doc) # there are duplicate rows because of copying the coding docs when I was originally starting the RAs on coding
+  
+  return(master_doc)
+}
+
+new_codes <- function( raw_codes, cols=c("raw", "clean"), key_file ){
+  
+  key <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
+  
+  message("\n(Note that the first column of the key needs to correspond to raw codes)\n")
+  new_raw_codes <- raw_codes[!raw_codes %in% key[,1]]
+  
+  message(length(new_raw_codes), " new raw codes (not already in the key).")
+  if(length(new_raw_codes) > 0) {
+    add_codes <- FALSE
+    add_codes <- grepl(readline("Do you wish to add these codes now? (y/n): "), "y")
+    
+    if(add_codes){
+      new_code_pairs <- data.frame(raw=new_raw_codes, clean=NA, stringsAsFactors=F)
+      colnames(new_code_pairs) <- cols
+      
+      message("\nEnter the clean code for each raw code \n")
+      for(i in 1:nrow(new_code_pairs)){
+        
+        change <- readline(paste0("Change '", new_code_pairs[i,1], "'? (y/n) "))
+        
+        if( change == "n" ) {
+          new_code_pairs[i,2] <- as.character(new_code_pairs[i,1]) # make clean code the same as raw code if change is "no" 
+        } else if( change == "y" ){
+          
+          replace_confirm <- FALSE
+          while(!replace_confirm){
+            clean_code <- readline("Replace with: ")
+            replace_confirm <- readline("Confirm? (y/n) ") =="y"
+          }
+          new_code_pairs[i,2] <- clean_code
+        } else stop("Error. Change must be y or n")
+      }
+      key <- rbind(key, new_code_pairs)
+      key <- key[ order(key[,1]) , ] # re-sort the key based on the first column (raw codes)
+      write.table(key, key_file, quote=F, col.names=T, row.names=F, append=F, sep="\t")
+      
+      message("New contexts added! :) \n")
+    }
+  } 
+}
+
+process_codes <- function(master_doc, criterion=3, key_file="context_cleaning_keys.txt" ){
+  if(!require(tidyr)) install.packages("tidyr"); library(tidyr)
+  if(!require(dplyr)) install.packages("dplyr"); library(dplyr)
+  if(!require(psych)) install.packages("psych"); library(psych)
+  if(!require(GPArotation)) install.packages("GPArotation"); library(GPArotation)
+  
+  cleaning_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
+  
+  # master_doc <- read.table("master_doc.txt", header=1, sep="\t", stringsAsFactors=F)
+  
+  master_doc <- filter(master_doc,  !grepl("^[[:blank:]]*$",master_doc$context)) # cleaning out empty codes
+  
+  RA_info <- master_doc %>%
+    tidyr::unite( utt, file, UttNum) %>%
+    dplyr::select(utt, coder, context, pass) %>%
+    group_by(coder) %>%
+    dplyr::summarize(n_utts_codes=n())
+  
+  message("\nRAs have coded this many utterances:\n") ; print(as.data.frame(RA_info))
+  
+  # only keep utterances that have been coded at least [criterion] times
+  keep <- master_doc %>%
+    tidyr::unite( utt, file, UttNum) %>%
+    dplyr::select(utt, coder, context, pass) %>%
+    group_by(utt) %>%
+    dplyr::summarize(n=n()) %>%
+    dplyr::filter(n > (criterion-1)) %>%
+    dplyr::select(utt)
+  
+  master_doc_keep <- merge(tidyr::unite(master_doc, utt, file, UttNum), keep, by="utt", all.x=FALSE, all.y=TRUE )
+  
+  message("Removing ", nrow(master_doc)-nrow(master_doc_keep) , " utterances because they have been coded fewer than ", criterion, " times across all coders.\n")    
+  message( 100*round( nrow(keep)/13350, 4), "% of total utterances are included in analyses.\n" )
+  
+  master_doc_keep$context <- as.factor(master_doc_keep$context)
+  
+  maxcontexts <- 10 # the maximum number of contexts that can be read for one window (30 utterances)
+  
+  master_doc_keep <- tidyr::separate(master_doc_keep, col=context, into=paste("context", 1:maxcontexts, sep="."), sep="[[:blank:]]*;[[:blank:]]*", extra="drop")
+  master_doc_keep <- tidyr::gather(master_doc_keep, key="contextnum", value="context", which(colnames(master_doc_keep)==paste("context",1, sep=".")):which(colnames(master_doc_keep)==paste("context",maxcontexts, sep=".")), na.rm=T)
+  
+  # check if any codes in the coding doc are missing from the cleaning key, and if so add them
+  raw_codes <- sort(unique(master_doc_keep$context))
+  new_codes(raw_codes, cols=c("context_raw", "context_clean"), key_file)
+  
+  # write.table(as.matrix(contexts, ncol=1), "context_cleaning_keys.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+  
+  for(i in 1:nrow(cleaning_keys)){
+    rows <- grep(pattern=paste("^", cleaning_keys[i,1], "$", sep=""), x=master_doc_keep$context, value=F)
+    master_doc_keep[rows,] # just for checking
+    master_doc_keep$context <- gsub(pattern=paste("^", cleaning_keys[i,1], "$", sep=""), x=master_doc_keep$context, replacement=cleaning_keys[i,2])
+    master_doc_keep[rows,] # just for checking
+  }
+  master_doc_keep$context <- as.factor(master_doc_keep$context)
+  summary(master_doc_keep$context)
+  
+  master_doc_keep <- filter(master_doc_keep, context !="TEST") # cleaning
+  
+  return(master_doc_keep)
+}
+
+process_categories <- function(master_doc_keep, key_file="categories_cleaning_keys.txt" ){
+  
+  categories_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
+  
+  # check for codes in master_doc_keep that aren't in the categories_keys yet
+  codes <- unique(master_doc_keep$context)
+  nomatch <- codes[-match(categories_keys$context_clean, codes)]
+  
+  # check if any context codes are missing from the categories key, and if so add them
+  new_codes(raw_codes=codes, cols=c("context_clean", "category"), key_file)
+  
+  master_doc_keep$category <- "misc"
+  
+  for(i in 1:nrow(categories_keys)){
+    rows <- grep(pattern=paste("^", categories_keys[i,1], "$", sep=""), x=master_doc_keep$context, value=F)
+    master_doc_keep[rows,] # just for checking
+    master_doc_keep$category <- ifelse(grepl(pattern=paste("^", categories_keys[i,1], "$", sep=""), x=master_doc_keep$context), categories_keys[i,2], master_doc_keep$category)
+    master_doc_keep[rows,] # just for checking
+  }
+  length(unique((master_doc_keep$category))) - length(unique((categories_keys$category)))
+  summary(as.factor(master_doc_keep$category))
+  return(master_doc_keep)
+}
