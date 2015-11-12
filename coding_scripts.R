@@ -99,7 +99,7 @@ BlankDoc <- function(wd="./transcripts/", for.coding=TRUE){
     coding_doc <- rbind(coding_doc1, coding_doc2, coding_doc3)
     coding_doc$utterance <- NULL # drop this column for coding purposes
   }
-
+  
   return(coding_doc)
 }
 # write.table(coding_doc, file="coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
@@ -203,10 +203,10 @@ CodeContexts <- function(this_pass=2, window_size=30, slide_by=5){
     this_doc$coder <- as.character(this_doc$coder)
     this_doc$context <- as.character(this_doc$context)
     still_to_code_this_doc <- dplyr::filter(coding_doc, 
-                           file==this.file & 
-                             start-1 < UttNum & 
-                             UttNum < start+window_size &  
-                             is.na(coding_doc$context))
+                                            file==this.file & 
+                                              start-1 < UttNum & 
+                                              UttNum < start+window_size &  
+                                              is.na(coding_doc$context))
     
     # if a particular utterance has been coded previously, then set the pass to the next value that's still uncoded
     for(i in 1:nrow(this_doc)){
@@ -214,9 +214,9 @@ CodeContexts <- function(this_pass=2, window_size=30, slide_by=5){
       
       max_pass <- max(dplyr::filter(coding_doc, file==this_doc$file[i] & UttNum==this_doc$UttNum[i])$pass) # the highest pass value available for this Utterance in the coding doc
       if( !is.integer(max_pass) ) max_pass <- max(coding_doc$pass) # in case there's an error above
-        
+      
       this_doc$LineNum[i] <- median(dplyr::filter(coding_doc, file==this_doc$file[i] & UttNum==this_doc$UttNum[i])$LineNum)
-        
+      
       if (length(still_to_code_this_doc_passes)>0) {
         this_doc$pass[i] <- min(still_to_code_this_doc_passes) # set pass to the lowest pass value that shows up in still_to_code_this_doc for this utterance
         # update coding_doc
@@ -229,7 +229,7 @@ CodeContexts <- function(this_pass=2, window_size=30, slide_by=5){
         coding_doc[coding_doc$UttNum==this_doc[i,]$UttNum & 
                      coding_doc$file==this_doc[i,]$file & 
                      coding_doc$pass==this_doc[i,]$pass,]$context <- this_doc[i,]$context
-        }
+      }
       if (length(still_to_code_this_doc_passes)==0) {
         this_doc$pass[i] <- max_pass + 1 # if this utterance has already been fully coded, add a new pass for it
         # update coding_doc
@@ -246,7 +246,7 @@ CodeContexts <- function(this_pass=2, window_size=30, slide_by=5){
       write.table(coding_doc, file="coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
     }
     
-        
+    
     # check whether to keep coding or quit
     code_another <- readline("\nCode another one? (Y/N) ")
     if (grepl("n", code_another, ignore.case=T )) {
@@ -338,45 +338,45 @@ collect_codes <- function(){
 }
 
 new_codes <- function( raw_codes, cols=c("raw", "clean"), key_file ){
-  
-  key <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
-  
-  message("\n(Note that the first column of the key needs to correspond to raw codes)\n")
-  new_raw_codes <- raw_codes[!raw_codes %in% key[,1]]
-  
-  message(length(new_raw_codes), " new raw codes (not already in the key).")
-  if(length(new_raw_codes) > 0) {
-    add_codes <- FALSE
-    add_codes <- grepl(readline("Do you wish to add these codes now? (y/n): "), "y")
-    
-    if(add_codes){
-      new_code_pairs <- data.frame(raw=new_raw_codes, clean=NA, stringsAsFactors=F)
-      colnames(new_code_pairs) <- cols
-      
-      message("\nEnter the clean code for each raw code \n")
-      for(i in 1:nrow(new_code_pairs)){
-        
-        change <- readline(paste0("Change '", new_code_pairs[i,1], "'? (y/n) "))
-        
-        if( change == "n" ) {
-          new_code_pairs[i,2] <- as.character(new_code_pairs[i,1]) # make clean code the same as raw code if change is "no" 
-        } else if( change == "y" ){
+  message(paste0("Checking to see if we need to update the cleaning key ", key_file, "...")
+          key <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
           
-          replace_confirm <- FALSE
-          while(!replace_confirm){
-            clean_code <- readline("Replace with: ")
-            replace_confirm <- readline("Confirm? (y/n) ") =="y"
-          }
-          new_code_pairs[i,2] <- clean_code
-        } else stop("Error. Change must be y or n")
-      }
-      key <- rbind(key, new_code_pairs)
-      key <- key[ order(key[,1]) , ] # re-sort the key based on the first column (raw codes)
-      write.table(key, key_file, quote=F, col.names=T, row.names=F, append=F, sep="\t")
-      
-      message("New contexts added! :) \n")
-    }
-  } 
+          message("\n(Note that the first column of the key needs to correspond to raw codes)\n")
+          new_raw_codes <- raw_codes[!raw_codes %in% key[,1]]
+          
+          message(length(new_raw_codes), " new raw codes (not already in the key).")
+          if(length(new_raw_codes) > 0) {
+            add_codes <- FALSE
+            add_codes <- grepl(readline("Do you wish to add these codes now? (y/n): "), "y")
+            
+            if(add_codes){
+              new_code_pairs <- data.frame(raw=new_raw_codes, clean=NA, stringsAsFactors=F)
+              colnames(new_code_pairs) <- cols
+              
+              message("\nEnter the clean code for each raw code \n")
+              for(i in 1:nrow(new_code_pairs)){
+                
+                change <- readline(paste0("Change '", new_code_pairs[i,1], "'? (y/n) "))
+                
+                if( change == "n" ) {
+                  new_code_pairs[i,2] <- as.character(new_code_pairs[i,1]) # make clean code the same as raw code if change is "no" 
+                } else if( change == "y" ){
+                  
+                  replace_confirm <- FALSE
+                  while(!replace_confirm){
+                    clean_code <- readline("Replace with: ")
+                    replace_confirm <- readline("Confirm? (y/n) ") =="y"
+                  }
+                  new_code_pairs[i,2] <- clean_code
+                } else stop("Error. Change must be y or n")
+              }
+              key <- rbind(key, new_code_pairs)
+              key <- key[ order(key[,1]) , ] # re-sort the key based on the first column (raw codes)
+              write.table(key, key_file, quote=F, col.names=T, row.names=F, append=F, sep="\t")
+              
+              message("New contexts added! :) \n")
+            }
+          } 
 }
 
 process_codes <- function(master_doc, criterion=3, key_file="context_cleaning_keys.txt" ){
@@ -453,7 +453,6 @@ process_categories <- function(master_doc_keep, key_file="categories_cleaning_ke
   # read in the key again, to get any updates
   categories_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
   
-  master_doc_keep$category <- "misc"
   
   for(i in 1:nrow(categories_keys)){
     rows <- grep(pattern=paste("^", categories_keys[i,1], "$", sep=""), x=master_doc_keep$context, value=F)
@@ -463,5 +462,15 @@ process_categories <- function(master_doc_keep, key_file="categories_cleaning_ke
   }
   length(unique((master_doc_keep$category))) - length(unique((categories_keys$category)))
   summary(as.factor(master_doc_keep$category))
+  
+  # check to make sure that one coder isn't contributing 2 hits on the same category for the same utterance
+  # e.g. if a coder tagged an utterance as "burping ; mealtime" then it would result in "mealtime" and "mealtime" as the categories
+  cat.check <- master_doc_keep %>%
+    group_by(coder, date, utt, category) %>%
+    summarize(hits=n() ) 
+  table(cat.check$hits) # see how many times a single utterance is coded by the same coder multiple times with the same category
+  
+  master_doc_keep <-  select(cat.check, utt, coder, date, category) # drop the extra columns
+  
   return(master_doc_keep)
 }
