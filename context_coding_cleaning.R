@@ -75,3 +75,25 @@ master_doc_prop$which <- ifelse(master_doc_prop$maxes>1, NA, master_doc_prop$whi
 master_doc_prop$which <- ifelse(master_doc_prop$max < .66 , NA, master_doc_prop$which) # don't pick a context if the max context is less than 66%
 master_doc_prop$context <- colnames(master_doc_prop)[master_doc_prop$which ]
 summary(as.factor(master_doc_prop$context) )
+
+
+# calc contexts by voting threshold
+include <- master_doc_keep %>%
+  group_by(utt, category) %>%
+  summarize(votes=n())
+include$yes <- ifelse(include$votes > 2, 1, 0)
+include <- include %>%
+  filter( yes==1 ) %>%
+  select(utt, category)
+  
+contexts_from_coding <- left_join( master_doc_keep[ , 1:2] , include) 
+contexts_from_coding <- unique(contexts_from_coding) %>%
+  select(-LineNum) %>%
+  mutate(hit=1) %>%
+  spread(category, hit, fill=0)
+
+# the number of utterances per context
+N.utts <- colSums(contexts_from_coding[ , 2:ncol(contexts_from_coding)])
+
+# the number of utterances that have 1, 2, 3, and 4 contexts identified (to get a sense of the overlap)
+table(rowSums(contexts_from_coding[ , 2:ncol(contexts_from_coding)]))
