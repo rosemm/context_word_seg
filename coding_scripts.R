@@ -342,7 +342,7 @@ new_codes <- function( raw_codes, cols=c("raw", "clean"), key_file ){
 
           key <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
           
-          message("\n(Note that the first column of the key needs to correspond to raw codes)\n")
+          message("(Note that the first column of the key needs to correspond to raw codes)\n")
           new_raw_codes <- raw_codes[!raw_codes %in% key[,1]]
           
           message(length(new_raw_codes), " new raw codes (not already in the key).")
@@ -387,8 +387,6 @@ process_codes <- function(master_doc, criterion=3, key_file="context_cleaning_ke
   if(!require(GPArotation)) install.packages("GPArotation"); library(GPArotation)
   
   cleaning_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
-  
-  # master_doc <- read.table("master_doc.txt", header=1, sep="\t", stringsAsFactors=F)
   
   master_doc <- filter(master_doc,  !grepl("^[[:blank:]]*$",master_doc$context)) # cleaning out empty codes
   
@@ -448,7 +446,6 @@ process_categories <- function(master_doc_keep, key_file="categories_cleaning_ke
   # check for codes in master_doc_keep that aren't in the categories_keys yet
   codes <- unique(master_doc_keep$context)
   nomatch <- codes[-match(categories_keys$context_clean, codes)]
-  
   # check if any context codes are missing from the categories key, and if so add them
   new_codes(raw_codes=codes, cols=c("context_clean", "category"), key_file)
   # read in the key again, to get any updates
