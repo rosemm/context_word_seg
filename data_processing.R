@@ -30,10 +30,26 @@ write.table(contexts.occuring, file="contexts.occuring.csv", sep=",", row.names=
 ######################################################################
 # translate orth to phon (this also reads in the dict file):
 ######################################################################
-source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_orth_to_phon.R")
-# source("data_processing_orth_to_phon.R")
+# to translate CHILDES transcripts to phon approximations using Swingley's dictionary:
+# source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_orth_to_phon.R")
 
-df <- coding_doc_clean
+# after the first time, we can just read in the saved results from the above code
+key <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
+dict <- read.table("dict_all3_updated.txt", header=1, sep="\t", quote="", comment.char ="")
+
+df <- key # take the utterance number, orth and phon key and use it to start the dataframe
+
+
+if( length(df$orth[grepl(x=df$orth, pattern="[[:upper:]]")]) >0 ) df$orth <- tolower(df$orth) # make sure the orth stream is all lower case
+if( length(df$orth[grepl(x=df$phon, pattern="-", fixed=T)])  >0 )  df$phon <- gsub(x=df$phon, pattern="-", replacement=" ", fixed=T) # make sure all word-internal syllable boundaries "-" are represnted just the same as between-word syllable boundaries (space)
+
+
+# add frequency for each word to dictionary
+dict$freq.orth <- NA
+for(i in 1:nrow(dict)){
+  dict$freq.orth[i] <- length(grep(paste("^",dict$word[i],"$", sep=""), x=strsplit(paste(df$orth, collapse=" "), split=" ", fixed=T)[[1]]))
+}
+
 ######################################################################
 
 
@@ -59,23 +75,6 @@ df <- left_join(df, temp.codes) # join temp.codes back to full df
 df <- expand_windows(df, context.names=names(contexts)) # extend context codes 2 utterances before and after each hit
 
 
-######################################################################
-# add number of syllables for each word to dictionary
-######################################################################
-dict$N.syl <- rep(NA, nrow(dict))
-for(i in 1:nrow(dict)){
-  dict$N.syl[i] <- length(strsplit(as.character(dict$phon[i]), split="-", fixed=TRUE)[[1]])
-  }
-
-if(length(df$orth[grepl(x=df$orth, pattern="[[:upper:]]")]) >0 ) df$orth <- tolower(df$orth) # make sure the orth stream is all lower case
-if(length(df$orth[grepl(x=df$phon, pattern="-", fixed=T)]) >0 )  df$phon <- gsub(x=df$phon, pattern="-", replacement=" ", fixed=T) # make sure all word-internal syllable boundaries "-" are represnted just the same as between-word syllable boundaries (space)
-
-# add frequency for each word
-dict$freq.orth <- rep(NA, nrow(dict))
-for(i in 1:nrow(dict)){
-  dict$freq.orth[i] <- length(grep(paste("^",dict$word[i],"$", sep=""), x=strsplit(paste(df$orth, collapse=" "), split=" ", fixed=T)[[1]]))
-  }
-
 
 ############################################################################
 # global results
@@ -91,6 +90,10 @@ hist(global.data$unique.phon.pairs$TP, main="Global TP")
 ############################################################################
 # context results
 ############################################################################
+colnames(df)[which(is.na(colnames(df)) )] <- "none" # replace NA with "none"
+
+contexts <- df[1,4:ncol(df)]
+
 context.data <- context_results(context.names=names(contexts), df=df) # calls make_streams() and calc_MI()
 
 # present results
@@ -157,6 +160,9 @@ for(k in 1:length(names(context.data))){
 # save resulting dataframe as nontext.results
 #####################################################
 nontext.results <- readRDS(file="batchresults.rds")
+nontext.results <- readRDS(file=paste0("nontexts_humanjudgments/batchresults_HJ.rds"))
+nontext.results <- readRDS(file=paste0("nontexts_humanjudgments/batchresults_HJ2.rds"))
+nontext.results <- readRDS(file=paste0("nontexts_humanjudgments/batchresults_HJ_noexpand.rds"))
 
 library(tidyr)
 nontext.results <- nontext.results %>%
