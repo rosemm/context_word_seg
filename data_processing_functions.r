@@ -216,13 +216,7 @@ assess_seg <- function(seg.phon.stream, words, dict){
     results$freq[i] <- length(gregexpr(pattern=as.character(results$phon[i]), text=collapsed.unseg, fixed=TRUE)[[1]])
     results$freq.segd[i] <- length(gregexpr(pattern=paste(",",as.character(results$phon[i]), "-,", sep=""), text=collapsed, fixed=TRUE)[[1]])
   }
-  freq.breaks <- quantile(results$freq, probs=seq(0,1, 1/3))
-  results$freq.bins <- ifelse(results$freq <= freq.breaks[1], "low",
-                              ifelse(results$freq <= freq.breaks[2], "med",
-                                     ifelse(results$freq > freq.breaks[2], "high", NA)))
-  results$freq.bins <- as.factor(results$freq.bins)
-  # break N.syl into monosyllabic, disyllabic and multisyllabic
-  results$syl.bins <- cut(results$N.syl, breaks=c(0,1,2,3,max(results$N.syl)+1), labels=c("one", "two", "three", "more"), ordered_result=T)
+  
   results$N.segd.units <- length(units)  # how many "words" were found in this corpus?
   
   return(results)
