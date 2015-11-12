@@ -223,7 +223,7 @@ assess_seg <- function(seg.phon.stream, words, dict){
 }
 
 # for bootstrapping nontexts:
-par_function <- function(df, dict){ # this is the function that should be done in parallel on the 12 cores of each node
+par_function <- function(df, dict, expand){ # this is the function that should be done in parallel on the 12 cores of each node
   context.names <- colnames(df[4:ncol(df)])
   
   # pick nontexts
@@ -236,8 +236,10 @@ par_function <- function(df, dict){ # this is the function that should be done i
   colnames(non) <- context.names
   df.non <- cbind(df[,1:3], non)
   
-  # expand windows to + - 2 utterances before and after
-  df.non <- expand_windows(df.non, context.names=context.names)
+  if(expand){
+    # expand windows to + - 2 utterances before and after
+    df.non <- expand_windows(df.non, context.names=context.names)
+  }
   
   # calculate MIs and TPs
   nontext.data <- context_results(context.names, df=df.non) # calls make_streams() and calc_MI()
