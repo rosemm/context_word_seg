@@ -423,8 +423,8 @@ process_codes <- function(master_doc, criterion=3, key_file="context_cleaning_ke
   # check if any codes in the coding doc are missing from the cleaning key, and if so add them
   raw_codes <- sort(unique(master_doc_keep$context))
   new_codes(raw_codes, cols=c("context_raw", "context_clean"), key_file)
-  
-  # write.table(as.matrix(contexts, ncol=1), "context_cleaning_keys.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+  # read in the key again, to get any updates
+  cleaning_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
   
   for(i in 1:nrow(cleaning_keys)){
     rows <- grep(pattern=paste("^", cleaning_keys[i,1], "$", sep=""), x=master_doc_keep$context, value=F)
@@ -450,6 +450,8 @@ process_categories <- function(master_doc_keep, key_file="categories_cleaning_ke
   
   # check if any context codes are missing from the categories key, and if so add them
   new_codes(raw_codes=codes, cols=c("context_clean", "category"), key_file)
+  # read in the key again, to get any updates
+  categories_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
   
   master_doc_keep$category <- "misc"
   
