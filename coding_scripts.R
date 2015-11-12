@@ -451,8 +451,8 @@ process_categories <- function(master_doc_keep, key_file="categories_cleaning_ke
   # read in the key again, to get any updates
   categories_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
   
-  
-  for(i in 1:nrow(categories_keys)){
+  master_doc_keep$category <- NA
+  for( i in 1:nrow(categories_keys) ){
     rows <- grep(pattern=paste("^", categories_keys[i,1], "$", sep=""), x=master_doc_keep$context, value=F)
     master_doc_keep[rows,] # just for checking
     master_doc_keep$category <- ifelse(grepl(pattern=paste("^", categories_keys[i,1], "$", sep=""), x=master_doc_keep$context), categories_keys[i,2], master_doc_keep$category)
