@@ -97,3 +97,10 @@ N.utts <- colSums(contexts_from_coding[ , 2:ncol(contexts_from_coding)])
 
 # the number of utterances that have 1, 2, 3, and 4 contexts identified (to get a sense of the overlap)
 table(rowSums(contexts_from_coding[ , 2:ncol(contexts_from_coding)]))
+
+
+# save these contexts in a file we can send to ACISS for bootstrap nontexts
+key <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
+key <- key[,1:3]
+key <- left_join(key, contexts_from_coding)
+write.table(key, file="utt_orth_phon_KEY2.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
