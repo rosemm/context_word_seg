@@ -10,22 +10,6 @@ library(devtools)
 source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r")
 setwd("/Users/TARDIS/Documents/STUDIES/context_word_seg")
 
-contexts <- read.csv("/Users/TARDIS/Documents/STUDIES/context_word_seg/words by contexts.csv")
-######################################################################
-# only keep context words that actually occur in the corpus
-# (this is only relevant for presenting the list, e.g. in a talk - the code works fine with extra words in there)
-######################################################################
-contexts.list <- as.list(contexts)
-for(i in 1:length(names(contexts.list))){
-  this.context <- contexts.list[[i]][contexts.list[[i]] %in% global.data$streams$orth.stream] # the context words that show up in the corpus
-  this.context <- c(as.character(this.context), rep("", nrow(contexts)-length(this.context))) # add empty values at the end to make all of the columns the same length
-  contexts.list[[i]] <- this.context
-}
-contexts.occuring <- as.data.frame(contexts.list)
-contexts.occuring <- contexts.occuring[-which(apply(contexts.occuring,1,function(x)all(x==""))),] # remove empty rows at the end
-kable(contexts.occuring)
-write.table(contexts.occuring, file="contexts.occuring.csv", sep=",", row.names=F)
-
 
 ######################################################################
 # translate orth to phon (this also reads in the dict file):
@@ -34,10 +18,8 @@ write.table(contexts.occuring, file="contexts.occuring.csv", sep=",", row.names=
 # source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_orth_to_phon.R")
 
 # after the first time, we can just read in the saved results from the above code
-key <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
 dict <- read.table("dict_all3_updated.txt", header=1, sep="\t", quote="", comment.char ="")
-
-df <- key # take the utterance number, orth and phon key and use it to start the dataframe
+df <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this gets used for word-lists contexts, it will get over-written for other contexts
 
 
 if( length(df$orth[grepl(x=df$orth, pattern="[[:upper:]]")]) >0 ) df$orth <- tolower(df$orth) # make sure the orth stream is all lower case
@@ -57,6 +39,24 @@ for(i in 1:nrow(dict)){
 ######################################################################
 # code contexts in df by word lists
 ######################################################################
+contexts <- read.csv("/Users/TARDIS/Documents/STUDIES/context_word_seg/words by contexts.csv")
+######################################################################
+# only keep context words that actually occur in the corpus
+# (this is only relevant for presenting the list, e.g. in a talk - the code works fine with extra words in there)
+######################################################################
+contexts.list <- as.list(contexts)
+for(i in 1:length(names(contexts.list))){
+  this.context <- contexts.list[[i]][contexts.list[[i]] %in% global.data$streams$orth.stream] # the context words that show up in the corpus
+  this.context <- c(as.character(this.context), rep("", nrow(contexts)-length(this.context))) # add empty values at the end to make all of the columns the same length
+  contexts.list[[i]] <- this.context
+}
+contexts.occuring <- as.data.frame(contexts.list)
+contexts.occuring <- contexts.occuring[-which(apply(contexts.occuring,1,function(x)all(x==""))),] # remove empty rows at the end
+kable(contexts.occuring)
+write.table(contexts.occuring, file="contexts.occuring.csv", sep=",", row.names=F)
+############################
+
+
 temp <- unique(df$orth) # to speed up processing, only code each unique utterance once (then we'll join it back to the full df)
 temp.codes <- data.frame(orth=temp)
 for(k in 1:length(names(contexts))){
@@ -74,6 +74,12 @@ df <- left_join(df, temp.codes) # join temp.codes back to full df
 
 df <- expand_windows(df, context.names=names(contexts)) # extend context codes 2 utterances before and after each hit
 
+
+############################################################################
+# tag contexts by human coder judgments
+############################################################################
+# run code in context_coding_cleaning.r to retrieve and clean codes
+df <- read.table("contexs_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this overwrites the word list context df above
 
 
 ############################################################################
@@ -163,6 +169,7 @@ nontext.results <- readRDS(file="batchresults.rds")
 nontext.results <- readRDS(file=paste0("nontexts_humanjudgments/batchresults_HJ.rds"))
 nontext.results <- readRDS(file=paste0("nontexts_humanjudgments/batchresults_HJ2.rds"))
 nontext.results <- readRDS(file=paste0("nontexts_humanjudgments/batchresults_HJ_noexpand.rds"))
+nontext.results <- readRDS(file=paste0("nontexts_humanjudgments/batchresults_HJ_2.rds"))
 
 library(tidyr)
 nontext.results <- nontext.results %>%
@@ -221,67 +228,6 @@ tests$stars <- ifelse(tests$p.val < .001, "***",
 kable(filter(tests, criterion=="MI85")[,-2], digits=3)
 
 #####################################################
-
-
-
-
-bootstrap.plot <- bootstrap.summary %>%
-  gather(key="key", value="value", -context) %>%
-  tidyr::extract(col=key, into=c("criterion", "measure", "stat"), regex="([A-Z]{2}[0-9]{2})([a-z]+).([a-z]+)") %>%
-  tidyr::spread(stat, value)
-bootstrap.plot$criterion <- as.factor(bootstrap.plot$criterion)
-bootstrap.plot$measure <- as.factor(bootstrap.plot$measure)
-
-
-ggplot(bootstrap.plot, aes(x=context, y=mean)) +
-  facet_wrap(~measure+criterion)+
-  geom_bar(stat="identity") +
-  geom_errorbar(aes(ymax = mean + sd, ymin=mean - sd), width=.3, position=position_dodge(.9)) +
-  labs(title="Nontext accuracy (error bars are SD)", x=NULL, y=NULL) + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
-
-
-#####################################################
-# one-sample t-tests comparing each nontext dist to its context estimate
-#####################################################
-for(k in 1:length(names(context.data))){
-  
-}
-
-
-#############
-combined.bootstrap.results <- as.data.frame(t(bootstrap.results[[1]]))
-combined.bootstrap.results$iter <- 1:nrow(combined.bootstrap.results)
-combined.bootstrap.results$context.corpus <- names(bootstrap.results)[1]
-for(k in 2:length(names(bootstrap.results))){
-  results <- as.data.frame(t(bootstrap.results[[k]]))
-  results$iter <- 1:nrow(results)
-  results$context.corpus <- names(bootstrap.results)[k]
-  combined.bootstrap.results <- rbind(combined.bootstrap.results,results)
-}
-combined.bootstrap.results$context.corpus <- as.factor(combined.bootstrap.results$context.corpus)
-combined.bootstrap.results <- combined.bootstrap.results %>%
-  gather(key="key", value="value", 1:4) %>%
-  extract(col=key, into=c("criterion", "measure"), regex="([A-Z]{2}[0-9]{2})([a-z]+)" ) 
-combined.bootstrap.results$criterion <- as.factor(combined.bootstrap.results$criterion)
-combined.bootstrap.results$measure <- as.factor(combined.bootstrap.results$measure)
-
-# Can add p-value calculation here for bootstrapped results
-combined.bootstrap.results <- combined.bootstrap.results %>%
-  group_by(criterion, measure, context.corpus) %>%
-  left_join(y=bootstrap.plot) %>%
-  mutate(n=n(), pval= ) # NOT WORKING YET!
-#############
-ggplot(filter(combined.bootstrap.results, criterion=="MI85"), aes(x=context.corpus, y=value))+
-  geom_boxplot() +
-  facet_wrap(~measure) +
-  geom_point(data=filter(bootstrap.plot, criterion=="MI85"), aes(x=context, y=context.est, color=context), size=4) + 
-  # geom_hline(data=global.plot, aes(yintercept=mean), linetype = 2) + 
-  theme(text = element_text(size=30), axis.ticks = element_blank(), axis.text.x = element_blank()) +
-  labs(x=NULL, y=NULL)
-
-global.acc <- global.acc <- colMeans(global.data$MI85$seg.results[,4:5], na.rm=T)
-global.plot <- data.frame(context="global", criterion="MI85", measure=names(global.acc), mean=global.acc, sd=NA, context.est=NA, t=NA, pval=NA, stars=NA, d=NA)
 
 ##################################################
 # descriptives
