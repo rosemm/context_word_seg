@@ -55,7 +55,7 @@ contexts.occuring <- contexts.occuring[-which(apply(contexts.occuring,1,function
 kable(contexts.occuring)
 write.table(contexts.occuring, file="contexts.occuring.csv", sep=",", row.names=F)
 ############################
-
+df <- df[,1:3]
 
 temp <- unique(df$orth) # to speed up processing, only code each unique utterance once (then we'll join it back to the full df)
 temp.codes <- data.frame(orth=temp)
@@ -144,7 +144,7 @@ colMeans(global.data$TP85$seg.results[,3:4], na.rm=T)
 
 global.data$MI85$seg.results <- assess_seg(seg.phon.stream=global.data$MI85$seg.phon.stream, words=global.data$streams$words, dict=dict)
 colMeans(global.data$MI85$seg.results[,3:4], na.rm=T)
-
+saveRDS(global.data, file="results/global_results.rds")
 
 for(k in 1:length(names(context.data))){
   
@@ -160,6 +160,10 @@ for(k in 1:length(names(context.data))){
   
   print(colMeans(context.data[[k]]$MI85$seg.results[,3:4], na.rm=T))
 }
+# saveRDS(context.data, file="results/context_results_WL.rds") # save the word list results
+# saveRDS(context.data, file="results/context_results_HJ.rds") # save the human judgment context results
+# context.data <- readRDS("results/context_results_WL.rds")
+# context.data <- readRDS("results/context_results_HL.rds")
 
 #####################################################
 # use batchjobs_script.r to run nontext comparison distributions on ACISS (HPC)
@@ -196,14 +200,25 @@ for (k in 1:length(names(context.data)) ){
 }  
 
 full.results <- left_join(nontext.results, context.results)
+
+# add global estimates
+global.results <- data.frame(measure=NA, criterion=NA, global.est=NA)
+global.results[1,] <- c("recall",    "TP85", colMeans(global.data$TP85$seg.results[, 3:4], na.rm=T)[1])
+global.results[2,] <- c("precision", "TP85", colMeans(global.data$TP85$seg.results[, 3:4], na.rm=T)[2])
+global.results[3,] <- c("recall",    "MI85", colMeans(global.data$MI85$seg.results[, 3:4], na.rm=T)[1])
+global.results[4,] <- c("precision", "MI85", colMeans(global.data$MI85$seg.results[, 3:4], na.rm=T)[2])
+global.results$global.est <- as.numeric(global.results$global.est)
+
+full.results <- left_join(full.results, global.results)
 #####################################################
 # THE PLOT
 #####################################################
 ggplot(filter(full.results, criterion=="MI85"), aes(x=context, y=value))+
   geom_boxplot() +
+  # geom_boxplot(color=NA, fill=NA, outlier.colour =NA) +
   facet_wrap(~measure) +
-  geom_point(aes(x=context, y=context.est, color=context), size=4) + 
-  # geom_hline(data=global.plot, aes(yintercept=mean), linetype = 2) + 
+  geom_point(aes(x=context, y=context.est, color=context), size=4, show_guide=F) + 
+  geom_hline(aes(yintercept=global.est), linetype = 2) + 
   theme(text = element_text(size=30), axis.ticks = element_blank(), axis.text.x = element_blank()) +
   labs(x=NULL, y=NULL)
 
