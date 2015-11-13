@@ -42,11 +42,9 @@ writeLines(simple, "simple.tmpl", sep="\n")
 ###########################################################
 # get files ready for ACISS
 ###########################################################
-save(contexts, file = "contexts")
-#save(radon.1, file = "r_obj/radon1")
-#load(file = "r_obj/radon1")
-# copy utt_orth_phon_KEY.txt to server
-# copy contexts to server (the R file saved above)
+
+# copy contexs_HJ.txt to server
+# copy contexts to server 
 # copy dict_all3_updated.txt to server
 # copy simple.tmpl
 # copy .BatchJobs.R
@@ -72,9 +70,8 @@ batch_function <- function(starts){
   
   source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r")
   
-  # note that key should have the context columns already (from lists, human coding, or topic modeling, etc.)
-  key <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
-  df <- key
+  # note that df should have the context columns already (from lists, human coding, or topic modeling, etc.)
+  df <- read.table("contexs_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
   if(nrow(df) == 0) stop("df didn't load")
   
   dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
@@ -85,22 +82,23 @@ batch_function <- function(starts){
 
   library(doParallel)
   registerDoParallel()
-  r <- foreach(1:iter, .combine = rbind, .packages=c("dplyr", "tidyr", "devtools") ) %dopar% par_function(df=df, dict=dict)
+  r <- foreach(1:iter, .combine = rbind, .packages=c("dplyr", "tidyr", "devtools") ) %dopar% par_function(df=df, dict=dict, expand=FALSE)
   # save(r, file="bootstrap_results.data")
 }
 
 
 # create a registry
-id <- "bootstrap"
+id <- "bootstrapHJ_2"
 reg <- makeRegistry(id = id)
 
 # map function and data to jobs and submit
 ids  <- batchMap(reg, batch_function, starts)
-done <- submitJobs(reg, resources = list(nodes = 10, ppn=iter))
+done <- submitJobs(reg, resources = list(nodes = 12, ppn=iter))
 
 showStatus(reg)
 
 results <- data.frame(V1=NULL)
+# id <- paste0("nontexts_humanjudgments/", id)
 nodes <- list.files(paste0(id, "-files/jobs"))
 for(i in 1:length(nodes)){
   if (i < 10){
@@ -110,4 +108,5 @@ for(i in 1:length(nodes)){
   }
   results <- rbind(results, result)
 }
-saveRDS(results, file="batchresults.rds") 
+saveRDS(results, file=paste0("batchresults_HJ_2.rds") )
+
