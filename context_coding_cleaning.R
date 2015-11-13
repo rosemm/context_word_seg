@@ -54,10 +54,18 @@ View(master_doc_prop)
 #########################################################################
 master_doc_prop$UttNum <- as.numeric(master_doc_prop$UttNum)
 
+# or read in the contexts as they're used in the analysis (for both contexts and nontexts)
+context_seq <- read.table("contexs_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this file is generated later on in this script
+
 master_doc_seq <- gather(master_doc_prop, key=context, value=value, -total, -file, -UttNum, -utt)
+master_doc_seq <- gather(context_seq, key=context, value=value, -orth, -phon, -utt) %>%
+  separate(col=utt, into=c("file", "UttNum"), sep="_", remove=FALSE)
+
 master_doc_seq$context <- as.factor(master_doc_seq$context)
 master_doc_seq$utt <- as.factor(master_doc_seq$utt)
 master_doc_seq$file <- as.factor(master_doc_seq$file)
+master_doc_seq$UttNum <- as.numeric(master_doc_seq$UttNum)
+
 
 # sequence plots for all of the files
 ggplot(master_doc_seq, aes(x=UttNum, y=value, color=context, alpha=value) ) +
@@ -68,11 +76,11 @@ ggplot(master_doc_seq, aes(x=UttNum, y=value, color=context, alpha=value) ) +
 files <- unique(master_doc_seq$file)
 for (f in 1:length(files)){
   data <- filter(master_doc_seq, file==files[f], context != "misc", context !="none")
-  ggplot(data, aes(x=UttNum, y=context, color=context, alpha=value, size=2*(1+value) ) ) +
+  ggplot(data, aes(x=UttNum, y=context, color=context, alpha=value, size=4*value ) ) +
     geom_point(na.rm = TRUE) + 
     scale_alpha(guide = 'none') + 
     scale_size(guide = 'none')
-  ggsave( paste0("plots/seqplot2-", files[f], ".png") )
+  ggsave( paste0("plots/seqplot-", files[f], ".png") )
 }
 
 #########################################################################
