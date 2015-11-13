@@ -141,11 +141,11 @@ segment_speech <- function(cutoff, stat, unique.phon.pairs, phon.stream, conside
   if(stat=="TP") {
     TP.cutoff <- quantile(unique.phon.pairs$TP, cutoff)
     message(paste("...TP cutoff is", round(TP.cutoff, 3)))
-    unique.phon.pairs$TPseg <- ifelse(unique.phon.pairs$TP > TP.cutoff, 0, 1)
+    unique.phon.pairs$TPseg <- ifelse(unique.phon.pairs$TP < TP.cutoff, 1, 0)
   } else if(stat=="MI") {
     MI.cutoff <- quantile(unique.phon.pairs$MI, cutoff)
     message(paste("...MI cutoff is", round(MI.cutoff, 3)))
-    unique.phon.pairs$MIseg <- ifelse(unique.phon.pairs$MI > MI.cutoff, 0, 1)
+    unique.phon.pairs$MIseg <- ifelse(unique.phon.pairs$MI < MI.cutoff, 1, 0)
   } else {stop("ERROR: Enter stat='TP' or stat='MI' only")}
   
   # to consider frequency as well, only segment units that are above freqency threshold as well as above TP/MI threshold
