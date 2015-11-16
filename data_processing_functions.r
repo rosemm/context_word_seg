@@ -1,3 +1,4 @@
+
 nontext_cols <- function(df, context_names){
   nontexts<- vector("list", length(context_names)) # storage variable
   non <- NULL
@@ -246,7 +247,7 @@ par_function <- function(df, dict, expand, seg.utts=TRUE){ # this is the functio
   }
   
   # calculate MIs and TPs
-  nontext.data <- context_results(context.names, df=df.non) # calls make_streams() and calc_MI()
+  nontext.data <- context_results(context.names, df=df.non, seg.utts=seg.utts) # calls make_streams() and calc_MI()
   
   # segment speech
   for(k in 1:length(names(nontext.data))){
@@ -255,13 +256,13 @@ par_function <- function(df, dict, expand, seg.utts=TRUE){ # this is the functio
                                                              stat="TP", 
                                                              nontext.data[[k]]$unique.phon.pairs, 
                                                              nontext.data[[k]]$streams$phon.stream, 
-                                                             seg.utts=TRUE)
+                                                             seg.utts=seg.utts)
     
     nontext.data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=.85, 
                                                              stat="MI", 
                                                              nontext.data[[k]]$unique.phon.pairs, 
                                                              nontext.data[[k]]$streams$phon.stream, 
-                                                             seg.utts=TRUE)
+                                                             seg.utts=seg.utts)
   }
   
   # assess segmentation
@@ -290,7 +291,6 @@ par_function <- function(df, dict, expand, seg.utts=TRUE){ # this is the functio
   return(stat.results)
 }
 
-
 make_corpus <- function(dist=c("unif", "skewed"), size){ # make an artificial language
   
   words <- c("pa-bi-ku", "tu-pi-ro", "go-la-bu")
@@ -309,13 +309,18 @@ make_corpus <- function(dist=c("unif", "skewed"), size){ # make an artificial la
     
   } else stop("dist must be either uniform or skewed")
   
-  corpus <- paste(base::sample(corpus.words, length(corpus.words) ), collapse=" ") # shuffle the words randomly and paste into one "utterance"
+  corpus <- base::sample(corpus.words, length(corpus.words) ) # shuffle the words randomly 
+  # make text files with columns for utt, orth and phon
+  orth <- corpus
+  phon <- corpus
+  utt <- paste0("utt", seq(from=1, to=length(corpus)))
   
-  return(corpus)
+  df <- data.frame(utt=utt, orth=orth, phon=phon)
+  
+  return(df)
 }
 
-contexts_by_size <- function(key="utt_orth_phon_KEY.txt" , N.sizes){
-  df <- read.table(key, header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
+contexts_by_size <- function(df=read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") , N.sizes){
   start.columns <- ncol(df)
   
   # Add columns for each "context", with increasing number of utterances. 
