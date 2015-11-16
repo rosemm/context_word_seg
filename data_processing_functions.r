@@ -333,28 +333,6 @@ results_descriptives <- function(data, criteria=c("MI85", "TP85"), context="glob
 return(descriptives)
 }
 
-record_bootstrap_results <- function(bootstrap.results, wd="./bootstrap_output/"){
- for(k in 1:length(names(bootstrap.results))){
-   write.table(bootstrap.results[[k]], file=paste(wd, names(bootstrap.results)[k], Sys.Date(),".txt", sep=""), sep="\t", col.names=F, row.names=row.names(bootstrap.results[[2]])) 
-  }
-}
-
-read_bootstrap_results <- function(iter, contexts, wd="./bootstrap_output/"){
-  bootstrap.results <- vector("list", length(context.names))  
-  for(k in 1:length(context.names)){
-    bootstrap.results[[k]] <- matrix(ncol=iter, nrow=4, dimnames=list(c("TP85recall", "TP85precision", "MI85recall", "MI85precision")))
-  }
-  files <- list.files(path=wd, ".txt")
-  
-  if(length(files) != length(context.names)) stop("ERROR: The number of contexts in this folder does not match the number of contexts in the contexts argument.")
-  
-  for(f in 1:length(files)){
-   bootstrap.results[[f]] <- read.table(file=paste(wd, files[f], sep=""), sep="\t", header=F, row.names=1) 
-   names(bootstrap.results)[f] <- sub(pattern="^([[:alpha:]]+\\.?[[:alpha:]]+).*", replacement="\\1", x=files[f])
-  }
-  
-  return(bootstrap.results)
-}
 
 # combine_results <- function(data){
 #   combined.results <- data[[1]]$MI85$seg.results
