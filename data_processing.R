@@ -74,6 +74,7 @@ df <- left_join(df, temp.codes) # join temp.codes back to full df
 
 df <- expand_windows(df, context.names=names(contexts)) # extend context codes 2 utterances before and after each hit
 
+write.table(df, file="contexts_WL.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
 ############################################################################
 # tag contexts by human coder judgments
@@ -170,10 +171,9 @@ for(k in 1:length(names(context.data))){
 # save resulting dataframe as nontext.results
 #####################################################
 nontext.results <- readRDS(file="batchresults.rds")
-nontext.results <- readRDS(file=paste0("nontexts_humanjudgments/batchresults_HJ.rds"))
-nontext.results <- readRDS(file=paste0("nontexts_humanjudgments/batchresults_HJ2.rds"))
-nontext.results <- readRDS(file=paste0("nontexts_humanjudgments/batchresults_HJ_noexpand.rds"))
-nontext.results <- readRDS(file=paste0("nontexts_humanjudgments/batchresults_HJ_2.rds"))
+nontext.results <- readRDS(file="batchresults_WL.rds")
+nontext.results <- readRDS(file="batchresults_HJ.rds")
+
 
 library(tidyr)
 nontext.results <- nontext.results %>%
@@ -214,8 +214,8 @@ full.results <- left_join(full.results, global.results)
 # THE PLOT
 #####################################################
 ggplot(filter(full.results, criterion=="MI85"), aes(x=context, y=value))+
-  geom_boxplot() +
-  # geom_boxplot(color=NA, fill=NA, outlier.colour =NA) +
+  # geom_boxplot() +
+  geom_boxplot(color=NA, fill=NA, outlier.colour =NA) +
   facet_wrap(~measure) +
   geom_point(aes(x=context, y=context.est, color=context), size=4, show_guide=F) + 
   geom_hline(aes(yintercept=global.est), linetype = 2) + 
