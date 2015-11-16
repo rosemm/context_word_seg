@@ -18,6 +18,10 @@ words_by_contexts.csv is the list of key words (seed words) for each context. Th
 
 ## Defining context with topic modeling
 
+## Using ACISS for boostrapping nontext distributions
+[ACISS](http://aciss-computing.uoregon.edu/) is the high performance cluster at UO. I'm using two R packages to parallelize the code and run it on ACISS: [BatchJobs](https://cran.r-project.org/web/packages/BatchJobs/index.html) and [doParallel](https://cran.fhcrc.org/web/packages/doParallel/index.html). The default nodes on ACISS have 12 processors each, so I'm using doParallel to write a function that can run independently at the same time on each of the 12 processors, called par_function(). I then send this function to 12 different nodes at once using BatchJobs, so I'm running 144 independent version of the analysis simultaneously. The code for BatchJobs (including additional notes about how to set things up on ACISS) is in batchjobs_script.r     
+
+
 
 ## Writing
 The manuscript draft is in paper.Rnw (a sweave file, combining Latex and R code)
