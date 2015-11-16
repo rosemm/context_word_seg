@@ -71,7 +71,9 @@ batch_function <- function(starts){
   source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r")
   
   # note that df should have the context columns already (from lists, human coding, or topic modeling, etc.)
-  df <- read.table("contexs_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
+  # df <- read.table("contexts_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
+  # df <- read.table("contexts_WL.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
+  df <- read.table("contexts_SizeSim.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
   if(nrow(df) == 0) stop("df didn't load")
   
   dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
@@ -82,13 +84,16 @@ batch_function <- function(starts){
 
   library(doParallel)
   registerDoParallel()
-  r <- foreach(1:iter, .combine = rbind, .packages=c("dplyr", "tidyr", "devtools") ) %dopar% par_function(df=df, dict=dict, expand=FALSE)
+  r <- foreach(1:iter, .combine = rbind, .packages=c("dplyr", "tidyr", "devtools") ) %dopar% par_function(df=df, 
+                                                                                                          dict=dict, 
+                                                                                                          expand=FALSE, 
+                                                                                                          seg.utts=TRUE)
   # save(r, file="bootstrap_results.data")
 }
 
 
 # create a registry
-id <- "bootstrapHJ_2"
+id <- "bootstrapSizeSim"
 reg <- makeRegistry(id = id)
 
 # map function and data to jobs and submit
@@ -99,6 +104,8 @@ showStatus(reg)
 
 results <- data.frame(V1=NULL)
 # id <- paste0("nontexts_humanjudgments/", id)
+# id <- paste0("nontexts_wordlists/", id)
+# id <- paste0("nontexts_SizeSim/", id)
 nodes <- list.files(paste0(id, "-files/jobs"))
 for(i in 1:length(nodes)){
   if (i < 10){
@@ -108,5 +115,6 @@ for(i in 1:length(nodes)){
   }
   results <- rbind(results, result)
 }
-saveRDS(results, file=paste0("batchresults_HJ_2.rds") )
+# saveRDS(results, file=paste0("batchresults_WL.rds") )
+# saveRDS(results, file=paste0("batchresults_HJ.rds") )
 
