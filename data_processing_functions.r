@@ -290,6 +290,32 @@ par_function <- function(df, dict, expand, seg.utts=TRUE){ # this is the functio
   return(stat.results)
 }
 
+
+make_corpus <- function(dist=c("unif", "skewed"), size){ # make an artificial language
+  
+  words <- c("pa-bi-ku", "tu-pi-ro", "go-la-bu")
+  
+  if(dist=="unif"){
+    reps <- round(size/length(words), 0) # the number of repetitions of each word should be based on the total size of the corpus  
+    corpus.words <- c(rep(words, reps) )
+    
+  } else if(dist=="skewed"){
+    rep1 <- round(size/2, 0)
+    rep2 <- round(size/3, 0)
+    rep3 <- size - rep1 - rep2
+    corpus.words <- c( rep(words[1], rep1), 
+                       rep(words[2], rep2),
+                       rep(words[3], rep3))
+    
+  } else stop("dist must be either uniform or skewed")
+  
+  corpus <- paste(base::sample(corpus.words, length(corpus.words) ), collapse=" ") # shuffle the words randomly and paste into one "utterance"
+  
+  return(corpus)
+}
+
+
+
 check_seed_words <- function(seg.results){
   results <- dplyr::filter(seg.results, context!="none" & !is.na(context))
   return(results)
