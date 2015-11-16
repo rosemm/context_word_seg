@@ -20,6 +20,7 @@ batch.conf[1] <- "cluster.functions = makeClusterFunctionsTorque('simple.tmpl')"
 # batch.conf[1] <- "cluster.functions = makeClusterFunctionsInteractive()"
 # batch.conf[7] <- "debug = TRUE"
 
+
 writeLines(batch.conf, ".BatchJobs.R", sep="\n") # write this file to the current working directory
 
 # from https://raw.githubusercontent.com/tudo-r/BatchJobs/master/examples/cfTorque/simple.tmpl
@@ -93,12 +94,12 @@ batch_function <- function(starts){
 
 
 # create a registry
-id <- "bootstrapSizeSim"
+id <- "bootstrapSizeSim2"
 reg <- makeRegistry(id = id)
 
 # map function and data to jobs and submit
 ids  <- batchMap(reg, batch_function, starts)
-done <- submitJobs(reg, resources = list(nodes = 12, ppn=iter))
+done <- submitJobs(reg, resources = list(nodes = 12, ppn=iter, queue="generic"))
 
 showStatus(reg)
 
