@@ -81,9 +81,9 @@ calc_MI = function(phon.pairs, phon.stream){
   return(output)
 }
 
-make_streams = function(df){
+make_streams = function(df, seg.utts=TRUE){
   # add utterance boundary marker to the end of every utterance
-  phon.utts <- paste(df$phon, "###")
+  if(seg.utts) phon.utts <- paste(df$phon, "###")
   # replace word-internal syllable boundaries "-" with space, the same as between-word boundaries
   phon.utts <- gsub(pattern="-", replacement=" ", x=phon.utts, fixed=T) 
   # collapse phonological utterances into one continuous stream
@@ -99,7 +99,7 @@ make_streams = function(df){
   # make phon stream into a list of all of the bisyllable pairs that occur
   phon.pairs <- data.frame(syl1=phon.stream[1:length(phon.stream)-1], syl2=phon.stream[2:length(phon.stream)])
   # delete rows that code for utterance boundary (the result is that syllable pairs across utterance boundaries are simply unattested)
-  phon.pairs <- dplyr::filter(phon.pairs, syl1 !="###" & syl2 !="###")
+  if(seg.utts) phon.pairs <- dplyr::filter(phon.pairs, syl1 !="###" & syl2 !="###")
   
   # collapse orthographic utterances into one stream
   orth.stream <- unlist(strsplit(df$orth, " "))
@@ -112,7 +112,7 @@ make_streams = function(df){
   return(output)
 }
 
-context_results <- function(context.names, df){
+context_results <- function(context.names, df, seg.utts=TRUE){
   context.data <- vector("list", length(context.names)) # storage variable
   names(context.data) <- context.names
   
@@ -126,7 +126,7 @@ context_results <- function(context.names, df){
     
     context.data[[k]]$N.utterances <- nrow(df.context)
     
-    context.data[[k]]$streams <- make_streams(df.context)
+    context.data[[k]]$streams <- make_streams(df.context, seg.utts=seg.utts)
     context.data[[k]]$unique.phon.pairs <- calc_MI(context.data[[k]]$streams$phon.pairs, context.data[[k]]$streams$phon.stream)
     
     context.data[[k]]$freq.bigrams <- dplyr::summarise(group_by(context.data[[k]]$streams$phon.pairs, syl1, syl2), count=n()) # frequency of bigrams
@@ -136,7 +136,7 @@ context_results <- function(context.names, df){
   return(context.data)
 }
 
-segment_speech <- function(cutoff, stat, unique.phon.pairs, phon.stream, consider.freq=FALSE){
+segment_speech <- function(cutoff, stat, unique.phon.pairs, phon.stream, consider.freq=FALSE, seg.utts=TRUE){
   
   if(stat=="TP") {
     TP.cutoff <- quantile(unique.phon.pairs$TP, cutoff)
@@ -161,14 +161,18 @@ segment_speech <- function(cutoff, stat, unique.phon.pairs, phon.stream, conside
     unique.phon.pairs$seg <- unique.phon.pairs$MIseg
   } else {stop("ERROR: Enter stat='TP' or stat='MI' only")}
   
-  
   seg.phon.stream <- phon.stream
   
   p <- progress_estimated(n=length(phon.stream)-1) # print progress bar while working
   for(i in 2:length(phon.stream)){
     
-    seg <- ifelse(phon.stream[i]=="###" | phon.stream[i-1]=="###", 1, # utterance boundaries are given as word boundaries
-                  dplyr::filter(unique.phon.pairs, syl1==phon.stream[i-1] & syl2==phon.stream[i])$seg)
+    if(seg.utts){
+      seg <- ifelse(phon.stream[i]=="###" | phon.stream[i-1]=="###", 1, # utterance boundaries are given as word boundaries
+                    dplyr::filter(unique.phon.pairs, syl1==phon.stream[i-1] & syl2==phon.stream[i])$seg)
+    } else {
+      seg <- dplyr::filter(unique.phon.pairs, syl1==phon.stream[i-1] & syl2==phon.stream[i])$seg
+    }
+    
     
     if(length(seg) > 1) stop(paste("ERROR at ", i, "th element of phon.stream: more than one entry for seg", sep=""))
     
@@ -223,7 +227,7 @@ assess_seg <- function(seg.phon.stream, words, dict){
 }
 
 # for bootstrapping nontexts:
-par_function <- function(df, dict, expand){ # this is the function that should be done in parallel on the 12 cores of each node
+par_function <- function(df, dict, expand, seg.utts=TRUE){ # this is the function that should be done in parallel on the 12 cores of each node
   context.names <- colnames(df[4:ncol(df)])
   
   # pick nontexts
@@ -247,9 +251,17 @@ par_function <- function(df, dict, expand){ # this is the function that should b
   # segment speech
   for(k in 1:length(names(nontext.data))){
     
-    nontext.data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=.85, stat="TP", nontext.data[[k]]$unique.phon.pairs, nontext.data[[k]]$streams$phon.stream)
+    nontext.data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=.85, 
+                                                             stat="TP", 
+                                                             nontext.data[[k]]$unique.phon.pairs, 
+                                                             nontext.data[[k]]$streams$phon.stream, 
+                                                             seg.utts=TRUE)
     
-    nontext.data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=.85, stat="MI", nontext.data[[k]]$unique.phon.pairs, nontext.data[[k]]$streams$phon.stream)
+    nontext.data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=.85, 
+                                                             stat="MI", 
+                                                             nontext.data[[k]]$unique.phon.pairs, 
+                                                             nontext.data[[k]]$streams$phon.stream, 
+                                                             seg.utts=TRUE)
   }
   
   # assess segmentation
