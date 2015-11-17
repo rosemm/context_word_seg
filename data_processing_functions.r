@@ -104,7 +104,7 @@ make_streams = function(df, seg.utts=TRUE){
   if(seg.utts) phon.pairs <- dplyr::filter(phon.pairs, syl1 !="###" & syl2 !="###")
   
   # collapse orthographic utterances into one stream
-  orth.stream <- unlist(strsplit(df$orth, " "))
+  orth.stream <- unlist(strsplit(as.character(df$orth), " "))
   
   # how many unique words are there?
   words <- unique(orth.stream)
