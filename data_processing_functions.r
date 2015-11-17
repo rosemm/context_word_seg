@@ -365,6 +365,15 @@ make_corpus <- function(dist=c("unif", "skewed"), N.utts=50, N.types=24){
   return( list(df, dict) )
 }
 
+plot_corpus_dist <- function(corpus){
+  x <- corpus %>%
+    separate(col=orth, into=c("word1", "word2", "word3","word4"), sep=" ", extra="drop") %>%
+    gather(key="key", value="value", starts_with("word")) %>%
+    select(word=value)
+  plot(sort(table(x$word), decreasing = TRUE), ylab="word freq", xlab="word rank")
+}
+
+
 contexts_by_size <- function(df=read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") , N.sizes, min.utt=100){
   start.columns <- ncol(df)
   
