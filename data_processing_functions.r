@@ -83,8 +83,9 @@ calc_MI = function(phon.pairs, phon.stream){
 }
 
 make_streams = function(df, seg.utts=TRUE){
-  # add utterance boundary marker to the end of every utterance
-  if(seg.utts) phon.utts <- paste(df$phon, "###")
+  if(seg.utts) phon.utts <- paste(df$phon, "###") # add utterance boundary marker to the end of every utterance
+  if(!seg.utts)  phon.utts <- df$phon
+  
   # replace word-internal syllable boundaries "-" with space, the same as between-word boundaries
   phon.utts <- gsub(pattern="-", replacement=" ", x=phon.utts, fixed=T) 
   # collapse phonological utterances into one continuous stream
@@ -291,27 +292,69 @@ par_function <- function(df, dict, expand, seg.utts=TRUE){ # this is the functio
   return(stat.results)
 }
 
-make_corpus <- function(dist=c("unif", "skewed"), size){ # make an artificial language
+# make an artificial language
+make_corpus <- function(dist=c("unif", "skewed"), N.utts=50, N.types=24){ 
+  N.type <- round(N.types/3, 0)
+  message(paste0("Generating ", N.type, " types each for 2, 3, and 4-syllables words...\n") )
   
-  words <- c("pa-bi-ku", "tu-pi-ro", "go-la-bu")
+  # generate all possible syllables from 16 consonants and 4 vowels
+  Cs <- c("b", "d", "f", "g", "j", "k", "l", "m", "n", "p", "r", "s", "t", "v", "w", "z")
+  Vs <- c("a", "e", "i", "o", "u")
+  syls <- NULL
+  for(c in 1:length(Cs)){
+    for(v in 1:length(Vs)){
+      syl <- paste0(Cs[c], Vs[v])
+      syls <- c(syls, syl)
+    }
+  }
+  syls <- base::sample(syls, size=length(syls)) # shuffle the syllables randomly
+  
+  words <- NULL
+    for(j in seq(from=1, by=9, to=9*N.type) ){
+      # generating one 2-syl word, one 3-syl word, and one 4-syl word takes 9 syllables
+      # don't want to re-use any syllables (as per Kurumada, Meylan & Frank, 2013), so this steps through the syls object 9 at a time
+      word2 <- paste(syls[(j + 0):(j + 1)], collapse="-")
+      word3 <- paste(syls[(j + 2):(j + 4)], collapse="-")
+      word4 <- paste(syls[(j + 5):(j + 8)], collapse="-")  
+      
+      words <- c(words, word2, word3, word4) # add these words to the list
+    }
+  # check to make sure there are no missing vlaues in the words
+  if( any(grepl(x=words, pattern="NA")) ) stop(paste("Not enough unique syllables to make", N.types, "word types."))
+  
+  size <- N.utts*4 # at an average of 4 words per utterance (as per Kurumada, Meylan & Frank, 2013), there will be size tokens in the corpus
   
   if(dist=="unif"){
     reps <- round(size/length(words), 0) # the number of repetitions of each word should be based on the total size of the corpus  
     corpus.words <- c(rep(words, reps) )
     
   } else if(dist=="skewed"){
-    rep1 <- round(size/2, 0)
-    rep2 <- round(size/3, 0)
-    rep3 <- size - rep1 - rep2
-    corpus.words <- c( rep(words[1], rep1), 
-                       rep(words[2], rep2),
-                       rep(words[3], rep3))
+    # frequency should be proportional to 1/rank (Zipfian dist)
+    reps <- NULL
+    for(i in 1:length(words)){
+      rep <- 1/i
+      reps <- c(reps, rep)
+    }
+    constant <- 1/sum(reps)*size # the constant we need to multiply reps by to get the correct total number of tokens
+    reps <- round(reps * constant, 0)
+    
+    corpus.words <- NULL
+    for(i in 1:length(words)){
+      word.reps <- rep(words[i], reps[i])
+      corpus.words <- c(corpus.words, word.reps)
+    }
     
   } else stop("dist must be either uniform or skewed")
   
   corpus <- base::sample(corpus.words, length(corpus.words) ) # shuffle the words randomly 
+  
+  # break it into utterances with 4 words each
+  library(BBmisc)
+  corpus.list <- chunk(corpus, chunk.size=4)
+  corpus <- unlist(lapply(corpus.list, FUN=paste, collapse=" "))
+  
   # make text files with columns for utt, orth and phon
-  orth <- corpus
+  orth <- gsub(x=corpus, pattern="-", replacement="")
   phon <- corpus
   utt <- paste0("utt", seq(from=1, to=length(corpus)))
   
