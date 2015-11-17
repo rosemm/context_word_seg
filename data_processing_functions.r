@@ -373,7 +373,6 @@ plot_corpus_dist <- function(corpus){
   plot(sort(table(x$word), decreasing = TRUE), ylab="word freq", xlab="word rank")
 }
 
-
 contexts_by_size <- function(df=read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") , N.sizes, min.utt=100){
   start.columns <- ncol(df)
   
@@ -386,6 +385,21 @@ contexts_by_size <- function(df=read.table("utt_orth_phon_KEY.txt", header=1, se
     df[[paste0("N.utts", sizes[s])]] <- c( rep(1, sizes[s]), rep(0, nrow(df)-sizes[s]) )
   }
   return(df)
+}
+
+process_batch_results <- function(id, dir){
+  results <- data.frame(V1=NULL)
+  id <- paste0(dir, "/", id)
+
+  nodes <- list.files(paste0(id, "-files/jobs"))
+  if(length(nodes)==0) stop("No completed jobs available. Check dir and id to make sure they're correct.")
+  
+  for(i in 1:length(nodes)){
+    load(paste0(id, "-files/jobs/", nodes[i], "/", as.numeric(nodes[i]), "-result.RData"))
+    results <- rbind(results, result)
+  }
+  return(results)
+  # saveRDS(results, file=paste0("batchresults_WL.rds") )
 }
 
 check_seed_words <- function(seg.results){
