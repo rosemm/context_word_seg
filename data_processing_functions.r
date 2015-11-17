@@ -363,13 +363,12 @@ make_corpus <- function(dist=c("unif", "skewed"), N.utts=50, N.types=24){
   return(df)
 }
 
-contexts_by_size <- function(df=read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") , N.sizes){
+contexts_by_size <- function(df=read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") , N.sizes, min.utt=100){
   start.columns <- ncol(df)
   
   # Add columns for each "context", with increasing number of utterances. 
   # It doesn't matter which utterances are selected for each column since they'll all get shuffled anyway during the bootstrapping process
-  min.utt <- 100
-  max.utt <- nrow(df) - 100 # a sample that includes all of the utterances in the corpus won't have any variability from sample to sample
+  max.utt <- nrow(df) - min.utt # a sample that includes all of the utterances in the corpus won't have any variability from sample to sample
   sizes <- round(seq(from=min.utt, to=max.utt, length.out=N.sizes), 0)
   # add a column to the dataframe for each  corpus size to try
   for(s in 1:N.sizes){
