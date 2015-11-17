@@ -295,7 +295,7 @@ par_function <- function(df, dict, expand, seg.utts=TRUE){ # this is the functio
 # make an artificial language
 make_corpus <- function(dist=c("unif", "skewed"), N.utts=50, N.types=24){ 
   N.type <- round(N.types/3, 0)
-  message(paste0("Generating ", N.type, " types each for 2, 3, and 4-syllables words...\n") )
+  message(paste0("\nGenerating ", N.type, " types each for 2, 3, and 4-syllables words...\n") )
   
   # generate all possible syllables from 16 consonants and 4 vowels
   Cs <- c("b", "d", "f", "g", "j", "k", "l", "m", "n", "p", "r", "s", "t", "v", "w", "z")
@@ -321,6 +321,8 @@ make_corpus <- function(dist=c("unif", "skewed"), N.utts=50, N.types=24){
     }
   # check to make sure there are no missing vlaues in the words
   if( any(grepl(x=words, pattern="NA")) ) stop(paste("Not enough unique syllables to make", N.types, "word types."))
+  
+  dict <- data.frame(orth=gsub(x=words, pattern="-", replacement=""), phon=words)
   
   size <- N.utts*4 # at an average of 4 words per utterance (as per Kurumada, Meylan & Frank, 2013), there will be size tokens in the corpus
   
@@ -360,7 +362,7 @@ make_corpus <- function(dist=c("unif", "skewed"), N.utts=50, N.types=24){
   
   df <- data.frame(utt=utt, orth=orth, phon=phon)
   
-  return(df)
+  return( list(df, dict) )
 }
 
 contexts_by_size <- function(df=read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") , N.sizes, min.utt=100){
