@@ -214,11 +214,11 @@ full.results <- left_join(full.results, global.results)
 # THE PLOT
 #####################################################
 ggplot(filter(full.results, criterion=="MI85"), aes(x=context, y=value))+
-  # geom_boxplot() +
-  geom_boxplot(color=NA, fill=NA, outlier.colour =NA) +
+  geom_boxplot() +
+  # geom_boxplot(color=NA, fill=NA, outlier.colour =NA) +
   facet_wrap(~measure) +
-  geom_point(aes(x=context, y=context.est, color=context), size=4, show_guide=F) + 
-  geom_hline(aes(yintercept=global.est), linetype = 2) + 
+  # geom_point(aes(x=context, y=context.est, color=context), size=4, show_guide=F) + 
+  # geom_hline(aes(yintercept=global.est), linetype = 2) + 
   theme(text = element_text(size=30), axis.ticks = element_blank(), axis.text.x = element_blank()) +
   labs(x=NULL, y=NULL)
 
