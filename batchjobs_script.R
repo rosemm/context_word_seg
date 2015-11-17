@@ -75,7 +75,7 @@ batch_function <- function(starts){
   # note that df should have the context columns already (from lists, human coding, or topic modeling, etc.)
   # df <- read.table("contexts_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
   # df <- read.table("contexts_WL.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
-  df <- read.table("contexts_SizeSim.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
+  df <- contexts_by_size(N.sizes=25)
   if(nrow(df) == 0) stop("df didn't load")
   
   dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
@@ -97,12 +97,12 @@ batch_function <- function(starts){
 
 
 # create a registry
-id <- "bootstrapSizeSim7"
+id <- "bootstrapSizeSim"
 reg <- makeRegistry(id = id)
 
 # map function and data to jobs and submit
 ids  <- batchMap(reg, batch_function, starts)
-done <- submitJobs(reg, resources = list(nodes = 12, walltime=21600)) # expected to run for 6 hours (21600 seconds)
+done <- submitJobs(reg, resources = list(nodes = 12, walltime=28800)) # expected to run for 8 hours (28800 seconds)
 
 showStatus(reg)
 findDone(reg)
