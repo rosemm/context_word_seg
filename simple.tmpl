@@ -2,6 +2,7 @@
 ## merge standard error and output
 #PBS -j oe
 ## direct streams to our logfile
+#PBS -q generic
 #PBS -o <%= log.file %>
 #PBS -l walltime=<%= resources$walltime %>,nodes=<%= resources$nodes %>,vmem=<%= resources$memory %>
 ## remove this line if your cluster does not support arrayjobs

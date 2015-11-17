@@ -28,13 +28,15 @@ simple <- "#PBS -N <%= job.name %>
 ## merge standard error and output
 #PBS -j oe
 ## direct streams to our logfile
+#PBS -q generic
 #PBS -o <%= log.file %>
-#PBS -l walltime=<%= resources$walltime %>,nodes=<%= resources$nodes %>,vmem=<%= resources$memory %>M
+#PBS -l walltime=<%= resources$walltime %>,nodes=<%= resources$nodes %>,vmem=<%= resources$memory %>
 ## remove this line if your cluster does not support arrayjobs
 #PBS -t 1-<%= arrayjobs %>
-
+   
 ## Run R:
 ## we merge R output with stdout from PBS, which gets then logged via -o option
+module add R
 R CMD BATCH --no-save --no-restore '<%= rscript %>' /dev/stdout
 "
 
@@ -47,7 +49,6 @@ writeLines(simple, "simple.tmpl", sep="\n")
 # copy contexs_HJ.txt to server
 # copy contexts to server 
 # copy dict_all3_updated.txt to server
-# copy simple.tmpl
 # copy .BatchJobs.R
 
 
@@ -85,23 +86,27 @@ batch_function <- function(starts){
 
   library(doParallel)
   registerDoParallel()
-  r <- foreach(1:iter, .combine = rbind, .packages=c("dplyr", "tidyr", "devtools") ) %dopar% par_function(df=df, 
-                                                                                                          dict=dict, 
-                                                                                                          expand=FALSE, 
-                                                                                                          seg.utts=TRUE)
+  r <- foreach(1:iter, 
+               .combine = rbind, 
+               .packages=c("dplyr", "tidyr", "devtools") ) %dopar% par_function(df=df,
+                                                                                dict=dict,
+                                                                                expand=FALSE,
+                                                                                seg.utts=TRUE)
   # save(r, file="bootstrap_results.data")
 }
 
 
 # create a registry
-id <- "bootstrapSizeSim2"
+id <- "bootstrapSizeSim7"
 reg <- makeRegistry(id = id)
 
 # map function and data to jobs and submit
 ids  <- batchMap(reg, batch_function, starts)
-done <- submitJobs(reg, resources = list(nodes = 12, ppn=iter, queue="generic"))
+done <- submitJobs(reg, resources = list(nodes = 12, walltime=21600)) # expected to run for 6 hours (21600 seconds)
 
 showStatus(reg)
+findDone(reg)
+results <- loadResults(reg) # Quick version to load all "done" jobs
 
 results <- data.frame(V1=NULL)
 # id <- paste0("nontexts_humanjudgments/", id)
@@ -109,11 +114,7 @@ results <- data.frame(V1=NULL)
 # id <- paste0("nontexts_SizeSim/", id)
 nodes <- list.files(paste0(id, "-files/jobs"))
 for(i in 1:length(nodes)){
-  if (i < 10){
-    load(paste0(id, "-files/jobs/0", i, "/", i, "-result.RData"))
-  } else {
-    load(paste0(id, "-files/jobs/", i, "/", i, "-result.RData"))
-  }
+  load(paste0(id, "-files/jobs/", nodes[i], "/", as.numeric(nodes[i]), "-result.RData"))
   results <- rbind(results, result)
 }
 # saveRDS(results, file=paste0("batchresults_WL.rds") )
