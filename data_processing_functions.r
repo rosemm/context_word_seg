@@ -200,7 +200,7 @@ assess_seg <- function(seg.phon.stream, words, dict){
   unique.units <- data.frame(phon=unique(units) )
   
   # compare extracted units to dictionary words
-  this.dict <- filter(dict, word %in% words)[,c("word", "phon")] 
+  this.dict <- dplyr::filter(dict, word %in% words)[,c("word", "phon")] 
   
   # number of hits and false alarms
   unique.units$precision <- ifelse(unique.units$phon %in% this.dict$phon, 1, 0) # if this segmented unit is in the dict it's a hit, if it's not in the dictionary it's a false alarm
@@ -322,7 +322,7 @@ make_corpus <- function(dist=c("unif", "skewed"), N.utts=50, N.types=24){
   # check to make sure there are no missing vlaues in the words
   if( any(grepl(x=words, pattern="NA")) ) stop(paste("Not enough unique syllables to make", N.types, "word types."))
   
-  dict <- data.frame(orth=gsub(x=words, pattern="-", replacement=""), phon=words)
+  dict <- data.frame(word=gsub(x=words, pattern="-", replacement=""), phon=words)
   
   size <- N.utts*4 # at an average of 4 words per utterance (as per Kurumada, Meylan & Frank, 2013), there will be size tokens in the corpus
   
