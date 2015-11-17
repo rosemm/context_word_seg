@@ -8,6 +8,22 @@ df <- contexts_by_size(N.sizes=30)
 write.table(df, file="contexts_SizeSim.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 # send the above text file to ACISS and use it as the contexts file for a bootstrap analysis
  
+library(tidyr)
+nontext.results <- nontext.results %>%
+  mutate(cutoff=85) %>%
+  unite(criterion, stat, cutoff, sep="", remove=F) %>%
+  gather(measure, value, recall:precision) %>%
+  rename(context=nontext) %>%
+  extract(col=context, into="size", regex="([[:digit:]]+)" )
+nontext.results$size <- as.numeric(nontext.results$size)
+
+library(ggplot2)
+ggplot(nontext.results, aes(x=as.factor(size), y=value))+
+  geom_boxplot() +
+  facet_grid(stat~measure, scales="free") +
+  theme(text = element_text(size=20), axis.text.x=element_text(size=10, angle =90), axis.ticks = element_blank() ) +
+  labs(y=NULL, x="Number of utterances in random corpora")
+
 ####################################################################################
 # how does the shape of the distribution affect MI dist, precision, and recall?
 ####################################################################################
