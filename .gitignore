@@ -23,3 +23,5 @@ batchtest-files
 packrat/lib*/
 plots/
 contexts
+utt_orth_phon_KEY_SKEW.txt
+utt_orth_phon_KEY_UNIF.txt
