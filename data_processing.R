@@ -89,7 +89,7 @@ df <- read.table("contexs_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote
 global.data <- list(N.utterances=nrow(df), streams=NULL, phon.pairs=NULL, unique.phon.pairs=NULL) # storage variable
 
 global.data$streams <- make_streams(df)
-global.data$unique.phon.pairs <- calc_MI(phon.pairs=global.data$streams$phon.pairs, phon.stream=global.data$streams$phon.stream)
+global.data$unique.phon.pairs <- calc_MI(phon.pairs=global.data$streams$phon.pairs)
 
 hist(global.data$unique.phon.pairs$MI, xlim=c(-5,15), main="Global MI")
 hist(global.data$unique.phon.pairs$TP, main="Global TP")

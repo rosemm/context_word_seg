@@ -43,7 +43,7 @@ expand_windows <- function(df, context.names){
   return(df)
 }
 
-calc_MI = function(phon.pairs, phon.stream){
+calc_MI = function(phon.pairs){
   # mutual information, and transitional probabilty. See Swingley (2005) p97
   
   library(tidyr)  
@@ -129,7 +129,7 @@ context_results <- function(context.names, df, seg.utts=TRUE){
     context.data[[k]]$N.utterances <- nrow(df.context)
     
     context.data[[k]]$streams <- make_streams(df.context, seg.utts=seg.utts)
-    context.data[[k]]$unique.phon.pairs <- calc_MI(context.data[[k]]$streams$phon.pairs, context.data[[k]]$streams$phon.stream)
+    context.data[[k]]$unique.phon.pairs <- calc_MI(context.data[[k]]$streams$phon.pairs)
     
     context.data[[k]]$freq.bigrams <- dplyr::summarise(group_by(context.data[[k]]$streams$phon.pairs, syl1, syl2), count=n()) # frequency of bigrams
     context.data[[k]]$freq.words <- table(context.data[[k]]$streams$orth.stream) # frequency of words
