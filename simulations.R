@@ -11,7 +11,7 @@ df <- contexts_by_size(N.sizes=30)
 size.results1 <- process_batch_results(id="bootstrapSizeSim", dir="nontexts_SizeSim")
 size.results2 <- process_batch_results(id="bootstrapSizeSim6", dir="nontexts_SizeSim")
 size.results3 <- process_batch_results(id="bootstrapSizeSim7", dir="nontexts_SizeSim")
-size.results <- rbind(size.results1, size.results2)
+size.results <- rbind(size.results1, size.results2, size.results3)
 
 library(tidyr); library(dplyr)
 nontext.results <- size.results  %>%
@@ -65,9 +65,16 @@ plot_corpus_dist(corpus.unif)
 unif.res <- par_function2(df=df.unif, dict=dict.unif, expand=FALSE, seg.utts=TRUE, TP=FALSE)
 skew.res <- par_function2(df=df.skew, dict=dict.skew, expand=FALSE, seg.utts=TRUE, TP=FALSE)
 names(unif.res[[2]]) # the sizes tried
+names(skew.res[[2]]) # the sizes tried
 summary(unif.res[[2]][[25]]$MI85$seg.results)
-hist(unif.res[[2]][[25]]$unique.phon.pairs$MI, breaks=30); abline(v=quantile(unif.res[[2]][[25]]$unique.phon.pairs$MI, .85), lty=2, col="red")
-hist(skew.res[[2]][[25]]$unique.phon.pairs$MI, breaks=30); abline(v=quantile(skew.res[[2]][[25]]$unique.phon.pairs$MI, .85), lty=2, col="red")
+summary(unif.res[[2]]$N.utts992$MI85$seg.results)
+summary(unif.res[[2]]$N.utts51$MI85$seg.results)
+
+hist(unif.res[[2]]$N.utts10$unique.phon.pairs$MI, breaks=30); abline(v=quantile(unif.res[[2]][[25]]$unique.phon.pairs$MI, .85), lty=2, col="red")
+hist(skew.res[[2]]$N.utts10$unique.phon.pairs$MI, breaks=30); abline(v=quantile(skew.res[[2]][[25]]$unique.phon.pairs$MI, .85), lty=2, col="red")
+
+hist(unif.res[[2]]$N.utts992$unique.phon.pairs$MI, breaks=30); abline(v=quantile(unif.res[[2]][[25]]$unique.phon.pairs$MI, .85), lty=2, col="red")
+hist(skew.res[[2]]$N.utts990$unique.phon.pairs$MI, breaks=30); abline(v=quantile(skew.res[[2]][[25]]$unique.phon.pairs$MI, .85), lty=2, col="red")
 
 library(BatchJobs)
 
@@ -82,8 +89,8 @@ batch_function <- function(starts){
   
   source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r")
   
-  dist <- "skewed"
-  # dist <- "unif"
+  # dist <- "skewed"
+  dist <- "unif"
   
   lang <- make_corpus(dist=dist, N.utts=1000, N.types=24)
   corpus <- lang[[1]] # the corpus
@@ -103,12 +110,12 @@ batch_function <- function(starts){
                .packages=c("dplyr", "tidyr", "devtools") ) %dopar% par_function(df=df,
                                                                                 dict=art.dict,
                                                                                 expand=FALSE,
-                                                                                seg.utts=TRUE,
+                                                                                seg.utts=FALSE,
                                                                                 TP=FALSE)
 }
 
 # create a registry
-id.skew <- "bootstrapSizeSimSKEW2"
+id.skew <- "bootstrapSizeSimSKEW"
 reg.skew <- makeRegistry(id = id.skew)
 
 # map function and data to jobs and submit
@@ -126,16 +133,18 @@ done <- submitJobs(reg.unif, resources = list(nodes = 12, walltime=21600)) # exp
 showStatus(reg.unif); showStatus(reg.skew)
 
 
-skew.results1 <- process_batch_results(id="bootstrapSizeSimSKEW", dir="nontexts_SizeSimSKEW")
-skew.results2 <- process_batch_results(id="bootstrapSizeSimSKEW50", dir="nontexts_SizeSimSKEW")
+skew.results1 <- process_batch_results(id="bootstrapSizeSimSKEW", dir="nontexts_SizeSimSKEW/seguttsFALSE")
+skew.results2 <- process_batch_results(id="bootstrapSizeSimSKEW50", dir="nontexts_SizeSimSKEW/seguttsFALSE")
 skew.results3 <- process_batch_results(id="bootstrapSizeSimSKEWlong", dir="nontexts_SizeSimSKEW")
-skew.results <- rbind(skew.results1, skew.results2)
+skew.results4 <- process_batch_results(id="bootstrapSizeSimSKEW", dir="nontexts_SizeSimSKEW")
+skew.results <- rbind(skew.results3, skew.results4)
 skew.results$dist <- "skew"
 
-unif.results1 <- process_batch_results(id="bootstrapSizeSimUNIF", dir="nontexts_SizeSimUNIF")
-unif.results2 <- process_batch_results(id="bootstrapSizeSimUNIF50", dir="nontexts_SizeSimUNIF")
+unif.results1 <- process_batch_results(id="bootstrapSizeSimUNIF", dir="nontexts_SizeSimUNIF/seguttsFALSE")
+unif.results2 <- process_batch_results(id="bootstrapSizeSimUNIF50", dir="nontexts_SizeSimUNIF/seguttsFALSE")
 unif.results3 <- process_batch_results(id="bootstrapSizeSimUNIFlong", dir="nontexts_SizeSimUNIF")
-unif.results <- rbind(unif.results1, unif.results2)
+unif.results4 <- process_batch_results(id="bootstrapSizeSimUNIF", dir="nontexts_SizeSimUNIF")
+unif.results <- rbind(unif.results3, unif.results4)
 unif.results$dist <- "unif"
 
 nontext.results <- rbind(skew.results, unif.results)
@@ -153,11 +162,14 @@ min.iters <- min(iters$count)
 max.iters <- max(iters$count)
   
 library(ggplot2)
-p <- ggplot(filter(nontext.results, stat=="MI"), aes(x=as.factor(size), y=value)) +
-  geom_boxplot() +
-  facet_grid(measure ~ dist, scales="free") +
+p <- ggplot(filter(nontext.results, stat=="MI"), aes(x=as.factor(size), y=value, fill=dist, color=dist)) +
+p <- ggplot(filter(nontext.results, stat=="MI"), aes(x=size, y=value, color=dist)) +
+  geom_point(alpha=.3, position = position_jitter(width = 5)) +
+  xlim(0,600) +
+  #geom_boxplot() +
+  facet_wrap(~measure, scales="free") +
   theme(text = element_text(size=20), axis.text.x=element_text(size=10, angle =90), axis.ticks = element_blank() ) +
-  labs(y=NULL, x="Number of utterances in random corpora")
-if(min.iters == max.iters) p + ggtitle(paste(min.iters, "iterations in each boxplot"))
+  labs(y=NULL, x="Number of utterances in random corpora") +
+if(min.iters == max.iters) p + ggtitle(paste(min.iters, "iterations at each size"))
 if(min.iters != max.iters) p + ggtitle(paste(min.iters, "to", max.iters, "iterations in each boxplot"))
   
