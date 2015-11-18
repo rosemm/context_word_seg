@@ -377,9 +377,14 @@ context.names <- colnames(df[4:ncol(df)])
 }  
 
 # make an artificial language
-make_corpus <- function(dist=c("unif", "skewed"), N.utts=50, N.types=24, smallest.most.freq=FALSE){ 
-  N.type <- round(N.types/3, 0)
-  message(paste0("\nGenerating ", N.type, " types each for 2, 3, and 4-syllables words...\n") )
+make_corpus <- function(dist=c("unif", "skewed"), N.utts=50, N.types=24, smallest.most.freq=FALSE, monosyl=FALSE){ 
+  if(!monosyl){
+    N.type <- round(N.types/3, 0)
+    message(paste0("\nGenerating ", N.type, " types each for 2, 3, and 4-syllables words...\n") )
+  } else {
+    N.type <- round(N.types/4, 0)
+    message(paste0("\nGenerating ", N.type, " types each for 1, 2, 3, and 4-syllables words...\n") )
+  }
   
   # generate all possible syllables from 16 consonants and 4 vowels
   Cs <- c("b", "d", "f", "g", "j", "k", "l", "m", "n", "p", "r", "s", "t", "v", "w", "z")
@@ -394,6 +399,7 @@ make_corpus <- function(dist=c("unif", "skewed"), N.utts=50, N.types=24, smalles
   syls <- base::sample(syls, size=length(syls)) # shuffle the syllables randomly
   
   words <- NULL
+  if( !monosyl ){
     for(j in seq(from=1, by=9, to=9*N.type) ){
       # generating one 2-syl word, one 3-syl word, and one 4-syl word takes 9 syllables
       # don't want to re-use any syllables (as per Kurumada, Meylan & Frank, 2013), so this steps through the syls object 9 at a time
@@ -403,12 +409,25 @@ make_corpus <- function(dist=c("unif", "skewed"), N.utts=50, N.types=24, smalles
       
       words <- c(words, word2, word3, word4) # add these words to the list
     }
+  } else {
+    for(j in seq(from=1, by=10, to=10*N.type) ){
+      # generating one 1-syl, 2-syl word, one 3-syl word, and one 4-syl word takes 10 syllables
+      # don't want to re-use any syllables (as per Kurumada, Meylan & Frank, 2013), so this steps through the syls object 9 at a time
+      word1 <- paste(syls[(j + 0)], collapse="-")
+      word2 <- paste(syls[(j + 1):(j + 2)], collapse="-")
+      word3 <- paste(syls[(j + 3):(j + 5)], collapse="-")
+      word4 <- paste(syls[(j + 6):(j + 9)], collapse="-")  
+      
+      words <- c(words, word1, word2, word3, word4) # add these words to the list
+    }
+  }
+  
   # check to make sure there are no missing vlaues in the words
   if( any(grepl(x=words, pattern="NA")) ) stop(paste("Not enough unique syllables to make", N.types, "word types."))
   
   if( !smallest.most.freq ){
     words <- base::sample(words, size=length(words), replace=FALSE) # shuffle the order of the words (the first word here will end up being the most frequent in the skewed dist) 
-  }
+  } 
   
   dict <- data.frame(word=gsub(x=words, pattern="-", replacement=""), phon=words)
   
