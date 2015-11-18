@@ -377,7 +377,7 @@ context.names <- colnames(df[4:ncol(df)])
 }  
 
 # make an artificial language
-make_corpus <- function(dist=c("unif", "skewed"), N.utts=50, N.types=24){ 
+make_corpus <- function(dist=c("unif", "skewed"), N.utts=50, N.types=24, smallest.most.freq=FALSE){ 
   N.type <- round(N.types/3, 0)
   message(paste0("\nGenerating ", N.type, " types each for 2, 3, and 4-syllables words...\n") )
   
@@ -406,7 +406,9 @@ make_corpus <- function(dist=c("unif", "skewed"), N.utts=50, N.types=24){
   # check to make sure there are no missing vlaues in the words
   if( any(grepl(x=words, pattern="NA")) ) stop(paste("Not enough unique syllables to make", N.types, "word types."))
   
-  words <- base::sample(words, size=length(words), replace=FALSE) # shuffle the order of the words (the first word here will end up being the most frequent in the skewed dist)
+  if( !smallest.most.freq ){
+    words <- base::sample(words, size=length(words), replace=FALSE) # shuffle the order of the words (the first word here will end up being the most frequent in the skewed dist) 
+  }
   
   dict <- data.frame(word=gsub(x=words, pattern="-", replacement=""), phon=words)
   
