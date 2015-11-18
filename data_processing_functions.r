@@ -229,7 +229,7 @@ assess_seg <- function(seg.phon.stream, words, dict){
 }
 
 # for bootstrapping nontexts:
-par_function <- function(df, dict, expand, seg.utts=TRUE){ # this is the function that should be done in parallel on the 12 cores of each node
+par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE){ # this is the function that should be done in parallel on the 12 cores of each node
   context.names <- colnames(df[4:ncol(df)])
   
   # pick nontexts
@@ -253,34 +253,44 @@ par_function <- function(df, dict, expand, seg.utts=TRUE){ # this is the functio
   # segment speech
   for(k in 1:length(names(nontext.data))){
     message(paste0("processing ", names(nontext.data)[k], "..."))
-    nontext.data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=.85, 
-                                                             stat="TP", 
-                                                             nontext.data[[k]]$unique.phon.pairs, 
-                                                             nontext.data[[k]]$streams$phon.stream, 
-                                                             seg.utts=seg.utts)
-    
-    nontext.data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=.85, 
-                                                             stat="MI", 
-                                                             nontext.data[[k]]$unique.phon.pairs, 
-                                                             nontext.data[[k]]$streams$phon.stream, 
-                                                             seg.utts=seg.utts)
+    if(TP){
+      nontext.data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=.85, 
+                                                               stat="TP", 
+                                                               nontext.data[[k]]$unique.phon.pairs, 
+                                                               nontext.data[[k]]$streams$phon.stream, 
+                                                               seg.utts=seg.utts)
+    }
+    if(MI){
+      nontext.data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=.85, 
+                                                               stat="MI", 
+                                                               nontext.data[[k]]$unique.phon.pairs, 
+                                                               nontext.data[[k]]$streams$phon.stream, 
+                                                               seg.utts=seg.utts)
+    }
   }
   
   # assess segmentation
   stat.results <- data.frame(recall=NULL, precision=NULL, stat=NULL, nontext=NULL)
   for(k in 1:length(names(nontext.data))){
     
-    nontext.data[[k]]$TP85$seg.results <- assess_seg(seg.phon.stream=nontext.data[[k]]$TP85$seg.phon.stream, words=nontext.data[[k]]$streams$words, dict=dict)
+    if(TP){
+      nontext.data[[k]]$TP85$seg.results <- assess_seg(seg.phon.stream=nontext.data[[k]]$TP85$seg.phon.stream, words=nontext.data[[k]]$streams$words, dict=dict)
+      TPresults <- colMeans(nontext.data[[k]]$TP85$seg.results[,3:4], na.rm=T)
+      TPresults$stat <- "TP"
+    }
+    if(MI){
+      nontext.data[[k]]$MI85$seg.results <- assess_seg(seg.phon.stream=nontext.data[[k]]$MI85$seg.phon.stream, words=nontext.data[[k]]$streams$words, dict=dict)
+      MIresults <- colMeans(nontext.data[[k]]$MI85$seg.results[,3:4], na.rm=T)
+      MIresults$stat <- "MI"
+    }
+    if(TP & MI){ 
+      this.result <- as.data.frame(rbind(TPresults, MIresults))
+    } else if(TP){
+      this.result <- as.data.frame(rbind(TPresults))
+    } else if(MI){
+      this.result <- as.data.frame(rbind(MIresults))
+    } else stop("At least one of MI and TP must be true.")
     
-    TPresults <- colMeans(nontext.data[[k]]$TP85$seg.results[,3:4], na.rm=T)
-    TPresults$stat <- "TP"
-    
-    nontext.data[[k]]$MI85$seg.results <- assess_seg(seg.phon.stream=nontext.data[[k]]$MI85$seg.phon.stream, words=nontext.data[[k]]$streams$words, dict=dict)
-    
-    MIresults <- colMeans(nontext.data[[k]]$MI85$seg.results[,3:4], na.rm=T)
-    MIresults$stat <- "MI"
-    
-    this.result <- as.data.frame(rbind(TPresults, MIresults))
     row.names(this.result) <- NULL
     this.result$stat <- as.factor(as.character(this.result$stat))
     this.result$nontext <- names(nontext.data)[[k]]
@@ -293,7 +303,7 @@ par_function <- function(df, dict, expand, seg.utts=TRUE){ # this is the functio
 }
 
 par_function2 <- function(df, dict, expand, seg.utts=TRUE){ # this is the function that should be done in parallel on the 12 cores of each node
-  context.names <- colnames(df[4:ncol(df)])
+context.names <- colnames(df[4:ncol(df)])
   
   # pick nontexts
   results <- nontext_cols(df=df, context_names=context.names ) # add the nontext col
@@ -316,34 +326,44 @@ par_function2 <- function(df, dict, expand, seg.utts=TRUE){ # this is the functi
   # segment speech
   for(k in 1:length(names(nontext.data))){
     message(paste0("processing ", names(nontext.data)[k], "..."))
-    nontext.data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=.85, 
-                                                             stat="TP", 
-                                                             nontext.data[[k]]$unique.phon.pairs, 
-                                                             nontext.data[[k]]$streams$phon.stream, 
-                                                             seg.utts=seg.utts)
-    
-    nontext.data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=.85, 
-                                                             stat="MI", 
-                                                             nontext.data[[k]]$unique.phon.pairs, 
-                                                             nontext.data[[k]]$streams$phon.stream, 
-                                                             seg.utts=seg.utts)
+    if(TP){
+      nontext.data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=.85, 
+                                                               stat="TP", 
+                                                               nontext.data[[k]]$unique.phon.pairs, 
+                                                               nontext.data[[k]]$streams$phon.stream, 
+                                                               seg.utts=seg.utts)
+    }
+    if(MI){
+      nontext.data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=.85, 
+                                                               stat="MI", 
+                                                               nontext.data[[k]]$unique.phon.pairs, 
+                                                               nontext.data[[k]]$streams$phon.stream, 
+                                                               seg.utts=seg.utts)
+    }
   }
   
   # assess segmentation
   stat.results <- data.frame(recall=NULL, precision=NULL, stat=NULL, nontext=NULL)
   for(k in 1:length(names(nontext.data))){
     
-    nontext.data[[k]]$TP85$seg.results <- assess_seg(seg.phon.stream=nontext.data[[k]]$TP85$seg.phon.stream, words=nontext.data[[k]]$streams$words, dict=dict)
+    if(TP){
+      nontext.data[[k]]$TP85$seg.results <- assess_seg(seg.phon.stream=nontext.data[[k]]$TP85$seg.phon.stream, words=nontext.data[[k]]$streams$words, dict=dict)
+      TPresults <- colMeans(nontext.data[[k]]$TP85$seg.results[,3:4], na.rm=T)
+      TPresults$stat <- "TP"
+    }
+    if(MI){
+      nontext.data[[k]]$MI85$seg.results <- assess_seg(seg.phon.stream=nontext.data[[k]]$MI85$seg.phon.stream, words=nontext.data[[k]]$streams$words, dict=dict)
+      MIresults <- colMeans(nontext.data[[k]]$MI85$seg.results[,3:4], na.rm=T)
+      MIresults$stat <- "MI"
+    }
+    if(TP & MI){ 
+      this.result <- as.data.frame(rbind(TPresults, MIresults))
+    } else if(TP){
+      this.result <- as.data.frame(rbind(TPresults))
+    } else if(MI){
+      this.result <- as.data.frame(rbind(MIresults))
+    } else stop("At least one of MI and TP must be true.")
     
-    TPresults <- colMeans(nontext.data[[k]]$TP85$seg.results[,3:4], na.rm=T)
-    TPresults$stat <- "TP"
-    
-    nontext.data[[k]]$MI85$seg.results <- assess_seg(seg.phon.stream=nontext.data[[k]]$MI85$seg.phon.stream, words=nontext.data[[k]]$streams$words, dict=dict)
-    
-    MIresults <- colMeans(nontext.data[[k]]$MI85$seg.results[,3:4], na.rm=T)
-    MIresults$stat <- "MI"
-    
-    this.result <- as.data.frame(rbind(TPresults, MIresults))
     row.names(this.result) <- NULL
     this.result$stat <- as.factor(as.character(this.result$stat))
     this.result$nontext <- names(nontext.data)[[k]]
@@ -353,7 +373,7 @@ par_function2 <- function(df, dict, expand, seg.utts=TRUE){ # this is the functi
   stat.results$recall <- as.numeric(stat.results$recall)
   stat.results$precision <- as.numeric(stat.results$precision)
   return(list(stat.results, nontext.data) )
-}
+}  
 
 # make an artificial language
 make_corpus <- function(dist=c("unif", "skewed"), N.utts=50, N.types=24){ 
