@@ -80,28 +80,13 @@ batch_function <- function(starts){
   dist <- "skewed"
   # dist <- "unif"
   
-  if(dist=="unif"){
-    lang.unif <- make_corpus(dist="unif", N.utts=1000, N.types=24)
-    corpus.unif <- lang.unif[[1]] # the corpus
-    dict.unif <- lang.unif[[2]] # the dictionary
-    # use that corpus to generate a size sim contexts file
-    df.unif <- contexts_by_size(df=corpus.unif, N.sizes=25, min.utt=10)
-    df <- df.unif
-    art.dict <- dict.unif
-  } else if(dist=="skewed"){
-    lang.skew <- make_corpus(dist="skewed", N.utts=1000, N.types=24)
-    corpus.skew <- lang.skew[[1]] # the corpus
-    dict.skew <- lang.skew[[2]] # the dictionary
-    # use that corpus to generate a size sim contexts file
-    df.skew <- contexts_by_size(df=corpus.skew, N.sizes=25, min.utt=10)
-    df <- df.skew
-    art.dict <- dict.skew
-  } else stop
-  
-  
+  lang <- make_corpus(dist=dist, N.utts=1000, N.types=24)
+  corpus <- lang[[1]] # the corpus
+  art.dict <- lang[[2]] # the dictionary
+  # use that corpus to generate a size sim contexts file
+  df <- contexts_by_size(df=corpus, N.sizes=25, min.utt=10)
+
   if(nrow(df) == 0) stop("df didn't load")
-  
-  
   if(nrow(art.dict) == 0) stop("dict didn't load")
   
   iter <- 50 # the number of times to generate random samples
