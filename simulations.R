@@ -9,11 +9,13 @@ df <- contexts_by_size(N.sizes=30)
 # send the above text file to ACISS and use it as the contexts file for a bootstrap analysis
  
 size.results1 <- process_batch_results(id="bootstrapSizeSim", dir="nontexts_SizeSim")
-size.results2 <- process_batch_results(id="bootstrapSizeSim7", dir="nontexts_SizeSim")
-size.reuslts <- rbind(size.results1, size.results2)
+size.results2 <- process_batch_results(id="bootstrapSizeSim6", dir="nontexts_SizeSim")
+size.results3 <- process_batch_results(id="bootstrapSizeSim7", dir="nontexts_SizeSim")
+size.results <- rbind(size.results1, size.results2)
 
-library(tidyr)
-nontext.results <- size.reuslts %>%
+library(tidyr); library(dplyr)
+nontext.results <- size.results  %>%
+  filter(grepl(x=nontext, pattern="N.utts")) %>%
   mutate(cutoff=85) %>%
   unite(criterion, stat, cutoff, sep="", remove=F) %>%
   gather(measure, value, recall:precision) %>%
@@ -68,7 +70,6 @@ library(dplyr); library(tidyr); library(doParallel); library(devtools)
 
 starts <- 1:12
 
-
 batch_function <- function(starts){
   library(dplyr)
   library(tidyr)
@@ -76,15 +77,31 @@ batch_function <- function(starts){
   
   source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r")
   
-  lang.unif <- make_corpus(dist="unif", N.utts=1000, N.types=24)
-  corpus.unif <- lang.unif[[1]] # the corpus
-  dict.unif <- lang.unif[[2]] # the dictionary
-  # use that corpus to generate a size sim contexts file
-  df.unif <- contexts_by_size(df=corpus.unif, N.sizes=15, min.utt=100)
-  df <- df.unif
+  dist <- "skewed"
+  # dist <- "unif"
+  
+  if(dist=="unif"){
+    lang.unif <- make_corpus(dist="unif", N.utts=1000, N.types=24)
+    corpus.unif <- lang.unif[[1]] # the corpus
+    dict.unif <- lang.unif[[2]] # the dictionary
+    # use that corpus to generate a size sim contexts file
+    df.unif <- contexts_by_size(df=corpus.unif, N.sizes=25, min.utt=10)
+    df <- df.unif
+    art.dict <- dict.unif
+  } else if(dist=="skewed"){
+    lang.skew <- make_corpus(dist="skewed", N.utts=1000, N.types=24)
+    corpus.skew <- lang.skew[[1]] # the corpus
+    dict.skew <- lang.skew[[2]] # the dictionary
+    # use that corpus to generate a size sim contexts file
+    df.skew <- contexts_by_size(df=corpus.skew, N.sizes=25, min.utt=10)
+    df <- df.skew
+    art.dict <- dict.skew
+  } else stop
+  
+  
   if(nrow(df) == 0) stop("df didn't load")
   
-  art.dict <- dict.unif
+  
   if(nrow(art.dict) == 0) stop("dict didn't load")
   
   iter <- 50 # the number of times to generate random samples
@@ -100,24 +117,33 @@ batch_function <- function(starts){
 }
 
 # create a registry
-id <- "bootstrapSizeSimUNIFlong"
-reg.unif <- makeRegistry(id = id)
+id.skew <- "bootstrapSizeSimSKEW2"
+reg.skew <- makeRegistry(id = id.skew)
+
+# map function and data to jobs and submit
+ids  <- batchMap(reg.skew, batch_function, starts)
+done <- submitJobs(reg.skew, resources = list(nodes = 12, walltime=21600)) # expected to run for 6 hours (21600 seconds)
+
+# create a registry
+id.unif <- "bootstrapSizeSimUNIF"
+reg.unif <- makeRegistry(id = id.unif)
 
 # map function and data to jobs and submit
 ids  <- batchMap(reg.unif, batch_function, starts)
 done <- submitJobs(reg.unif, resources = list(nodes = 12, walltime=21600)) # expected to run for 6 hours (21600 seconds)
 
-showStatus(reg.unif)
-showStatus(reg.skew)
+showStatus(reg.unif); showStatus(reg.skew)
 
 
 skew.results1 <- process_batch_results(id="bootstrapSizeSimSKEW", dir="nontexts_SizeSimSKEW")
 skew.results2 <- process_batch_results(id="bootstrapSizeSimSKEW50", dir="nontexts_SizeSimSKEW")
+skew.results3 <- process_batch_results(id="bootstrapSizeSimSKEWlong", dir="nontexts_SizeSimSKEW")
 skew.results <- rbind(skew.results1, skew.results2)
 skew.results$dist <- "skew"
 
 unif.results1 <- process_batch_results(id="bootstrapSizeSimUNIF", dir="nontexts_SizeSimUNIF")
 unif.results2 <- process_batch_results(id="bootstrapSizeSimUNIF50", dir="nontexts_SizeSimUNIF")
+unif.results3 <- process_batch_results(id="bootstrapSizeSimUNIFlong", dir="nontexts_SizeSimUNIF")
 unif.results <- rbind(unif.results1, unif.results2)
 unif.results$dist <- "unif"
 
