@@ -133,7 +133,8 @@ context_results <- function(context.names, df, seg.utts=TRUE){
     
     context.data[[k]]$freq.bigrams <- dplyr::summarise(group_by(context.data[[k]]$streams$phon.pairs, syl1, syl2), count=n()) # frequency of bigrams
     context.data[[k]]$freq.words <- table(context.data[[k]]$streams$orth.stream) # frequency of words
-    context.data[[k]]$freq.syl <- table(context.data[[k]]$streams$phon.stream) # frequency of syllables
+    phon.stream <- context.data[[k]]$streams$phon.stream[context.data[[k]]$streams$phon.stream != "###"]
+    context.data[[k]]$freq.syl <- table(phon.stream) # frequency of syllables
   }
   return(context.data)
 }
@@ -168,13 +169,13 @@ segment_speech <- function(cutoff, stat, unique.phon.pairs, phon.stream, conside
   p <- progress_estimated(n=length(phon.stream)-1) # print progress bar while working
   for(i in 2:length(phon.stream)){
     
+    # decide whether to place a boundary between this syllable (i) and the one before it
     if(seg.utts){
       seg <- ifelse(phon.stream[i]=="###" | phon.stream[i-1]=="###", 1, # utterance boundaries are given as word boundaries
                     dplyr::filter(unique.phon.pairs, syl1==phon.stream[i-1] & syl2==phon.stream[i])$seg)
     } else {
       seg <- dplyr::filter(unique.phon.pairs, syl1==phon.stream[i-1] & syl2==phon.stream[i])$seg
     }
-    
     
     if(length(seg) > 1) stop(paste("ERROR at ", i, "th element of phon.stream: more than one entry for seg", sep=""))
     
@@ -185,7 +186,7 @@ segment_speech <- function(cutoff, stat, unique.phon.pairs, phon.stream, conside
   }
   
   # drop utterance boundary markers (the segmentation is still coded on the syllable after the utt boundary)
-  seg.phon.stream <- seg.phon.stream[ seg.phon.stream != ",##"]
+  seg.phon.stream <- seg.phon.stream[ seg.phon.stream != ",###"]
   
   return(seg.phon.stream)
 }
