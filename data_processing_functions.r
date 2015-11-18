@@ -406,6 +406,8 @@ make_corpus <- function(dist=c("unif", "skewed"), N.utts=50, N.types=24){
   # check to make sure there are no missing vlaues in the words
   if( any(grepl(x=words, pattern="NA")) ) stop(paste("Not enough unique syllables to make", N.types, "word types."))
   
+  words <- base::sample(words, size=length(words), replace=FALSE) # shuffle the order of the words (the first word here will end up being the most frequent in the skewed dist)
+  
   dict <- data.frame(word=gsub(x=words, pattern="-", replacement=""), phon=words)
   
   size <- N.utts*4 # at an average of 4 words per utterance (as per Kurumada, Meylan & Frank, 2013), there will be size tokens in the corpus
