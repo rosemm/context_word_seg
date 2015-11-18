@@ -302,7 +302,7 @@ par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE){ # t
   return(stat.results)
 }
 
-par_function2 <- function(df, dict, expand, seg.utts=TRUE){ # this is the function that should be done in parallel on the 12 cores of each node
+par_function2 <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE){ # this is the function that should be done in parallel on the 12 cores of each node
 context.names <- colnames(df[4:ncol(df)])
   
   # pick nontexts
