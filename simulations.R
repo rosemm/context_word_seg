@@ -40,29 +40,34 @@ ggplot(nontext.results, aes(x=as.factor(size), y=value))+
 source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r")
 
 # make a skewed corpus and save to text file
-lang.skew <- make_corpus(dist="skewed", N.utts=100, N.types=24)
+lang.skew <- make_corpus(dist="skewed", N.utts=1000, N.types=24)
 corpus.skew <- lang.skew[[1]] # the corpus
 dict.skew <- lang.skew[[2]] # the dictionary
 # write.table(corpus.skew, file="utt_orth_phon_KEY_SKEW.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 # use that corpus to generate a size sim contexts file
-df.skew <- contexts_by_size(df=corpus.skew, N.sizes=10, min.utt=5)
+df.skew <- contexts_by_size(df=corpus.skew, N.sizes=25, min.utt=10)
 # write.table(df.skew, file="contexts_SizeSimSKEW.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
 
 # make a uniform corpus and save to text file
-lang.unif <- make_corpus(dist="unif", N.utts=100, N.types=24)
+lang.unif <- make_corpus(dist="unif", N.utts=1000, N.types=24)
 corpus.unif <- lang.unif[[1]] # the corpus
 dict.unif <- lang.unif[[2]] # the dictionary
 # write.table(corpus.unif, file="utt_orth_phon_KEY_UNIF.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 # use that corpus to generate a size sim contexts file
-df.unif <- contexts_by_size(df=corpus.unif, N.sizes=10, min.utt=5)
+df.unif <- contexts_by_size(df=corpus.unif, N.sizes=25, min.utt=10)
 # write.table(df.skew, file="contexts_SizeSimUNIF.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
 # check that the frequency dist looks correct
 plot_corpus_dist(corpus.skew)
 plot_corpus_dist(corpus.unif)
 
-
+unif.res <- par_function2(df=df.unif, dict=dict.unif, expand=FALSE, seg.utts=TRUE, TP=FALSE)
+skew.res <- par_function2(df=df.skew, dict=dict.skew, expand=FALSE, seg.utts=TRUE, TP=FALSE)
+names(unif.res[[2]]) # the sizes tried
+summary(unif.res[[2]][[25]]$MI85$seg.results)
+hist(unif.res[[2]][[25]]$unique.phon.pairs$MI, breaks=30); abline(v=quantile(unif.res[[2]][[25]]$unique.phon.pairs$MI, .85), lty=2, col="red")
+hist(skew.res[[2]][[25]]$unique.phon.pairs$MI, breaks=30); abline(v=quantile(skew.res[[2]][[25]]$unique.phon.pairs$MI, .85), lty=2, col="red")
 
 library(BatchJobs)
 
@@ -98,7 +103,8 @@ batch_function <- function(starts){
                .packages=c("dplyr", "tidyr", "devtools") ) %dopar% par_function(df=df,
                                                                                 dict=art.dict,
                                                                                 expand=FALSE,
-                                                                                seg.utts=TRUE)
+                                                                                seg.utts=TRUE,
+                                                                                TP=FALSE)
 }
 
 # create a registry
