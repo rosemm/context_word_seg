@@ -43,22 +43,32 @@ expand_windows <- function(df, context.names){
   return(df)
 }
 
-calc_MI = function(phon.pairs){
+calc_MI = function(phon.pairs, phon.stream, MI=TRUE, TP=TRUE){
   # mutual information, and transitional probabilty. See Swingley (2005) p97
   
   library(tidyr)  
-  # calculate the number of times each syllable (1 and 2) occurs
-  A.count <- phon.pairs %>%
-    group_by(syl1) %>%
-    summarize(A.freq=n())
-  B.count <- phon.pairs %>%
-    group_by(syl2) %>%
-    summarize(B.freq=n())
-  # NOTE: Since syllable transitions spanning an utterance boundary have been removed, this only counts freq of syl1 / all non-utterance-final syllables, and freq of syl 2 / all non-utterance-initial syllables
-  # This more closely approximates the sense of TP as conditional probability (see e.g. Saffran et al. 1996). 
-  # If all occurences of a syllable are counted (including utterance-final occurences for syl1 and utterance-initial occurences for syl2), then the TP can (and does) go far above 1 since there are many more units of syllables than bi-syllable pairs
-  phon.pairs <- left_join(phon.pairs, A.count)
-  phon.pairs <- left_join(phon.pairs, B.count)
+    # calculate the number of times each syllable occurs in first position in a bigram
+    A.at1 <- phon.pairs %>%
+      group_by(syl1) %>%
+      summarize(A.freq1=n())
+    B.at2 <- phon.pairs %>%
+      group_by(syl2) %>%
+      summarize(B.freq2=n())
+    # NOTE: Since syllable transitions spanning an utterance boundary have been removed, this only counts freq of syl1 / all non-utterance-final syllables
+    # This more closely approximates the sense of TP as conditional probability (see e.g. Saffran et al. 1996). 
+    # If all occurences of a syllable are counted (including utterance-final occurences for syl1), then the TP can (and does) go far above 1 since there are many more units of syllables than bi-syllable pairs
+    phon.pairs <- left_join(phon.pairs, A.at1)
+    phon.pairs <- left_join(phon.pairs, B.at2)
+
+    syls <- data.frame(syl=phon.stream[phon.stream != "###"]) %>%
+      count(syl) %>%
+      mutate(p=n/length(unique(phon.stream[phon.stream != "###"])))
+    # merge in sylable info for syl1
+    colnames(syls) <- c("syl1", "A.freq.tot", "p.A")
+    phon.pairs <- left_join(phon.pairs, syls)
+    # merge in sylable info for syl2
+    colnames(syls) <- c("syl2", "B.freq.tot", "p.B")
+    phon.pairs <- left_join(phon.pairs, syls)
   
   # add a column for the syllable pair (helps for joining this table with pairs.count later)
   phon.pairs <- phon.pairs %>%
@@ -71,12 +81,35 @@ calc_MI = function(phon.pairs){
   phon.pairs <- left_join(phon.pairs, pairs.count) # add the AB frequency counts to the phon.pairs table
   
   # calculate MI and TP
+  
   phon.pairs <- phon.pairs %>%
-    mutate(p.AB=AB.freq/nrow(phon.pairs), 
-           p.A=A.freq/nrow(phon.pairs), 
-           p.B=B.freq/nrow(phon.pairs),
-           MI=log2(p.AB/(p.A * p.B)), 
-           TP=p.AB/p.A ) 
+    mutate(p.AB=AB.freq/nrow(phon.pairs),
+           p.A.at1=A.freq1/nrow(phon.pairs),
+           p.B.at2=B.freq2/nrow(phon.pairs) ) # for both TP and MI p(AB) is freq of AB / # bigrams
+  
+  if(TP){
+    phon.pairs <- phon.pairs %>%
+      mutate(TP=p.AB/p.A.at1 ) %>%
+      arrange(desc(TP))
+    # get rank order
+    TPrank <- unique(phon.pairs)
+    TPrank$TP.rank <- 1:nrow(TPrank)
+    phon.pairs <- left_join(phon.pairs, select(TPrank, pair, TP.rank))
+  } 
+  if(MI){
+    phon.pairs <- phon.pairs %>% 
+      mutate(MI.1=log2(p.AB/(p.A.at1 * p.B.at2)),
+             MI.2=log2(p.AB/(p.A * p.B))) %>%
+      arrange(desc(MI.1))
+    # get rank orderfor both MI1 and MI2
+    MI1rank <- unique(phon.pairs)
+    MI1rank$MI1.rank <- 1:nrow(MI1rank)
+    phon.pairs <- left_join(phon.pairs, select(MI1rank, pair, MI1.rank)) %>%
+      arrange(desc(MI.2))
+    MI2rank <- unique(phon.pairs)
+    MI2rank$MI2.rank <- 1:nrow(MI2rank)
+    phon.pairs <- left_join(phon.pairs, select(MI2rank, pair, MI2.rank))
+  } 
   
   output <- unique(phon.pairs) # Only keep one instance of each syllable pair
   return(output)
@@ -105,6 +138,7 @@ make_streams = function(df, seg.utts=TRUE){
   
   # collapse orthographic utterances into one stream
   orth.stream <- unlist(strsplit(as.character(df$orth), " "))
+  orth.stream <- orth.stream[!grepl(pattern="^[[:punct:]]+$", x=orth.stream)]
   
   # how many unique words are there?
   words <- unique(orth.stream)
@@ -230,7 +264,7 @@ assess_seg <- function(seg.phon.stream, words, dict){
 }
 
 # for bootstrapping nontexts:
-par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE){ # this is the function that should be done in parallel on the 12 cores of each node
+par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE){ # this is the function that should be done in parallel on the 12 cores of each node
   context.names <- colnames(df[4:ncol(df)])
   
   # pick nontexts
@@ -300,100 +334,36 @@ par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE){ # t
   stat.results$nontext <- as.factor(as.character(stat.results$nontext))
   stat.results$recall <- as.numeric(stat.results$recall)
   stat.results$precision <- as.numeric(stat.results$precision)
-  return(stat.results)
+  
+  if(verbose){
+    return(list(stat.results, nontext.data) )
+  } else {
+    return(stat.results)
+  }
 }
 
-par_function2 <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE){ # this is the function that should be done in parallel on the 12 cores of each node
-context.names <- colnames(df[4:ncol(df)])
   
-  # pick nontexts
-  results <- nontext_cols(df=df, context_names=context.names ) # add the nontext col
-  non <- results[[1]]
-  nontexts <- results[[2]]
-  names(nontexts) <- paste("non.", context.names, sep="")
-  
-  # add nontext columns to dataframe
-  colnames(non) <- context.names
-  df.non <- cbind(df[,1:3], non)
-  
-  if(expand){
-    # expand windows to + - 2 utterances before and after
-    df.non <- expand_windows(df.non, context.names=context.names)
-  }
-  
-  # calculate MIs and TPs
-  nontext.data <- context_results(context.names, df=df.non, seg.utts=seg.utts) # calls make_streams() and calc_MI()
-  
-  # segment speech
-  for(k in 1:length(names(nontext.data))){
-    message(paste0("processing ", names(nontext.data)[k], "..."))
-    if(TP){
-      nontext.data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=.85, 
-                                                               stat="TP", 
-                                                               nontext.data[[k]]$unique.phon.pairs, 
-                                                               nontext.data[[k]]$streams$phon.stream, 
-                                                               seg.utts=seg.utts)
-    }
-    if(MI){
-      nontext.data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=.85, 
-                                                               stat="MI", 
-                                                               nontext.data[[k]]$unique.phon.pairs, 
-                                                               nontext.data[[k]]$streams$phon.stream, 
-                                                               seg.utts=seg.utts)
-    }
-  }
-  
-  # assess segmentation
-  stat.results <- data.frame(recall=NULL, precision=NULL, stat=NULL, nontext=NULL)
-  for(k in 1:length(names(nontext.data))){
-    
-    if(TP){
-      nontext.data[[k]]$TP85$seg.results <- assess_seg(seg.phon.stream=nontext.data[[k]]$TP85$seg.phon.stream, words=nontext.data[[k]]$streams$words, dict=dict)
-      TPresults <- colMeans(nontext.data[[k]]$TP85$seg.results[,3:4], na.rm=T)
-      TPresults$stat <- "TP"
-    }
-    if(MI){
-      nontext.data[[k]]$MI85$seg.results <- assess_seg(seg.phon.stream=nontext.data[[k]]$MI85$seg.phon.stream, words=nontext.data[[k]]$streams$words, dict=dict)
-      MIresults <- colMeans(nontext.data[[k]]$MI85$seg.results[,3:4], na.rm=T)
-      MIresults$stat <- "MI"
-    }
-    if(TP & MI){ 
-      this.result <- as.data.frame(rbind(TPresults, MIresults))
-    } else if(TP){
-      this.result <- as.data.frame(rbind(TPresults))
-    } else if(MI){
-      this.result <- as.data.frame(rbind(MIresults))
-    } else stop("At least one of MI and TP must be true.")
-    
-    row.names(this.result) <- NULL
-    this.result$stat <- as.factor(as.character(this.result$stat))
-    this.result$nontext <- names(nontext.data)[[k]]
-    stat.results <- rbind(stat.results,this.result)
-  } 
-  stat.results$nontext <- as.factor(as.character(stat.results$nontext))
-  stat.results$recall <- as.numeric(stat.results$recall)
-  stat.results$precision <- as.numeric(stat.results$precision)
-  return(list(stat.results, nontext.data) )
-}  
+
 
 # make an artificial language
-make_corpus <- function(dist=c("unif", "skewed"), N.utts=50, N.types=24, smallest.most.freq=FALSE, monosyl=FALSE){ 
+make_corpus <- function(dist=c("unif", "skewed"), N.utts=1000, N.types=1800, smallest.most.freq=FALSE, monosyl=FALSE){ 
+  N.type <- round(N.types/3, 0)
   if(!monosyl){
-    N.type <- round(N.types/3, 0)
     message(paste0("\nGenerating ", N.type, " types each for 2, 3, and 4-syllables words...\n") )
   } else {
-    N.type <- round(N.types/4, 0)
-    message(paste0("\nGenerating ", N.type, " types each for 1, 2, 3, and 4-syllables words...\n") )
+    message(paste0("\nGenerating ", N.type, " types each for 1, 2, and 3-syllables words...\n") )
   }
   
-  # generate all possible syllables from 16 consonants and 4 vowels
-  Cs <- c("b", "d", "f", "g", "j", "k", "l", "m", "n", "p", "r", "s", "t", "v", "w", "z")
-  Vs <- c("a", "e", "i", "o", "u")
+  # generate all possible syllables from these consonants and these vowels
+  Cs <- c("b", "c", "ch", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "r", "s", "sh", "t", "v", "w", "z")
+  Vs <- c("a", "e", "i", "o", "u", "A", "E", "I", "O", "U")
   syls <- NULL
-  for(c in 1:length(Cs)){
-    for(v in 1:length(Vs)){
-      syl <- paste0(Cs[c], Vs[v])
-      syls <- c(syls, syl)
+  for(a in 1:length(Cs)){
+    for(b in 1:length(Vs)){
+      for(c in 1:length(Cs)){
+        syl <- paste0(Cs[a], Vs[b], Cs[c]) # syllables have a CVC structure
+        syls <- c(syls, syl)
+      }
     }
   }
   syls <- base::sample(syls, size=length(syls)) # shuffle the syllables randomly
@@ -410,15 +380,14 @@ make_corpus <- function(dist=c("unif", "skewed"), N.utts=50, N.types=24, smalles
       words <- c(words, word2, word3, word4) # add these words to the list
     }
   } else {
-    for(j in seq(from=1, by=10, to=10*N.type) ){
-      # generating one 1-syl, 2-syl word, one 3-syl word, and one 4-syl word takes 10 syllables
-      # don't want to re-use any syllables (as per Kurumada, Meylan & Frank, 2013), so this steps through the syls object 9 at a time
+    for(j in seq(from=1, by=6, to=6*N.type) ){
+      # generating one 1-syl, 2-syl word, and one 3-syl word word takes 6 syllables
+      # don't want to re-use any syllables (as per Kurumada, Meylan & Frank, 2013), so this steps through the syls object 6 at a time
       word1 <- paste(syls[(j + 0)], collapse="-")
       word2 <- paste(syls[(j + 1):(j + 2)], collapse="-")
-      word3 <- paste(syls[(j + 3):(j + 5)], collapse="-")
-      word4 <- paste(syls[(j + 6):(j + 9)], collapse="-")  
+      word3 <- paste(syls[(j + 3):(j + 5)], collapse="-") 
       
-      words <- c(words, word1, word2, word3, word4) # add these words to the list
+      words <- c(words, word1, word2, word3) # add these words to the list
     }
   }
   
@@ -446,6 +415,7 @@ make_corpus <- function(dist=c("unif", "skewed"), N.utts=50, N.types=24, smalles
     }
     constant <- 1/sum(reps)*size # the constant we need to multiply reps by to get the correct total number of tokens
     reps <- round(reps * constant, 0)
+    sum(reps)
     
     corpus.words <- NULL
     for(i in 1:length(words)){
