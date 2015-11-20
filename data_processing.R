@@ -80,7 +80,7 @@ write.table(df, file="contexts_WL.txt", quote=F, col.names=T, row.names=F, appen
 # tag contexts by human coder judgments
 ############################################################################
 # run code in context_coding_cleaning.r to retrieve and clean codes
-df <- read.table("contexs_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this overwrites the word list context df above
+df <- read.table("contexts_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this overwrites the word list context df above
 
 
 ############################################################################
@@ -89,7 +89,7 @@ df <- read.table("contexs_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote
 global.data <- list(N.utterances=nrow(df), streams=NULL, phon.pairs=NULL, unique.phon.pairs=NULL) # storage variable
 
 global.data$streams <- make_streams(df)
-global.data$unique.phon.pairs <- calc_MI(phon.pairs=global.data$streams$phon.pairs)
+global.data$unique.phon.pairs <- calc_MI(phon.pairs=global.data$streams$phon.pairs, phon.stream=global.data$streams$phon.stream)
 
 hist(global.data$unique.phon.pairs$MI, xlim=c(-5,15), main="Global MI")
 hist(global.data$unique.phon.pairs$TP, main="Global TP")
