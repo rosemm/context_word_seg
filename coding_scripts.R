@@ -4,11 +4,13 @@ CleanTranscripts <- function(wd="./transcripts/"){
   
   files <- list.files(path=wd)
   Nfiles <- length(files)
+  if(Nfiles==0) stop("No transcripts found. Check the working directory.")
   
-  transcripts <- list()
+  transcripts <- list(NULL)
   
   for(f in 1:Nfiles){
     this.file <- files[f]
+    if(is.na(this.file)) stop(paste(this.file, "not found."))
     this.transcript <- readLines(paste(wd, this.file, sep=""))
     
     # The split between speaker id and utterance is :\t (colon, then tab), but somtimes that pattern also occurs later in the utterance, especially on the %pho tier where : is used for vowel length.
@@ -32,7 +34,7 @@ CleanTranscripts <- function(wd="./transcripts/"){
     temp <- dplyr::filter(data, grepl("*", speaker, fixed=TRUE))
     temp$UttNum <- 1:nrow(temp)
     data <- merge(data, temp, by=c("LineNum", "speaker", "utterance"), all=T, sort=T)
-    #data$UttNum <- na.locf(data$UttNum, na.rm = FALSE)  # fill in utterance number column
+    head(data)
     
     # print(sort(unique(data$speaker))) # check
     
@@ -57,7 +59,7 @@ CleanTranscripts <- function(wd="./transcripts/"){
                                 '%com'='(comment)' ")
     
     data$utterance <-  ifelse(data$speaker=="(New Episode)", "...",  data$utterance )
-    
+
     transcripts[[f]] <- data
   }
   
