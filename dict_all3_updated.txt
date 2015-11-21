@@ -1795,8 +1795,11 @@ yourself	j$-'sElf	2
 yum	'jVm	1
 zee	'zi	1
 zunc	'zVNk	1
+shh	S	1
+ssh	S	1
 mummie	'mV-mI	2
 mummie's	'mV-mIz	2
+mummmy's	'mV-mIz	2
 mummie'll	'mV-mI-@l	3
 tellie	'tE-lI	2
 handie	'h{n-dI	2

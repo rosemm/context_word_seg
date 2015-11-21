@@ -8,7 +8,7 @@ coding_doc <- coding_doc %>%
   unite(utt, file, UttNum) %>%
   select(utt, orth=utterance)
 
-# write.table(coding_doc, file="utt_orth_KEY.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+write.table(coding_doc, file="utt_orth_KEY.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 # coding_doc <- read.table("utt_orth_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
 
 #################################
@@ -19,8 +19,8 @@ dict <- read.table("eng_korman_from_swingley2005/dict_all3.txt", sep=" ", quote=
 colnames(dict) <- c("word", "phon")
 
 # add some entries to the dict file
-dict.add <- data.frame(word=    c("mummie", "mummie's", "mummie'll", "tellie", "handie", "pottie", "bathie", "ruskie", "headie", "chinnie", "hankie", "nappie", "drinkie", "rolly", "rollie", "polly", "pollie", "deary",  "hiccough", "hiccoughs", "poo",  "lew", "&hmm", "&er", "&eh", "&ha", "&mm", "&ah", "&uh", "&hah", "whee", "treas",  "hee", "oo"), 
-                       old.word=c("mummy",  "mummy's",  "mummy'll",  "telly",  "handy",  "potty",  "bathy",  "rusky",  "heady",  "chinny",  "hanky",  "nappy",  "drinkee", "roley", "roley",  "poley", "poley",  "dearie", "hiccup",   "hiccups",   "pooh", "lu",  "hmm",  "er",  "eh",  "ha",  "mm",  "aah", "uh",  "ha",   "wee",  "treazh", "he",  "ooh"),
+dict.add <- data.frame(word=    c("shh", "ssh", "mummie", "mummie's", "mummmy's", "mummie'll", "tellie", "handie", "pottie", "bathie", "ruskie", "headie", "chinnie", "hankie", "nappie", "drinkie", "rolly", "rollie", "polly", "pollie", "deary",  "hiccough", "hiccoughs", "poo",  "lew", "&hmm", "&er", "&eh", "&ha", "&mm", "&ah", "&uh", "&hah", "whee", "treas",  "hee", "oo"), 
+                       old.word=c("sh",  "sh",  "mummy",  "mummy's",  "mummy's",  "mummy'll",  "telly",  "handy",  "potty",  "bathy",  "rusky",  "heady",  "chinny",  "hanky",  "nappy",  "drinkee", "roley", "roley",  "poley", "poley",  "dearie", "hiccup",   "hiccups",   "pooh", "lu",  "hmm",  "er",  "eh",  "ha",  "mm",  "aah", "uh",  "ha",   "wee",  "treazh", "he",  "ooh"),
                        phon=NA)
 for(d in 1:nrow(dict.add)){
   # for each new entry, use the phon for its homophone's entry
@@ -48,42 +48,40 @@ coding_doc <- coding_doc[!grepl(pattern="unintelligible", x=coding_doc$orth), ] 
 translate_phon <- function(dict, orth, first=TRUE){ # translate orth to phon based on dict
   
   # tidying the utterances to match conventions in the dict file
-    phon <- orth
     if(first){
-      phon <- tolower(phon)
-      phon <- gsub(pattern="[?]", replacement="", x=phon) # delete question marks
-      phon <- gsub(pattern="[.]", replacement="", x=phon) # delete periods
-      phon <- gsub(pattern="[!]", replacement="", x=phon) # delete exclamation points
-      phon <- gsub(pattern="[;]", replacement="", x=phon) # delete semicolons
-      phon <- gsub(pattern="mummmy", replacement="mummy", x=phon) #typo
-      phon <- gsub(pattern="nosy", replacement="nosey", x=phon) #typo
-      phon <- gsub(pattern="loulou", replacement="lou-lou", x=phon)
-      phon <- gsub(pattern="tata's", replacement="ta-ta's", x=phon)
-      phon <- gsub(pattern="cmon", replacement="c'mon", x=phon)
-      phon <- gsub(pattern="uhuh", replacement="uh-huh", x=phon)
-      phon <- gsub(pattern="tumtum", replacement="tum tum", x=phon)
-      phon <- gsub(pattern="haha", replacement="ha ha", x=phon)
-      phon <- gsub(pattern="ahhah", replacement="aah ha", x=phon)
-      phon <- gsub(pattern="[[].*[]]", replacement="", x=phon) # delete bracket patterns from the utterances (used to provide notes or translations of unconventional speech)
-      phon <- gsub(pattern="bath+room", replacement="bathroom", x=phon, fixed=T)
-      phon <- gsub(pattern="play+mate", replacement="playmate", x=phon, fixed=T)
-      phon <- gsub(pattern="t+shirt", replacement="t-shirt", x=phon, fixed=T)
-      phon <- gsub(pattern="sack+cloth", replacement="sackcloth", x=phon, fixed=T)
-      phon <- gsub(pattern="+", replacement=" ", x=phon, fixed=T) # replace remaining + with a space (used to join words, e.g. "patty+cake")
-      phon <- gsub(pattern="_", replacement=" ", x=phon, fixed=T) # also used to join words (e.g. "all_gone")
-      phon <- gsub(pattern="[(]i)t", replacement="it", x=phon)
-      phon <- gsub(pattern="y[(]ou[)]", replacement="you", x=phon)
-      phon <- gsub(pattern="[(]i[)]f", replacement="if", x=phon)
-      phon <- gsub(pattern="d[(]o[)]", replacement="do", x=phon)
-      phon <- gsub(pattern="t[(]o[)]", replacement="to", x=phon)
-      phon <- gsub(pattern="[(]h[)]ave", replacement="'ave", x=phon)
-      phon <- gsub(pattern="[(]h[)]ere", replacement="'ere", x=phon)
-      phon <- gsub(pattern="[(].*[)]", replacement="", x=phon) # delete remaining () patterns from the utterances (used for shortened speech, e.g. "(be)cause")
-      phon <- gsub(pattern="[:]", replacement="", x=phon) # delete remaining colons (used to indicate drawn-out words, e.g. "oooooh" as "o:h")
+      orth <- gsub(pattern="[?]", replacement="", x=orth) # delete question marks
+      orth <- gsub(pattern="[.]", replacement="", x=orth) # delete periods
+      orth <- gsub(pattern="[!]", replacement="", x=orth) # delete exclamation points
+      orth <- gsub(pattern="[;]", replacement="", x=orth) # delete semicolons
+      orth <- gsub(pattern="mummmy", replacement="mummy", x=orth) #typo
+      orth <- gsub(pattern="nosy", replacement="nosey", x=orth) #typo
+      orth <- gsub(pattern="loulou", replacement="lou-lou", x=orth)
+      orth <- gsub(pattern="tata's", replacement="ta-ta's", x=orth)
+      orth <- gsub(pattern="cmon", replacement="c'mon", x=orth)
+      orth <- gsub(pattern="uhuh", replacement="uh-huh", x=orth)
+      orth <- gsub(pattern="tumtum", replacement="tum tum", x=orth)
+      orth <- gsub(pattern="haha", replacement="ha ha", x=orth)
+      orth <- gsub(pattern="ahhah", replacement="aah ha", x=orth)
+      orth <- gsub(pattern="[[].*[]]", replacement="", x=orth) # delete bracket patterns from the utterances (used to provide notes or translations of unconventional speech)
+      orth <- gsub(pattern="bath+room", replacement="bathroom", x=orth, fixed=T)
+      orth <- gsub(pattern="play+mate", replacement="playmate", x=orth, fixed=T)
+      orth <- gsub(pattern="t+shirt", replacement="t-shirt", x=orth, fixed=T)
+      orth <- gsub(pattern="sack+cloth", replacement="sackcloth", x=orth, fixed=T)
+      orth <- gsub(pattern="+", replacement=" ", x=orth, fixed=T) # replace remaining + with a space (used to join words, e.g. "patty+cake")
+      orth <- gsub(pattern="_", replacement=" ", x=orth, fixed=T) # also used to join words (e.g. "all_gone")
+      orth <- gsub(pattern="[(]i)t", replacement="it", x=orth)
+      orth <- gsub(pattern="y[(]ou[)]", replacement="you", x=orth)
+      orth <- gsub(pattern="[(]i[)]f", replacement="if", x=orth)
+      orth <- gsub(pattern="d[(]o[)]", replacement="do", x=orth)
+      orth <- gsub(pattern="t[(]o[)]", replacement="to", x=orth)
+      orth <- gsub(pattern="[(]h[)]ave", replacement="'ave", x=orth)
+      orth <- gsub(pattern="[(]h[)]ere", replacement="'ere", x=orth)
+      orth <- gsub(pattern="[(].*[)]", replacement="", x=orth) # delete remaining () patterns from the utterances (used for shortened speech, e.g. "(be)cause")
+      orth <- gsub(pattern="[:]", replacement="", x=orth) # delete remaining colons (used to indicate drawn-out words, e.g. "oooooh" as "o:h")
+      phon <- tolower(orth)
     } 
-      
+    if(!first) phon <- orth 
     
-  
   for(i in 1:nrow(dict)){
     # for each entry in the "dictionary", find that orth word and replace it with the phon translation
     this.word <- as.character(dict$word[i])
@@ -94,10 +92,13 @@ translate_phon <- function(dict, orth, first=TRUE){ # translate orth to phon bas
     phon <- gsub(pattern=paste("[[:space:]]", this.word, "$", sep=""), replacement=paste(" ",this.phon, sep=""), x=phon)
     phon <- gsub(pattern=paste("^", this.word, "$", sep=""), replacement=this.phon, x=phon)
   }
-  return(phon)
+  if(first) return( list(orth, phon) )
+  if(!first) return(phon)
 }
 
-coding_doc$phon <- translate_phon(dict, orth=coding_doc$orth)
+translated <- translate_phon(dict, orth=coding_doc$orth)
+coding_doc$orth <- translated[[1]]
+coding_doc$phon <- translated[[2]]
 
 # note that words repeated immediately (e.g. "dear dear") will get missed by the gsub commands for some reason. Running it twice fixes it.
 missed.dict <- dict[1,]
