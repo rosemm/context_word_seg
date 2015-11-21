@@ -453,23 +453,21 @@ process_categories <- function(master_doc_keep, key_file="categories_cleaning_ke
   # read in the key again, to get any updates
   categories_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
   
-  master_doc_keep$category <- NA
-  for( i in 1:nrow(categories_keys) ){
-    rows <- grep(pattern=paste("^", categories_keys[i,1], "$", sep=""), x=master_doc_keep$context, value=F)
-    master_doc_keep[rows,] # just for checking
-    master_doc_keep$category <- ifelse(grepl(pattern=paste("^", categories_keys[i,1], "$", sep=""), x=master_doc_keep$context), categories_keys[i,2], master_doc_keep$category)
-    master_doc_keep[rows,] # just for checking
-  }
-  length(unique((master_doc_keep$category))) - length(unique((categories_keys$category)))
-  summary(as.factor(master_doc_keep$category))
+  # add categories to master doc
+  master_doc_keep <- left_join(master_doc_keep, categories_keys, by=c("context" = "context_clean"))
+
+  if(length(unique((master_doc_keep$category))) != length(unique((categories_keys$category)))) stop("Error in number of categories.")
+  
+  summary(as.factor(master_doc_keep$category)) 
   
   # check to make sure that one coder isn't contributing 2 hits on the same category for the same utterance
   # e.g. if a coder tagged an utterance as "burping ; mealtime" then it would result in "mealtime" and "mealtime" as the categories
   cat.check <- master_doc_keep %>%
-    group_by(coder, date, utt, category) %>%
+    group_by(utt, coder, date, category) %>%
     summarize(hits=n() ) 
   table(cat.check$hits) # see how many times a single utterance is coded by the same coder multiple times with the same category
   
+  # only keep one of the same category code per coder per day (i.e. if there's more than one hit from the same coder on the same day for the same category, collapse it)
   master_doc_keep <-  select(cat.check, utt, coder, date, category) # drop the extra columns
   
   return(master_doc_keep)
