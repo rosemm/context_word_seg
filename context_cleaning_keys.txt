@@ -9,6 +9,7 @@ after meal	post-mealtime
 after mealtime	post-mealtime
 after nap	post-nap
 after naptime	post-nap
+after sickness	post-sick
 after sleep	post-nap
 after sleeping	post-bedtime
 answering the telephone	answering the telephone
@@ -27,6 +28,7 @@ bed time	bedtime
 bedtime	bedtime
 before bath	pre-bath
 before bath time	pre-bath
+before bed	pre-bedtime
 before bedtime	pre-bedtime
 before diapering	pre-diaper
 before feeding	pre-mealtime
@@ -38,12 +40,15 @@ before mealtime	pre-mealtime
 before nap	pre-nap
 before napping	pre-bedtime
 before swimming	pre-swimming
+being sick	sick
 being tired	being tired
 being uncomfortable	fussing
 being upset	fussing
 biting	biting
 blowing bubbles	blowing bubbles
 blowing raspberries	blowing raspberries
+boiling water	cooking
+bottle feeding	mealtime
 bounching	bouncing
 bouncing	bouncing
 bouncing chair	bouncing
@@ -51,6 +56,7 @@ breastfeeding	mealtime
 brushing	brushing hair
 brushing hair	brushing hair
 burping	burping
+camera	taking pictures
 car trip	car
 changing	diaper change
 changing clothes	changing clothes
@@ -78,6 +84,7 @@ cuddling	cuddling
 Cuddling	cuddling
 dancing	dancing
 defecating	pooping
+diaper cahnge	diaper change
 diaper change	diaper change
 diapering	diaper change
 dinner time	mealtime
@@ -121,6 +128,7 @@ hearing	hearing
 hiccuping	hiccups
 hiccupping	hiccups
 hiccups	hiccups
+hicupping	hiccups
 holding	holding
 holding child	holding child
 house chores	housework
@@ -140,6 +148,7 @@ leaving	leaving
 listening	listening
 looking	looking
 lying	lying
+making mess	making mess
 meal	mealtime
 meal time	mealtime
 mealtime	mealtime
@@ -151,16 +160,20 @@ nap time	nap time
 napping	nap time
 naptime	nap time
 nibbling	mealtime
+nine	none
 none	none
 observing	observing
 outside	outside
+palying	playing
 peeing	peeing
 pkaying	playtime
 play	playtime
 play time	playtime
+playin	playing
 playing	playtime
 playing outside	outside
 playing with ball	playing
+playing with dog	playing
 playing with pet	playing
 playtime	playtime
 pooping	pooping
@@ -174,6 +187,7 @@ post-feeding	post-feeding
 post-meal	post-mealtime
 potty training	potty training
 pre bath	pre-bath
+pre diaper change	pre-diaper
 pre meal	pre-mealtime
 pre-bath	pre-bath
 pre-bathing	pre-bath
@@ -188,6 +202,7 @@ preparing food	cooking
 preparing for bath	pre-bedtime
 preparing for bed	pre-bedtime
 preparing for bedtime	pre-bedtime
+pulling hair	pulling hair
 putting down	pre-bedtime
 putting on the bib	putting on the bib
 putting to bed	bedtime
@@ -197,6 +212,7 @@ relieving tummy ache	relieving tummy ache
 rolling	rolling
 rolling around	rolling
 rolling over	rolling
+seeing	observing
 shopping	shopping
 shouting	shouting
 sick	sick
@@ -208,9 +224,11 @@ smiling	smiling
 snack	mealtime
 snacktime	mealtime
 sneezing	sneezing
+snuggling	cuddling
 soething	soothing
 soothing	soothing
 soothng	soothing
+sooyhing	soothing
 sothing	soothing
 speaking	talking
 spitting up	spitting up
@@ -218,12 +236,15 @@ storytime	storytime
 stretching	stretching
 sucking	sucking
 sucking thumb	sucking thumb
+sun bathing	outside
 sunbathing	sunbathing
+sunning	outside
 swimming	swimming
 swinging	swinging
 taking photo	taking pictures
 taking photos	taking pictures
 taking pictures	taking pictures
+takling	talking
 talking	talking
 talking photos	taking pictures
 talking to child	talking
