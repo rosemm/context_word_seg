@@ -106,7 +106,7 @@ BlankDoc <- function(wd="./transcripts/", for.coding=TRUE){
 }
 # write.table(coding_doc, file="coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
-CodeContexts <- function(this_pass=2, window_size=30, slide_by=5){
+CodeContexts <- function(this_pass=3, window_size=30, slide_by=5){
   # check whether packages need to be installed
   list.of.packages <- c("dplyr", "car")
   new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
