@@ -1,16 +1,27 @@
 
-nontext_cols <- function(df, context_names){
-  nontexts<- vector("list", length(context_names)) # storage variable
+nontext_cols <- function(df, context_names, prop=FALSE){
+  nontexts <- vector("list", length(context_names)) # storage variable
   non <- NULL
   
-  for(k in 1:length(context_names)){  
-    N.hits <- length(which(df[[context_names[k]]] == 1)) # the number of utterances that contain a keyword for that context
-    nontexts[[k]] <- sample(x=as.numeric(row.names(df)), size=N.hits)
-    col <- rep(0, nrow(df))
-    col[nontexts[[k]]] <- 1
-    non <- cbind(non, col)
-    colnames(non)[k] <- paste("non.", context_names[k], sep="") 
+  if(!prop){
+    for(k in 1:length(context_names)){  
+      N.hits <- length(which(df[[context_names[k]]] == 1)) # the number of utterances that contain a keyword for that context
+      nontexts[[k]] <- sample(x=as.numeric(row.names(df)), size=N.hits)
+      col <- rep(0, nrow(df))
+      col[nontexts[[k]]] <- 1
+      non <- cbind(non, col)
+      colnames(non)[k] <- paste("non.", context_names[k], sep="") 
+    }
+  } 
+  if(prop){
+    # shuffle the context columns
+    for(k in 1:length(context_names)){
+      df[[context_names[k]]] <- base::sample(df[[context_names[k]]], 
+                                             size=length(df[[context_names[k]]]), 
+                                             replace=FALSE)
+    }    
   }
+  
   return(list(non, nontexts))
 }
 
@@ -259,11 +270,11 @@ assess_seg <- function(seg.phon.stream, words, dict){
 }
 
 # for bootstrapping nontexts:
-par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE){ # this is the function that should be done in parallel on the 12 cores of each node
+par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE){ # this is the function that should be done in parallel on the 12 cores of each node
   context.names <- colnames(df[4:ncol(df)])
   
   # pick nontexts
-  results <- nontext_cols(df=df, context_names=context.names ) # add the nontext col
+  results <- nontext_cols(df=df, context_names=context.names, prop=prop) # add the nontext col
   non <- results[[1]]
   nontexts <- results[[2]]
   names(nontexts) <- paste("non.", context.names, sep="")
