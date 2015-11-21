@@ -98,17 +98,12 @@ calc_MI = function(phon.pairs, phon.stream, MI=TRUE, TP=TRUE){
   } 
   if(MI){
     phon.pairs <- phon.pairs %>% 
-      mutate(MI.1=log2(p.AB/(p.A.at1 * p.B.at2)),
-             MI.2=log2(p.AB/(p.A * p.B))) %>%
-      arrange(desc(MI.1))
-    # get rank orderfor both MI1 and MI2
-    MI1rank <- unique(phon.pairs)
-    MI1rank$MI1.rank <- 1:nrow(MI1rank)
-    phon.pairs <- left_join(phon.pairs, select(MI1rank, pair, MI1.rank)) %>%
-      arrange(desc(MI.2))
-    MI2rank <- unique(phon.pairs)
-    MI2rank$MI2.rank <- 1:nrow(MI2rank)
-    phon.pairs <- left_join(phon.pairs, select(MI2rank, pair, MI2.rank))
+      mutate(MI=log2(p.AB/(p.A.at1 * p.B.at2))) %>%
+      arrange(desc(MI))
+    # get rank order for MI 
+    MIrank <- unique(phon.pairs)
+    MIrank$MI.rank <- 1:nrow(MIrank)
+    phon.pairs <- left_join(phon.pairs, select(MIrank, pair, MI.rank)) 
   } 
   
   output <- unique(phon.pairs) # Only keep one instance of each syllable pair
