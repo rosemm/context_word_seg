@@ -280,7 +280,7 @@ assess_seg <- function(seg.phon.stream, words, dict){
 }
 
 # for bootstrapping nontexts:
-par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE){ # this is the function that should be done in parallel on the 12 cores of each node
+par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85){ # this is the function that should be done in parallel on the 12 cores of each node
   if(expand & prop) stop("Cannot have both expand and prop TRUE.")
   
   context.names <- colnames(df[4:ncol(df)])
@@ -305,14 +305,14 @@ par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verb
   for(k in 1:length(names(nontext.data))){
     message(paste0("processing ", names(nontext.data)[k], "..."))
     if(TP){
-      nontext.data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=.85, 
+      nontext.data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=cutoff, 
                                                                stat="TP", 
                                                                nontext.data[[k]]$unique.phon.pairs, 
                                                                nontext.data[[k]]$streams$phon.stream, 
                                                                seg.utts=seg.utts)
     }
     if(MI){
-      nontext.data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=.85, 
+      nontext.data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=cutoff, 
                                                                stat="MI", 
                                                                nontext.data[[k]]$unique.phon.pairs, 
                                                                nontext.data[[k]]$streams$phon.stream, 
