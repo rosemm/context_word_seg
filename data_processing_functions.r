@@ -14,7 +14,7 @@ nontext_cols <- function(df, context_names, prop=FALSE){
     }
   } 
   if(prop){
-    non <- df
+    non <- df[ , 4:ncol(df)]
     # shuffle the context columns
     for(k in 1:length(context_names)){
       non[[context_names[k]]] <- base::sample(non[[context_names[k]]], 
@@ -277,8 +277,6 @@ par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verb
   # pick nontexts
   results <- nontext_cols(df=df, context_names=context.names, prop=prop) # add the nontext col
   non <- results[[1]]
-  nontexts <- results[[2]]
-  names(nontexts) <- paste("non.", context.names, sep="")
   
   # add nontext columns to dataframe
   colnames(non) <- context.names
