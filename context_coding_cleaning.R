@@ -16,16 +16,19 @@ master_doc_keep <- process_categories(master_doc_contexts, key_file="categories_
 ####################################
 # lump little categories into "misc"
 summary(as.factor(master_doc_keep$category) ) # how many utterances per category
-hist(summary(as.factor(master_doc_keep$category) ), breaks=1000, xlim=c(0,1000)) # how many utterances per category
+hist(summary(as.factor(master_doc_keep$category)), breaks=1000, xlim=c(0,1000)) # how many utterances per category
+barplot(sort(summary(as.factor(master_doc_keep$category)), decreasing=T))
 
-main_cats <- summary(as.factor(master_doc_keep$category) )[summary(as.factor(master_doc_keep$category) ) > 300] # the categories with more than 100 utterances
-misc_cats <- summary(as.factor(master_doc_keep$category) )[summary(as.factor(master_doc_keep$category) ) < 301] # the categories with less than 100 utterances
+main_cats <- summary(as.factor(master_doc_keep$category) )[summary(as.factor(master_doc_keep$category) ) > 500] # the categories with more than 100 utterances
+misc_cats <- summary(as.factor(master_doc_keep$category) )[summary(as.factor(master_doc_keep$category) ) < 501] # the categories with less than 100 utterances
 # check that I'm not losing any categories...
 length(main_cats) + length(misc_cats) == length(summary(as.factor(master_doc_keep$category) ))
 
 for(i in 1:length(misc_cats)){
   master_doc_keep$category <- gsub(pattern=paste0("^", names(misc_cats)[i], "$"), x=master_doc_keep$category, replacement="misc")
 }
+
+
 ###################################
 
 # calculate the number of times each context category is coded for each utterance
@@ -37,6 +40,11 @@ master_doc_calc <- master_doc_keep %>%
   spread(key=category, value=hits, fill = 0) %>%
   separate(col=utt, into=c("file", "UttNum"), sep="_" , remove=F) %>%
   arrange(file, as.numeric(UttNum) )
+
+# make "burping" part of "mealtime"?
+burp.no.meal <- sum(table(master_doc_calc$burping, master_doc_calc$mealtime)[-1,1]) # the number of utterances tagged as burping but not also mealtime
+burp.tot <- nrow(filter(master_doc_calc, burping > 0)) # total number of utterances tagged as burping
+burp.no.meal/burp.tot
 
 contextcols <- 4:ncol(master_doc_calc) # the column numbers for all columns identifying contexts
 master_doc_calc$total <- rowSums(x=master_doc_calc[ ,contextcols], na.rm=TRUE)  # total number of codes for each utterace
@@ -53,11 +61,10 @@ View(master_doc_prop)
 # sequence plots
 #########################################################################
 master_doc_prop$UttNum <- as.numeric(master_doc_prop$UttNum)
+master_doc_seq <- gather(master_doc_prop, key=context, value=value, -total, -file, -UttNum, -utt)
 
 # or read in the contexts as they're used in the analysis (for both contexts and nontexts)
 context_seq <- read.table("contexs_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this file is generated later on in this script
-
-master_doc_seq <- gather(master_doc_prop, key=context, value=value, -total, -file, -UttNum, -utt)
 master_doc_seq <- gather(context_seq, key=context, value=value, -orth, -phon, -utt) %>%
   separate(col=utt, into=c("file", "UttNum"), sep="_", remove=FALSE)
 
@@ -68,9 +75,10 @@ master_doc_seq$UttNum <- as.numeric(master_doc_seq$UttNum)
 
 
 # sequence plots for all of the files
-ggplot(master_doc_seq, aes(x=UttNum, y=value, color=context, alpha=value) ) +
+ggplot(filter(master_doc_seq, context != "misc", context !="none"), aes(x=UttNum, y=context, color=context, alpha=value) ) +
   geom_point()+
-  facet_wrap(~file, scales="free")
+  facet_wrap(~file, scales="free_x") +
+  scale_alpha(guide = 'none')
 
 # sequence plots for each file separately
 files <- unique(master_doc_seq$file)
@@ -86,6 +94,7 @@ for (f in 1:length(files)){
 #########################################################################
 # define context by utterance
 #########################################################################
+#################################################
 # calc most endorsed context for each utterance (mutually exclusive context coding)
 master_doc_prop$max <- apply(master_doc_prop[contextcols], 1, function(x) max(x, na.rm=T))
 master_doc_prop$maxes <-  apply(master_doc_prop[c(contextcols, which(colnames(master_doc_prop)=="max"))], 1, function(x) length(which(x[1:(length(x)-1)]==x[length(x)]))) # how many contexts have the same value as the max context?
@@ -130,4 +139,23 @@ table(rowSums(contexts_from_coding[ , 2:ncol(contexts_from_coding)]))
 # save these contexts in a file we can send to ACISS for bootstrap nontexts
 key <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
 key <- left_join(key, contexts_from_coding) # note that this step drops utterances excluded during orth to phon translation (i.e. more utterances are coded for context than are included in the final analyses)
-write.table(key, file="contexs_HJ.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+key <- na.omit(key)
+write.table(key, file="contexs_HJ_voting.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+
+
+#################################################
+# assign utterances to contexts probabalistically (e.g. a code with 80% mealtime category endorsement would be in the mealtime corpus 80% of the time)
+
+# how many codes are available per utterance? (how much information do we have per utt?)
+summary(master_doc_calc$total)
+hist(master_doc_calc$total, main="number of codes per utterance", xlab=NULL)
+
+contexts_from_coding <- select(master_doc_prop, -file, -UttNum, -total, -max, -maxes, -which, -context) %>% # drop extra columns
+  select(-misc, -none) # drop context columns that don't actually code for a context
+
+# save these contexts in a file we can send to ACISS for bootstrap nontexts
+key <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
+key <- left_join(key, contexts_from_coding) # note that this step drops utterances excluded during orth to phon translation (i.e. more utterances are coded for context than are included in the final analyses)
+key <- na.omit(key)
+write.table(key, file="contexs_HJ_prop.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+
