@@ -6,22 +6,23 @@ nontext_cols <- function(df, context_names, prop=FALSE){
   if(!prop){
     for(k in 1:length(context_names)){  
       N.hits <- length(which(df[[context_names[k]]] == 1)) # the number of utterances that contain a keyword for that context
-      nontexts[[k]] <- sample(x=as.numeric(row.names(df)), size=N.hits)
-      col <- rep(0, nrow(df))
-      col[nontexts[[k]]] <- 1
-      non <- cbind(non, col)
+      nontexts[[k]] <- sample(x=as.numeric(row.names(df)), size=N.hits) # take a random sample of utterances
+      col <- rep(0, nrow(df)) # make a column of zeros
+      col[nontexts[[k]]] <- 1 # change those zeros to 1's for every random utterance selected
+      non <- cbind(non, col) 
       colnames(non)[k] <- paste("non.", context_names[k], sep="") 
     }
   } 
   if(prop){
+    non <- df
     # shuffle the context columns
     for(k in 1:length(context_names)){
-      df[[context_names[k]]] <- base::sample(df[[context_names[k]]], 
-                                             size=length(df[[context_names[k]]]), 
+      non[[context_names[k]]] <- base::sample(non[[context_names[k]]], 
+                                             size=length(non[[context_names[k]]]), 
                                              replace=FALSE)
+      colnames(non)[k] <- paste("non.", context_names[k], sep="") 
     }    
   }
-  
   return(list(non, nontexts))
 }
 
@@ -281,7 +282,7 @@ par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verb
   
   # add nontext columns to dataframe
   colnames(non) <- context.names
-  df.non <- cbind(df[,1:3], non)
+  df.non <- cbind(df[ , 1:3], non)
   
   if(expand){
     # expand windows to + - 2 utterances before and after
