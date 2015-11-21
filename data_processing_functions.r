@@ -21,7 +21,16 @@ nontext_cols <- function(df, context_names, prop=FALSE){
                                              size=length(non[[context_names[k]]]), 
                                              replace=FALSE)
       colnames(non)[k] <- paste("non.", context_names[k], sep="") 
-    }    
+    }
+    # change probabilities into 1 or 0 probabalistically based on their values
+    non.probs <- non
+    for(r in 1:nrow(non)){
+      for(c in 1:ncol(non)){
+        non[r,c] <- sample(x=c(0,1), 
+                           size=1, 
+                           prob=c(1-non.probs[r,c], non.probs[r,c]))
+      }
+    }
   }
   return(list(non, nontexts))
 }
@@ -170,7 +179,7 @@ context_results <- function(context.names, df, seg.utts=TRUE){
     context.data[[k]]$N.utterances <- nrow(df.context)
     
     context.data[[k]]$streams <- make_streams(df.context, seg.utts=seg.utts)
-    context.data[[k]]$unique.phon.pairs <- calc_MI(context.data[[k]]$streams$phon.pairs)
+    context.data[[k]]$unique.phon.pairs <- calc_MI(phon.pairs=context.data[[k]]$streams$phon.pairs, phon.stream=context.data[[k]]$streams$phon.stream)
     
     context.data[[k]]$freq.bigrams <- dplyr::summarise(group_by(context.data[[k]]$streams$phon.pairs, syl1, syl2), count=n()) # frequency of bigrams
     context.data[[k]]$freq.words <- table(context.data[[k]]$streams$orth.stream) # frequency of words
@@ -272,6 +281,8 @@ assess_seg <- function(seg.phon.stream, words, dict){
 
 # for bootstrapping nontexts:
 par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE){ # this is the function that should be done in parallel on the 12 cores of each node
+  if(expand & prop) stop("Cannot have both expand and prop TRUE.")
+  
   context.names <- colnames(df[4:ncol(df)])
   
   # pick nontexts
@@ -346,8 +357,6 @@ par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verb
     return(stat.results)
   }
 }
-
-  
 
 
 # make an artificial language
