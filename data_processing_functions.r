@@ -484,11 +484,14 @@ process_batch_results <- function(id, dir){
 
   nodes <- list.files(paste0(id, "-files/jobs"))
   if(length(nodes)==0) stop("No completed jobs available. Check dir and id to make sure they're correct.")
+  empty_jobs <- NULL
   
   for(i in 1:length(nodes)){
     load(paste0(id, "-files/jobs/", nodes[i], "/", as.numeric(nodes[i]), "-result.RData"))
+    if(is.null(result)) empty_jobs <- c(empty_jobs, nodes[i])
     results <- rbind(results, result)
   }
+  if(!is.null(empty_jobs)) stop(paste("The following jobs were empty:", paste(empty_jobs, collapse=", ")))
   return(results)
   # saveRDS(results, file=paste0("batchresults_WL.rds") )
 }
