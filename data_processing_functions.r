@@ -339,16 +339,22 @@ par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verb
     }
     if(TP & MI){ 
       this.result <- as.data.frame(rbind(TPresults, MIresults))
+      this.result$TPN.segd.units <- median(nontext.data[[k]]$TP85$seg.results$N.segd.units)
+      this.result$MIN.segd.units <- median(nontext.data[[k]]$MI85$seg.results$N.segd.units)
     } else if(TP){
       this.result <- as.data.frame(rbind(TPresults))
+      this.result$TPN.segd.units <- median(nontext.data[[k]]$TP85$seg.results$N.segd.units)
     } else if(MI){
       this.result <- as.data.frame(rbind(MIresults))
+      this.result$MIN.segd.units <- median(nontext.data[[k]]$MI85$seg.results$N.segd.units)
     } else stop("At least one of MI and TP must be true.")
     
     row.names(this.result) <- NULL
     this.result$stat <- as.factor(as.character(this.result$stat))
     this.result$nontext <- names(nontext.data)[[k]]
     this.result$cutoff <- cutoff
+    this.result$N.utts <- nontext.data[[k]]$N.utterances
+    this.result$N.words <- nontext.data[[k]]$streams$N.words
     stat.results <- rbind(stat.results,this.result)
   } 
   stat.results$nontext <- as.factor(as.character(stat.results$nontext))
@@ -361,7 +367,6 @@ par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verb
     return(list(stat.results, nontext.data) )
   }
 }
-
 
 # make an artificial language
 make_corpus <- function(dist=c("unif", "skewed"), N.utts=1000, N.types=1800, smallest.most.freq=FALSE, monosyl=FALSE){ 
