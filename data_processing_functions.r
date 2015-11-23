@@ -3,14 +3,24 @@ nontext_cols <- function(df, context_names, prop=FALSE, nontext=TRUE){
   nontexts <- vector("list", length(context_names)) # storage variable
   non <- NULL
   
-  if(!prop){
-    for(k in 1:length(context_names)){  
-      N.hits <- length(which(df[[context_names[k]]] == 1)) # the number of utterances that contain a keyword for that context
-      nontexts[[k]] <- sample(x=as.numeric(row.names(df)), size=N.hits) # take a random sample of utterances
-      col <- rep(0, nrow(df)) # make a column of zeros
-      col[nontexts[[k]]] <- 1 # change those zeros to 1's for every random utterance selected
-      non <- cbind(non, col) 
-      colnames(non)[k] <- paste("non.", context_names[k], sep="") 
+  if(!prop ){
+    if(nontext){
+      # to generate nontexts from non-proportional contexts (1 and 0)
+      for(k in 1:length(context_names)){  
+        N.hits <- length(which(df[[context_names[k]]] == 1)) # the number of utterances that contain a keyword for that context
+        nontexts[[k]] <- sample(x=as.numeric(row.names(df)), size=N.hits) # take a random sample of utterances
+        col <- rep(0, nrow(df)) # make a column of zeros
+        col[nontexts[[k]]] <- 1 # change those zeros to 1's for every random utterance selected
+        non <- cbind(non, col) 
+        colnames(non)[k] <- paste("non.", context_names[k], sep="")
+      } 
+    } else {
+      # if nontext=FALSE, then leave the df as-is (don't shuffle)
+      for(k in 1:length(context_names)){  
+        col[[context_names[k]]] <- df[[context_names[k]]]
+        non <- cbind(non, col) 
+        colnames(non)[k] <- paste("non.", context_names[k], sep="")
+      } 
     }
   } 
   if(prop){
@@ -284,7 +294,7 @@ assess_seg <- function(seg.phon.stream, words, dict){
 # for bootstrapping nontexts:
 par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE){ # this is the function that should be done in parallel on the 12 cores of each node
   if(expand & prop) stop("Cannot have both expand and prop TRUE.")
-  if(!nontext & !prop) stop("Context analyses (vs. nontext) are only appropriate when prop=TRUE.")
+  #if(!nontext & !prop) stop("Context analyses (vs. nontext) are only appropriate when prop=TRUE.")
   
   context.names <- colnames(df[4:ncol(df)])
   
