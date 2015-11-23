@@ -355,12 +355,11 @@ par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verb
   stat.results$recall <- as.numeric(stat.results$recall)
   stat.results$precision <- as.numeric(stat.results$precision)
   
-#   if(!verbose){
-#     return(stat.results)
-#   } else {
-#     return(list(stat.results, nontext.data) )
-#   }
-return(stat.results)
+  if(!verbose){
+    return(stat.results)
+  } else {
+    return(list(stat.results, nontext.data) )
+  }
 }
 
 
