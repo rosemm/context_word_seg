@@ -1,5 +1,5 @@
 
-nontext_cols <- function(df, context_names, prop=FALSE){
+nontext_cols <- function(df, context_names, prop=FALSE, nontext=TRUE){
   nontexts <- vector("list", length(context_names)) # storage variable
   non <- NULL
   
@@ -15,12 +15,14 @@ nontext_cols <- function(df, context_names, prop=FALSE){
   } 
   if(prop){
     non <- df[ , 4:ncol(df)]
-    # shuffle the context columns
-    for(k in 1:length(context_names)){
-      non[[context_names[k]]] <- base::sample(non[[context_names[k]]], 
-                                             size=length(non[[context_names[k]]]), 
-                                             replace=FALSE)
-      colnames(non)[k] <- paste("non.", context_names[k], sep="") 
+    if(nontext){
+      # shuffle the context columns only if nontext=TRUE
+      for(k in 1:length(context_names)){
+        non[[context_names[k]]] <- base::sample(non[[context_names[k]]], 
+                                                size=length(non[[context_names[k]]]), 
+                                                replace=FALSE)
+        colnames(non)[k] <- paste("non.", context_names[k], sep="") 
+      }
     }
     # change probabilities into 1 or 0 probabalistically based on their values
     non.probs <- non
@@ -280,13 +282,14 @@ assess_seg <- function(seg.phon.stream, words, dict){
 }
 
 # for bootstrapping nontexts:
-par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85){ # this is the function that should be done in parallel on the 12 cores of each node
+par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE){ # this is the function that should be done in parallel on the 12 cores of each node
   if(expand & prop) stop("Cannot have both expand and prop TRUE.")
+  if(!nontext & !prop) stop("Context analyses (vs. nontext) are only appropriate when prop=TRUE.")
   
   context.names <- colnames(df[4:ncol(df)])
   
   # pick nontexts
-  results <- nontext_cols(df=df, context_names=context.names, prop=prop) # add the nontext col
+  results <- nontext_cols(df=df, context_names=context.names, prop=prop, nontext=nontext) # add the nontext col
   non <- results[[1]]
   
   # add nontext columns to dataframe
