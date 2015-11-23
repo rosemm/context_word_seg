@@ -348,6 +348,7 @@ par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verb
     row.names(this.result) <- NULL
     this.result$stat <- as.factor(as.character(this.result$stat))
     this.result$nontext <- names(nontext.data)[[k]]
+    this.result$cutoff <- cutoff
     stat.results <- rbind(stat.results,this.result)
   } 
   stat.results$nontext <- as.factor(as.character(stat.results$nontext))
@@ -495,7 +496,7 @@ process_batch_results <- function(id, dir){
     if(is.null(result)) empty_jobs <- c(empty_jobs, nodes[i])
     results <- rbind(results, result)
   }
-  if(!is.null(empty_jobs)) stop(paste("The following jobs were empty:", paste(empty_jobs, collapse=", ")))
+  if(!is.null(empty_jobs)) warning(paste("The following jobs were empty:", paste(empty_jobs, collapse=", ")))
   return(results)
   # saveRDS(results, file=paste0("batchresults_WL.rds") )
 }
