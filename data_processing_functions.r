@@ -379,7 +379,7 @@ make_corpus <- function(dist=c("unif", "skewed"), N.utts=1000, N.types=1800, sma
   
   # generate all possible syllables from these consonants and these vowels
   Cs <- c("b", "c", "ch", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "r", "s", "sh", "t", "v", "w", "z")
-  Vs <- c("a", "e", "i", "o", "u", "A", "E", "I", "O", "U")
+  Vs <- c("a", "e", "i", "o", "u", "a1", "e1", "i1", "o1", "u1")
   syls <- NULL
   for(a in 1:length(Cs)){
     for(b in 1:length(Vs)){
