@@ -281,7 +281,7 @@ assess_seg <- function(seg.phon.stream, words, dict){
 }
 
 # for bootstrapping nontexts:
-par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE){ # this is the function that should be done in parallel on the 12 cores of each node
+par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version){ # this is the function that should be done in parallel on the 12 cores of each node
   if(expand & prop) stop("Cannot have both expand and prop TRUE.")
 
   # if a corpus isn't given, generate an artificial one
@@ -380,6 +380,7 @@ par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verb
   stat.results$nontext <- as.factor(as.character(stat.results$nontext))
   stat.results$recall <- as.numeric(stat.results$recall)
   stat.results$precision <- as.numeric(stat.results$precision)
+  stat.results$SHA1 <- fun.version
   
   if(verbose){
     return(list(stat.results, data) )
