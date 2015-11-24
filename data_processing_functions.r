@@ -1,51 +1,35 @@
 
-nontext_cols <- function(df, context_names, prop=FALSE, nontext=TRUE){
-  nontexts <- vector("list", length(context_names)) # storage variable
-  non <- NULL
+nontext_cols <- function(df){
+  non <- df[ , 4:ncol(df)]
+  message(paste("nontext_cols using all but the following columns:", colnames(df)[1:3]))
+  context.names <- colnames(non)
   
-  if(!prop ){
-    if(nontext){
-      # to generate nontexts from non-proportional contexts (1 and 0)
-      for(k in 1:length(context_names)){  
-        N.hits <- length(which(df[[context_names[k]]] == 1)) # the number of utterances that contain a keyword for that context
-        nontexts[[k]] <- sample(x=as.numeric(row.names(df)), size=N.hits) # take a random sample of utterances
-        col <- rep(0, nrow(df)) # make a column of zeros
-        col[nontexts[[k]]] <- 1 # change those zeros to 1's for every random utterance selected
-        non <- cbind(non, col) 
-        colnames(non)[k] <- paste("non.", context_names[k], sep="")
-      } 
-    } else {
-      # if nontext=FALSE, then leave the df as-is (don't shuffle)
-      for(k in 1:length(context_names)){  
-        col[[context_names[k]]] <- df[[context_names[k]]]
-        non <- cbind(non, col) 
-        colnames(non)[k] <- paste("non.", context_names[k], sep="")
-      } 
-    }
-  } 
-  if(prop){
-    non <- df[ , 4:ncol(df)]
-    if(nontext){
-      # shuffle the context columns only if nontext=TRUE
-      for(k in 1:length(context_names)){
-        non[[context_names[k]]] <- base::sample(non[[context_names[k]]], 
-                                                size=length(non[[context_names[k]]]), 
-                                                replace=FALSE)
-        colnames(non)[k] <- paste("non.", context_names[k], sep="") 
-      }
-    }
-    # change probabilities into 1 or 0 probabalistically based on their values
-    non.probs <- non
-    for(r in 1:nrow(non)){
-      for(c in 1:ncol(non)){
-        non[r,c] <- sample(x=c(0,1), 
-                           size=1, 
-                           prob=c(1-non.probs[r,c], non.probs[r,c]))
-      }
+  # shuffle the context columns
+  for(k in 1:length(context.names)){
+    non[[context.names[k]]] <- base::sample(non[[context.names[k]]], 
+                                            size=nrow(df), 
+                                            replace=FALSE)
+    colnames(non)[k] <- paste("non.", context.names[k], sep="") 
+  }
+  return(non)
+}  
+
+sample_probs <- function(df){
+  # change probabilities into 1 or 0 probabalistically based on their values
+  sample <- df[ , 4:ncol(df)]
+  message(paste("sample_probs using all but the following columns:", colnames(df)[1:3]))
+  
+  for(r in 1:nrow(sample)){
+    for(c in 1:ncol(sample)){
+      sample[r,c] <- sample(x=c(0,1), 
+                         size=1, 
+                         prob=c(1-sample[r,c], sample[r,c]))
     }
   }
-  return(list(non, nontexts))
+  return(sample)
 }
+  
+
 
 expand_windows <- function(df, context.names){
   p <- progress_estimated(n=length(3:(nrow(df)-2))) # print progress bar while working
@@ -294,97 +278,99 @@ assess_seg <- function(seg.phon.stream, words, dict){
 # for bootstrapping nontexts:
 par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE){ # this is the function that should be done in parallel on the 12 cores of each node
   if(expand & prop) stop("Cannot have both expand and prop TRUE.")
-  #if(!nontext & !prop) stop("Context analyses (vs. nontext) are only appropriate when prop=TRUE.")
-  
-  context.names <- colnames(df[4:ncol(df)])
-  
+
   # if a corpus isn't given, generate an artificial one
   if(df=="skewed"){
     lang <- make_corpus(dist="skewed", N.utts=1000, N.types=1800, smallest.most.freq=FALSE, monosyl=TRUE)
     corpus <- lang[[1]] # the corpus
     dict <- lang[[2]] # the dictionary
-    # use that corpus to generate a size sim contexts file
-    df <- contexts_by_size(df=corpus, N.sizes=25, min.utt=50)
   } else if(df=="unif"){
     lang <- make_corpus(dist="unif", N.utts=1000, N.types=1800, smallest.most.freq=FALSE, monosyl=TRUE)
     corpus <- lang[[1]] # the corpus
     dict <- lang[[2]] # the dictionary
+  } else if(!is.data.frame(df)) stop("Either provide a corpus via df or specify the distribution for an artificial one (skewed or unif)")
+  if(df=="skewed" | df=="unif"){
     # use that corpus to generate a size sim contexts file
     df <- contexts_by_size(df=corpus, N.sizes=25, min.utt=50)
-  } else if(!is.data.frame(df)) stop("Either provide a corpus via df or specify the distribution for an artificial one (skewed or unif)")
-  
-  
+  }
+    
   if(nrow(df) == 0) stop("df didn't load")
   if(nrow(dict) == 0) stop("dict didn't load")
+  context.names <- colnames(df[4:ncol(df)])
   
+  if(prop){
+    # change probabilities into 1 or 0 probabalistically based on their values
+    sample <- sample_probs(df=df) 
+    # replace probabalistic columns with binary ones
+    df <- cbind(df[ , 1:3], sample)
+  }
   
-  # pick nontexts
-  results <- nontext_cols(df=df, context_names=context.names, prop=prop, nontext=nontext) # add the nontext col
-  non <- results[[1]]
-  
-  # add nontext columns to dataframe
-  colnames(non) <- context.names
-  df.non <- cbind(df[ , 1:3], non)
+  if(nontext){
+    # pick nontext utterances
+    non <- nontext_cols(df=df) 
+    # add nontext columns to dataframe
+    df <- cbind(df[ , 1:3], non)
+  }
   
   if(expand){
     # expand windows to + - 2 utterances before and after
-    df.non <- expand_windows(df.non, context.names=context.names)
+    df <- expand_windows(df, context.names=context.names)
   }
   
   # calculate MIs and TPs
-  nontext.data <- context_results(context.names, df=df.non, seg.utts=seg.utts) # calls make_streams() and calc_MI()
+  data <- context_results(context.names, df=df, seg.utts=seg.utts) # calls make_streams() and calc_MI()
   
   # segment speech
-  for(k in 1:length(names(nontext.data))){
-    message(paste0("processing ", names(nontext.data)[k], "..."))
+  for(k in 1:length(names(data))){
+    message(paste0("processing ", names(data)[k], "..."))
     if(TP){
-      nontext.data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=cutoff, 
+      data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=cutoff, 
                                                                stat="TP", 
-                                                               nontext.data[[k]]$unique.phon.pairs, 
-                                                               nontext.data[[k]]$streams$phon.stream, 
+                                                               data[[k]]$unique.phon.pairs, 
+                                                               data[[k]]$streams$phon.stream, 
                                                                seg.utts=seg.utts)
     }
     if(MI){
-      nontext.data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=cutoff, 
+      data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=cutoff, 
                                                                stat="MI", 
-                                                               nontext.data[[k]]$unique.phon.pairs, 
-                                                               nontext.data[[k]]$streams$phon.stream, 
+                                                               data[[k]]$unique.phon.pairs, 
+                                                               data[[k]]$streams$phon.stream, 
                                                                seg.utts=seg.utts)
     }
   }
   
   # assess segmentation
   stat.results <- data.frame(recall=NULL, precision=NULL, stat=NULL, nontext=NULL)
-  for(k in 1:length(names(nontext.data))){
+  for(k in 1:length(names(data))){
     
     if(TP){
-      nontext.data[[k]]$TP85$seg.results <- assess_seg(seg.phon.stream=nontext.data[[k]]$TP85$seg.phon.stream, words=nontext.data[[k]]$streams$words, dict=dict)
-      TPresults <- colMeans(nontext.data[[k]]$TP85$seg.results[,3:4], na.rm=T)
+      data[[k]]$TP85$seg.results <- assess_seg(seg.phon.stream=data[[k]]$TP85$seg.phon.stream, words=data[[k]]$streams$words, dict=dict)
+      TPresults <- colMeans(data[[k]]$TP85$seg.results[,3:4], na.rm=T)
       TPresults$stat <- "TP"
     }
     if(MI){
-      nontext.data[[k]]$MI85$seg.results <- assess_seg(seg.phon.stream=nontext.data[[k]]$MI85$seg.phon.stream, words=nontext.data[[k]]$streams$words, dict=dict)
-      MIresults <- colMeans(nontext.data[[k]]$MI85$seg.results[,3:4], na.rm=T)
+      data[[k]]$MI85$seg.results <- assess_seg(seg.phon.stream=data[[k]]$MI85$seg.phon.stream, words=data[[k]]$streams$words, dict=dict)
+      MIresults <- colMeans(data[[k]]$MI85$seg.results[,3:4], na.rm=T)
       MIresults$stat <- "MI"
     }
     if(TP & MI){ 
       this.result <- as.data.frame(rbind(TPresults, MIresults))
-      this.result$TPN.segd.units <- median(nontext.data[[k]]$TP85$seg.results$N.segd.units)
-      this.result$MIN.segd.units <- median(nontext.data[[k]]$MI85$seg.results$N.segd.units)
+      this.result$TPN.segd.units <- median(data[[k]]$TP85$seg.results$N.segd.units)
+      this.result$MIN.segd.units <- median(data[[k]]$MI85$seg.results$N.segd.units)
     } else if(TP){
       this.result <- as.data.frame(rbind(TPresults))
-      this.result$TPN.segd.units <- median(nontext.data[[k]]$TP85$seg.results$N.segd.units)
+      this.result$TPN.segd.units <- median(data[[k]]$TP85$seg.results$N.segd.units)
     } else if(MI){
       this.result <- as.data.frame(rbind(MIresults))
-      this.result$MIN.segd.units <- median(nontext.data[[k]]$MI85$seg.results$N.segd.units)
+      this.result$MIN.segd.units <- median(data[[k]]$MI85$seg.results$N.segd.units)
     } else stop("At least one of MI and TP must be true.")
     
     row.names(this.result) <- NULL
     this.result$stat <- as.factor(as.character(this.result$stat))
-    this.result$nontext <- names(nontext.data)[[k]]
+    this.result$nontext <- names(data)[[k]]
     this.result$cutoff <- cutoff
-    this.result$N.utts <- nontext.data[[k]]$N.utterances
-    this.result$N.words <- nontext.data[[k]]$streams$N.words
+    this.result$N.utts <- data[[k]]$N.utterances
+    this.result$N.words <- data[[k]]$streams$N.words
     stat.results <- rbind(stat.results,this.result)
   } 
   stat.results$nontext <- as.factor(as.character(stat.results$nontext))
@@ -394,7 +380,7 @@ par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verb
   if(!verbose){
     return(stat.results)
   } else {
-    return(list(stat.results, nontext.data) )
+    return(list(stat.results, data) )
   }
 }
 
