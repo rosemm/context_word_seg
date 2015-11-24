@@ -185,7 +185,9 @@ context_results <- function(context.names, df, seg.utts=TRUE){
   return(context.data)
 }
 
-segment_speech <- function(cutoff, stat, unique.phon.pairs, phon.stream, consider.freq=FALSE, seg.utts=TRUE){
+segment_speech <- function(cutoff, stat, data, consider.freq=FALSE, seg.utts=TRUE){
+  unique.phon.pairs <- data$unique.phon.pairs
+  phon.stream <- data$streams$phon.stream
   
   if(stat=="TP") {
     TP.cutoff <- quantile(unique.phon.pairs$TP, cutoff)
@@ -327,15 +329,13 @@ par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verb
     if(TP){
       data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=cutoff,
                                                        stat = "TP", 
-                                                       unique.phon.pairs = data[[k]]$unique.phon.pairs, 
-                                                       phon.stream = data[[k]]$streams$phon.stream,
+                                                       data = data[[k]],
                                                        seg.utts = seg.utts)
     }
     if(MI){
       data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff = cutoff,
                                                        stat = "MI", 
-                                                       unique.phon.pairs = data[[k]]$unique.phon.pairs, 
-                                                       phon.stream = data[[k]]$streams$phon.stream, 
+                                                       data = data[[k]],
                                                        seg.utts = seg.utts)
     }
   }
