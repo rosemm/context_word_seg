@@ -389,7 +389,7 @@ par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verb
 make_corpus <- function(dist=c("unif", "skewed"), N.utts=1000, N.types=1800, smallest.most.freq=FALSE, monosyl=FALSE){ 
   N.type <- round(N.types/3, 0)
   if(!monosyl){
-    message(paste0("\nGenerating ", N.type, " types each for 2, 3, and 4-syllables words...\n") )
+    message(paste0("\nGenerating ", N.type, " types each for 2, 3, and 4-syllables words from a ", dist, " distribution...\n") )
   } else {
     message(paste0("\nGenerating ", N.type, " types each for 1, 2, and 3-syllables words...\n") )
   }
