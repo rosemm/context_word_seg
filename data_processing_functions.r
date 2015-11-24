@@ -298,6 +298,26 @@ par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verb
   
   context.names <- colnames(df[4:ncol(df)])
   
+  # if a corpus isn't given, generate an artificial one
+  if(df=="skewed"){
+    lang <- make_corpus(dist="skewed", N.utts=1000, N.types=1800, smallest.most.freq=FALSE, monosyl=TRUE)
+    corpus <- lang[[1]] # the corpus
+    dict <- lang[[2]] # the dictionary
+    # use that corpus to generate a size sim contexts file
+    df <- contexts_by_size(df=corpus, N.sizes=25, min.utt=50)
+  } else if(df=="unif"){
+    lang <- make_corpus(dist="unif", N.utts=1000, N.types=1800, smallest.most.freq=FALSE, monosyl=TRUE)
+    corpus <- lang[[1]] # the corpus
+    dict <- lang[[2]] # the dictionary
+    # use that corpus to generate a size sim contexts file
+    df <- contexts_by_size(df=corpus, N.sizes=25, min.utt=50)
+  } else if(!is.data.frame(df)) stop("Either provide a corpus via df or specify the distribution for an artificial one (skewed or unif)")
+  
+  
+  if(nrow(df) == 0) stop("df didn't load")
+  if(nrow(dict) == 0) stop("dict didn't load")
+  
+  
   # pick nontexts
   results <- nontext_cols(df=df, context_names=context.names, prop=prop, nontext=nontext) # add the nontext col
   non <- results[[1]]
