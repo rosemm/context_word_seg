@@ -1,7 +1,7 @@
 
 nontext_cols <- function(df){
   non <- df[ , 4:ncol(df)]
-  message(paste("nontext_cols using all but the following columns:", colnames(df)[1:3]))
+  message(paste("nontext_cols using all but the following columns:", paste(colnames(df)[1:3], collapse=", ")))
   context.names <- colnames(non)
   
   # shuffle the context columns
@@ -17,7 +17,7 @@ nontext_cols <- function(df){
 sample_probs <- function(df){
   # change probabilities into 1 or 0 probabalistically based on their values
   sample <- df[ , 4:ncol(df)]
-  message(paste("sample_probs using all but the following columns:", colnames(df)[1:3]))
+  message(paste("sample_probs using all but the following columns:", paste(colnames(df)[1:3], collapse=", ")))
   
   for(r in 1:nrow(sample)){
     for(c in 1:ncol(sample)){
