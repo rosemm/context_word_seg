@@ -325,18 +325,18 @@ par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verb
   for(k in 1:length(names(data))){
     message(paste0("processing ", names(data)[k], "..."))
     if(TP){
-      data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=cutoff, 
-                                                               stat="TP", 
-                                                               data[[k]]$unique.phon.pairs, 
-                                                               data[[k]]$streams$phon.stream, 
-                                                               seg.utts=seg.utts)
+      data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=cutoff,
+                                                       stat = "TP", 
+                                                       unique.phon.pairs = data[[k]]$unique.phon.pairs, 
+                                                       phon.stream = data[[k]]$streams$phon.stream,
+                                                       seg.utts = seg.utts)
     }
     if(MI){
-      data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=cutoff, 
-                                                               stat="MI", 
-                                                               data[[k]]$unique.phon.pairs, 
-                                                               data[[k]]$streams$phon.stream, 
-                                                               seg.utts=seg.utts)
+      data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff = cutoff,
+                                                       stat = "MI", 
+                                                       unique.phon.pairs = data[[k]]$unique.phon.pairs, 
+                                                       phon.stream = data[[k]]$streams$phon.stream, 
+                                                       seg.utts = seg.utts)
     }
   }
   
