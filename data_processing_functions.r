@@ -160,7 +160,10 @@ make_streams = function(df, seg.utts=TRUE){
   return(output)
 }
 
-context_results <- function(context.names, df, seg.utts=TRUE){
+context_results <- function(df, seg.utts=TRUE){
+  message(paste("\ncontext_results using all but the following columns:", paste(colnames(df)[1:3], collapse=", ")))
+  context.names <- colnames(df[ , 4:ncol(df)])
+  
   context.data <- vector("list", length(context.names)) # storage variable
   names(context.data) <- context.names
   
@@ -321,7 +324,7 @@ par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verb
   }
   
   # calculate MIs and TPs
-  data <- context_results(context.names, df=df, seg.utts=seg.utts) # calls make_streams() and calc_MI()
+  data <- context_results(df=df, seg.utts=seg.utts) # calls make_streams() and calc_MI()
   
   # segment speech
   for(k in 1:length(names(data))){
