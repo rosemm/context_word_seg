@@ -289,6 +289,7 @@ par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verb
     corpus <- lang[[1]] # the corpus
     dict <- lang[[2]] # the dictionary
   } else if(!is.data.frame(df)) stop("Either provide a corpus via df or specify the distribution for an artificial one (skewed or unif)")
+  
   if(df=="skewed" | df=="unif"){
     # use that corpus to generate a size sim contexts file
     df <- contexts_by_size(df=corpus, N.sizes=25, min.utt=50)
@@ -377,10 +378,10 @@ par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verb
   stat.results$recall <- as.numeric(stat.results$recall)
   stat.results$precision <- as.numeric(stat.results$precision)
   
-  if(!verbose){
-    return(stat.results)
-  } else {
+  if(verbose){
     return(list(stat.results, data) )
+  } else {
+    return(stat.results)
   }
 }
 
