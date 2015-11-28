@@ -95,26 +95,19 @@ for (f in 1:length(files)){
 # define context by utterance
 #########################################################################
 #################################################
-# calc most endorsed context for each utterance (mutually exclusive context coding)
-master_doc_prop$max <- apply(master_doc_prop[contextcols], 1, function(x) max(x, na.rm=T))
-master_doc_prop$maxes <-  apply(master_doc_prop[c(contextcols, which(colnames(master_doc_prop)=="max"))], 1, function(x) length(which(x[1:(length(x)-1)]==x[length(x)]))) # how many contexts have the same value as the max context?
-master_doc_prop$which <- apply(master_doc_prop[contextcols], 1, which.max) + 3 # which.max() finds which of the context columns has the highest value, add 3 to get which column from the dataframe (since there are three other columns at the beginning before the context columns start)
-master_doc_prop$which <- ifelse(master_doc_prop$maxes>1, NA, master_doc_prop$which) # don't pick a context for utterances where there's a tie
-master_doc_prop$which <- ifelse(master_doc_prop$max < .66 , NA, master_doc_prop$which) # don't pick a context if the max context is less than 66%
-master_doc_prop$context <- colnames(master_doc_prop)[master_doc_prop$which ]
-summary(as.factor(master_doc_prop$context) )
-
-
 # calc contexts by voting threshold
 include <- master_doc_keep %>%
   group_by(utt, category) %>%
-  summarize(votes=n())
+  summarize(votes=n()) %>%
+  separate(utt, into=c("file", "UttNum"), sep="_", remove=F) %>%
+  arrange(file, as.numeric(UttNum))
 include$yes <- ifelse(include$votes > 2, 1, 0)
 print(mean(include$yes)) # the % of codes that have agreement of at least 2 coders
 # only keep the codes for each utterance that have at least 2 votes
 include <- include %>%
   filter( yes==1 ) %>%
   select(utt, category)
+summary(as.factor(include$category))
 
 # note that we are probably missing utterances from the include dataframe (if there was no code that had 2 coders agree for a particular utt)
 # to restore the full corpus, merge with the utterances from master_doc_keep
@@ -134,6 +127,7 @@ print(N.utts)
 
 # the number of utterances that have 1, 2, 3, and 4 contexts identified (to get a sense of the overlap)
 table(rowSums(contexts_from_coding[ , 2:ncol(contexts_from_coding)]))
+round(table(rowSums(contexts_from_coding[ , 2:ncol(contexts_from_coding)]))/nrow(contexts_from_coding), 3) # as percents
 
 
 # save these contexts in a file we can send to ACISS for bootstrap nontexts
@@ -150,7 +144,7 @@ write.table(key, file="contexs_HJ_voting.txt", quote=F, col.names=T, row.names=F
 summary(master_doc_calc$total)
 hist(master_doc_calc$total, main="number of codes per utterance", xlab=NULL)
 
-contexts_from_coding <- select(master_doc_prop, -file, -UttNum, -total, -max, -maxes, -which, -context) %>% # drop extra columns
+contexts_from_coding <- select(master_doc_prop, -file, -UttNum, -total) %>% # drop extra columns
   select(-misc, -none) # drop context columns that don't actually code for a context
 
 # save these contexts in a file we can send to ACISS for bootstrap nontexts
