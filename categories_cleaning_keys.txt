@@ -1,1 +1,133 @@
-context_clean	categoryanswering the telephone	answering the telephoneapplying teething gel	fussingbabbling	interactionbaptism	baptismbathroom	bathroombathtime	bathtimebedtime	sleepbefore leaving	outsidebeing tired	being tiredbiting	bitingblowing bubbles	blowing bubblesblowing raspberries	touchingbouncing	playtimebrushing hair	dressingburping	burpingcar	outsidechanging clothes	dressingchewing	mealtimechiding	interactionclapping	interactionclean up	houseworkcleaning	houseworkcleaning the child	touchingcoming home	outsidecooing	interactioncooking	houseworkcoughing	coughingcrawling	playtimecrying	fussingcuddling	touchingdancing	playtimediaper change	diaper changedirecting attention	interactiondressing	dressingdrinking	mealtimedrooling	droolingdrying	bathtimeentertaining	playtimeexercising	playtimefilming	taking picturesfussing	fussinggas	fussinggetting ready	dressinggoing potty	diaper changegrooming	touchinggrunting	interactionhearing	interactionhiccups	hiccupsholding	touchingholding child	touchinghousework	houseworkin crib	sleepin the kitchen	houseworkinactive	noneironing	houseworkjoint attention	interactionkicking	playtimekissing	touchinglaughing	interactionlearning words	interactionleaving	outsidelistening	interactionlooking	interactionlying	lyingmaking mess	making messmealtime	mealtimemessing up	messing upmom eating	mom eatingmoving	playtimemusic	musicnap time	sleepnone	noneobserving	interactionoutside	outsidepeeing	diaper changeplaying	playtimeplaytime	playtimepooping	diaper changepost-bath	bathtimepost-bedtime	sleeppost-diaper	diaper changepost-feeding	mealtimepost-mealtime	mealtimepost-nap	sleeppost-sick	sickpotty training	bathroompre-bath	bathtimepre-bedtime	sleeppre-change	diaper changepre-diaper	diaper changepre-doctors visit	pre-doctors visitpre-dressing	dressingpre-feeding	mealtimepre-mealtime	mealtimepre-nap	sleeppre-swimming	pre-swimmingpulling hair	pulling hairputting on the bib	mealtimerelieving tummy ache	sickrolling	playtimeshopping	shoppingshouting	interactionsick	sicksinging	interactionsmiling	interactionsneezing	sneezingsoothing	fussingspitting up	mealtimestorytime	interactionstretching	stretchingsucking	touchingsucking thumb	touchingsunbathing	outsideswimming	swimmingswinging	playtimetaking pictures	taking picturestalking	interactiontaping	taking picturesteasing	interactionteething	fussingtickling	touchingtouching	touchingTV	TVundressing	dressingwaking up	sleepwalking	playtimewashing	bathtimewashing dishes	houseworkwashing face	bathtimewatching	interactionyawning	sleep
+context_clean	category
+answering the telephone	answering the telephone
+applying teething gel	fussing
+babbling	interaction
+baptism	baptism
+bathroom	bathroom
+bathtime	bathtime
+bedtime	sleep
+before leaving	outside
+being tired	being tired
+biting	biting
+blowing bubbles	blowing bubbles
+blowing raspberries	touching
+bouncing	playtime
+brushing hair	dressing
+burping	mealtime
+car	outside
+changing clothes	dressing
+chewing	mealtime
+chiding	interaction
+clapping	interaction
+clean up	housework
+cleaning	housework
+cleaning the child	touching
+coming home	outside
+cooing	interaction
+cooking	housework
+coughing	coughing
+crawling	playtime
+crying	fussing
+cuddling	touching
+dancing	playtime
+diaper change	diaper change
+directing attention	interaction
+dressing	dressing
+drinking	mealtime
+drooling	drooling
+drying	bathtime
+entertaining	playtime
+exercising	playtime
+filming	taking pictures
+fussing	fussing
+gas	fussing
+getting ready	dressing
+going potty	diaper change
+grooming	touching
+grunting	interaction
+hearing	interaction
+hiccups	hiccups
+holding	touching
+holding child	touching
+housework	housework
+in crib	sleep
+in the kitchen	housework
+inactive	none
+ironing	housework
+joint attention	interaction
+kicking	playtime
+kissing	touching
+laughing	interaction
+learning words	interaction
+leaving	outside
+listening	interaction
+looking	interaction
+lying	lying
+making mess	making mess
+mealtime	mealtime
+messing up	messing up
+mom eating	mom eating
+moving	playtime
+music	music
+nap time	sleep
+newspaper	newspaper
+none	none
+observing	interaction
+outside	outside
+peeing	diaper change
+playing	playtime
+playtime	playtime
+pooping	diaper change
+post-bath	bathtime
+post-bedtime	sleep
+post-diaper	diaper change
+post-feeding	mealtime
+post-mealtime	mealtime
+post-nap	sleep
+post-sick	sick
+potty training	bathroom
+pre-bath	bathtime
+pre-bedtime	sleep
+pre-change	diaper change
+pre-diaper	diaper change
+pre-doctors visit	pre-doctors visit
+pre-dressing	dressing
+pre-feeding	mealtime
+pre-mealtime	mealtime
+pre-nap	sleep
+pre-swimming	pre-swimming
+pulling hair	pulling hair
+putting on the bib	mealtime
+relieving tummy ache	sick
+rolling	playtime
+shopping	shopping
+shouting	interaction
+sick	sick
+singing	interaction
+smiling	interaction
+sneezing	sneezing
+soothing	fussing
+spitting up	mealtime
+storytime	interaction
+stretching	stretching
+sucking	touching
+sucking thumb	touching
+sunbathing	outside
+swimming	swimming
+swinging	playtime
+taking pictures	taking pictures
+talking	interaction
+taping	taking pictures
+teasing	interaction
+teething	fussing
+tickling	touching
+touching	touching
+TV	TV
+undressing	dressing
+waking up	sleep
+walking	playtime
+washing	bathtime
+washing dishes	housework
+washing face	bathtime
+watching	interaction
+yawning	sleep

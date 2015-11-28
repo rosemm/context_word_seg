@@ -41,6 +41,7 @@ before nap	pre-nap
 before napping	pre-bedtime
 before swimming	pre-swimming
 being sick	sick
+being sleepy	being tired
 being tired	being tired
 being uncomfortable	fussing
 being upset	fussing
@@ -57,6 +58,7 @@ brushing	brushing hair
 brushing hair	brushing hair
 burping	burping
 camera	taking pictures
+car ride	car
 car trip	car
 changing	diaper change
 changing clothes	changing clothes
@@ -88,6 +90,7 @@ diaper cahnge	diaper change
 diaper change	diaper change
 diapering	diaper change
 dinner time	mealtime
+dinnertime	mealtime
 directing attention	directing attention
 doing chores	housework
 doing housework	housework
@@ -117,6 +120,7 @@ getting dressed	dressing
 getting on clothes	changing clothes
 getting ready	getting ready
 getting ready for bed	pre-bedtime
+getting ready for doctor	pre-doctors visit
 getting sick	spitting up
 getting up	post-nap
 going potty	going potty
@@ -159,13 +163,16 @@ music	music
 nap time	nap time
 napping	nap time
 naptime	nap time
+newspaper	newspaper
 nibbling	mealtime
 nine	none
 none	none
 observing	observing
+on a walk	walking
 outside	outside
 palying	playing
 peeing	peeing
+peekaboo	playtime
 pkaying	playtime
 play	playtime
 play time	playtime
