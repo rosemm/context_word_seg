@@ -128,7 +128,6 @@ for(i in 1:length(missed.phon) ){
 message("\n...now ", nrow(df), " utterances in df. ", 100*round(nrow(df)/nrow(coding_doc), 4), "% utterances remain\n")
 
 if( length(df$orth[grepl(x=df$orth, pattern="[[:upper:]]")]) > 0 )  df$orth <- tolower(df$orth) # make sure the orth stream is all lower case
-if( length(df$phon[grepl(x=df$phon, pattern="-", fixed=T)])  > 0 )  df$phon <- gsub(x=df$phon, pattern="-", replacement=" ", fixed=T) # make sure all word-internal syllable boundaries "-" are represnted just the same as between-word syllable boundaries (space)
 
 write.table(df, file="utt_orth_phon_KEY.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 # key <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
