@@ -160,12 +160,17 @@ CodeContexts <- function(this_pass=3, window_size=30, slide_by=5){
     message("Selecting utterances...")
     Nutts <- max(dplyr::filter(coding_doc, file==this.file)$UttNum) # the total number of utterances in this transcript
     start_vals <- seq(from=start_at, to=Nutts, by=window_size) # the vector of starting values for coding windows
-    start <- sample(start_vals, 1) # select a starting utterance at random from the starting values
+    start.num <- sample(1:length(start_vals), 1) # select a starting utterance at random from the starting values
+    start <- start_vals[start.num]
     
     # if that section has already been fully coded, select new starting values until you get some stuff that hasn't been coded yet
     wait <- Sys.time() # only keep looping for a max of 5 seconds, then just go with whatever's there
     while( Sys.time() - wait < as.difftime(5, units = "secs") & !anyNA(dplyr::filter(coding_doc, file==this.file & start-1 < UttNum & UttNum < start+window_size & pass==this_pass)$context ) ){
-      start <- sample(start_vals, 1) # select a new starting utterance at random from the starting values
+      # select a new starting utterance from the starting values
+      # loop through the list of starting values until we find one that hasn't been fully codes
+      start.num <- start.num + 1 
+      if(start.num > length(start_vals)) start.num <- 1 # if we're at the end of the list, start over
+      start <- start_vals[start.num]
     }
     
     this.transcript <- transcripts[[this.file]]
