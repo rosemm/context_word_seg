@@ -118,14 +118,17 @@ table(missed.phon.counts) # how many utterances are affected by each missed phon
 
 # delete utterances that contain untranslateable sounds
 message("\n", nrow(coding_doc), " utterances in coding_doc... \n")
-coding_doc_clean <- coding_doc
+df <- coding_doc
 for(i in 1:length(missed.phon) ){
-  coding_doc_clean <- coding_doc_clean[!grepl(pattern=paste0("[[:space:]]", missed.phon[i], "[[:space:]]"), x=coding_doc_clean$phon), ]
-  coding_doc_clean <- coding_doc_clean[!grepl(pattern=paste0("^", missed.phon[i], "[[:space:]]"), x=coding_doc_clean$phon), ]
-  coding_doc_clean <- coding_doc_clean[!grepl(pattern=paste0("[[:space:]]", missed.phon[i], "$"), x=coding_doc_clean$phon), ]
-  coding_doc_clean <- coding_doc_clean[!grepl(pattern=paste0("^", missed.phon[i], "$"), x=coding_doc_clean$phon), ]
+  df <- df[!grepl(pattern=paste0("[[:space:]]", missed.phon[i], "[[:space:]]"), x=df$phon), ]
+  df <- df[!grepl(pattern=paste0("^", missed.phon[i], "[[:space:]]"), x=df$phon), ]
+  df <- df[!grepl(pattern=paste0("[[:space:]]", missed.phon[i], "$"), x=df$phon), ]
+  df <- df[!grepl(pattern=paste0("^", missed.phon[i], "$"), x=df$phon), ]
 }
-message("\n...now ", nrow(coding_doc_clean), " utterances in coding_doc_clean. ", 100*round(nrow(coding_doc_clean)/nrow(coding_doc), 4), "% utterances remain\n")
+message("\n...now ", nrow(df), " utterances in df. ", 100*round(nrow(df)/nrow(coding_doc), 4), "% utterances remain\n")
 
-write.table(coding_doc_clean, file="utt_orth_phon_KEY.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+if( length(df$orth[grepl(x=df$orth, pattern="[[:upper:]]")]) > 0 )  df$orth <- tolower(df$orth) # make sure the orth stream is all lower case
+if( length(df$phon[grepl(x=df$phon, pattern="-", fixed=T)])  > 0 )  df$phon <- gsub(x=df$phon, pattern="-", replacement=" ", fixed=T) # make sure all word-internal syllable boundaries "-" are represnted just the same as between-word syllable boundaries (space)
+
+write.table(df, file="utt_orth_phon_KEY.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 # key <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
