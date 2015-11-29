@@ -281,21 +281,21 @@ assess_seg <- function(seg.phon.stream, words, dict){
 }
 
 # for bootstrapping nontexts:
-par_function <- function(df, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version){ # this is the function that should be done in parallel on the 12 cores of each node
-  if(expand & prop) stop("Cannot have both expand and prop TRUE.")
+par_function <- function(dataframe, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version){ # this is the function that should be done in parallel on the 12 cores of each node
+  if(expand & prop) stop("Cannot have both expand and prop TRUE - expand does not work with prop.")
 
   # if a corpus isn't given, generate an artificial one
-  if(df=="skewed"){
+  if(dataframe=="skewed"){
     lang <- make_corpus(dist="skewed", N.utts=1000, N.types=1800, smallest.most.freq=FALSE, monosyl=TRUE)
     corpus <- lang[[1]] # the corpus
     dict <- lang[[2]] # the dictionary
-  } else if(df=="unif"){
+  } else if(dataframe=="unif"){
     lang <- make_corpus(dist="unif", N.utts=1000, N.types=1800, smallest.most.freq=FALSE, monosyl=TRUE)
     corpus <- lang[[1]] # the corpus
     dict <- lang[[2]] # the dictionary
-  } else if(!is.data.frame(df)) stop("Either provide a corpus via df or specify the distribution for an artificial one (skewed or unif)")
+  } else if(!is.data.frame(dataframe)) stop("Either provide a corpus via dataframe or specify the distribution for an artificial one (skewed or unif)")
   
-  if(df=="skewed" | df=="unif"){
+  if(dataframe=="skewed" | dataframe=="unif"){
     # use that corpus to generate a size sim contexts file
     df <- contexts_by_size(df=corpus, N.sizes=25, min.utt=50)
   }
