@@ -21,15 +21,16 @@ setwd("/Users/TARDIS/Documents/STUDIES/context_word_seg")
 dict <- read.table("dict_all3_updated.txt", header=1, sep="\t", quote="", comment.char ="")
 df <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this gets used for word-lists contexts, it will get over-written for other contexts
 
-
-if( length(df$orth[grepl(x=df$orth, pattern="[[:upper:]]")]) >0 ) df$orth <- tolower(df$orth) # make sure the orth stream is all lower case
-if( length(df$orth[grepl(x=df$phon, pattern="-", fixed=T)])  >0 )  df$phon <- gsub(x=df$phon, pattern="-", replacement=" ", fixed=T) # make sure all word-internal syllable boundaries "-" are represnted just the same as between-word syllable boundaries (space)
+if( length(df$orth[grepl(x=df$orth, pattern="[[:upper:]]")]) > 0 )  df$orth <- tolower(df$orth) # make sure the orth stream is all lower case
+if( length(df$phon[grepl(x=df$phon, pattern="-", fixed=T)])  > 0 )  df$phon <- gsub(x=df$phon, pattern="-", replacement=" ", fixed=T) # make sure all word-internal syllable boundaries "-" are represnted just the same as between-word syllable boundaries (space)
 
 
 # add frequency for each word to dictionary
 dict$freq.orth <- NA
+search_in <- strsplit(paste(df$orth, collapse=" "), split=" ", fixed=T)[[1]] # look for it in the vector of words (df$orth, collapsed into one paste, and then split into a unit for each word)
 for(i in 1:nrow(dict)){
-  dict$freq.orth[i] <- length(grep(paste("^",dict$word[i],"$", sep=""), x=strsplit(paste(df$orth, collapse=" "), split=" ", fixed=T)[[1]]))
+  search_for <- paste("^",dict$word[i],"$", sep="") # look for the ith word in the dictionary
+  dict$freq.orth[i] <- length(grep(pattern=search_for, x=search_in)) # how many times does it find the ith dict word in the orth stream?
 }
 
 ######################################################################
@@ -40,6 +41,16 @@ for(i in 1:nrow(dict)){
 # code contexts in df by word lists
 ######################################################################
 contexts <- read.csv("/Users/TARDIS/Documents/STUDIES/context_word_seg/words by contexts.csv")
+
+# mark seed word bigrams in df$orth
+bigrams <- grep(pattern="_", x=unlist(as.list(contexts)), fixed=T, value=T) # all of the context seed words that are bigrams (have an _)
+for(b in 1:length(bigrams)){
+  search_for <- paste0(gsub(x=bigrams[[b]], pattern="_", replacement=" ")) # look for the bigram, but with a space instead of the _
+  replace_with <- bigrams[[b]] # replace it with the bigram
+  df$orth <- gsub(pattern=search_for, x=df$orth, replacement=replace_with)
+}
+
+
 ######################################################################
 # only keep context words that actually occur in the corpus
 # (this is only relevant for presenting the list, e.g. in a talk - the code works fine with extra words in there)
@@ -55,7 +66,7 @@ contexts.occuring <- contexts.occuring[-which(apply(contexts.occuring,1,function
 kable(contexts.occuring)
 write.table(contexts.occuring, file="contexts.occuring.csv", sep=",", row.names=F)
 ############################
-df <- df[,1:3]
+df <- df[ , 1:3] # only keep the first three columns (there should only be three columns anyway, but just to be sure)
 
 temp <- unique(df$orth) # to speed up processing, only code each unique utterance once (then we'll join it back to the full df)
 temp.codes <- data.frame(orth=temp)
@@ -82,6 +93,109 @@ write.table(df, file="contexts_WL.txt", quote=F, col.names=T, row.names=F, appen
 # run code in context_coding_cleaning.r to retrieve and clean codes
 df <- read.table("contexts_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this overwrites the word list context df above
 
+################## run on aciss
+library(BatchJobs)
+
+library(dplyr); library(tidyr); library(doParallel); library(devtools)
+
+starts <- 1:20
+
+batch_function <- function(starts){
+  library(dplyr)
+  library(tidyr)
+  library(devtools)
+  
+  source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r")
+  
+  # note that df should have the context columns already (from lists, human coding, or topic modeling, etc.)
+  # df <- read.table("contexts_HJ_voting.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
+  df <- read.table("contexs_HJ_prop.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char =""); prop=TRUE
+  # df <- read.table("contexts_WL.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char =""); prop=FALSE
+  if(nrow(df) == 0) stop("df didn't load")
+  
+  dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
+  cols <- ncol(dict)
+  if(nrow(dict) == 0) stop("dict didn't load")
+  
+  iter <- 50 # the number of times to generate random samples
+  
+  library(doParallel)
+  registerDoParallel()
+  r <- foreach(1:iter, 
+               .errorhandling='remove',
+               .combine = rbind, 
+               .packages=c("dplyr", "tidyr", "devtools") ) %dopar% par_function(df=df,
+                                                                                dict=dict,
+                                                                                expand=FALSE,
+                                                                                seg.utts=TRUE,
+                                                                                TP=FALSE,
+                                                                                MI=TRUE, 
+                                                                                verbose=FALSE, 
+                                                                                prop=prop,
+                                                                                cutoff=.85,
+                                                                                nontext=TRUE)
+}
+
+
+# create a registry
+id <- "bootstrapHJpropContext2"
+reg.prop.con2 <- makeRegistry(id = id)
+
+# map function and data to jobs and submit
+ids  <- batchMap(reg.prop.con2, batch_function, starts)
+done <- submitJobs(reg.prop.con2, resources = list(nodes = 12, walltime=28800)) # expected to run for 8 hours (28800 seconds)
+
+showStatus(reg.prop.con2)
+
+# create a registry
+id <- "bootstrapHJpropNontext2"
+reg.prop.non2 <- makeRegistry(id = id)
+
+# map function and data to jobs and submit
+ids  <- batchMap(reg.prop.non2, batch_function, starts)
+done <- submitJobs(reg.prop.non2, resources = list(nodes = 12, walltime=28800)) # expected to run for 8 hours (28800 seconds)
+
+showStatus(reg.prop.non2)
+
+HJnontext.results1 <- process_batch_results(id="bootstrapHJpropNontext", dir="nontexts_humanjudgments")
+HJnontext.results2 <- process_batch_results(id="bootstrapHJpropNontext2", dir="nontexts_humanjudgments")
+HJnontext.results <- HJnontext.results2 
+HJnontext.results$analysis <- "nontext"
+
+HJcontext.results1 <- process_batch_results(id="bootstrapHJpropContext", dir="contexts_humanjudgments")
+HJcontext.results2 <- process_batch_results(id="bootstrapHJpropContext1", dir="contexts_humanjudgments")
+HJcontext.results <- rbind(HJcontext.results1, HJcontext.results2)
+HJcontext.results$analysis <- "context"
+
+HJresults <- rbind(HJcontext.results, HJnontext.results)
+HJresults.summary <- HJresults %>%
+  gather(key=measure, value=value, recall:precision) %>%
+  group_by(analysis, nontext, measure) %>%
+  summarize(mean=mean(value), sd=sd(value)) %>%
+  rename(context=nontext)
+HJresults.summary <- as.data.frame(HJresults.summary)
+
+HJresults.plot <- HJresults %>%
+  gather(key=measure, value=value, recall:precision) %>%
+  rename(context=nontext)
+
+# histograms
+ggplot(HJresults.plot, aes(x=value)) +
+  geom_histogram(data=filter(HJresults.plot, analysis=="nontext"), alpha=.5) +
+  geom_histogram(data=filter(HJresults.plot, analysis=="context"), aes(x=value, fill=context), alpha=.5) +
+  facet_wrap(~ measure + context, scales="free", ncol=12) +
+  theme(text = element_text(size=20), axis.ticks = element_blank()) +
+  labs(x=NULL, y=NULL)
+
+# barplots
+ggplot(HJresults.summary, aes(x=context, y=mean, fill=analysis)) +
+  geom_bar(position=position_dodge(), stat="identity") +
+  geom_errorbar(aes(ymin=mean - sd, ymax=mean + sd),
+                width=.2,                    # Width of the error bars
+                position=position_dodge(.9)) +
+  facet_wrap(~ measure) +
+  theme(text = element_text(size=20), axis.ticks = element_blank()) +
+  labs(x=NULL) 
 
 ############################################################################
 # global results
@@ -91,7 +205,10 @@ global.data <- list(N.utterances=nrow(df), streams=NULL, phon.pairs=NULL, unique
 global.data$streams <- make_streams(df)
 global.data$unique.phon.pairs <- calc_MI(phon.pairs=global.data$streams$phon.pairs, phon.stream=global.data$streams$phon.stream)
 
-hist(global.data$unique.phon.pairs$MI, xlim=c(-5,15), main="Global MI")
+
+hist(global.data$unique.phon.pairs$MI, main="Global MI")
+# hist(global.data$unique.phon.pairs$MI.1, main="Global MI 1 \nred line shows chance"); abline(v=1, lty=2, col="red")
+# hist(global.data$unique.phon.pairs$MI.2, main="Global MI 2\nred line shows chance"); abline(v=1, lty=2, col="red")
 hist(global.data$unique.phon.pairs$TP, main="Global TP")
 
 ############################################################################
@@ -99,9 +216,7 @@ hist(global.data$unique.phon.pairs$TP, main="Global TP")
 ############################################################################
 colnames(df)[which(is.na(colnames(df)) )] <- "none" # replace NA with "none"
 
-contexts <- df[1,4:ncol(df)]
-
-context.data <- context_results(context.names=names(contexts), df=df) # calls make_streams() and calc_MI()
+context.data <- context_results(df=df, seg.utts=TRUE) # calls make_streams() and calc_MI()
 
 # present results
 par(mfrow=c(1,2))
@@ -123,17 +238,25 @@ names(N.utt) <- colnames(contexts)
 #####################################
 # segment speech
 #####################################
-global.data$TP85$seg.phon.stream <- segment_speech(cutoff=.85, stat="TP", global.data$unique.phon.pairs, global.data$streams$phon.stream)
+global.data$TP85$seg.phon.stream <- segment_speech(cutoff=.85, 
+                                                   stat="TP", 
+                                                   data=global.data)
 
-global.data$MI85$seg.phon.stream <- segment_speech(cutoff=.85, stat="MI", global.data$unique.phon.pairs, global.data$streams$phon.stream)
+global.data$MI85$seg.phon.stream <- segment_speech(cutoff=.85, 
+                                                   stat="MI", 
+                                                   data=global.data)
 
 for(k in 1:length(names(context.data))){
   
   message(paste("processing ", names(contexts)[k], "...", sep=""))
       
-  context.data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=.85, stat="TP", context.data[[k]]$unique.phon.pairs, context.data[[k]]$streams$phon.stream)
+  context.data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=.85, 
+                                                           stat="TP", 
+                                                           data=context.data[[k]])
   
-  context.data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=.85, stat="MI", context.data[[k]]$unique.phon.pairs, context.data[[k]]$streams$phon.stream)
+  context.data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=.85, 
+                                                           stat="MI", 
+                                                           data=context.data[[k]])
   
 }
 
@@ -170,9 +293,7 @@ for(k in 1:length(names(context.data))){
 # use batchjobs_script.r to run nontext comparison distributions on ACISS (HPC)
 # save resulting dataframe as nontext.results
 #####################################################
-nontext.results <- readRDS(file="batchresults.rds")
-nontext.results <- readRDS(file="batchresults_WL.rds")
-nontext.results <- readRDS(file="batchresults_HJ.rds")
+nontext.results <- process_batch_results(id="bootstrapWL1", dir="nontexts_wordlists")
 
 
 library(tidyr)
@@ -214,8 +335,8 @@ full.results <- left_join(full.results, global.results)
 # THE PLOT
 #####################################################
 ggplot(filter(full.results, criterion=="MI85"), aes(x=context, y=value))+
-  geom_boxplot() +
-  # geom_boxplot(color=NA, fill=NA, outlier.colour =NA) +
+  # geom_boxplot() +
+  geom_boxplot(color=NA, fill=NA, outlier.colour =NA) +
   facet_wrap(~measure) +
   # geom_point(aes(x=context, y=context.est, color=context), size=4, show_guide=F) + 
   # geom_hline(aes(yintercept=global.est), linetype = 2) + 
@@ -246,11 +367,37 @@ kable(filter(tests, criterion=="MI85")[,-2], digits=3)
 
 ##################################################
 # descriptives
-descriptives <- results_descriptives(data=global.data, criteria="MI85")
+descriptives <- results_descriptives(data=global.data, 
+                                     context="global",
+                                     criterion="MI85")
 for(k in 1:length(colnames(contexts))){
-  descriptives <- rbind(descriptives, results_descriptives(context.data[[k]], context=colnames(contexts[k])))
-  #descriptives <- rbind(results_descriptives(context.data[[k]], context=colnames(contexts[k]), criteria="MI85"), descriptives)
+  descriptives <- rbind(descriptives, results_descriptives(data=context.data[[k]], 
+                                                           context=colnames(contexts[k]), 
+                                                           criterion="MI85") )
 }
+
+# histograms of MI for each context
+for(k in 0:length(names(contexts))){
+  
+  if(k==0) data <- global.data else data <- context.data[[k]]
+  title <- ifelse(k==0, "global", names(contexts)[k])
+  
+  p <- ggplot(data$unique.phon.pairs, aes(x=MI)) +
+    geom_histogram() +
+    geom_vline(aes(color="red", xintercept=quantile(data$unique.phon.pairs$MI, .85)[[1]]), size=2) + 
+    theme(text = element_text(size=20), axis.ticks = element_blank()) +
+    ggtitle(title) + 
+    labs(x="mutual information (MI)", y=NULL) +
+    xlim(c(-5,15))
+  
+  ggsave(filename=paste0("plots/descriptives/MIhist_", title, ".png"),
+         plot=p, 
+         units="in", 
+         width=4, 
+         height=4)
+}
+
+
 
 ##################################################
 # NOTE: Swingley 2005 only considers a "word" segmented if it has BOTH high within-unit MI and also high frequency as a unit.
