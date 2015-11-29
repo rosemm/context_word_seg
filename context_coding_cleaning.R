@@ -123,7 +123,7 @@ length(unique(include$utt))
 # to restore the full corpus, merge with the utterances from utt_orth_phon_KEY.txt
 temp <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
 
-contexts_from_coding <- left_join(temp, include, by="utt") 
+contexts_from_coding <- left_join(temp, include, by="utt") # note that this step drops utterances excluded during orth to phon translation (i.e. more utterances are coded for context than are included in the final analyses)
 contexts_from_coding$category <- ifelse(is.na(contexts_from_coding$category), "none", contexts_from_coding$category )
 
 # translate this into a binary 1/0 for each context for each utt
@@ -135,14 +135,12 @@ contexts_from_coding <- contexts_from_coding %>%
 N.utts <- colSums(contexts_from_coding[ , 4:ncol(contexts_from_coding)])
 print(N.utts)
 
-# the number of utterances that have 1, 2, 3, and 4 contexts identified (to get a sense of the overlap)
+# the number of utterances that have 0, 1, 2, 3, and 4 contexts identified (to get a sense of the overlap)
 just_real_contexts <- table(rowSums(contexts_from_coding[ , which(colnames(contexts_from_coding) %in% names(N.utts)[!grepl(pattern="none|misc", x=names(N.utts))])]))
-round(just_real_contexts/nrow(contexts_from_coding), 3)
+round(just_real_contexts/nrow(contexts_from_coding), 3) # as percents of the whole corpus
 
 # save these contexts in a file we can send to ACISS for bootstrap nontexts
-key <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
-key <- left_join(key, contexts_from_coding) # note that this step drops utterances excluded during orth to phon translation (i.e. more utterances are coded for context than are included in the final analyses)
-key <- na.omit(key)
+key <- na.omit(contexts_from_coding)
 write.table(key, file="contexts_HJ_voting.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
 
@@ -158,7 +156,6 @@ contexts_from_coding <- select(master_doc_prop, -file, -UttNum, -total) %>% # dr
 
 # save these contexts in a file we can send to ACISS for bootstrap nontexts
 key <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
-key <- left_join(key, contexts_from_coding) # note that this step drops utterances excluded during orth to phon translation (i.e. more utterances are coded for context than are included in the final analyses)
+key <- left_join(key, contexts_from_coding, by="utt") # note that this step drops utterances excluded during orth to phon translation (i.e. more utterances are coded for context than are included in the final analyses)
 key <- na.omit(key)
 write.table(key, file="contexts_HJ_prop.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
-
