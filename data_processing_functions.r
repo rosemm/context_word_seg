@@ -162,7 +162,7 @@ make_streams = function(df, seg.utts=TRUE){
 
 context_results <- function(df, seg.utts=TRUE){
   message(paste("\ncontext_results using all but the following columns:", paste(colnames(df)[1:3], collapse=", ")))
-  context.names <- colnames(df[ , 4:ncol(df)])
+  context.names <- colnames(df[ , 4:ncol(df)]) # retains contexts as they were used for column names, regardless of where they came from (works for any context defining method)
   
   context.data <- vector("list", length(context.names)) # storage variable
   names(context.data) <- context.names
@@ -486,14 +486,6 @@ make_corpus <- function(dist=c("unif", "skewed"), N.utts=1000, N.types=1800, sma
   return( list(df, dict) )
 }
 
-plot_corpus_dist <- function(corpus){
-  x <- corpus %>%
-    separate(col=orth, into=c("word1", "word2", "word3","word4"), sep=" ", extra="drop") %>%
-    gather(key="key", value="value", starts_with("word")) %>%
-    select(word=value)
-  plot(sort(table(x$word), decreasing = TRUE), ylab="word freq", xlab="word rank")
-}
-
 contexts_by_size <- function(df=read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") , N.sizes, min.utt=100){
   start.columns <- ncol(df)
   
@@ -526,11 +518,6 @@ process_batch_results <- function(id, dir){
   # saveRDS(results, file=paste0("batchresults_WL.rds") )
 }
 
-check_seed_words <- function(seg.results){
-  results <- dplyr::filter(seg.results, context!="none" & !is.na(context))
-  return(results)
-}
-
 plot_seg_results <- function(seg.results, title=NULL, boxplot=TRUE, scatterplot=FALSE, by=c("syl", "contexts")){
   # add break by N.syl option (check whether 1, 2, + syllable words are getting segmented correctly)
   plot <- ggplot(seg.results, aes(x=seg.result, y=freq.segd)) 
@@ -545,18 +532,23 @@ plot_seg_results <- function(seg.results, title=NULL, boxplot=TRUE, scatterplot=
   return(plot)
 }
 
-results_descriptives <- function(data, criteria=c("MI85", "TP85"), context="global"){
+results_descriptives <- function(data, criterion=c("MI85", "TP85"), context="global"){
   N.syl <- data$streams$N.syl
   words.tokens <- length(data$streams$orth.stream)
-  words.types <- data$streams$N.words
+  words.types <- length(unique(data$streams$orth.stream))
   N.utt <- data$N.utterances
   N.seed.words <- ifelse(context=="global", NA, length(grep(context, data$TP85$seg.results$context, fixed=TRUE)))
   
-  descriptives <- data.frame(context=context, 
-                             N.seed.words=N.seed.words, 
+  if(criterion=="MI85") N.segd.units <- median(data$MI85$seg.results$N.segd.units)
+  if(criterion=="TP85") N.segd.units <- median(data$TP85$seg.results$N.segd.units)
+  
+  descriptives <- data.frame(context=context,  
                              N.utt=N.utt,
-                             N.unique.words=words.types,
-                             criterion=criteria,
+                             N.word.tokens=words.tokens,
+                             N.word.types=words.types,
+                             N.syl=N.syl,
+                             criterion=criterion,
+                             N.segd.units=N.segd.units,
                              N.hits=NA,
                              N.misses=NA,
                              N.false.alarms=NA)
@@ -566,22 +558,34 @@ results_descriptives <- function(data, criteria=c("MI85", "TP85"), context="glob
                                 ifelse(descriptives$criterion=="MI85", summary(data$MI85$seg.results$seg.result)[3], NA))
   descriptives$N.false.alarms <- ifelse(descriptives$criterion=="TP85", summary(data$TP85$seg.results$seg.result)[1],
                                 ifelse(descriptives$criterion=="MI85", summary(data$MI85$seg.results$seg.result)[1], NA))
-return(descriptives)
+  
+  descriptives <- dplyr::mutate(descriptives, 
+                                seg.diff = N.word.tokens - N.segd.units, 
+                                trend = ifelse(seg.diff > 0, "under", ifelse(seg.diff < 0, "over", NA)),
+                                prop.diff = abs(seg.diff)/N.word.tokens)
+
+  return(descriptives)
 }
 
-
-# combine_results <- function(data){
-#   combined.results <- data[[1]]$MI85$seg.results
-#   combined.results$context.corpus <- colnames(contexts)[1]
-#   for(k in 2:length(colnames(contexts))){
-#     seg.results <- context.data[[k]]$MI85$seg.results
-#     seg.results$context.corpus <- colnames(contexts)[k]
-#     combined.results <- rbind(combined.results,seg.results)
-#   }
-#   
-#   combined.results$context.corpus <- as.factor(combined.results$context.corpus)
-# }
-
+corpus_decriptives <- function(data, contexts){
+  freqs.table <- sort(table(data$streams$orth.stream), decreasing = TRUE)
+  freqs <- data.frame(word=names(freqs), freq=freqs.table)
+  freqs$context <- NA
+  
+  temp.codes <- data.frame(orth=freqs$word)
+  for(k in 1:length(names(contexts))){
+    
+    temp.codes[[names(contexts)[k]]] <- 0 # make a new column for this context
+    words <- as.character(unique(contexts[,k])) # this word list
+    words <- words[words !=""] # drop empty character element in the list
+    
+    for(w in 1:length(words)){
+      # for every orth entry that contains this word, put a 1 in this context's column
+      temp.codes[[names(contexts)[k]]][grep(pattern=paste0("\\<", words[w], "\\>"), x=temp.codes$orth )] <- 1 
+    }
+  }
+  df <- left_join(df, temp.codes) # join temp.codes back to full df
+}
 
 network_plot <- function(data, title=""){
   unique.phon.pairs <- data$unique.phon.pairs
