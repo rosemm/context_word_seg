@@ -144,7 +144,7 @@ make_streams = function(df, seg.utts=TRUE){
   # collapse phonological utterances into one continuous stream
   phon.stream <- unlist(strsplit(phon.utts, " "))
   # delete "syllables" that are just empty space
-  phon.stream <- phon.stream[ !grepl(pattern="^$", x=phon.stream) ]
+  phon.stream <- phon.stream[ !grepl(pattern="^[[:space:]]*$", x=phon.stream) ]
   
   # how many unique syllables are there?
   syllables <- unique(phon.stream)
@@ -158,7 +158,8 @@ make_streams = function(df, seg.utts=TRUE){
   
   # collapse orthographic utterances into one stream
   orth.stream <- unlist(strsplit(as.character(df$orth), " "))
-  orth.stream <- orth.stream[!grepl(pattern="^[[:punct:]]+$", x=orth.stream)]
+  orth.stream <- orth.stream[!grepl(pattern="^[[:punct:]]+$", x=orth.stream)] # remove any "words" that are only punctuation marks
+  orth.stream <- orth.stream[!grepl(pattern="^[[:space:]]*$", x=orth.stream)] # remove any "words" that are only blank space
   
   # how many unique words are there?
   words <- unique(orth.stream)
@@ -495,7 +496,7 @@ make_corpus <- function(dist=c("unif", "skewed"), N.utts=1000, N.types=1800, sma
   return( list(df, dict) )
 }
 
-contexts_by_size <- function(df=read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") , N.sizes, min.utt=100){
+contexts_by_size <- function(df, N.sizes, min.utt=100){
   start.columns <- ncol(df)
   
   # Add columns for each "context", with increasing number of utterances. 
@@ -576,24 +577,79 @@ results_descriptives <- function(data, criterion=c("MI85", "TP85"), context="glo
   return(descriptives)
 }
 
-corpus_decriptives <- function(data, contexts){
+corpus_decriptives <- function(corpus, data, contexts, dict){
+  ##############################
+  # what's the frequency of each word, and is it a seed word?
   freqs.table <- sort(table(data$streams$orth.stream), decreasing = TRUE)
-  freqs <- data.frame(word=names(freqs), freq=freqs.table)
-  freqs$context <- NA
+  freqs <- data.frame(orth=names(freqs.table), freq=freqs.table)
+  freqs$orth <- as.character(freqs$orth)
   
-  temp.codes <- data.frame(orth=freqs$word)
-  for(k in 1:length(names(contexts))){
-    
-    temp.codes[[names(contexts)[k]]] <- 0 # make a new column for this context
-    words <- as.character(unique(contexts[,k])) # this word list
-    words <- words[words !=""] # drop empty character element in the list
-    
-    for(w in 1:length(words)){
-      # for every orth entry that contains this word, put a 1 in this context's column
-      temp.codes[[names(contexts)[k]]][grep(pattern=paste0("\\<", words[w], "\\>"), x=temp.codes$orth )] <- 1 
-    }
+  word.contexts <- gather(contexts, key=context, value=orth) %>%
+    filter(grepl(pattern="[[:alpha:]]+", x=orth))
+
+  freqs <- left_join(freqs, word.contexts, by="orth")
+  dict$word <- as.character(dict$word)
+  dict <- dict %>%
+    select(word, phon, N.syl)
+  freqs <- left_join(freqs, dict, by=c("orth" = "word") ) 
+  
+    arrange(-freq)
+  
+  ##############################
+  # how many syls per utterance?
+  key <- corpus[ , 1:3]
+  key$phon.stream <- gsub(pattern="-", x=key$phon, replacement=" ")
+  
+  temp <- key %>%
+    separate(col=phon.stream, into=paste0("syl", 1:30), extra='merge', sep=" ")
+  # clean out empty columns
+  deleted <- 0
+  for(c in seq(from=ncol(temp), to=1)){
+    temp[[c]] <- gsub(pattern="^[[:space:]]*$", x=temp[[c]], replacement=NA)
+    nas <- length(which(is.na(temp[ , c])))
+    if(nas == nrow(temp)) temp[[c]] <- NULL ; deleted <- deleted + 1
   }
-  df <- left_join(df, temp.codes) # join temp.codes back to full df
+  if(deleted==0) stop("too many syllables per utterance to split it all!")
+  
+  syls.per.utt <- temp %>% 
+    gather(key=key, value=value, starts_with("syl")) %>%
+    na.omit() %>%
+    count(utt) %>%
+    rename(N.syls=n)
+  
+  key <- left_join(key, syls.per.utt, by="utt")
+  
+  syls.per.utt <- list()
+  syls.per.utt$N.utts <- nrow(key)
+  syls.per.utt$Mean.length.utt <- mean(key$N.syls)
+  syls.per.utt$SD.length.utt <- sd(key$N.syls)
+  syls.per.utt$N.syls.per.utt <- table(key$N.syls)
+  syls.per.utt$Perc.syls.per.utt <- round(table(key$N.syls) / nrow(key), 3)
+  
+  syl.freqs <- freqs %>%
+    group_by(N.syl) %>%
+    summarize(freq.mean=mean(freq), freq.sd=sd(freq), N.types=n(), freq.se = freq.sd/sqrt(N.types))
+  
+  summary <- data.frame(freq1st.word = arrange(freqs, -freq)$orth[1],
+                        freq2nd.word = arrange(freqs, -freq)$orth[2],
+                        freq3rd.word = arrange(freqs, -freq)$orth[3],
+                        freq1st.freq = arrange(freqs, -freq)$freq[[1]],
+                        freq2nd.freq = arrange(freqs, -freq)$freq[[2]],
+                        freq3rd.freq = freqs$freq[[3]],
+                        freq1syl.mean = syl.freqs$freq.mean[[1]],
+                        freq2syl.mean = syl.freqs$freq.mean[[2]],
+                        freq3syl.mean = syl.freqs$freq.mean[[3]],
+                        freq4syl.mean = syl.freqs$freq.mean[[4]],
+                        freq1syl.sd   = syl.freqs$freq.sd[[1]],
+                        freq2syl.sd   = syl.freqs$freq.sd[[2]],
+                        freq3syl.sd   = syl.freqs$freq.sd[[3]],
+                        freq4syl.sd   = syl.freqs$freq.sd[[4]],
+                        freq1syl.se   = syl.freqs$freq.se[1],
+                        freq2syl.se   = syl.freqs$freq.se[2],
+                        freq3syl.se   = syl.freqs$freq.se[3],
+                        freq4syl.se   = syl.freqs$freq.se[4])
+  
+ return(list(word.freq=freqs, syls.per.utt=syls.per.utt, syl.summary=summary)) 
 }
 
 network_plot <- function(data, title=""){
