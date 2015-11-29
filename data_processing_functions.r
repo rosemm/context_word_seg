@@ -588,12 +588,13 @@ corpus_decriptives <- function(corpus, data, contexts, dict){
     filter(grepl(pattern="[[:alpha:]]+", x=orth))
 
   freqs <- left_join(freqs, word.contexts, by="orth")
+  freqs$freq <- as.numeric(freqs$freq)
   dict$word <- as.character(dict$word)
   dict <- dict %>%
     select(word, phon, N.syl)
-  freqs <- left_join(freqs, dict, by=c("orth" = "word") ) 
-  
+  freqs <- left_join(freqs, dict, by=c("orth" = "word") ) %>%
     arrange(-freq)
+  
   
   ##############################
   # how many syls per utterance?
