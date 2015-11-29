@@ -25,3 +25,10 @@ plots/
 contexts
 utt_orth_phon_KEY_SKEW.txt
 utt_orth_phon_KEY_UNIF.txt
+nontexts_CutoffSim/
+nontexts_SizeSim/
+nontexts_SizeSimSKEW/
+nontexts_SizeSimUNIF/
+nontexts_humanjudgments/
+nontexts_wordlists/
+contexts_humanjudgments/
