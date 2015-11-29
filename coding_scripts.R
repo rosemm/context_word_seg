@@ -106,7 +106,7 @@ BlankDoc <- function(wd="./transcripts/", for.coding=TRUE){
 }
 # write.table(coding_doc, file="coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
-CodeContexts <- function(this_pass=3, window_size=30, slide_by=5){
+CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
   # check whether packages need to be installed
   list.of.packages <- c("dplyr", "car")
   new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
@@ -123,7 +123,7 @@ CodeContexts <- function(this_pass=3, window_size=30, slide_by=5){
   
   # we will break each transcript into windows of [window_size] utterances each, for example 20, sliding (for example) every 2 utterances (so the first would be lines 1-20, and the next would be lines 2-22, etc.)
   starts <- seq(from=1, to=window_size-1, by=slide_by) # each starting point will set up a different set of windows
-  start_at <- starts[this_pass] # the utterance to begin counting the windows from
+  start_at <- sample(starts, 1) # the utterance to begin counting the windows from (randomly selected)
   if(is.na(start_at)) stop("Error in this_pass value. To allow more passes, use a smaller slide_by value.")
   
   message("\nHello, and welcome to coding. :)")
