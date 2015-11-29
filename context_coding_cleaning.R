@@ -124,21 +124,20 @@ length(unique(include$utt))
 temp <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
 
 contexts_from_coding <- left_join(temp, include, by="utt") 
-contexts_from_coding$category <- ifelse(is.na(contexts_from_coding$category), "misc", contexts_from_coding$category )
+contexts_from_coding$category <- ifelse(is.na(contexts_from_coding$category), "none", contexts_from_coding$category )
 
 # translate this into a binary 1/0 for each context for each utt
-contexts_from_coding <- unique(contexts_from_coding) %>%
+contexts_from_coding <- contexts_from_coding %>%
   mutate(hit=1) %>%
   spread(category, hit, fill=0)
 
 # the number of utterances per context
-N.utts <- colSums(contexts_from_coding[ , 2:ncol(contexts_from_coding)])
+N.utts <- colSums(contexts_from_coding[ , 4:ncol(contexts_from_coding)])
 print(N.utts)
 
 # the number of utterances that have 1, 2, 3, and 4 contexts identified (to get a sense of the overlap)
-table(rowSums(contexts_from_coding[ , 2:ncol(contexts_from_coding)]))
-round(table(rowSums(contexts_from_coding[ , 2:ncol(contexts_from_coding)]))/nrow(contexts_from_coding), 3) # as percents
-
+just_real_contexts <- table(rowSums(contexts_from_coding[ , which(colnames(contexts_from_coding) %in% names(N.utts)[!grepl(pattern="none|misc", x=names(N.utts))])]))
+round(just_real_contexts/nrow(contexts_from_coding), 3)
 
 # save these contexts in a file we can send to ACISS for bootstrap nontexts
 key <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
