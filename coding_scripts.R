@@ -121,6 +121,13 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
   # load the coding doc
   coding_doc <- read.table("coding_doc.txt", header=1, sep="\t", stringsAsFactors=F)
   
+  # which files still have NAs for contexts?
+  still_to_code <- dplyr::filter(coding_doc, pass==this_pass & is.na(context))
+  while(nrow(still_to_code)==0) {
+    this_pass=this_pass+1
+    still_to_code <- dplyr::filter(coding_doc, pass==this_pass & is.na(context))
+  }
+
   # we will break each transcript into windows of [window_size] utterances each, for example 20, sliding (for example) every 2 utterances (so the first would be lines 1-20, and the next would be lines 2-22, etc.)
   starts <- seq(from=1, to=window_size-1, by=slide_by) # each starting point will set up a different set of windows
   start_at <- sample(starts, 1) # the utterance to begin counting the windows from (randomly selected)
@@ -148,12 +155,7 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
     
     # select transcript
     message("Selecting transcript...")
-    # which files still have NAs for contexts?
-    still_to_code <- dplyr::filter(coding_doc, pass==this_pass & is.na(context))
-    while(nrow(still_to_code)==0) {
-      this_pass=this_pass+1
-      still_to_code <- dplyr::filter(coding_doc, pass==this_pass & is.na(context))
-    }
+    
     this.file <- sample(unique(still_to_code$file), 1) # pick one of the transcripts that isn't done yet, at random
     
     # select utterances 
