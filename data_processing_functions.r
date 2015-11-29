@@ -9,7 +9,7 @@ nontext_cols <- function(df){
     non[[context.names[k]]] <- base::sample(non[[context.names[k]]], 
                                             size=nrow(df), 
                                             replace=FALSE)
-    colnames(non)[k] <- paste("non.", context.names[k], sep="") 
+    colnames(non)[k] <- context.names[k]
   }
   return(non)
 }  
