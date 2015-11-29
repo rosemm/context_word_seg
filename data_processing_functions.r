@@ -32,9 +32,17 @@ sample_probs <- function(df){
 
 
 expand_windows <- function(df, context.names){
+  contextcols <- which(colnames(df) == context.names[1]):ncol(df)
+  
+  # clean out any codes that aren't 1 or 0
+  df <- df %>%
+    gather(key=key, value=value, contextcols) %>%
+    mutate(value=ifelse(value==1, 1, 0)) %>% # if it's a 1 leave it, otherwise 0
+    spread(key=key, value=value)
+  
   p <- progress_estimated(n=length(3:(nrow(df)-2))) # print progress bar while working
   for(i in 3:(nrow(df)-2)){
-    for(j in which(colnames(df) == context.names[1]):ncol(df)){
+    for(j in contextcols){
       df[i,j] <- ifelse(df[i,j]==1, df[i,j], # if it is already marked 1, leave it
                         ifelse(df[(i-2),j]==1, 1.5, # if the utterance 2 before it is marked 1, mark 1.5
                                ifelse(df[(i-1),j]==1, 1.5, # if the utterance 1 before it is marked 1, mark 1.5
@@ -283,22 +291,23 @@ assess_seg <- function(seg.phon.stream, words, dict){
 # for bootstrapping nontexts:
 par_function <- function(dataframe, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version){ # this is the function that should be done in parallel on the 12 cores of each node
   if(expand & prop) stop("Cannot have both expand and prop TRUE - expand does not work with prop.")
-
-  # if a corpus isn't given, generate an artificial one
-  if(dataframe=="skewed"){
-    lang <- make_corpus(dist="skewed", N.utts=1000, N.types=1800, smallest.most.freq=FALSE, monosyl=TRUE)
-    corpus <- lang[[1]] # the corpus
-    dict <- lang[[2]] # the dictionary
-  } else if(dataframe=="unif"){
-    lang <- make_corpus(dist="unif", N.utts=1000, N.types=1800, smallest.most.freq=FALSE, monosyl=TRUE)
-    corpus <- lang[[1]] # the corpus
-    dict <- lang[[2]] # the dictionary
-  } else if(!is.data.frame(dataframe)) stop("Either provide a corpus via dataframe or specify the distribution for an artificial one (skewed or unif)")
   
-  if(dataframe=="skewed" | dataframe=="unif"){
+  if(is.character(dataframe)){
+    # if a corpus isn't given, generate an artificial one
+    if(dataframe=="skewed"){
+      lang <- make_corpus(dist="skewed", N.utts=1000, N.types=1800, smallest.most.freq=FALSE, monosyl=TRUE)
+      corpus <- lang[[1]] # the corpus
+      dict <- lang[[2]] # the dictionary
+    } else if(dataframe=="unif"){
+      lang <- make_corpus(dist="unif", N.utts=1000, N.types=1800, smallest.most.freq=FALSE, monosyl=TRUE)
+      corpus <- lang[[1]] # the corpus
+      dict <- lang[[2]] # the dictionary
+    } else stop("Only recognized dists are 'skewed' or 'unif'.")
+    
     # use that corpus to generate a size sim contexts file
     df <- contexts_by_size(df=corpus, N.sizes=25, min.utt=50)
-  }
+  } 
+  if(is.data.frame(dataframe)) df <- dataframe # if the given data
     
   if(nrow(df) == 0) stop("df didn't load")
   if(nrow(dict) == 0) stop("dict didn't load")
