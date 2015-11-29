@@ -64,9 +64,13 @@ master_doc_prop$UttNum <- as.numeric(master_doc_prop$UttNum)
 master_doc_seq <- gather(master_doc_prop, key=context, value=value, -total, -file, -UttNum, -utt)
 
 # or read in the contexts as they're used in the analysis (for both contexts and nontexts)
-context_seq <- read.table("contexs_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this file is generated later on in this script
+context_seq <- read.table("contexts_WL.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this file is generated later on in this script
+context_seq <- read.table("contexts_HJ_voting.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this file is generated later on in this script
+context_seq <- read.table("contexts_HJ_prop.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this file is generated later on in this script
 master_doc_seq <- gather(context_seq, key=context, value=value, -orth, -phon, -utt) %>%
-  separate(col=utt, into=c("file", "UttNum"), sep="_", remove=FALSE)
+  separate(col=utt, into=c("file", "UttNum"), sep="_", remove=FALSE) %>%
+  # for word list analysis only, make all contexts either 1 or 0 (smoothing over 1.5's from expand_windows)
+  mutate(value=ifelse(value>0, 1, 0)) 
 
 master_doc_seq$context <- as.factor(master_doc_seq$context)
 master_doc_seq$utt <- as.factor(master_doc_seq$utt)
@@ -81,14 +85,19 @@ ggplot(filter(master_doc_seq, context != "misc", context !="none"), aes(x=UttNum
   scale_alpha(guide = 'none')
 
 # sequence plots for each file separately
+context_codes <- "WL"
+context_codes <- "HJ_voting"
+context_codes <- "HJ_prop"
+
 files <- unique(master_doc_seq$file)
 for (f in 1:length(files)){
   data <- filter(master_doc_seq, file==files[f], context != "misc", context !="none")
-  ggplot(data, aes(x=UttNum, y=context, color=context, alpha=value, size=4*value ) ) +
-    geom_point(na.rm = TRUE) + 
+  ggplot(data ) +
+    geom_point(aes(x=UttNum, y=context, color=context, alpha=value, size=4, shape="|" ), na.rm = TRUE, show_guide=F) + 
+    scale_shape_identity() +
     scale_alpha(guide = 'none') + 
     scale_size(guide = 'none')
-  ggsave( paste0("plots/seqplot-", files[f], ".png") )
+  ggsave( paste0("plots/seqplot-",context_codes, files[f], ".png"), width=9, height=3, units="in" )
 }
 
 #########################################################################
@@ -110,10 +119,11 @@ include <- include %>%
 summary(as.factor(include$category))
 
 # note that we are probably missing utterances from the include dataframe (if there was no code that had 2 coders agree for a particular utt)
-# to restore the full corpus, merge with the utterances from master_doc_keep
-temp <- data.frame(utt=unique(master_doc_keep$utt))
-  
-contexts_from_coding <- left_join( temp , include) 
+length(unique(include$utt))
+# to restore the full corpus, merge with the utterances from utt_orth_phon_KEY.txt
+temp <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
+
+contexts_from_coding <- left_join(temp, include, by="utt") 
 contexts_from_coding$category <- ifelse(is.na(contexts_from_coding$category), "misc", contexts_from_coding$category )
 
 # translate this into a binary 1/0 for each context for each utt
@@ -134,7 +144,7 @@ round(table(rowSums(contexts_from_coding[ , 2:ncol(contexts_from_coding)]))/nrow
 key <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
 key <- left_join(key, contexts_from_coding) # note that this step drops utterances excluded during orth to phon translation (i.e. more utterances are coded for context than are included in the final analyses)
 key <- na.omit(key)
-write.table(key, file="contexs_HJ_voting.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+write.table(key, file="contexts_HJ_voting.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
 
 #################################################
@@ -151,5 +161,5 @@ contexts_from_coding <- select(master_doc_prop, -file, -UttNum, -total) %>% # dr
 key <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
 key <- left_join(key, contexts_from_coding) # note that this step drops utterances excluded during orth to phon translation (i.e. more utterances are coded for context than are included in the final analyses)
 key <- na.omit(key)
-write.table(key, file="contexs_HJ_prop.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+write.table(key, file="contexts_HJ_prop.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
