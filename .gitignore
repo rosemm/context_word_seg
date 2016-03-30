@@ -32,3 +32,6 @@ nontexts_SizeSimUNIF/
 nontexts_humanjudgments/
 nontexts_wordlists/
 contexts_humanjudgments/
+CORPUS_brent_ratner
+CORPUS_korman_from_swingley2005
+CORPUS_uci-brent-syl-Dec2013
