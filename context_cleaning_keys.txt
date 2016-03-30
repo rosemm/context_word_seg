@@ -40,6 +40,8 @@ before mealtime	pre-mealtime
 before nap	pre-nap
 before napping	pre-bedtime
 before swimming	pre-swimming
+beforing snacks	pre-mealtime
+being hungry	being hungry
 being sick	sick
 being sleepy	being tired
 being tired	being tired
@@ -49,10 +51,12 @@ biting	biting
 blowing bubbles	blowing bubbles
 blowing raspberries	blowing raspberries
 boiling water	cooking
+bottle	mealtime
 bottle feeding	mealtime
 bounching	bouncing
 bouncing	bouncing
 bouncing chair	bouncing
+breakfast	mealtime
 breastfeeding	mealtime
 brushing	brushing hair
 brushing hair	brushing hair
@@ -72,6 +76,7 @@ cleaning the child	cleaning the child
 cleaning up	cleaning
 coaxing words from baby	talking
 comforting	soothing
+coming back	coming home
 coming home	coming home
 communicating	talking
 consoling	soothing
@@ -103,15 +108,18 @@ drying	drying
 drying after bath	drying
 drying off	drying
 eating	mealtime
+eating something wrong	eating something wrong
 end of mealtime	post-mealtime
 entertaining	entertaining
 excreting waste	pooping
 exercising	exercising
 feeding	mealtime
 Feeding	mealtime
+feeding bottle	mealtime
 feeding time	mealtime
 filming	filming
 finishing bath	post-bath
+friends	friends
 fussibg	fussing
 fussing	fussing
 gas	gas
@@ -123,6 +131,7 @@ getting ready for bed	pre-bedtime
 getting ready for doctor	pre-doctors visit
 getting sick	spitting up
 getting up	post-nap
+going out	leaving
 going potty	going potty
 going to sleep	bedtime
 grooming	grooming
@@ -158,6 +167,7 @@ meal time	mealtime
 mealtime	mealtime
 messing up	messing up
 mom eating	mom eating
+morning time	morning time
 moving	moving
 music	music
 nap time	nap time
@@ -174,8 +184,10 @@ palying	playing
 peeing	peeing
 peekaboo	playtime
 pkaying	playtime
+plaing	playing
 play	playtime
 play time	playtime
+playiing	playing
 playin	playing
 playing	playtime
 playing outside	outside
@@ -209,6 +221,7 @@ preparing food	cooking
 preparing for bath	pre-bedtime
 preparing for bed	pre-bedtime
 preparing for bedtime	pre-bedtime
+preparing meal	cooking
 pulling hair	pulling hair
 putting down	pre-bedtime
 putting on the bib	putting on the bib
@@ -247,6 +260,7 @@ sun bathing	outside
 sunbathing	sunbathing
 sunning	outside
 swimming	swimming
+swimmming	swimming
 swinging	swinging
 taking photo	taking pictures
 taking photos	taking pictures
@@ -260,12 +274,15 @@ tea time	mealtime
 teasing	teasing
 teething	teething
 television	TV
+thinking	thinking
 thumb sucking	sucking thumb
 thumb-sucking	sucking thumb
 ticking	tickling
 tickling	tickling
+toilet	going potty
 touching	touching
 undressing	undressing
+videotaping	taping
 waiting for food	pre-mealtime
 waking	waking up
 waking up	waking up

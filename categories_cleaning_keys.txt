@@ -7,6 +7,7 @@ bathroom	bathroom
 bathtime	bathtime
 bedtime	sleep
 before leaving	outside
+being hungry	being hungry
 being tired	being tired
 biting	biting
 blowing bubbles	blowing bubbles
@@ -36,9 +37,11 @@ dressing	dressing
 drinking	mealtime
 drooling	drooling
 drying	bathtime
+eating something wrong	eating something wrong
 entertaining	playtime
 exercising	playtime
 filming	taking pictures
+friends	friends
 fussing	fussing
 gas	fussing
 getting ready	dressing
@@ -67,6 +70,7 @@ making mess	making mess
 mealtime	mealtime
 messing up	messing up
 mom eating	mom eating
+morning time	morning time
 moving	playtime
 music	music
 nap time	sleep
@@ -120,6 +124,7 @@ talking	interaction
 taping	taking pictures
 teasing	interaction
 teething	fussing
+thinking	thinking
 tickling	touching
 touching	touching
 TV	TV
