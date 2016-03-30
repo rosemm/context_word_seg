@@ -629,14 +629,18 @@ corpus_decriptives <- function(corpus, data, contexts, dict){
   
   syl.freqs <- freqs %>%
     group_by(N.syl) %>%
-    summarize(freq.mean=mean(freq), freq.sd=sd(freq), N.types=n(), freq.se = freq.sd/sqrt(N.types))
+    summarize(freq.tot=sum(freq), freq.mean=mean(freq), freq.sd=sd(freq), N.types=n(), freq.se = freq.sd/sqrt(N.types))
   
   summary <- data.frame(freq1st.word = arrange(freqs, -freq)$orth[1],
                         freq2nd.word = arrange(freqs, -freq)$orth[2],
                         freq3rd.word = arrange(freqs, -freq)$orth[3],
                         freq1st.freq = arrange(freqs, -freq)$freq[[1]],
                         freq2nd.freq = arrange(freqs, -freq)$freq[[2]],
-                        freq3rd.freq = freqs$freq[[3]],
+                        freq3rd.freq = arrange(freqs, -freq)$freq[[3]],
+                        freq1syl.tot  = syl.freqs$freq.tot[[1]],
+                        freq2syl.tot  = syl.freqs$freq.tot[[2]],
+                        freq3syl.tot  = syl.freqs$freq.tot[[3]],
+                        freq4syl.tot  = syl.freqs$freq.tot[[4]],
                         freq1syl.mean = syl.freqs$freq.mean[[1]],
                         freq2syl.mean = syl.freqs$freq.mean[[2]],
                         freq3syl.mean = syl.freqs$freq.mean[[3]],
