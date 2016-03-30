@@ -292,6 +292,7 @@ assess_seg <- function(seg.phon.stream, words, dict){
 # for bootstrapping nontexts:
 par_function <- function(dataframe, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version){ # this is the function that should be done in parallel on the 12 cores of each node
   if(expand & prop) stop("Cannot have both expand and prop TRUE - expand does not work with prop.")
+  if(!any(MI, TP)) stop("At least one of MI and TP must be true.")
   
   if(is.character(dataframe)){
     # if a corpus isn't given, generate an artificial one
@@ -367,17 +368,12 @@ par_function <- function(dataframe, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRU
       MIresults <- colMeans(data[[k]]$MI85$seg.results[,3:4], na.rm=T)
       MIresults$stat <- "MI"
     }
-    if(TP & MI){ 
-      this.result <- as.data.frame(rbind(TPresults, MIresults))
-      this.result$TPN.segd.units <- median(data[[k]]$TP85$seg.results$N.segd.units)
-      this.result$MIN.segd.units <- median(data[[k]]$MI85$seg.results$N.segd.units)
-    } else if(TP){
-      this.result <- as.data.frame(rbind(TPresults))
-      this.result$TPN.segd.units <- median(data[[k]]$TP85$seg.results$N.segd.units)
-    } else if(MI){
-      this.result <- as.data.frame(rbind(MIresults))
-      this.result$MIN.segd.units <- median(data[[k]]$MI85$seg.results$N.segd.units)
-    } else stop("At least one of MI and TP must be true.")
+    
+    # if MI and TP are not both calculcated, this should just include whatever is calculated
+    this.result <- as.data.frame(rbind(TPresults, MIresults))
+    this.result$TPN.segd.units <- median(data[[k]]$TP85$seg.results$N.segd.units)
+    this.result$MIN.segd.units <- median(data[[k]]$MI85$seg.results$N.segd.units)
+   
     
     row.names(this.result) <- NULL
     this.result$stat <- as.factor(as.character(this.result$stat))
@@ -386,7 +382,8 @@ par_function <- function(dataframe, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRU
     this.result$N.utts <- data[[k]]$N.utterances
     this.result$N.words <- data[[k]]$streams$N.words
     stat.results <- rbind(stat.results,this.result)
-  } 
+  } # end of for loop
+  
   stat.results$nontext <- as.factor(as.character(stat.results$nontext))
   stat.results$recall <- as.numeric(stat.results$recall)
   stat.results$precision <- as.numeric(stat.results$precision)
