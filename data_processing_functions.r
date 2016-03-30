@@ -338,7 +338,8 @@ par_function <- function(dataframe, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRU
   data <- context_results(df=df, seg.utts=seg.utts) # calls make_streams() and calc_MI()
   
   # segment speech
-  for(k in 1:length(names(data))){
+  # note that this loop is slow
+  for(k in 1:length(names(data))){ 
     message(paste0("processing ", names(data)[k], "..."))
     if(TP){
       data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=cutoff,
@@ -352,10 +353,12 @@ par_function <- function(dataframe, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRU
                                                        data = data[[k]],
                                                        seg.utts = seg.utts)
     }
-  }
+  } # end of for loop
   
   # assess segmentation
-  stat.results <- data.frame(recall=NULL, precision=NULL, stat=NULL, nontext=NULL)
+  stat.results <- data.frame(recall=NULL, precision=NULL, stat=NULL, nontext=NULL) # empty storage variable
+  MIs <- vector("list", length(names(data))); names(MIs) <- names(data) # empty storage variable
+  TPs <- vector("list", length(names(data))); names(TPs) <- names(data) # empty storage variable
   for(k in 1:length(names(data))){
     
     if(TP){
@@ -381,7 +384,10 @@ par_function <- function(dataframe, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRU
     this.result$cutoff <- cutoff
     this.result$N.utts <- data[[k]]$N.utterances
     this.result$N.words <- data[[k]]$streams$N.words
-    stat.results <- rbind(stat.results,this.result)
+    stat.results <- rbind(stat.results, this.result)
+    
+    if(verbose & MI) MIs[[k]] <- data[[k]]$unique.phon.pairs$MI
+    if(verbose & TP) TPs[[k]] <- data[[k]]$unique.phon.pairs$TP
   } # end of for loop
   
   stat.results$nontext <- as.factor(as.character(stat.results$nontext))
@@ -390,7 +396,7 @@ par_function <- function(dataframe, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRU
   stat.results$SHA1 <- fun.version
   
   if(verbose){
-    return(list(stat.results, data) )
+    return( list(stat.results=stat.results, MIs=MIs, TPs=TPs) )
   } else {
     return(stat.results)
   }
