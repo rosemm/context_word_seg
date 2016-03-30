@@ -402,6 +402,30 @@ par_function <- function(dataframe, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRU
   }
 }
 
+# a quick version for testing (doesn't actually run the analyses)
+par_function_test <- function(dataframe, verbose=FALSE){
+  
+  data <- dataframe[,4:ncol(dataframe)]
+  
+  stat.results <- data.frame(recall=NULL, precision=NULL, stat=NULL, nontext=NULL) # empty storage variable
+  MIs <- vector("list", length(names(data))); names(MIs) <- names(data) # empty storage variable
+  TPs <- vector("list", length(names(data))); names(TPs) <- names(data) # empty storage variable
+  for(k in 1:length(names(data))){
+    this.result <- c(runif(1), runif(1), "stat", names(data)[k])
+    stat.results <- rbind(stat.results, this.result )
+    
+    MI <- rnorm(nrow(df))
+    MIs[[k]] <- MI
+    TP <- rbeta(nrow(df), .5, .75)
+    TPs[[k]] <- TP
+  }
+  
+  if(verbose){
+    return( list(stat.results=stat.results, MIs=MIs, TPs=TPs) )
+  } else {
+    return(stat.results)
+  }
+}
 # make an artificial language
 make_corpus <- function(dist=c("unif", "skewed"), N.utts=1000, N.types=1800, smallest.most.freq=FALSE, monosyl=FALSE){ 
   N.type <- round(N.types/3, 0)
