@@ -434,7 +434,10 @@ par_function_test <- function(dataframe, verbose=FALSE){
   MIs <- vector("list", length(names(data))); names(MIs) <- names(data) # empty storage variable
   TPs <- vector("list", length(names(data))); names(TPs) <- names(data) # empty storage variable
   for(k in 1:length(names(data))){
-    this.result <- c(runif(1), runif(1), "stat", names(data)[k])
+    this.result <- data.frame(recall=runif(1), 
+                              precision=runif(1), 
+                              stat="stat", 
+                              nontext=names(data)[k])
     stat.results <- rbind(stat.results, this.result )
     
     MI <- rnorm(nrow(df))
@@ -449,6 +452,7 @@ par_function_test <- function(dataframe, verbose=FALSE){
     return(stat.results)
   }
 }
+
 # make an artificial language
 make_corpus <- function(dist=c("unif", "skewed"), N.utts=1000, N.types=1800, smallest.most.freq=FALSE, monosyl=FALSE){ 
   N.type <- round(N.types/3, 0)
