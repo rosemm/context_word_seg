@@ -30,16 +30,14 @@ simple <- "#PBS -N <%= job.name %>
 ## merge standard error and output
 #PBS -j oe
 ## direct streams to our logfile
-#PBS -q generic
 #PBS -o <%= log.file %>
 #PBS -l walltime=<%= resources$walltime %>,nodes=<%= resources$nodes %>,vmem=<%= resources$memory %>
 ## remove this line if your cluster does not support arrayjobs
-#PBS -l nodes=1:ppn=12
 #PBS -t 1-<%= arrayjobs %>
-   
+
 ## Run R:
 ## we merge R output with stdout from PBS, which gets then logged via -o option
-module add R
+module load R
 R CMD BATCH --no-save --no-restore '<%= rscript %>' /dev/stdout
 "
 
