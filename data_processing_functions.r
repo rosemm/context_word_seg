@@ -314,7 +314,7 @@ assess_seg <- function(seg.phon.stream, words, dict){
 }
 
 # for bootstrapping nontexts:
-par_function <- function(dataframe, N.types=NULL, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version){ # this is the function that should be done in parallel on the 12 cores of each node
+par_function <- function(dataframe, N.types=NULL, N.utts=NULL, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version){ # this is the function that should be done in parallel on the 12 cores of each node
   if(expand & prop) stop("Cannot have both expand and prop TRUE - expand does not work with prop.")
   if(!any(MI, TP)) stop("At least one of MI and TP must be true.")
   if(!is.character(dataframe) & !is.null(N.types)) stop("Cannot specify N.types when providing a real dataframe.")
@@ -322,13 +322,14 @@ par_function <- function(dataframe, N.types=NULL, dict, expand, seg.utts=TRUE, T
   if(is.character(dataframe)){
     # if a corpus isn't given, generate an artificial one
     if(is.null(N.types)) N.types <- 1800 # default value of 1800 types
+    if(is.null(N.utts)) N.types <- 1000 # default value of 1000 utterances
     
     if(dataframe=="skewed"){
-      lang <- make_corpus(dist="skewed", N.utts=1000, N.types=N.types, smallest.most.freq=FALSE, monosyl=TRUE)
+      lang <- make_corpus(dist="skewed", N.utts=N.utts, N.types=N.types, smallest.most.freq=FALSE, monosyl=TRUE)
       corpus <- lang[[1]] # the corpus
       dict <- lang[[2]] # the dictionary
     } else if(dataframe=="unif"){
-      lang <- make_corpus(dist="unif", N.utts=1000, N.types=N.types, smallest.most.freq=FALSE, monosyl=TRUE)
+      lang <- make_corpus(dist="unif", N.utts=N.utts, N.types=N.types, smallest.most.freq=FALSE, monosyl=TRUE)
       corpus <- lang[[1]] # the corpus
       dict <- lang[[2]] # the dictionary
     } else stop("Only recognized dists are 'skewed' or 'unif'.")
