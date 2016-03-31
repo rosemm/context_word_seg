@@ -163,9 +163,10 @@ make_streams = function(df, seg.utts=TRUE){
   
   # how many unique words are there?
   words <- unique(orth.stream)
-  N.words <- length(words)
+  N.types <- length(words)
+  N.tokens <- length(orth.stream)
   
-  output <- list(phon.stream=phon.stream, syllables=syllables, N.syl=N.syl, phon.pairs=phon.pairs, orth.stream=orth.stream, words=words, N.words=N.words)
+  output <- list(phon.stream=phon.stream, syllables=syllables, N.syl=N.syl, phon.pairs=phon.pairs, orth.stream=orth.stream, words=words, N.types=N.types, N.tokens=N.tokens)
   return(output)
 }
 
@@ -399,14 +400,15 @@ par_function <- function(dataframe, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRU
     this.result <- as.data.frame(rbind(TPresults, MIresults))
     this.result$TPN.segd.units <- median(data[[k]]$TP85$seg.results$N.segd.units)
     this.result$MIN.segd.units <- median(data[[k]]$MI85$seg.results$N.segd.units)
-   
+
     
     row.names(this.result) <- NULL
     this.result$stat <- as.factor(as.character(this.result$stat))
     this.result$nontext <- names(data)[[k]]
     this.result$cutoff <- cutoff
     this.result$N.utts <- data[[k]]$N.utterances
-    this.result$N.words <- data[[k]]$streams$N.words
+    this.result$N.words <- data[[k]]$streams$N.types    
+    this.result$TTR <- data[[k]]$streams$N.types/data[[k]]$streams$N.tokens
     stat.results <- rbind(stat.results, this.result)
     
     if(verbose & MI) MIs[[k]] <- data[[k]]$unique.phon.pairs$MI
@@ -426,7 +428,7 @@ par_function <- function(dataframe, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRU
 }
 
 # a quick version for testing (doesn't actually run the analyses)
-par_function_test <- function(dataframe, verbose=FALSE){
+par_function_test <- function(dataframe, verbose){
   
   data <- dataframe[,4:ncol(dataframe)]
   
@@ -454,7 +456,7 @@ par_function_test <- function(dataframe, verbose=FALSE){
 }
 
 # make an artificial language
-make_corpus <- function(dist=c("unif", "skewed"), N.utts=1000, N.types=1800, smallest.most.freq=FALSE, monosyl=FALSE){ 
+make_corpus <- function(dist=c("unif", "skewed"), TTR=NULL, N.utts=1000, N.types=1800, smallest.most.freq=FALSE, monosyl=FALSE){ 
   N.type <- round(N.types/3, 0)
   if(!monosyl){
     message(paste0("\nGenerating ", N.type, " types each for 2, 3, and 4-syllables words from a ", dist, " distribution...\n") )
@@ -499,7 +501,7 @@ make_corpus <- function(dist=c("unif", "skewed"), N.utts=1000, N.types=1800, sma
     }
   }
   
-  # check to make sure there are no missing vlaues in the words
+  # check to make sure there are no missing values in the words
   if( any(grepl(x=words, pattern="NA")) ) stop(paste("Not enough unique syllables to make", N.types, "word types."))
   
   if( !smallest.most.freq ){
