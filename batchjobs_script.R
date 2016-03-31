@@ -64,7 +64,7 @@ library(dplyr); library(tidyr); library(doParallel); library(devtools)
 sessionInfo() # to check
 
 starts <- 1:20
-batch_function_test <- function(starts, val, log=FALSE){
+batch_function_test <- function(starts, val, log=TRUE){
   stupid_function <- function(val){
     rnorm(10) + val
   } 
@@ -72,17 +72,17 @@ batch_function_test <- function(starts, val, log=FALSE){
   library(doParallel)
   registerDoParallel()
   iter <- 5
-  r <- foreach(1:iter, 
+  t <- foreach(1:iter, 
                #.combine = rbind, 
                .packages=c("dplyr", "tidyr", "devtools") ) %dopar% stupid_function(val=val)
   
-  if(!log){
+  if(log){
     return(t)
   } else {
     return(list(t=t, x=100))
   }
 }
-batch_function <- function(starts, verbose, dataframe){
+batch_function <- function(starts, verbose){
   library(dplyr)
   library(tidyr)
   library(devtools)
@@ -91,6 +91,8 @@ batch_function <- function(starts, verbose, dataframe){
   source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r", 
              sha1=fun.version)
   
+  df <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_WL.txt") 
+  
   library(doParallel)
   registerDoParallel()
   
@@ -98,14 +100,9 @@ batch_function <- function(starts, verbose, dataframe){
   
   r <- foreach(1:iter, 
                #.combine = rbind, 
-               .packages=c("dplyr", "tidyr", "devtools") ) %dopar% par_function_test(dataframe=dataframe, 
+               .packages=c("dplyr", "tidyr", "devtools") ) %dopar% par_function_test(dataframe=df, 
                                                                                      verbose=verbose)
 }
-fun.version <- "d5379fe0555b8"
-source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r", 
-           sha1=fun.version)
-
-df <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_WL.txt") ; prop=FALSE; expand=TRUE
 
 # create a registry
 id <- "test"
@@ -114,8 +111,8 @@ reg <- makeRegistry(id = id)
 # removeRegistry(reg)
 
 # map function and data to jobs and submit
-# ids  <- batchMap(reg=reg, fun=batch_function, starts, more.args=list(dataframe=df, verbose=TRUE))
-ids  <- batchMap(reg=reg, fun=batch_function_test, starts, more.args=list(val=100, log=TRUE))
+ids  <- batchMap(reg=reg, fun=batch_function, starts, more.args=list(verbose=TRUE))
+# ids  <- batchMap(reg=reg, fun=batch_function_test, starts, more.args=list(val=100, log=FALSE))
 done <- submitJobs(reg, resources = list(nodes=1, ppn=12)) 
 
 showStatus(reg)
