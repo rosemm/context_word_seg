@@ -182,56 +182,82 @@ library(BatchJobs)
 # install.packages("dplyr", "tidyr", "doParallel")
 library(dplyr); library(tidyr); library(doParallel); library(devtools)
 
-starts <- 1:20
+start <- 1:50
 
-batch_function <- function(start, verbose=FALSE, dataframe){
+batch_function <- function(start, verbose=FALSE, dataframe, TTR){
   library(dplyr)
   library(tidyr)
   library(devtools)
-  fun.version <- "d5379fe0555b8" # refers to the current commit for data_processing_functions.r
+  fun.version <- "da911092d22dd" # refers to the current commit for data_processing_functions.r
   source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r", 
              sha1=fun.version)
   
-  # note that df should have the context columns already (from lists, human coding, or topic modeling, etc.)
-  corpus <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/utt_orth_phon_KEY.txt")
-  df <- contexts_by_size(corpus, N.sizes=20, min.utt=200)
-    
-  if(nrow(df) == 0) stop("df didn't load")
+#   # note that df should have the context columns already (from lists, human coding, or topic modeling, etc.)
+#   corpus <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/utt_orth_phon_KEY.txt")
+#   df <- contexts_by_size(corpus, N.sizes=20, min.utt=200)
+#   if(nrow(df) == 0) stop("df didn't load")
   
   dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
   cols <- ncol(dict)
   if(nrow(dict) == 0) stop("dict didn't load")
+
+  if (TTR){
+    N.types <- round(seq(from=250, to=1800, length.out=20), 0) # these are good N.types values for make_corpus(), for manipulating TTR
+  } else {
+    N.types <- rep(1800, 20) # 1800 is a sensible default
+  }
   
-  iter <- 50 # the number of times to generate random samples
+  
   
   library(doParallel)
   registerDoParallel()
-  r <- foreach(1:iter,  
-               #.combine=rbind,
-               .packages=c("dplyr", "tidyr", "devtools", "BBmisc") ) %dopar% par_function(dataframe=dataframe,
-                                                                                dict=dict,
-                                                                                expand=FALSE,
-                                                                                seg.utts=TRUE,
-                                                                                TP=FALSE,
-                                                                                MI=TRUE, 
-                                                                                verbose=verbose, 
-                                                                                prop=FALSE,
-                                                                                cutoff=.85,
-                                                                                nontext=TRUE,
-                                                                                fun.version=fun.version)
+  r <- foreach(i=N.types, 
+               .errorhandling="pass",
+               .verbose=TRUE) %dopar% par_function(dataframe=dataframe,
+                                                   N.types=i,
+                                                   dict=dict,
+                                                   expand=FALSE,
+                                                   seg.utts=TRUE, 
+                                                   TP=FALSE,
+                                                   MI=TRUE, 
+                                                   verbose=verbose, 
+                                                   prop=FALSE,
+                                                   cutoff=.85,
+                                                   nontext=TRUE,
+                                                   fun.version=fun.version)
+  return(r)
 }
 
 
 # create a registry
+id <- "bootstrapSizeSim_skew"
+reg.size.skew <- makeRegistry(id = id)
+# system('rm -r *-files')
+# removeRegistry(reg)
+# map function and data to jobs and submit
+ids  <- batchMap(reg.size.skew, batch_function, starts, more.args=list(verbose=TRUE, dataframe="skewed", TTR=FALSE))
+done <- submitJobs(reg.size.skew, resources = list(nodes=1, ppn=12))
+
 id <- "bootstrapSizeSim_unif"
 reg.size.unif <- makeRegistry(id = id)
-
 # map function and data to jobs and submit
-ids  <- batchMap(reg.size.unif, batch_function, starts, more.args=list(verbose=TRUE, dataframe="unif"))
+ids  <- batchMap(reg.size.unif, batch_function, starts, more.args=list(verbose=TRUE, dataframe="unif", TTR=FALSE))
 done <- submitJobs(reg.size.unif, resources = list(nodes=1, ppn=12))
 
-showStatus(reg.size.unif); showStatus(reg.size.skew); showStatus(reg.size) # checking progress
-findDone(reg.size) # checking progress
+id <- "bootstrapTTRSim_skew"
+reg.ttr.skew <- makeRegistry(id = id)
+# map function and data to jobs and submit
+ids  <- batchMap(reg.ttr.skew, batch_function, starts, more.args=list(verbose=TRUE, dataframe="skewed", TTR=TRUE))
+done <- submitJobs(reg.ttr.skew, resources = list(nodes=1, ppn=12))
+
+id <- "bootstrapTTRSim_unif"
+reg.ttr.unif <- makeRegistry(id = id)
+# map function and data to jobs and submit
+ids  <- batchMap(reg.ttr.unif, batch_function, starts, more.args=list(verbose=TRUE, dataframe="unif", TTR=TRUE))
+done <- submitJobs(reg.ttr.unif, resources = list(nodes=1, ppn=12))
+
+showStatus(reg.size.unif); showStatus(reg.size.skew); showStatus(reg.ttr.unif); showStatus(reg.ttr.skew) # checking progress
+findDone(reg) # checking progress
  
 size.results <- process_batch_results(id="bootstrapSizeSim", dir="nontexts_SizeSim")
 
