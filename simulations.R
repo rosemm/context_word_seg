@@ -9,7 +9,7 @@ batch_function <- function(start){
   library(tidyr)
   library(devtools)
   library(RCurl)
-  fun.version <- "2400f7eeb4395"
+  fun.version <- "15cf033206483"
   source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r", 
              sha1=fun.version)
   
@@ -43,8 +43,6 @@ batch_function <- function(start){
                                                                                 nontext=TRUE,
                                                                                 fun.version=fun.version)
 }
-
-
 
 # create a registry
 id <- "bootstrapCutoffWLnontext"
@@ -190,7 +188,7 @@ batch_function <- function(start, verbose=FALSE, dataframe){
   library(dplyr)
   library(tidyr)
   library(devtools)
-  fun.version <- "1df70b4b0e602" # refers to the current commit for data_processing_functions.r
+  fun.version <- "d5379fe0555b8" # refers to the current commit for data_processing_functions.r
   source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r", 
              sha1=fun.version)
   
@@ -225,14 +223,14 @@ batch_function <- function(start, verbose=FALSE, dataframe){
 
 
 # create a registry
-id <- "bootstrapSizeSim_verbose20"
-reg.size.unif.v <- makeRegistry(id = id)
+id <- "bootstrapSizeSim_unif"
+reg.size.unif <- makeRegistry(id = id)
 
 # map function and data to jobs and submit
-ids  <- batchMap(reg.size.unif.v, batch_function, starts, more.args=list(verbose=TRUE, dataframe="unif"))
-done <- submitJobs(reg.size.unif.v, resources = list(nodes = 20, walltime=28800)) # expected to run for 8 hours (28800 seconds)
+ids  <- batchMap(reg.size.unif, batch_function, starts, more.args=list(verbose=TRUE, dataframe="unif"))
+done <- submitJobs(reg.size.unif, resources = list(nodes=1, ppn=12))
 
-showStatus(reg.size.unif.v); showStatus(reg.size.skew.v); showStatus(reg.size.v20) # checking progress
+showStatus(reg.size.unif); showStatus(reg.size.skew); showStatus(reg.size) # checking progress
 findDone(reg.size) # checking progress
  
 size.results <- process_batch_results(id="bootstrapSizeSim", dir="nontexts_SizeSim")
