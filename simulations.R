@@ -188,7 +188,7 @@ batch_function <- function(start, verbose=FALSE, dataframe, TTR){
   library(dplyr)
   library(tidyr)
   library(devtools)
-  fun.version <- "da911092d22dd" # refers to the current commit for data_processing_functions.r
+  fun.version <- "c7e0f2c7cff0d" # refers to the current commit for data_processing_functions.r
   source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r", 
              sha1=fun.version)
   
@@ -229,27 +229,27 @@ batch_function <- function(start, verbose=FALSE, dataframe, TTR){
 }
 
 # create a registry
-id <- "bootstrapSizeSim_skew_q"
-reg.size.skew.q <- makeRegistry(id = id)
+id <- "bootSizeSim_skew"
+reg.size.skew <- makeRegistry(id = id)
 # system('rm -r *-files')
 # removeRegistry(reg)
 # map function and data to jobs and submit
-ids  <- batchMap(reg.size.skew.q, batch_function, starts, more.args=list(verbose=TRUE, dataframe="skewed", TTR=FALSE))
-done <- submitJobs(reg.size.skew.q, resources = list(nodes=1, ppn=12))
+ids  <- batchMap(reg.size.skew, batch_function, starts, more.args=list(verbose=TRUE, dataframe="skewed", TTR=FALSE))
+done <- submitJobs(reg.size.skew, resources = list(nodes=1, ppn=12))
 
-id <- "bootstrapSizeSim_unif"
+id <- "bootSizeSim_unif"
 reg.size.unif <- makeRegistry(id = id)
 # map function and data to jobs and submit
 ids  <- batchMap(reg.size.unif, batch_function, starts, more.args=list(verbose=TRUE, dataframe="unif", TTR=FALSE))
 done <- submitJobs(reg.size.unif, resources = list(nodes=1, ppn=12))
 
-id <- "bootstrapTTRSim_skew"
+id <- "bootTTRSim_skew"
 reg.ttr.skew <- makeRegistry(id = id)
 # map function and data to jobs and submit
 ids  <- batchMap(reg.ttr.skew, batch_function, starts, more.args=list(verbose=TRUE, dataframe="skewed", TTR=TRUE))
 done <- submitJobs(reg.ttr.skew, resources = list(nodes=1, ppn=12))
 
-id <- "bootstrapTTRSim_unif"
+id <- "bootTTRSim_unif"
 reg.ttr.unif <- makeRegistry(id = id)
 # map function and data to jobs and submit
 ids  <- batchMap(reg.ttr.unif, batch_function, starts, more.args=list(verbose=TRUE, dataframe="unif", TTR=TRUE))
