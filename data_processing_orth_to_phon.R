@@ -15,7 +15,7 @@ write.table(coding_doc, file="utt_orth_KEY.txt", quote=F, col.names=T, row.names
 # read in dict
 #################################
 
-dict <- read.table("eng_korman_from_swingley2005/dict_all3.txt", sep=" ", quote="", comment.char ="")
+dict <- read.table("CORPUS_korman_from_swingley2005/dict_all3.txt", sep=" ", quote="", comment.char ="")
 colnames(dict) <- c("word", "phon")
 
 # add some entries to the dict file
