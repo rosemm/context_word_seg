@@ -201,13 +201,12 @@ batch_function <- function(start, verbose=FALSE, dataframe, TTR){
   cols <- ncol(dict)
   if(nrow(dict) == 0) stop("dict didn't load")
 
+  reps <- 20
   if (TTR){
-    N.types <- round(seq(from=250, to=1800, length.out=20), 0) # these are good N.types values for make_corpus(), for manipulating TTR
+    N.types <- round(seq(from=250, to=1800, length.out=reps), 0) # these are good N.types values for make_corpus(), for manipulating TTR
   } else {
-    N.types <- rep(1800, 20) # 1800 is a sensible default
+    N.types <- rep(1800, reps) # 1800 is a sensible default
   }
-  
-  
   
   library(doParallel)
   registerDoParallel()
@@ -215,6 +214,7 @@ batch_function <- function(start, verbose=FALSE, dataframe, TTR){
                .errorhandling="pass",
                .verbose=TRUE) %dopar% par_function(dataframe=dataframe,
                                                    N.types=i,
+                                                   N.utts=500, # if this argument is left NULL, it will use 1000 utts
                                                    dict=dict,
                                                    expand=FALSE,
                                                    seg.utts=TRUE, 
@@ -229,13 +229,13 @@ batch_function <- function(start, verbose=FALSE, dataframe, TTR){
 }
 
 # create a registry
-id <- "bootstrapSizeSim_skew"
-reg.size.skew <- makeRegistry(id = id)
+id <- "bootstrapSizeSim_skew_q"
+reg.size.skew.q <- makeRegistry(id = id)
 # system('rm -r *-files')
 # removeRegistry(reg)
 # map function and data to jobs and submit
-ids  <- batchMap(reg.size.skew, batch_function, starts, more.args=list(verbose=TRUE, dataframe="skewed", TTR=FALSE))
-done <- submitJobs(reg.size.skew, resources = list(nodes=1, ppn=12))
+ids  <- batchMap(reg.size.skew.q, batch_function, starts, more.args=list(verbose=TRUE, dataframe="skewed", TTR=FALSE))
+done <- submitJobs(reg.size.skew.q, resources = list(nodes=1, ppn=12))
 
 id <- "bootstrapSizeSim_unif"
 reg.size.unif <- makeRegistry(id = id)
@@ -257,6 +257,8 @@ done <- submitJobs(reg.ttr.unif, resources = list(nodes=1, ppn=12))
 
 showStatus(reg.size.unif); showStatus(reg.size.skew); showStatus(reg.ttr.unif); showStatus(reg.ttr.skew) # checking progress
 findDone(reg) # checking progress
+# results <- loadResults(reg.size.skew.q)
+reg.size.unif
  
 size.results <- process_batch_results(id="bootstrapSizeSim", dir="nontexts_SizeSim")
 
