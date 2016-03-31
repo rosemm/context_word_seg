@@ -30,9 +30,9 @@ simple <- "#PBS -N <%= job.name %>
 ## direct streams to our logfile
 #PBS -q generic
 #PBS -o <%= log.file %>
-#PBS -l walltime=<%= resources$walltime %>,nodes=<%= resources$nodes %>,vmem=<%= resources$memory %>
+#PBS -l walltime=28800, nodes=1:ppn=1
 ## remove this line if your cluster does not support arrayjobs
-#PBS -t 1-<%= arrayjobs %>
+#PBS -t 1-20
    
 ## Run R:
 ## we merge R output with stdout from PBS, which gets then logged via -o option
@@ -62,46 +62,26 @@ library(BatchJobs)
 library(dplyr); library(tidyr); library(doParallel); library(devtools)
 sessionInfo() # to check
 
-starts <- 1:12
+starts <- 1:20
 
-
-batch_function <- function(starts){
-  library(dplyr)
-  library(tidyr)
-  library(devtools)
-  
-  source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r")
-  
-  # note that df should have the context columns already (from lists, human coding, or topic modeling, etc.)
-  # df <- read.table("contexts_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
-  # df <- read.table("contexts_WL.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
-  df <- contexts_by_size(N.sizes=25)
-  if(nrow(df) == 0) stop("df didn't load")
-  
-  dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
-  cols <- ncol(dict)
-  if(nrow(dict) == 0) stop("dict didn't load")
-    
-  iter <- 12 # the number of times to generate random samples
-
+batch_function <- function(starts, verbose=FALSE, dataframe){
   library(doParallel)
   registerDoParallel()
+  
+  iter <- 50 # the number of times to generate random samples
+  
   r <- foreach(1:iter, 
-               .combine = rbind, 
-               .packages=c("dplyr", "tidyr", "devtools") ) %dopar% par_function(df=df,
-                                                                                dict=dict,
-                                                                                expand=FALSE,
-                                                                                seg.utts=TRUE)
-  # save(r, file="bootstrap_results.data")
+               #.combine = rbind, 
+               .packages=c("dplyr", "tidyr", "devtools") ) %dopar% par_function_test(dataframe=dataframe, 
+                                                                                     verbose=verbose)
 }
 
-
 # create a registry
-id <- "bootstrapSizeSim"
+id <- "test"
 reg <- makeRegistry(id = id)
 
 # map function and data to jobs and submit
-ids  <- batchMap(reg, batch_function, starts)
+ids  <- batchMap(reg, batch_function, starts, more.args=list(verbose=TRUE, dataframe=df))
 done <- submitJobs(reg, resources = list(nodes = 12, walltime=28800)) # expected to run for 8 hours (28800 seconds)
 
 showStatus(reg)
