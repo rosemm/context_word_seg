@@ -186,17 +186,17 @@ library(dplyr); library(tidyr); library(doParallel); library(devtools)
 
 starts <- 1:20
 
-batch_function <- function(start){
+batch_function <- function(start, verbose=FALSE, dataframe){
   library(dplyr)
   library(tidyr)
   library(devtools)
-  fun.version <- "2400f7eeb4395" # refers to the current commit for data_processing_functions.r
+  fun.version <- "1df70b4b0e602" # refers to the current commit for data_processing_functions.r
   source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r", 
              sha1=fun.version)
   
   # note that df should have the context columns already (from lists, human coding, or topic modeling, etc.)
   corpus <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/utt_orth_phon_KEY.txt")
-  df <- contexts_by_size(corpus, N.sizes=40, min.utt=200)
+  df <- contexts_by_size(corpus, N.sizes=20, min.utt=200)
     
   if(nrow(df) == 0) stop("df didn't load")
   
@@ -208,15 +208,15 @@ batch_function <- function(start){
   
   library(doParallel)
   registerDoParallel()
-  r <- foreach(1:iter, 
-               .combine = rbind, 
-               .packages=c("dplyr", "tidyr", "devtools", "BBmisc") ) %dopar% par_function(dataframe=df,
+  r <- foreach(1:iter,  
+               #.combine=rbind,
+               .packages=c("dplyr", "tidyr", "devtools", "BBmisc") ) %dopar% par_function(dataframe=dataframe,
                                                                                 dict=dict,
                                                                                 expand=FALSE,
                                                                                 seg.utts=TRUE,
                                                                                 TP=FALSE,
                                                                                 MI=TRUE, 
-                                                                                verbose=FALSE, 
+                                                                                verbose=verbose, 
                                                                                 prop=FALSE,
                                                                                 cutoff=.85,
                                                                                 nontext=TRUE,
@@ -225,18 +225,17 @@ batch_function <- function(start){
 
 
 # create a registry
-id <- "bootstrapSizeSim"
-reg.size <- makeRegistry(id = id)
+id <- "bootstrapSizeSim_verbose20"
+reg.size.unif.v <- makeRegistry(id = id)
 
 # map function and data to jobs and submit
-ids  <- batchMap(reg.size, batch_function, starts)
-done <- submitJobs(reg.size, resources = list(nodes = 20, walltime=28800)) # expected to run for 8 hours (28800 seconds)
+ids  <- batchMap(reg.size.unif.v, batch_function, starts, more.args=list(verbose=TRUE, dataframe="unif"))
+done <- submitJobs(reg.size.unif.v, resources = list(nodes = 20, walltime=28800)) # expected to run for 8 hours (28800 seconds)
 
+showStatus(reg.size.unif.v); showStatus(reg.size.skew.v); showStatus(reg.size.v20) # checking progress
+findDone(reg.size) # checking progress
  
-size.results1 <- process_batch_results(id="bootstrapSizeSim", dir="nontexts_SizeSim")
-size.results2 <- process_batch_results(id="bootstrapSizeSim6", dir="nontexts_SizeSim")
-size.results3 <- process_batch_results(id="bootstrapSizeSim7", dir="nontexts_SizeSim")
-size.results <- rbind(size.results1, size.results2, size.results3)
+size.results <- process_batch_results(id="bootstrapSizeSim", dir="nontexts_SizeSim")
 
 library(tidyr); library(dplyr)
 nontext.results <- size.results  %>%
