@@ -197,6 +197,39 @@ context_results <- function(df, seg.utts=TRUE){
   return(context.data)
 }
 
+seg <- function(phon.stream, unique.phon.pairs, seg.utts=TRUE){
+  
+  if( length(phon.stream) == 1 ) { # if phon.stream isn't already vectorized syllables, make it so
+    phon.stream <- gsub(x=phon.stream, pattern=" ", replacement="-")
+    phon.stream <- strsplit(phon.stream, split="-")[[1]]
+  }
+  
+  seg.phon.stream <- phon.stream
+  if( length(phon.stream) > 1 ){
+    for(i in 2:length(phon.stream)){
+      
+      # decide whether to place a boundary between this syllable (i) and the one before it
+      if(seg.utts){
+        seg <- ifelse(phon.stream[i]=="###" | phon.stream[i-1]=="###", 1, # utterance boundaries are given as word boundaries
+                      dplyr::filter(unique.phon.pairs, syl1==phon.stream[i-1] & syl2==phon.stream[i])$seg)
+      } else {
+        seg <- dplyr::filter(unique.phon.pairs, syl1==phon.stream[i-1] & syl2==phon.stream[i])$seg
+      }
+      
+      if(length(seg) != 1) stop(paste("ERROR at ", i, "th element of phon.stream: more or less than one entry for seg", sep=""))
+      
+      seg.phon.stream[i]<- ifelse(seg==1, 
+                                  paste0(",", phon.stream[i]), 
+                                  phon.stream[i]) # if seg=1 for this phon pair, then insert a comma before the second syllable
+    } # end for loop
+  } # end if statement
+  
+  # drop utterance boundary markers (the segmentation is still coded on the syllable after the utt boundary)
+  seg.phon.stream <- seg.phon.stream[ seg.phon.stream != ",###"]
+  
+  return(seg.phon.stream)
+}
+
 segment_speech <- function(cutoff, stat, data, consider.freq=FALSE, seg.utts=TRUE){
   unique.phon.pairs <- data$unique.phon.pairs
   phon.stream <- data$streams$phon.stream
@@ -224,29 +257,18 @@ segment_speech <- function(cutoff, stat, data, consider.freq=FALSE, seg.utts=TRU
     unique.phon.pairs$seg <- unique.phon.pairs$MIseg
   } else {stop("ERROR: Enter stat='TP' or stat='MI' only")}
   
-  seg.phon.stream <- phon.stream
+#   # faster version # http://blogs.uoregon.edu/rclub/2015/11/03/using-dplyr-to-batch-analyses/
+#   # requires df
+#   unique.utts <- data.frame(phon=unique(df$phon)) %>%
+#     group_by(phon)
+#   segd.utts <- unique.utts %>%
+#     do({
+#       seg.utt <- seg(.$phon, unique.phon.pairs, seg.utts=seg.utts)
+#       seg.utt <- data.frame(phon=paste0(seg.utt, collapse = "-"))
+#     })
+#   ##################
   
-  p <- progress_estimated(n=length(phon.stream)-1) # print progress bar while working
-  for(i in 2:length(phon.stream)){
-    
-    # decide whether to place a boundary between this syllable (i) and the one before it
-    if(seg.utts){
-      seg <- ifelse(phon.stream[i]=="###" | phon.stream[i-1]=="###", 1, # utterance boundaries are given as word boundaries
-                    dplyr::filter(unique.phon.pairs, syl1==phon.stream[i-1] & syl2==phon.stream[i])$seg)
-    } else {
-      seg <- dplyr::filter(unique.phon.pairs, syl1==phon.stream[i-1] & syl2==phon.stream[i])$seg
-    }
-    
-    if(length(seg) > 1) stop(paste("ERROR at ", i, "th element of phon.stream: more than one entry for seg", sep=""))
-    
-    seg.phon.stream[i]<- ifelse(seg==1, 
-                                paste0(",", phon.stream[i]), 
-                                phon.stream[i]) # if seg=1 for this phon pair, then insert a comma before the second syllable
-    print(p$tick()) # advance progress bar
-  }
-  
-  # drop utterance boundary markers (the segmentation is still coded on the syllable after the utt boundary)
-  seg.phon.stream <- seg.phon.stream[ seg.phon.stream != ",###"]
+  seg.phon.stream <- seg(phon.stream, unique.phon.pairs, seg.utts=seg.utts)
   
   return(seg.phon.stream)
 }
@@ -268,7 +290,8 @@ assess_seg <- function(seg.phon.stream, words, dict){
   # number of hits and misses
   this.dict$recall <- ifelse(this.dict$phon %in% unique.units$phon, 1, 0)
   
-  results <- merge(this.dict, unique.units, by="phon", all=T)
+  # results <- merge(this.dict, unique.units, by="phon", all=T)
+  results <- dplyr::full_join(this.dict, unique.units, by="phon")
   
   # segmentation result
   results$seg.result <- as.factor(ifelse(results$recall==1 & results$precision==1, "hit", 
