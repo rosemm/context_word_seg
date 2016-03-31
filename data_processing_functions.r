@@ -396,12 +396,19 @@ par_function <- function(dataframe, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRU
       MIresults$stat <- "MI"
     }
     
-    # if MI and TP are not both calculcated, this should just include whatever is calculated
-    this.result <- as.data.frame(rbind(TPresults, MIresults))
-    this.result$TPN.segd.units <- median(data[[k]]$TP85$seg.results$N.segd.units)
-    this.result$MIN.segd.units <- median(data[[k]]$MI85$seg.results$N.segd.units)
+    # save these results
+    if(MI & TP){
+      this.result <- as.data.frame(rbind(TPresults, MIresults))
+      this.result$TPN.segd.units <- median(data[[k]]$TP85$seg.results$N.segd.units)
+      this.result$MIN.segd.units <- median(data[[k]]$MI85$seg.results$N.segd.units)
+    } else if(MI){
+      this.result <- as.data.frame(rbind(MIresults))
+      this.result$MIN.segd.units <- median(data[[k]]$MI85$seg.results$N.segd.units)
+    } else if(TP){
+      this.result <- as.data.frame(rbind(TPresults))
+      this.result$TPN.segd.units <- median(data[[k]]$TP85$seg.results$N.segd.units)
+    }
 
-    
     row.names(this.result) <- NULL
     this.result$stat <- as.factor(as.character(this.result$stat))
     this.result$nontext <- names(data)[[k]]
