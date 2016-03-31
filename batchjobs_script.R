@@ -16,9 +16,11 @@ library(BatchJobs)
 # set up batchjobs configuration for this project to override the global settings
 batch.conf <- readLines("/Library/Frameworks/R.framework/Versions/3.1/Resources/library/BatchJobs/etc/BatchJobs_global_config.R")
 batch.conf[1] <- "cluster.functions = makeClusterFunctionsTorque('simple.tmpl')"
+# batch.conf[length(batch.conf)+1] <- "default.resources = list(nodes=20, ppn=1, walltime=28800)" # doesn't work
 ## to run debug function for BatchJobs, change the configuration file:
 # batch.conf[1] <- "cluster.functions = makeClusterFunctionsInteractive()"
 # batch.conf[7] <- "debug = TRUE"
+
 
 
 writeLines(batch.conf, ".BatchJobs.R", sep="\n") # write this file to the current working directory
@@ -30,9 +32,10 @@ simple <- "#PBS -N <%= job.name %>
 ## direct streams to our logfile
 #PBS -q generic
 #PBS -o <%= log.file %>
-#PBS -l walltime=28800, nodes=1:ppn=1
+#PBS -l walltime=<%= resources$walltime %>,nodes=<%= resources$nodes %>,vmem=<%= resources$memory %>
 ## remove this line if your cluster does not support arrayjobs
-#PBS -t 1-20
+#PBS -l nodes=1:ppn=12
+#PBS -t 1-<%= arrayjobs %>
    
 ## Run R:
 ## we merge R output with stdout from PBS, which gets then logged via -o option
@@ -63,8 +66,33 @@ library(dplyr); library(tidyr); library(doParallel); library(devtools)
 sessionInfo() # to check
 
 starts <- 1:20
-
-batch_function <- function(starts, verbose=FALSE, dataframe){
+batch_function_test <- function(starts, val, log=FALSE){
+  stupid_function <- function(val){
+    rnorm(10) + val
+  } 
+  
+  library(doParallel)
+  registerDoParallel()
+  iter <- 5
+  r <- foreach(1:iter, 
+               #.combine = rbind, 
+               .packages=c("dplyr", "tidyr", "devtools") ) %dopar% stupid_function(val=val)
+  
+  if(!log){
+    return(t)
+  } else {
+    return(list(t=t, x=100))
+  }
+}
+batch_function <- function(starts, verbose, dataframe){
+  library(dplyr)
+  library(tidyr)
+  library(devtools)
+  library(RCurl)
+  fun.version <- "d5379fe0555b8"
+  source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r", 
+             sha1=fun.version)
+  
   library(doParallel)
   registerDoParallel()
   
@@ -75,14 +103,22 @@ batch_function <- function(starts, verbose=FALSE, dataframe){
                .packages=c("dplyr", "tidyr", "devtools") ) %dopar% par_function_test(dataframe=dataframe, 
                                                                                      verbose=verbose)
 }
+fun.version <- "d5379fe0555b8"
+source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r", 
+           sha1=fun.version)
+
+df <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_WL.txt") ; prop=FALSE; expand=TRUE
 
 # create a registry
 id <- "test"
 reg <- makeRegistry(id = id)
+# system('rm -r *-files')
+# removeRegistry(reg)
 
 # map function and data to jobs and submit
-ids  <- batchMap(reg, batch_function, starts, more.args=list(verbose=TRUE, dataframe=df))
-done <- submitJobs(reg, resources = list(nodes = 12, walltime=28800)) # expected to run for 8 hours (28800 seconds)
+# ids  <- batchMap(reg=reg, fun=batch_function, starts, more.args=list(dataframe=df, verbose=TRUE))
+ids  <- batchMap(reg=reg, fun=batch_function_test, starts, more.args=list(val=100, log=TRUE))
+done <- submitJobs(reg, resources = list(nodes=1, ppn=12)) 
 
 showStatus(reg)
 findDone(reg)
