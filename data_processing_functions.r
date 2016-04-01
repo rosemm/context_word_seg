@@ -318,7 +318,7 @@ par_function <- function(dataframe, N.types=NULL, N.utts=NULL, by.size=TRUE, dic
   if(expand & prop) stop("Cannot have both expand and prop TRUE - expand does not work with prop.")
   if(!any(MI, TP)) stop("At least one of MI and TP must be true.")
   if(!is.character(dataframe) & !is.null(N.types)) message("NOTE: Cannot specify N.types when providing a real dataframe.")
-  
+
   if(is.character(dataframe)){
     # if a corpus isn't given, generate an artificial one
     if(is.null(N.types)) N.types <- 1800 # default value of 1800 types
@@ -356,7 +356,7 @@ par_function <- function(dataframe, N.types=NULL, N.utts=NULL, by.size=TRUE, dic
     df <- cbind(df[ , 1:3], sample)
   }
   
-  if(nontext){
+  if(nontext & ncol(df)>4){
     # pick nontext utterances
     non <- nontext_cols(df=df) 
     # add nontext columns to dataframe
