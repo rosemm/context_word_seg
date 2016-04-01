@@ -322,7 +322,7 @@ par_function <- function(dataframe, N.types=NULL, N.utts=NULL, dict, expand, seg
   if(is.character(dataframe)){
     # if a corpus isn't given, generate an artificial one
     if(is.null(N.types)) N.types <- 1800 # default value of 1800 types
-    if(is.null(N.utts)) N.types <- 1000 # default value of 1000 utterances
+    if(is.null(N.utts)) N.utts <- 1000 # default value of 1000 utterances
     
     if(dataframe=="skewed"){
       lang <- make_corpus(dist="skewed", N.utts=N.utts, N.types=N.types, smallest.most.freq=FALSE, monosyl=TRUE)
@@ -420,6 +420,8 @@ par_function <- function(dataframe, N.types=NULL, N.utts=NULL, dict, expand, seg
     this.result$N.utts <- data[[k]]$N.utterances
     this.result$N.words <- data[[k]]$streams$N.types    
     this.result$TTR <- data[[k]]$streams$N.types/data[[k]]$streams$N.tokens
+    this.result$mean.MI <- ifelse(MI, mean(data[[k]]$unique.phon.pairs$MI), NA)
+    this.result$mean.TP <- ifelse(TP, mean(data[[k]]$unique.phon.pairs$TP), NA)
     stat.results <- rbind(stat.results, this.result)
     
     if(verbose & MI) MIs[[k]] <- data[[k]]$unique.phon.pairs$MI
@@ -577,7 +579,7 @@ contexts_by_size <- function(df, N.sizes, min.utt=100){
   return(df)
 }
 
-process_batch_results <- function(id, dir){
+process_batch_results <- function(id, dir, combine=c("rbind", "list")){
   results <- data.frame(V1=NULL)
   id <- paste0(dir, "/", id)
 
@@ -585,10 +587,14 @@ process_batch_results <- function(id, dir){
   if(length(nodes)==0) stop("No completed jobs available. Check dir and id to make sure they're correct.")
   empty_jobs <- NULL
   
-  for(i in 1:length(nodes)){
-    load(paste0(id, "-files/jobs/", nodes[i], "/", as.numeric(nodes[i]), "-result.RData"))
-    if(is.null(result)) empty_jobs <- c(empty_jobs, nodes[i])
-    results <- rbind(results, result)
+  if(combine=="list"){
+    results <- loadResults(loadRegistry(paste0(id, "-files"), adjust.paths=TRUE, work.dir=dir))
+  } else if(combine=="rbind"){
+    for(i in 1:length(nodes)){
+      load(paste0(id, "-files/jobs/", nodes[i], "/", as.numeric(nodes[i]), "-result.RData"))
+      results <- rbind(results, result)
+      if(is.null(result)) empty_jobs <- c(empty_jobs, nodes[i])
+    }
   }
   if(!is.null(empty_jobs)) warning(paste("The following jobs were empty:", paste(empty_jobs, collapse=", ")))
   return(results)
