@@ -314,7 +314,7 @@ assess_seg <- function(seg.phon.stream, words, dict){
 }
 
 # for bootstrapping nontexts:
-par_function <- function(dataframe, N.types=NULL, N.utts=NULL, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version){ # this is the function that should be done in parallel on the 12 cores of each node
+par_function <- function(dataframe, N.types=NULL, N.utts=NULL, by.size=TRUE, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version){ # this is the function that should be done in parallel on the 12 cores of each node
   if(expand & prop) stop("Cannot have both expand and prop TRUE - expand does not work with prop.")
   if(!any(MI, TP)) stop("At least one of MI and TP must be true.")
   if(!is.character(dataframe) & !is.null(N.types)) message("NOTE: Cannot specify N.types when providing a real dataframe.")
@@ -334,8 +334,13 @@ par_function <- function(dataframe, N.types=NULL, N.utts=NULL, dict, expand, seg
       dict <- lang[[2]] # the dictionary
     } else stop("Only recognized dists are 'skewed' or 'unif'.")
     
-    # use that corpus to generate a size sim contexts file
-    df <- contexts_by_size(df=corpus, N.sizes=20, min.utt=100)
+    if(by.size){
+      # use that corpus to generate a size sim contexts file
+      df <- contexts_by_size(df=corpus, N.sizes=20, min.utt=100)
+    } else {
+      df$N.uttAall <- 1 # make a column of ones for the whole corpus (i.e. use everything)
+    }
+
   } 
   if(is.data.frame(dataframe)) df <- dataframe # if the given data
     
