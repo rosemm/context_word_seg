@@ -580,6 +580,7 @@ contexts_by_size <- function(df, N.sizes, min.utt=100){
   # add a column to the dataframe for each  corpus size to try
   for(s in 1:N.sizes){
     df[[paste0("N.utts", sizes[s])]] <- c( rep(1, sizes[s]), rep(0, nrow(df)-sizes[s]) )
+    df[[paste0("N.utts", sizes[s])]] <- base::sample(df[[paste0("N.utts", sizes[s])]], nrow(df), replace=F) # shuffle
   }
   return(df)
 }
