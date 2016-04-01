@@ -338,6 +338,7 @@ par_function <- function(dataframe, N.types=NULL, N.utts=NULL, by.size=TRUE, dic
       # use that corpus to generate a size sim contexts file
       df <- contexts_by_size(df=corpus, N.sizes=20, min.utt=100)
     } else {
+      df <- corpus
       df$N.uttAall <- 1 # make a column of ones for the whole corpus (i.e. use everything)
     }
 
