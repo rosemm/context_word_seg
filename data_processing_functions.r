@@ -317,7 +317,7 @@ assess_seg <- function(seg.phon.stream, words, dict){
 par_function <- function(dataframe, N.types=NULL, N.utts=NULL, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version){ # this is the function that should be done in parallel on the 12 cores of each node
   if(expand & prop) stop("Cannot have both expand and prop TRUE - expand does not work with prop.")
   if(!any(MI, TP)) stop("At least one of MI and TP must be true.")
-  if(!is.character(dataframe) & !is.null(N.types)) stop("Cannot specify N.types when providing a real dataframe.")
+  if(!is.character(dataframe) & !is.null(N.types)) message("NOTE: Cannot specify N.types when providing a real dataframe.")
   
   if(is.character(dataframe)){
     # if a corpus isn't given, generate an artificial one
