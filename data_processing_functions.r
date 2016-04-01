@@ -172,7 +172,7 @@ make_streams = function(df, seg.utts=TRUE){
 
 context_results <- function(df, seg.utts=TRUE){
   message(paste("\ncontext_results using all but the following columns:", paste(colnames(df)[1:3], collapse=", ")))
-  context.names <- colnames(df[ , 4:ncol(df)]) # retains contexts as they were used for column names, regardless of where they came from (works for any context defining method)
+  context.names <- colnames(df)[4:ncol(df)] # retains contexts as they were used for column names, regardless of where they came from (works for any context defining method)
   
   context.data <- vector("list", length(context.names)) # storage variable
   names(context.data) <- context.names
