@@ -335,7 +335,7 @@ par_function <- function(dataframe, N.types=NULL, N.utts=NULL, dict, expand, seg
     } else stop("Only recognized dists are 'skewed' or 'unif'.")
     
     # use that corpus to generate a size sim contexts file
-    df <- contexts_by_size(df=corpus, N.sizes=25, min.utt=50)
+    df <- contexts_by_size(df=corpus, N.sizes=20, min.utt=100)
   } 
   if(is.data.frame(dataframe)) df <- dataframe # if the given data
     
