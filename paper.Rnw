@@ -41,9 +41,6 @@ Using unambiguous syllable boundaries in this project likely exagerates the stre
 It is also important to consider that many features of this simplified phonetic corpus would have the opposite effect. 
 For example, prosodic information, which has been demonstrated to be a useful cue to word boundaries for infants both on its own \citep{Johnson2009} and in combination with statistical phonological cues \citep{Shukla2007}, is not available to the model, potentially handicapping performance. 
 Information from other modalities, such as touch \citep{Seidl2014}, may also bolster the signal to word boundaries and is not available to the model. 
-As \citet*{Box1987} famously note, "All models are wrong, but some are useful." 
-The goal of this analyses is to explore how context shapes patterns in the statistical co-occurence of syllables, clarifying the role of statistical learning for word segmentation in natural speech. 
-While our model is most definitely wrong, it is our hope that it is still useful. 
 
 \subsection{Defining context} 
 There are multiple potential ways to define context within a corpus. 
