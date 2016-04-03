@@ -339,7 +339,7 @@ par_function <- function(dataframe, N.types=NULL, N.utts=NULL, by.size=TRUE, dic
       df <- contexts_by_size(df=corpus, N.sizes=20, min.utt=100)
     } else {
       df <- corpus
-      df$N.uttAall <- 1 # make a column of ones for the whole corpus (i.e. use everything)
+      df$N.uttAll <- 1 # make a column of ones for the whole corpus (i.e. use everything)
     }
 
   } 
@@ -606,6 +606,55 @@ process_batch_results <- function(id, dir, combine=c("rbind", "list")){
   if(!is.null(empty_jobs)) warning(paste("The following jobs were empty:", paste(empty_jobs, collapse=", ")))
   return(results)
   # saveRDS(results, file=paste0("batchresults_WL.rds") )
+}
+
+clean_batch_results <- function(results){
+  # combine and organize results
+  MIs <- vector("list", length(names(results))); names(MIs) <- names(results) # empty storage variable
+  TPs <- vector("list", length(names(results))); names(TPs) <- names(results)  # empty storage variable
+  stat.results <- vector("list", length(names(results))); names(stat.results) <- names(results)  # empty storage variable
+  for(exp in names(results)){ # exp is the name of the experiment (e.g. SizeSkew)
+    for(j in 1:length(names(results[[exp]]))){ # for each job
+      if(length(results[[exp]][[j]]) > 0){ # only continue if there are any nodes within this job
+        for(n in 1:length(results[[exp]][[j]])){ # for each node
+          if(!is.error(results[[exp]][[j]][[n]])){
+            if(is.data.frame(results[[exp]][[j]][[n]]$stat.results)){ # only read in results if they exist
+              this.result <- results[[exp]][[j]][[n]]$stat.results
+              this.result$exp <- exp # add experiment name to results dataframe 
+              stat.results[[exp]] <- rbind(stat.results[[exp]], this.result)
+            }
+            if(!is.null(results[[exp]][[j]][[n]]$MIs)){ # only read in results if they exist
+              label <- ifelse(grepl(x=exp, pattern="TTR"), paste0("TTR", as.character(round(this.result$TTR, 2))), as.character(this.result$N.utts))
+              this.MIs  <- results[[exp]][[j]][[n]]$MIs
+              if(is.list(this.MIs)) this.MIs <- this.MIs[[1]]
+              MIs[[exp]][[label]] <- this.MIs
+            }
+            if(!is.null(results[[exp]][[j]][[n]]$TPs)) { # only read in results if they exist
+              label <- ifelse(grepl(x=exp, pattern="TTR"), paste0("TTR", as.character(round(this.result$TTR, 2))), as.character(this.result$N.utts))
+              this.TPs  <- results[[exp]][[j]][[n]]$TPs
+              if(is.list(this.TPs)) this.TPs <- this.TPs[[1]]
+              TPs[[exp]][[label]] <- this.TPs
+            }
+          }
+        } # end n for loop
+      } 
+    } # end j for loop
+  } # end e for loop
+  # combine the stat.results from all experiments into one dataframe
+  sim.results <- stat.results[[1]]
+  for(e in 2:length(names(stat.results))){
+    sim.results <- rbind(sim.results, stat.results[[e]])
+  }
+  library(tidyr); library(dplyr)
+  sim.results <- sim.results %>%
+    mutate(cutoff=85) %>%
+    unite(criterion, stat, cutoff, sep="", remove=F) %>%
+    extract(exp, into="dist", regex="([[:alnum:]]{4}$)", remove=FALSE) %>%
+    gather(measure, value, recall:precision) %>%
+    arrange(nontext)
+  sim.results$dist <- tolower(sim.results$dist)
+  
+  return(list(sim.results=sim.results, MIs=MIs, TPs=TPs))
 }
 
 plot_seg_results <- function(seg.results, title=NULL, boxplot=TRUE, scatterplot=FALSE, by=c("syl", "contexts")){
