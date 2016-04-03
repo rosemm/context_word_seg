@@ -35,11 +35,3 @@ library(devtools)
 create("functions")
 ```
 
-## Writing
-The manuscript draft is in paper.Rnw (a sweave file, combining Latex and R code)
-
-Some latex resources:     
-[http://www.tug.org/pracjourn/2008-1/zahn/zahn.pdf](http://www.tug.org/pracjourn/2008-1/zahn/zahn.pdf)
-[http://mirror.jmu.edu/pub/CTAN/macros/latex/contrib/apa6/apa6.pdf](http://mirror.jmu.edu/pub/CTAN/macros/latex/contrib/apa6/apa6.pdf)
-[http://merkel.zoneo.net/Latex/natbib.php](http://merkel.zoneo.net/Latex/natbib.php)
-[http://yihui.name/knitr/demo/sweave/](http://yihui.name/knitr/demo/sweave/)
