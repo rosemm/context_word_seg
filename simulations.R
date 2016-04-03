@@ -201,11 +201,11 @@ batch_function <- function(start, verbose=FALSE, dataframe, TTR, by.size){
   cols <- ncol(dict)
   if(nrow(dict) == 0) stop("dict didn't load")
 
-  reps <- 20
+  reps <- 30
   if (TTR){
-    N.types <- round(seq(from=50, to=300, length.out=reps), 0) # these are good N.types values for make_corpus(), for manipulating TTR
+    N.types <- round(seq(from=50, to=2000, length.out=reps), 0) # these are good N.types values for make_corpus(), for manipulating TTR
   } else {
-    N.types <- rep(300, reps) # a sensible default
+    N.types <- rep(2000, reps) # a sensible default
   }
   
   library(doParallel)
@@ -233,7 +233,7 @@ corpus <- read.table("utt_orth_phon_KEY.txt", sep="\t", quote="", comment.char =
 df <- contexts_by_size(corpus, N.sizes=20, min.utt=200)
 
 # create a registry
-id <- "bootSizeSim_skew"
+id <- "bootSizeSim_skew_long"
 reg.size.skew <- makeRegistry(id = id)
 # system('rm -r *-files')
 # removeRegistry(reg)
@@ -241,19 +241,19 @@ reg.size.skew <- makeRegistry(id = id)
 ids  <- batchMap(reg.size.skew, batch_function, starts, more.args=list(verbose=TRUE, dataframe="skewed", TTR=FALSE, by.size=TRUE))
 done <- submitJobs(reg.size.skew, resources = list(nodes=1, ppn=12))
 
-id <- "bootSizeSim_unif"
+id <- "bootSizeSim_unif_long"
 reg.size.unif <- makeRegistry(id = id)
 # map function and data to jobs and submit
 ids  <- batchMap(reg.size.unif, batch_function, starts, more.args=list(verbose=TRUE, dataframe="unif", TTR=FALSE, by.size=TRUE))
 done <- submitJobs(reg.size.unif, resources = list(nodes=1, ppn=12))
 
-id <- "bootTTRSim_skew"
+id <- "bootTTRSim_skew_long"
 reg.ttr.skew <- makeRegistry(id = id)
 # map function and data to jobs and submit
 ids  <- batchMap(reg.ttr.skew, batch_function, starts, more.args=list(verbose=TRUE, dataframe="skewed", TTR=TRUE, by.size=FALSE))
 done <- submitJobs(reg.ttr.skew, resources = list(nodes=1, ppn=12))
 
-id <- "bootTTRSim_unif"
+id <- "bootTTRSim_unif_long"
 reg.ttr.unif <- makeRegistry(id = id)
 # map function and data to jobs and submit
 ids  <- batchMap(reg.ttr.unif, batch_function, starts, more.args=list(verbose=TRUE, dataframe="unif", TTR=TRUE, by.size=FALSE))
