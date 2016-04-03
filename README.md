@@ -6,11 +6,13 @@ coding_scripts.R has the functions research assistants use to code the transcrip
 _OPEN_ME.r has instrutcions for RAs, including the code to access the coding_scripts.r file 
 
 context_coding_cleaning.R has the functions for cleaning the RAs' context coding, and for compiling them all into one document.
+
+context_cleaning_keys.txt and categories_cleaning_keys.txt are files for standardizing RA codes and combining codes into groups, respectively. For example, the first file standardizes spelling differences and synonyms (eating, meal, and eatting all get changed one code). The second file groups similar codes together into categories (changing clothes, brushing hair, undressing, and dressing all get changed to dressing). 
     
 ## Defining context by key words    
 data_processing.r has the analysis code.
 
-data_processing_functions.r has a list of specialized functions called by data_processing.r
+data_processing_functions.r has a list of specialized functions called by data_processing.r and  simulations.r.
 
 data_processing_orth_to_phon.r is a procedure for translating utterances from the .cha files from CHILDES to phon via Swingley's (2005) dictionary
 
@@ -21,9 +23,10 @@ words_by_contexts.csv is the list of key words (seed words) for each context. Th
 ## Using ACISS for boostrapping nontext distributions
 [ACISS](http://aciss-computing.uoregon.edu/) is the high performance cluster at UO. 
 I'm using two R packages to parallelize the code and run it on ACISS: [BatchJobs](https://cran.r-project.org/web/packages/BatchJobs/index.html) and [doParallel](https://cran.fhcrc.org/web/packages/doParallel/index.html). 
-The default nodes on ACISS have 12 processors each, so I'm using doParallel to write a function that can run independently at the same time on each of the 12 processors, called par_function(). 
-I then send this function to 12 different nodes at once using BatchJobs, so I'm running 144 independent version of the analysis simultaneously. 
+The default nodes on ACISS have 12 processors each, so I'm using doParallel to write a function that can run independently at the same time on each of the X processors, called par_function(). 
+I then send this function to Y different nodes at once using BatchJobs, so I'm running X*Y independent version of the analysis simultaneously. 
 The code for BatchJobs (including additional notes about how to set things up on ACISS) is in batchjobs_script.r     
+The code for the simulations themselves is in simulations.r. This also includes code for cleaning the simulations output and plotting results.
 
 ## Code tools
 Organize the functions as a personal R package.
