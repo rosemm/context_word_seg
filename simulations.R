@@ -184,11 +184,11 @@ library(dplyr); library(tidyr); library(doParallel); library(devtools)
 
 starts <- 1:50
 
-batch_function <- function(start, verbose=FALSE, dataframe, TTR){
+batch_function <- function(start, verbose=FALSE, dataframe, TTR, by.size){
   library(dplyr)
   library(tidyr)
   library(devtools)
-  fun.version <- "c7e0f2c7cff0d" # refers to the current commit for data_processing_functions.r
+  fun.version <- "47a23f2bb99ac" # refers to the current commit for data_processing_functions.r
   source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r", 
              sha1=fun.version)
   
@@ -203,9 +203,9 @@ batch_function <- function(start, verbose=FALSE, dataframe, TTR){
 
   reps <- 20
   if (TTR){
-    N.types <- round(seq(from=250, to=1800, length.out=reps), 0) # these are good N.types values for make_corpus(), for manipulating TTR
+    N.types <- round(seq(from=50, to=300, length.out=reps), 0) # these are good N.types values for make_corpus(), for manipulating TTR
   } else {
-    N.types <- rep(1800, reps) # 1800 is a sensible default
+    N.types <- rep(300, reps) # a sensible default
   }
   
   library(doParallel)
@@ -214,7 +214,8 @@ batch_function <- function(start, verbose=FALSE, dataframe, TTR){
                .errorhandling="pass",
                .verbose=TRUE) %dopar% par_function(dataframe=dataframe,
                                                    N.types=i,
-                                                   N.utts=500, # if this argument is left NULL, it will use 1000 utts
+                                                   N.utts=1000, # if this argument is left NULL, it will use 1000 utts
+                                                   by.size=by.size,
                                                    dict=dict,
                                                    expand=FALSE,
                                                    seg.utts=TRUE, 
@@ -227,6 +228,9 @@ batch_function <- function(start, verbose=FALSE, dataframe, TTR){
                                                    fun.version=fun.version)
   return(r)
 }
+source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r")
+corpus <- read.table("utt_orth_phon_KEY.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
+df <- contexts_by_size(corpus, N.sizes=20, min.utt=200)
 
 # create a registry
 id <- "bootSizeSim_skew"
@@ -234,33 +238,146 @@ reg.size.skew <- makeRegistry(id = id)
 # system('rm -r *-files')
 # removeRegistry(reg)
 # map function and data to jobs and submit
-ids  <- batchMap(reg.size.skew, batch_function, starts, more.args=list(verbose=TRUE, dataframe="skewed", TTR=FALSE))
+ids  <- batchMap(reg.size.skew, batch_function, starts, more.args=list(verbose=TRUE, dataframe="skewed", TTR=FALSE, by.size=TRUE))
 done <- submitJobs(reg.size.skew, resources = list(nodes=1, ppn=12))
 
 id <- "bootSizeSim_unif"
 reg.size.unif <- makeRegistry(id = id)
 # map function and data to jobs and submit
-ids  <- batchMap(reg.size.unif, batch_function, starts, more.args=list(verbose=TRUE, dataframe="unif", TTR=FALSE))
+ids  <- batchMap(reg.size.unif, batch_function, starts, more.args=list(verbose=TRUE, dataframe="unif", TTR=FALSE, by.size=TRUE))
 done <- submitJobs(reg.size.unif, resources = list(nodes=1, ppn=12))
 
 id <- "bootTTRSim_skew"
 reg.ttr.skew <- makeRegistry(id = id)
 # map function and data to jobs and submit
-ids  <- batchMap(reg.ttr.skew, batch_function, starts, more.args=list(verbose=TRUE, dataframe="skewed", TTR=TRUE))
+ids  <- batchMap(reg.ttr.skew, batch_function, starts, more.args=list(verbose=TRUE, dataframe="skewed", TTR=TRUE, by.size=FALSE))
 done <- submitJobs(reg.ttr.skew, resources = list(nodes=1, ppn=12))
 
 id <- "bootTTRSim_unif"
 reg.ttr.unif <- makeRegistry(id = id)
 # map function and data to jobs and submit
-ids  <- batchMap(reg.ttr.unif, batch_function, starts, more.args=list(verbose=TRUE, dataframe="unif", TTR=TRUE))
+ids  <- batchMap(reg.ttr.unif, batch_function, starts, more.args=list(verbose=TRUE, dataframe="unif", TTR=TRUE, by.size=FALSE))
 done <- submitJobs(reg.ttr.unif, resources = list(nodes=1, ppn=12))
 
+id <- "bootSizeSim_korman" # note that this is not working as-is
+reg.size.korman <- makeRegistry(id = id)
+# map function and data to jobs and submit
+ids  <- batchMap(reg.size.korman, batch_function, starts, more.args=list(verbose=TRUE, dataframe=df, TTR=FALSE, by.size=TRUE))
+done <- submitJobs(reg.size.korman, resources = list(nodes=1, ppn=12))
+
+reg.size.skew <- loadRegistry("bootSizeSim_skew-files")
+reg.size.unif <- loadRegistry("bootSizeSim_unif-files")
+reg.ttr.skew <- loadRegistry("bootTTRSim_skew-files")
+reg.ttr.unif <- loadRegistry("bootTTRSim_unif-files")
+reg.size.korman <- loadRegistry("bootSizeSim_korman3-files")
+
 showStatus(reg.size.unif); showStatus(reg.size.skew); showStatus(reg.ttr.unif); showStatus(reg.ttr.skew) # checking progress
+showStatus(reg.size.korman)
 findDone(reg) # checking progress
-# results <- loadResults(reg.size.skew.q)
-reg.size.unif
- 
-size.results <- process_batch_results(id="bootstrapSizeSim", dir="nontexts_SizeSim")
+# results <- loadResults(reg.size.korman3)
+
+# on aciss:
+# system('rm boot_results.RData')
+results <- list(SizeSkew=loadResults(reg.size.skew), 
+                SizeUnif=loadResults(reg.size.unif),
+                TTRskew=loadResults(reg.ttr.skew),
+                TTRunif=loadResults(reg.ttr.unif))
+save(results, file="boot_results.RData")  
+# copy via sftp to local machine
+load("bootstrap_results_Mar2016/boot_results.RData") # this is generated on ACISS using loadResults() and then saved and sftp to local machine
+names(results)
+
+# cleaning on local machine:
+sim.results.list <- clean_batch_results(results)
+sim.results <- sim.results.list[[1]]
+MIs <- sim.results.list$MIs
+
+library(ggplot2); library(RColorBrewer)
+#### PLOT: y-axis TTR, x-axis corpus size
+ggplot(filter(sim.results, grepl(x=exp, pattern="Size")), aes(x=N.utts, y=TTR))+
+  geom_point(alpha=.3, size=3) +
+  facet_wrap(~dist, scales="fixed") +
+  theme(text = element_text(size=20), axis.text.x=element_text(size=10, angle =90), axis.ticks = element_blank() ) +
+  labs(x="Number of utterances in random corpora")
+ggsave(filename="plots/TTRandSize.png", width=8, height=5, units="in")
+#### PLOT: y-axis precision/recall, x-axis corpus size, panels by skew/unif (color by TTR)
+ggplot(filter(sim.results, grepl(x=exp, pattern="Size")), aes(x=N.utts, y=value, color=TTR))+
+  geom_point(alpha=.3, size=3) +
+  facet_grid(dist~measure, scales="fixed") +
+  theme(text = element_text(size=20), axis.text.x=element_text(size=10, angle =90), axis.ticks = element_blank() ) +
+  labs(y=NULL, x="Number of utterances in random corpora") +
+  scale_color_continuous(low="navy", high="red")
+ggsave(filename="plots/segresultsbyTTRandSize.png", width=8, height=5, units="in")
+# ggplot(sim.results, aes(x=nontext, y=value, color=TTR))+
+#   geom_point(alpha=.3, size=3) +
+#   facet_grid(exp~measure, scales="fixed") +
+#   theme(text = element_text(size=20), axis.text.x=element_text(size=10, angle =90), axis.ticks = element_blank() ) +
+#   labs(y=NULL, x="Number of utterances in random corpora") +
+#   scale_color_continuous(low="darkgreen", high="olivedrab1")
+#### PLOT: y-axis precision/recall, x-axis TTR, panels by skew/unif (color by corpus size)
+ggplot(sim.results, aes(x=TTR, y=value))+
+  geom_point(alpha=.3, size=3) +
+  #facet_grid(exp~measure, scales="fixed") +
+  facet_grid(dist~measure, scales="fixed") +
+  theme(text = element_text(size=20), axis.text.x=element_text(size=10, angle =90), axis.ticks = element_blank() ) +
+  labs(y=NULL, x="TTR in random corpora") +
+  scale_color_continuous(low="midnightblue", high="steelblue1")
+ggsave(filename="plots/segresultsbyTTR.png", width=8, height=5, units="in")
+#### PLOT: y-axis mean MI, x-axis TTR
+ggplot(filter(sim.results, grepl(x=exp, pattern="TTR")), aes(x=TTR, y=mean.MI)) +
+  geom_point(alpha=.3, size=3) +
+  facet_wrap(~dist, scales="fixed") +
+  theme(text = element_text(size=20), axis.text.x=element_text(size=10, angle =90), axis.ticks = element_blank() ) +
+  labs(x="TTR in random corpora") 
+ggsave(filename="plots/meanMIbyTTR.png", width=8, height=5, units="in")
+#### PLOT: y-axis mean MI, x-axis corpus size
+ggplot(filter(sim.results, grepl(x=exp, pattern="Size")), aes(x=N.utts, y=mean.MI)) +
+  geom_point(alpha=.3, size=3) +
+  facet_wrap(~dist, scales="fixed") +
+  theme(text = element_text(size=20), axis.text.x=element_text(size=10, angle =90), axis.ticks = element_blank() ) +
+  labs(x="Number of utterances in random corpora") 
+ggsave(filename="plots/meanMIbynutts.png", width=8, height=5, units="in")
+#### PLOT: histograms of MI at different corpus sizes
+for(exp in names(MIs)){
+  s <- base::sample(1:length(MIs[[exp]]), 10)
+  select <- MIs[[exp]][s]
+  for(p in 1:length(select)){
+    p.data <- as.data.frame(select[p])
+    size <- colnames(p.data)
+    colnames(p.data) <- "MI"
+    plot <- ggplot(p.data, aes(x=MI)) +
+      geom_histogram() + 
+      theme(text = element_text(size=20), axis.text.y = element_blank(), axis.ticks = element_blank() ) +
+      labs(y=NULL) +
+      # xlim(c(0,12)) + 
+      ggtitle(paste(exp, size))
+    ggsave(filename=paste0("plots/hist_", exp, size, ".png"), plot=plot,
+           width=5, height=5, units="in")
+  } # end plot for loop
+} # end exp for loop
+#### PLOT: histograms of MI at different TTRs
+for(exp in names(MIs)){
+  if(length(MIs[[exp]]) > 10){
+    s <- base::sample(1:length(MIs[[exp]]), 10)
+    select <- MIs[[exp]][s]
+  } else select <- MIs[[exp]]
+  for(p in 1:length(select)){
+    p.data <- as.data.frame(select[p])
+    ttr <- colnames(p.data)
+    colnames(p.data) <- "MI"
+    plot <- ggplot(p.data, aes(x=MI)) +
+      geom_histogram() + 
+      theme(text = element_text(size=20), axis.text.y = element_blank(), axis.ticks = element_blank() ) +
+      labs(y=NULL) +
+      # xlim(c(0,12)) + 
+      ggtitle(paste(exp, ttr))
+    ggsave(filename=paste0("plots/hist_", exp, ttr, ".png"), plot=plot,
+           width=5, height=5, units="in")
+  } # end plot for loop
+} # end exp for loop
+
+summary(stat.results$TTRskew$TTR);  hist(summary(stat.results$TTRskew$TTR), breaks=30)
+summary(stat.results$SizeSkew$TTR); hist(summary(stat.results$SizeSkew$TTR), breaks=30)
 
 library(tidyr); library(dplyr)
 nontext.results <- size.results  %>%
