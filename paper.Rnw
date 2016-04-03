@@ -31,7 +31,7 @@ file.append('library.bib', 'add.cites.bib')
 \subsection{The corpus}
 The \citet{Korman1984} corpus is comprised of dense longitudinal recordings from 6 infants and their middle class UK mothers at home. Mothers were instructed to keep the recording apparatus near the child and on for as much of the day as possible. Experimenters dropped off the recording equipment around noon and picked it up around noon the next day. There are six recordings for each infant, spanning the age range from 6 to 16 weeks (for more details on the participants and recording methods, see \citealt{Korman1984}).
 
-The original corpus (available via CHILDES, cite MacWhinney) is transcribed in CHAT format, but because we were interested in the co-occurence of syllables we needed the phonetic transcription. 
+The original corpus \citep[available via CHILDES][]{MacWhinney2000} is transcribed in CHAT format, but because we were interested in the co-occurence of syllables we needed the phonetic transcription. 
 This is one of the corpora used by \citet{Swingley2005}, and we used the same phonetic approximations from that study as well (for details about the phonetic approximation, see \citealt{Swingley2005}). 
 This phonetic approximation is a simplified and idealized version of what the actual phonetic material would have been - a given word is represented with the exact same pronunciation each time it occurs, ignoring probable irregularities due to coarticulation, prosody, etc. 
 This has the potential to exagerate performance of the segmentation model, since there is no variability from one exemplar of a word to another as there would be in real speech. 
@@ -39,8 +39,7 @@ Syllable boundaries are also already given in the phonetic approximation of this
 \citet{Swingley2005} examines the effect of probabilistic resyllabification of the corpus on word segmentation accuracy and indeed finds that it results in a modest drop in accuracy (when syllable onsets and offsets are restricted to forms observed at utterance onsets and offsets respectively, so phonotactically illegal sequences like vmi from "give me" do not occur). 
 Using unambiguous syllable boundaries in this project likely exagerates the strength of statistical cues to word boundaries. 
 It is also important to consider that many features of this simplified phonetic corpus would have the opposite effect. 
-For example, prosodic information, which has been demonstrated to be a useful cue to word boundaries for infants both on its own (cite) and in combination with statistical phonological cues (cite), is not available to the model, potentially handicapping performance. 
-Utterance boundaries have also been removed, another important cue to word boundaries (cite). 
+For example, prosodic information, which has been demonstrated to be a useful cue to word boundaries for infants both on its own \citep{Johnson2009} and in combination with statistical phonological cues \citep{Shukla2007}, is not available to the model, potentially handicapping performance. 
 Information from other modalities, such as touch \citep{Seidl2014}, may also bolster the signal to word boundaries and is not available to the model. 
 As \citet*{Box1987} famously note, "All models are wrong, but some are useful." 
 The goal of this analyses is to explore how context shapes patterns in the statistical co-occurence of syllables, clarifying the role of statistical learning for word segmentation in natural speech. 
@@ -49,10 +48,12 @@ While our model is most definitely wrong, it is our hope that it is still useful
 \subsection{Defining context} 
 There are multiple potential ways to define context within a corpus. 
 \subsubsection{Key word analysis}
-For this analysis, our approach was to use a list of key words that we expected would be associated with particular contexts – for example, milk was on the list for mealtime words, and wipe was on the list for diaper change words. 
+For this analysis, our approach was to use a list of key words that we expected would be associated with particular contexts  --- for example, \emph{milk} was on the list for mealtime words, and \emph{wipe} was on the list for diaper change words. 
 The context lists were based on MCDI words, previous work describing infants' everyday activities \citep{Place2011, Fausey2015} and other models that have attempted to define contexts in infants' experience \citep{Soderstrom2013, Roy2012}, supplemented with some especially frequent content words from the corpus. 
 The key word lists are available in Appendix~\ref{app:KeyWords}. 
-Utterances in the corpus were then tagged for each context (not mutually exclusively) when those key words occurred, yielding 7 context-specific subcorpora. 
+Utterances in the corpus were then tagged for each context (not mutually exclusively) when those key words occurred. 
+Because not every utterance that occurs in a given context will contain context-specific words from the key word lists, we applied a smoothing procedure, including the two utterances immediately before and after a tagged utterance as well. 
+This procedure yielded 7 context-specific subcorpora.
 Word segmentation decisions based on syllable co-occurrence statistics were made within each context independently of the others, modeling zero generalization from one context to another on the part of infants. 
 
 \subsubsection{Coder judgments}
