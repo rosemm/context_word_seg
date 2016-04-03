@@ -91,17 +91,46 @@ batch_function <- function(starts, verbose){
   source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r", 
              sha1=fun.version)
   
-  df <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_WL.txt") 
-  
-  library(doParallel)
-  registerDoParallel()
-  
-  iter <- 50 # the number of times to generate random samples
-  
-  r <- foreach(1:iter, 
-               #.combine = rbind, 
-               .packages=c("dplyr", "tidyr", "devtools") ) %dopar% par_function_test(dataframe=df, 
-                                                                                     verbose=verbose)
+#   df <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_WL.txt") 
+#   
+#   library(doParallel)
+#   registerDoParallel()
+#   
+#   iter <- 50 # the number of times to generate random samples
+#   
+#   r <- foreach(1:iter, 
+#                #.combine = rbind, 
+#                .packages=c("dplyr", "tidyr", "devtools") ) %dopar% par_function_test(dataframe=df, 
+#                                                                                      verbose=verbose)
+
+dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
+cols <- ncol(dict)
+if(nrow(dict) == 0) stop("dict didn't load")
+
+reps <- 3
+if (TTR){
+  N.types <- round(seq(from=250, to=1800, length.out=reps), 0) # these are good N.types values for make_corpus(), for manipulating TTR
+} else {
+  N.types <- rep(1800, reps) # 1800 is a sensible default
+}
+
+library(doParallel)
+registerDoParallel()
+r <- foreach(i=N.types, 
+             .errorhandling="pass",
+             .verbose=TRUE) %dopar% par_function(dataframe=dataframe,
+                                                 N.types=i,
+                                                 dict=dict,
+                                                 expand=FALSE,
+                                                 seg.utts=TRUE, 
+                                                 TP=FALSE,
+                                                 MI=TRUE, 
+                                                 verbose=verbose, 
+                                                 prop=FALSE,
+                                                 cutoff=.85,
+                                                 nontext=TRUE,
+                                                 fun.version=fun.version)
+return(r)
 }
 
 # create a registry
