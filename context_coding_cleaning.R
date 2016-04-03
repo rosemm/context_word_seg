@@ -1,3 +1,4 @@
+library(devtools)
 source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/coding_scripts.R")
 # set working directory to transcript coding folder on server
 # setwd("/Volumes/cas-fs2/baldwinlab/Maier/Transcript Coding")
@@ -14,19 +15,10 @@ master_doc_contexts <- process_codes(master_doc, key_file="context_cleaning_keys
 master_doc_keep <- process_categories(master_doc_contexts, key_file="categories_cleaning_keys.txt")
 
 ####################################
-# lump little categories into "misc"
 summary(as.factor(master_doc_keep$category) ) # how many utterances per category
+hist(summary(as.factor(master_doc_keep$category)), breaks=1000) # how many utterances per category
 hist(summary(as.factor(master_doc_keep$category)), breaks=1000, xlim=c(0,1000)) # how many utterances per category
 barplot(sort(summary(as.factor(master_doc_keep$category)), decreasing=T))
-
-main_cats <- summary(as.factor(master_doc_keep$category) )[summary(as.factor(master_doc_keep$category) ) > 500] # the categories with more than 100 utterances
-misc_cats <- summary(as.factor(master_doc_keep$category) )[summary(as.factor(master_doc_keep$category) ) < 501] # the categories with less than 100 utterances
-# check that I'm not losing any categories...
-length(main_cats) + length(misc_cats) == length(summary(as.factor(master_doc_keep$category) ))
-
-for(i in 1:length(misc_cats)){
-  master_doc_keep$category <- gsub(pattern=paste0("^", names(misc_cats)[i], "$"), x=master_doc_keep$category, replacement="misc")
-}
 
 
 ###################################
@@ -41,13 +33,14 @@ master_doc_calc <- master_doc_keep %>%
   separate(col=utt, into=c("file", "UttNum"), sep="_" , remove=F) %>%
   arrange(file, as.numeric(UttNum) )
 
+contextcols <- 4:ncol(master_doc_calc) # the column numbers for all columns identifying contexts
+master_doc_calc$total <- rowSums(x=master_doc_calc[ ,contextcols], na.rm=TRUE)  # total number of codes for each utterace
+
+
 # make "burping" part of "mealtime"?
 burp.no.meal <- sum(table(master_doc_calc$burping, master_doc_calc$mealtime)[-1,1]) # the number of utterances tagged as burping but not also mealtime
 burp.tot <- nrow(filter(master_doc_calc, burping > 0)) # total number of utterances tagged as burping
 burp.no.meal/burp.tot
-
-contextcols <- 4:ncol(master_doc_calc) # the column numbers for all columns identifying contexts
-master_doc_calc$total <- rowSums(x=master_doc_calc[ ,contextcols], na.rm=TRUE)  # total number of codes for each utterace
 
 View(master_doc_calc)
 
@@ -56,6 +49,33 @@ master_doc_prop <- master_doc_calc %>%
 
 View(master_doc_prop)
 
+#########################################################################
+# lump little categories into "misc"
+cats <- master_doc_calc %>%
+  # count how many utterances are tagged with a particular code (regardless of how many coders identified it for each utterace)
+  mutate_each(funs(ifelse(. > 0, 1, 0)),  contextcols) %>%
+  gather(key="category", value="hit", contextcols) %>%
+  group_by(category) %>%
+  summarize(hits=sum(hit)) %>%
+  arrange(desc(hits))
+
+barplot(cats$hits, names.arg=cats$category, las=2)
+cat_med <- median(cats$hits)
+
+main_cats <- filter(cats, hits > cat_med) # the categories with more than 100 utterances
+misc_cats <- filter(cats, hits < (cat_med+1)) # the categories with less than 100 utterances
+# check that I'm not losing any categories...
+nrow(main_cats) + nrow(misc_cats) == nrow(cats)
+
+barplot(main_cats$hits, names.arg=main_cats$category, las=2)
+
+summary(as.factor(master_doc_keep$category))
+for(i in 1:nrow(misc_cats)){
+  master_doc_keep$category <- gsub(pattern=paste0("^", as.character(misc_cats[i,]$category), "$"), x=master_doc_keep$category, replacement="misc")
+}
+summary(as.factor(master_doc_keep$category))
+#########################################################################
+# THEN RE-RUN CODE TO GENERATE master_doc_calc AND master_doc_prop
 
 #########################################################################
 # sequence plots
@@ -79,6 +99,7 @@ master_doc_seq$UttNum <- as.numeric(master_doc_seq$UttNum)
 
 
 # sequence plots for all of the files
+library(ggplot2)
 ggplot(filter(master_doc_seq, context != "misc", context !="none"), aes(x=UttNum, y=context, color=context, alpha=value) ) +
   geom_point()+
   facet_wrap(~file, scales="free_x") +
@@ -92,6 +113,8 @@ context_codes <- "HJ_prop"
 files <- unique(master_doc_seq$file)
 for (f in 1:length(files)){
   data <- filter(master_doc_seq, file==files[f], context != "misc", context !="none")
+  # data <- filter(master_doc_seq, file==files[f])
+  
   ggplot(data ) +
     geom_point(aes(x=UttNum, y=context, color=context, alpha=value, size=4, shape="|" ), na.rm = TRUE, show_guide=F) + 
     scale_shape_identity() +
@@ -99,6 +122,8 @@ for (f in 1:length(files)){
     scale_size(guide = 'none')
   ggsave( paste0("plots/seqplot-",context_codes, files[f], ".png"), width=9, height=3, units="in" )
 }
+
+
 
 #########################################################################
 # define context by utterance
