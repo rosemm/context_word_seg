@@ -33,7 +33,24 @@ for(i in 1:nrow(dict)){
   search_for <- paste("^",dict$word[i],"$", sep="") # look for the ith word in the dictionary
   dict$freq.orth[i] <- length(grep(pattern=search_for, x=search_in)) # how many times does it find the ith dict word in the orth stream?
 }
+```
+  
+## read in context word list
+```{r}
+contexts <- read.csv("/Users/TARDIS/Documents/STUDIES/context_word_seg/words by contexts.csv")
 
+# mark seed word bigrams in df$orth
+bigrams <- grep(pattern="_", x=unlist(as.list(contexts)), fixed=T, value=T) # all of the context seed words that are bigrams (have an _)
+for(b in 1:length(bigrams)){
+  search_for <- paste0(gsub(x=bigrams[[b]], pattern="_", replacement=" ")) # look for the bigram, but with a space instead of the _
+  replace_with <- bigrams[[b]] # replace it with the bigram
+  df$orth <- gsub(pattern=search_for, x=df$orth, replacement=replace_with)
+}
+```
+
+
+## add word context to dictionary dataframe and plot
+```{r}
 # add context for each word to dictionary
 c <- gather(contexts, key="context", value="word") %>%
   filter(word!="")
@@ -63,19 +80,6 @@ ggplot(c, aes(x=as.factor(word.num), y=freq, fill=context)) +
   labs(x=NULL, y=NULL)
 ggsave(filename="plots/wordlists/key_word_freq_by_context.png", width=12, height=5, units="in")
 ```
-  
-## read in context word list
-```{r}
-contexts <- read.csv("/Users/TARDIS/Documents/STUDIES/context_word_seg/words by contexts.csv")
-
-# mark seed word bigrams in df$orth
-bigrams <- grep(pattern="_", x=unlist(as.list(contexts)), fixed=T, value=T) # all of the context seed words that are bigrams (have an _)
-for(b in 1:length(bigrams)){
-  search_for <- paste0(gsub(x=bigrams[[b]], pattern="_", replacement=" ")) # look for the bigram, but with a space instead of the _
-  replace_with <- bigrams[[b]] # replace it with the bigram
-  df$orth <- gsub(pattern=search_for, x=df$orth, replacement=replace_with)
-}
-```
 
 ## only keep context words that actually occur in the corpus
 (this is only relevant for presenting the list, e.g. in a talk - the code works fine with extra words in there)
@@ -92,7 +96,6 @@ kable(contexts.occuring)
 write.table(contexts.occuring, file="contexts.occuring.csv", sep=",", row.names=F)
 ############################
 ```
-
 
 ## code contexts in df by word lists
 ```{r}
@@ -123,6 +126,63 @@ write.table(df, file="contexts_WL.txt", quote=F, col.names=T, row.names=F, appen
 ```{r}
 # run code in context_coding_cleaning.r to retrieve and clean codes
 df <- read.table("contexts_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this overwrites the word list context df above
+```
+
+## tag contexts by topic modeling
+```{r stm}
+
+library(stm)
+
+df <- df[ , 1:3] # only keep the first three columns (there should only be three columns anyway, but just to be sure)
+
+df.temp <- df %>%
+  select(-phon) %>%
+  extract(col=utt, into=c("child", "age_weeks"), regex="^([[:alpha:]]{2})([[:digit:]]{2})", remove=FALSE) %>%
+  extract(col=utt, into=c("file", "utt.num"), regex="^([[:alpha:]]{2}[[:digit:]]{2})[.]cha_([[:digit:]]+)", remove=FALSE)
+
+wn <- 30 # number of utterances in each window
+# add wn blank lines at the end of each file, so we can break it into wn-utterance windows without spanning recordings
+df.temp <- group_by(df.temp, file) %>%
+  do({
+    max.utt.num <- as.numeric(max(as.numeric(.$utt.num)))
+    new.rows <- data.frame(utt=NA, 
+                           file=.$file[1], 
+                           utt.num=seq(from=(max.utt.num+1), to=(max.utt.num+wn)),
+                           child=NA,
+                           age_weeks=NA,
+                           orth=NA)
+    file.data <- rbind(., new.rows)
+    n <- ceiling(nrow(file.data)/wn) # how many levels will be needed in the counter?
+    file.data$wn.count <- gl(n=n, k=wn, labels=paste0(paste(sample(letters, 20, replace=T), collapse=""), 1:n))[1:nrow(file.data)] 
+    # add a counter that goes 1 to wn, so we can split the resulting data frame using that counter
+    return(file.data)
+    })
+
+df.temp <- na.omit(df.temp) # delete the extra empty rows made as a buffer between recordings
+
+max(table(df.temp$wn.count)) # if this is greater than wn, error!
+
+# collapse utterances from within each wn-utterance window
+doc.data <- group_by(df.temp, wn.count) %>%
+  dplyr::select(child, age_weeks, orth, wn.count) %>%
+  do({
+    doc.data <- data.frame(child=.$child[1],
+                      age_weeks=.$age_weeks[1],
+                      documents=paste(.$orth, collapse=" "))
+  }) %>%
+  ungroup() %>%
+  dplyr::select( -wn.count) # drop the wn.count variable, since it's no longer needed
+
+##########################
+# STM
+##########################
+# prep
+processed <- textProcessor(doc.data$documents, metadata = doc.data)
+out <- prepDocuments(processed$documents, processed$vocab, processed$meta) # removes infrequent terms depending on user-set parameter lower.thresh (the minimum number of documents a word needs to appear in in order for the word to be kept within the vocabulary)
+docs <- out$documents
+vocab <- out$vocab
+meta <-out$meta
+
 ```
 
 ## run on aciss
