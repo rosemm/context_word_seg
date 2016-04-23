@@ -50,4 +50,8 @@ stm
 *.docx
 *.pptx
 *.xlsx
+*.png
+*.pdf
 "Topics\nfit.null.txt"
+contexts_STM.txt
+words by contexts_CDIcheck.csv
