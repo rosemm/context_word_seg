@@ -77,52 +77,8 @@ summary(as.factor(master_doc_keep$category))
 #########################################################################
 # THEN RE-RUN CODE TO GENERATE master_doc_calc AND master_doc_prop
 
-#########################################################################
-# sequence plots
-#########################################################################
 master_doc_prop$UttNum <- as.numeric(master_doc_prop$UttNum)
 master_doc_seq <- gather(master_doc_prop, key=context, value=value, -total, -file, -UttNum, -utt)
-
-# or read in the contexts as they're used in the analysis (for both contexts and nontexts)
-context_seq <- read.table("contexts_WL.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this file is generated later on in this script
-context_seq <- read.table("contexts_HJ_voting.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this file is generated later on in this script
-context_seq <- read.table("contexts_HJ_prop.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this file is generated later on in this script
-master_doc_seq <- gather(context_seq, key=context, value=value, -orth, -phon, -utt) %>%
-  separate(col=utt, into=c("file", "UttNum"), sep="_", remove=FALSE) %>%
-  # for word list analysis only, make all contexts either 1 or 0 (smoothing over 1.5's from expand_windows)
-  mutate(value=ifelse(value>0, 1, 0)) 
-
-master_doc_seq$context <- as.factor(master_doc_seq$context)
-master_doc_seq$utt <- as.factor(master_doc_seq$utt)
-master_doc_seq$file <- as.factor(master_doc_seq$file)
-master_doc_seq$UttNum <- as.numeric(master_doc_seq$UttNum)
-
-
-# sequence plots for all of the files
-library(ggplot2)
-ggplot(filter(master_doc_seq, context != "misc", context !="none"), aes(x=UttNum, y=context, color=context, alpha=value) ) +
-  geom_point()+
-  facet_wrap(~file, scales="free_x") +
-  scale_alpha(guide = 'none')
-
-# sequence plots for each file separately
-context_codes <- "WL"
-context_codes <- "HJ_voting"
-context_codes <- "HJ_prop"
-
-files <- unique(master_doc_seq$file)
-for (f in 1:length(files)){
-  data <- filter(master_doc_seq, file==files[f], context != "misc", context !="none")
-  # data <- filter(master_doc_seq, file==files[f])
-  
-  ggplot(data ) +
-    geom_point(aes(x=UttNum, y=context, color=context, alpha=value, size=4, shape="|" ), na.rm = TRUE, show_guide=F) + 
-    scale_shape_identity() +
-    scale_alpha(guide = 'none') + 
-    scale_size(guide = 'none')
-  ggsave( paste0("plots/seqplot-",context_codes, files[f], ".png"), width=9, height=3, units="in" )
-}
-
 
 
 #########################################################################
