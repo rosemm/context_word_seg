@@ -6,6 +6,7 @@ library(ggplot2)
 library(reshape2)
 library(knitr)
 library(devtools)
+library(stm)
 
 # read in the functions written for this analysis
 source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r")
@@ -125,12 +126,13 @@ write.table(df, file="contexts_WL.txt", quote=F, col.names=T, row.names=F, appen
 ## tag contexts by human coder judgments
 ```{r}
 # run code in context_coding_cleaning.r to retrieve and clean codes
-df <- read.table("contexts_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this overwrites the word list context df above
+df <- read.table("contexts_HJ_prop.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this overwrites the word list context df above
 ```
 
 ## tag contexts by topic modeling
-```{r stm}
+![](stm_comparison.png)
 
+```{r stm_data_wrangling}
 library(stm)
 
 df <- df[ , 1:3] # only keep the first three columns (there should only be three columns anyway, but just to be sure)
@@ -138,7 +140,8 @@ df <- df[ , 1:3] # only keep the first three columns (there should only be three
 df.temp <- df %>%
   select(-phon) %>%
   extract(col=utt, into=c("child", "age_weeks"), regex="^([[:alpha:]]{2})([[:digit:]]{2})", remove=FALSE) %>%
-  extract(col=utt, into=c("file", "utt.num"), regex="^([[:alpha:]]{2}[[:digit:]]{2})[.]cha_([[:digit:]]+)", remove=FALSE)
+  extract(col=utt, into=c("file", "utt.num"), regex="^([[:alpha:]]{2}[[:digit:]]{2})[.]cha_([[:digit:]]+)", remove=FALSE) %>%
+  filter(child != "hi") # remove this child, since the transcripts are so short
 
 wn <- 30 # number of utterances in each window
 # add wn blank lines at the end of each file, so we can break it into wn-utterance windows without spanning recordings
@@ -160,7 +163,7 @@ df.temp <- group_by(df.temp, file) %>%
 
 df.temp <- na.omit(df.temp) # delete the extra empty rows made as a buffer between recordings
 
-max(table(df.temp$wn.count)) # if this is greater than wn, error!
+stopifnot(wn >= max(table(df.temp$wn.count))) # if this is greater than wn, error!
 
 # collapse utterances from within each wn-utterance window
 doc.data <- group_by(df.temp, wn.count) %>%
@@ -169,21 +172,225 @@ doc.data <- group_by(df.temp, wn.count) %>%
     doc.data <- data.frame(child=.$child[1],
                       age_weeks=.$age_weeks[1],
                       documents=paste(.$orth, collapse=" "))
-  }) %>%
-  ungroup() %>%
-  dplyr::select( -wn.count) # drop the wn.count variable, since it's no longer needed
+  }) 
+doc.data$child <- as.factor(doc.data$child)
+```
 
+```{r stm_prep}
 ##########################
 # STM
 ##########################
+source("stm/R/searchK.R") # use my own version of this command
+source("stm/R/plot.searchK.R") # use my own version of this command
 # prep
-processed <- textProcessor(doc.data$documents, metadata = doc.data)
-out <- prepDocuments(processed$documents, processed$vocab, processed$meta) # removes infrequent terms depending on user-set parameter lower.thresh (the minimum number of documents a word needs to appear in in order for the word to be kept within the vocabulary)
+processed <- textProcessor(doc.data$documents, 
+                           metadata = doc.data, 
+                           removestopwords=FALSE, 
+                           wordLengths=c(1, Inf))
+out <- prepDocuments(processed$documents, processed$vocab, processed$meta,
+                     lower.thresh = 2) 
+# removes infrequent terms depending on user-set parameter lower.thresh (the minimum number of documents a word needs to appear in order for the word to be kept within the vocabulary)
 docs <- out$documents
 vocab <- out$vocab
 meta <-out$meta
+```
+
+```{r stm_searchK, cache=TRUE}
+ntopics <- searchK(out$documents, out$vocab, 
+                   K = c(5:20), # how many topics?
+                   iter=10,
+                   data = meta,
+                   prevalence =~ child,
+                   content =~ child) 
+ntopics.results <- ntopics$results %>%
+  gather(key="measure", value="value", -K) %>%
+  filter(measure!="em.its" & measure!="iter" & measure!="bound") # drop measures from the plot
+ggplot(ntopics.results, aes(y=value, x=K)) +
+  geom_point(alpha=.5) +
+  geom_smooth(n=20) +
+  facet_wrap(~ measure, scales="free") +
+  labs(y=NULL, x="Number of topics") +
+  ggtitle(paste0("searchK() results\n", paste(format(ntopics$call), collapse="")))
+ggsave(filename=paste0("plots/topicmodeling/searchK_results_iter_winutts", wn ,".png"), width=12, height=6, units="in")
 
 ```
+
+```{r stm_model, cache=TRUE}
+# Metadata covariates for topical prevalence allow the observed metadata to affect the frequency with which a topic is discussed. 
+# Topical prevalence captures how much each topic contributes to a document. Because different documents come from different sources, it is natural then to want to allow this prevalence to vary with metadata that we have about document sources.
+# Covariates in topical content allow the observed metadata to affect the word rate use within a given topic–that is, how a particular topic is discussed.
+# A topical content variable allows for the vocabulary used to talk about a particular topic to vary.
+# As with all mixed-membership topic models, the posterior is intractable and non-convex, which creates a multimodal estimation problem that can be sensitive to initialization. Put differently, the answers the estimation procedure comes up with may depend on starting values of the parameters (e.g., the distribution over words for a particular topic). There are two approaches to dealing with this that the STM package facilitates. The first is to use a specific intitialization based on the method of moments, which is deterministic and globally consistent under reasonable conditions (Roberts et al. Forthcoming). This is known as a spectral initialization.10 In practice we have found this intialization to be very helpful. This can be chosen by setting init.type = "Spectral" in the stm function. We use this option in the above example. This means that no matter the seed that is set, the same results will be generated. However, it currently does not scale to extremely large vocabularies (uncommon in most applications) in which case alternative initializations are available
+nK <- 12
+fit.null <- stm(out$documents, # the documents
+           out$vocab, # the words
+           K = nK, # number of topics
+           max.em.its = 75, # set to run for a maximum of 75 EM iterations
+           data = out$meta, # all the variables
+           init.type = "Spectral")
+fit.cont <- stm(out$documents, # the documents
+           out$vocab, # the words
+           K = nK, # number of topics
+           content =~ child,
+           max.em.its = 75, 
+           data = out$meta, 
+           init.type = "Spectral")
+fit.prev <- stm(out$documents, # the documents
+           out$vocab, # the words
+           K = nK, # number of topics
+           prevalence =~ child,
+           max.em.its = 75, 
+           data = out$meta, 
+           init.type = "Spectral")
+fit.both <- stm(out$documents, # the documents
+           out$vocab, # the words
+           K = nK, # number of topics
+           prevalence =~ child, 
+           content =~ child,
+           max.em.its = 75, 
+           data = out$meta, 
+           init.type = "Spectral")
+
+fits <- list(fit.null=fit.null, fit.cont=fit.cont, fit.prev=fit.prev, fit.both=fit.both)
+
+sink("plots/topicmodeling/modelinfo.txt", append = T, type="output")
+paste0("\n",date(), "\n")
+for(f in 1:length(fits)){
+  print((names(fits)[[f]]))
+  print(paste("\n", wn, "utterances per document\n"))
+  fit <- fits[[f]]
+  
+  pdf(paste0("plots/topicmodeling/topics_winutts", wn, "_",names(fits)[[f]], ".pdf"))
+  plot.STM(fit, type = "summary", main = paste0("Topics\n", names(fits)[[f]])) 
+  dev.off()
+  
+  print(labelTopics(fit))
+  print(findThoughts(fit, texts=out$meta$documents, topics=1:nK, n=3))
+  
+  pdf(paste0("plots/topicmodeling/convergence_winutts", wn, "_",names(fits)[[f]], ".pdf"))
+  plot(fit$convergence$bound, type = "l",
+     ylab = "Approximate Objective",
+     main = paste0("Convergence\n", names(fits)[[f]]))
+  dev.off()
+  
+  pdf(paste0("plots/topicmodeling/topic_net_winutts", wn, "_",names(fits)[[f]], ".pdf"))
+  # topicCorr(fit) # lots of output :)
+  plot(topicCorr(fit), main = paste0("Topic correlations\n", names(fits)[[f]]))
+  dev.off()
+  
+  pdf(paste0("plots/topicmodeling/topic_heatmap_winutts", wn, "_",names(fits)[[f]], ".pdf"))
+  c <- topicCorr(fit)$cor # just the correlations between topics
+  print(round(c, 2))
+  diag(c) <- NA # remove the 1's on the diagonal so we can see the variation in the correlations
+  heatmap(c, keep.dendro=F, symm=TRUE, main = paste0("Topic correlations: max", round(max(c), 2), "\n", names(fits)[[f]]))
+  dev.off()
+}
+sink(NULL)
+
+fit <- fits$fit.both
+```
+
+```{r stm_estimateEffect}
+est <- estimateEffect(1:nK ~ child, fit, meta=out$meta)
+
+prev.ests <- plot(est, "child")
+# mean point estimates
+prev.ests.means <- prev.ests$means
+names(prev.ests.means) <- paste0("topic", prev.ests$topics)
+prev.ests.means <- as.data.frame(prev.ests.means)
+prev.ests.means$child <- levels(prev.ests$uvals)
+prev.ests.means <- gather(prev.ests.means, key="topic", value="mean", -child)
+# ci point estimates
+prev.ests.cis <- prev.ests$cis
+names(prev.ests.cis) <- paste0("topic", 1:nK)
+prev.ests.cis.df <- data.frame(ci.2.5=NULL, ci.97.5=NULL, child=NULL, topic=NULL)
+for(k in prev.ests$topics){
+  c <- as.data.frame(prev.ests.cis[[k]])
+  c <- as.data.frame(t(c))
+  colnames(c) <- c("ci.2.5", "ci.97.5")
+  c$child <- levels(prev.ests$uvals)
+  c$topic <- names(prev.ests.cis[k])
+  row.names(c) <- NULL
+  prev.ests.cis.df <- rbind(prev.ests.cis.df, c)
+}
+prev.ests.df <- left_join(prev.ests.means, prev.ests.cis.df, by=c("child", "topic"))
+
+ggplot(prev.ests.df, aes(x=child, y=mean, fill=child)) +
+  geom_bar(position=position_dodge(), stat="identity") +
+  geom_errorbar(aes(ymin=ci.2.5, ymax=ci.97.5),
+                width=.2,                    # Width of the error bars
+                position=position_dodge(.9)) +
+  facet_wrap(~topic) + 
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
+  labs(y="topic prevalence", x=NULL, title="Topic prevalence by child\nwith 95CI error bars")
+ggsave(filename=paste0("plots/topicmodeling/topic_prevalence_winutts", wn ,".png"), width=12, height=12, units="in")
+```
+
+The topic loading for a document is the percentage of words attributable to a latent topic. [https://scholar.princeton.edu/sites/default/files/bstewart/files/ajpsappendix.pdf](https://scholar.princeton.edu/sites/default/files/bstewart/files/ajpsappendix.pdf)
+```{r stm_doc_weights}
+thetas <- as.data.frame(fit$theta)
+colnames(thetas) <- paste0("topic_", 1:nK)
+thetas <- cbind(out$meta, thetas)
+df.temp <- left_join(df.temp, thetas, by=c( "child", "age_weeks", "wn.count" ))
+df.stm <- df.temp %>%
+  ungroup() %>%
+  select(utt, orth, starts_with("topic_") )
+
+write.table(df.stm, file=paste0("contexts_STM_winutts", wn, ".txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")
+
+hist(unlist(thetas[,5:16]), breaks=50)
+```
+
+
+```{r stm_threshold}
+df.threshold <- gather(df.stm, key="topic", value="loading", starts_with("topic_"))
+
+thresholds <- seq(0,.75,.025) # what thresholds to try
+for(threshold in thresholds){
+  df.threshold[[paste0("thresh_",threshold)]] <- ifelse(df.threshold$loading > threshold, 1, 0)
+}
+
+df.threshold <- df.threshold %>% 
+  select(-loading) %>% 
+  gather(key="threshold", value="include", starts_with("thresh_")) %>% 
+  spread(key=topic, value=include) %>% 
+  extract(col=threshold, into="threshold", regex="_(0*[.]*[[:digit:]]+)", convert=TRUE) 
+
+df.threshold$num_topics <- rowSums(select(df.threshold, starts_with("topic_")))
+
+df.threshold.plot <- df.threshold %>% 
+  group_by(threshold) %>% 
+  summarize(mean_num_topics=mean(num_topics, na.rm=T), 
+            perc_zero_topic=length(num_topics[num_topics==0])/length(num_topics),
+            perc_one_topic=length(num_topics[num_topics==1])/length(num_topics),
+            perc_one_or_two_topic=length(num_topics[num_topics < 3 & num_topics > 0])/length(num_topics),
+            perc_two_topic=length(num_topics[num_topics==2])/length(num_topics),
+            perc_more_topic=length(num_topics[num_topics>2])/length(num_topics)) %>% 
+  gather(key="measure", value="value", -threshold)
+df.threshold.plot$measure <- factor(df.threshold.plot$measure, 
+                        levels = c("mean_num_topics", "perc_zero_topic", "perc_one_topic", "perc_one_or_two_topic", "perc_two_topic", "perc_more_topic"),
+                        labels = c("mean_num_topics", "zero contexts", "one context", "one or two contexts", "two contexts", "more than two contexts"))
+
+ggplot(filter(df.threshold.plot, measure=="mean_num_topics"), aes(x=threshold, y=value)) + 
+  geom_line() + 
+  scale_y_continuous(breaks=0:12) +
+  scale_x_continuous(breaks=round(seq(min(thresholds), max(thresholds), by=.05), 2)) +
+  geom_line(y=1, linetype=2) +
+  labs(y=NULL) +
+  ggtitle(paste0("mean number of contexts per utterance\nutterances per document=", wn))
+ggsave(filename=paste0("plots/topicmodeling/topic_thresholds_means_winutts", wn ,".png"), width=8, height=8, units="in")
+
+ggplot(filter(df.threshold.plot, measure!="mean_num_topics"), aes(x=threshold, y=value, color=measure)) + 
+  geom_line() + 
+  #facet_wrap(~measure, scales="free_y") + 
+  scale_x_continuous(breaks=round(seq(min(thresholds), max(thresholds), by=.05), 2)) +
+  labs(y="Percent of total utterances") +
+  ggtitle(paste0("number of contexts per utterance\nutterances per document=", wn))
+ggsave(filename=paste0("plots/topicmodeling/topic_thresholds_perc_winutts", wn ,".png"), width=12, height=8, units="in")
+
+threshold <- .2 # set threshold for inclusion in a context
+```
+
 
 ## run on aciss
 ```{r}
@@ -472,6 +679,57 @@ tests$stars <- ifelse(tests$p.val < .001, "***",
                                     ifelse(tests$p.val < .1, "+", ""))))
 
 kable(filter(tests, criterion=="MI85")[,-2], digits=3)
+```
+
+## sequence plots
+```{r seqplot}
+#########################################################################
+# sequence plots
+#########################################################################
+
+# read in the contexts as they're used in the analysis (for both contexts and nontexts)
+context_seq <- read.table("contexts_WL.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
+context_seq <- read.table("contexts_HJ_voting.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this file is generated in context_coding_cleaning.R
+context_seq <- read.table("contexts_HJ_prop.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this file is generated in context_coding_cleaning.R
+context_seq <- read.table("contexts_STM.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
+
+master_doc_seq <- gather(context_seq, key=context, value=value, -orth, -phon, -utt) %>%
+  separate(col=utt, into=c("file", "UttNum"), sep="_", remove=FALSE) %>%
+  # for word list analysis only, make all contexts either 1 or 0 (smoothing over 1.5's from expand_windows)
+  mutate(value=ifelse(value>0, 1, 0)) 
+
+master_doc_seq$context <- as.factor(master_doc_seq$context)
+master_doc_seq$utt <- as.factor(master_doc_seq$utt)
+master_doc_seq$file <- as.factor(master_doc_seq$file)
+master_doc_seq$UttNum <- as.numeric(master_doc_seq$UttNum)
+
+
+# sequence plots for all of the files
+library(ggplot2)
+ggplot(filter(na.omit(master_doc_seq), context != "misc", context !="none"), aes(x=UttNum, y=context, color=context, alpha=value) ) +
+  geom_point()+
+  facet_wrap(~file, scales="free_x") +
+  scale_alpha(guide = 'none')
+
+# sequence plots for each file separately
+context_codes <- "WL"
+context_codes <- "HJ_voting"
+context_codes <- "HJ_prop"
+context_codes <- "STM"
+
+files <- unique(master_doc_seq$file)
+for (f in 1:length(files)){
+  data <- filter(master_doc_seq, file==files[f], context != "misc", context !="none")
+  # data <- filter(master_doc_seq, file==files[f])
+  
+  ggplot(data ) +
+    geom_point(aes(x=UttNum, y=context, color=context, alpha=value, size=4, shape="|" ), na.rm = TRUE, show_guide=F) + 
+    scale_shape_identity() +
+    scale_alpha(guide = 'none') + 
+    scale_size(guide = 'none')
+  ggsave( paste0("plots/seqplot-",context_codes, files[f], ".png"), width=9, height=3, units="in" )
+}
+
 ```
 
 ## descriptives
