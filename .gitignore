@@ -40,9 +40,6 @@ bootstrapCutoffWLnontext-files
 GoldwaterSegCode
 apa6.cls
 bootstrap_results_Mar2016
-contexts_SizeSim.txt
-contexts_SizeSimSKEW.txt
-contexts_SizeSimUNIF.txt
 contexts.occuring.csv
 .Rapp.history
 bootSizeSim_korman3-files
@@ -53,7 +50,6 @@ stm
 *.png
 *.pdf
 "Topics\nfit.null.txt"
-contexts_STM.txt
 words by contexts_CDIcheck.csv
-contexts_STM_winutts5.txt
-contexts_STM_bin_winutts5.txt
+contexts_*.txt
+
