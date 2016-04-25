@@ -56,3 +56,4 @@ stm
 contexts_STM.txt
 words by contexts_CDIcheck.csv
 contexts_STM_winutts5.txt
+contexts_STM_bin_winutts5.txt
