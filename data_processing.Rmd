@@ -7,6 +7,8 @@ library(reshape2)
 library(knitr)
 library(devtools)
 library(stm)
+library(vcd)
+library(car)
 
 # read in the functions written for this analysis
 source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r")
@@ -132,7 +134,7 @@ df <- read.table("contexts_HJ_prop.txt", header=1, sep="\t", stringsAsFactors=F,
 ## tag contexts by topic modeling
 ![](stm_comparison.png)
 
-```{r stm_data_wrangling}
+```{r topic_modeling_data_wrangling}
 library(stm)
 
 df <- df[ , 1:3] # only keep the first three columns (there should only be three columns anyway, but just to be sure)
@@ -176,16 +178,11 @@ doc.data <- group_by(df.temp, wn.count) %>%
 doc.data$child <- as.factor(doc.data$child)
 ```
 
-```{r stm_prep}
-##########################
-# STM
-##########################
-source("stm/R/searchK.R") # use my own version of this command
-source("stm/R/plot.searchK.R") # use my own version of this command
+```{r topic_modeling_prep}
 # prep
 processed <- textProcessor(doc.data$documents, 
                            metadata = doc.data, 
-                           removestopwords=FALSE, 
+                           removestopwords=TRUE, 
                            wordLengths=c(1, Inf))
 out <- prepDocuments(processed$documents, processed$vocab, processed$meta,
                      lower.thresh = 2) 
@@ -195,9 +192,13 @@ vocab <- out$vocab
 meta <-out$meta
 ```
 
+
 ```{r stm_searchK, cache=TRUE}
+source("stm/R/searchK.R") # use my own version of this command
+source("stm/R/plot.searchK.R") # use my own version of this command
+
 ntopics <- searchK(out$documents, out$vocab, 
-                   K = c(5:20), # how many topics?
+                   K = c(8:20), # how many topics?
                    iter=10,
                    data = meta,
                    prevalence =~ child,
@@ -213,7 +214,117 @@ ggplot(ntopics.results, aes(y=value, x=K)) +
   ggtitle(paste0("searchK() results\n", paste(format(ntopics$call), collapse="")))
 ggsave(filename=paste0("plots/topicmodeling/searchK_results_iter_winutts", wn ,".png"), width=12, height=6, units="in")
 
+nK <- 12
 ```
+
+
+```{r lda_model}
+library(lda)
+# Need to reindex docs to start counting vocab at 0 instead of 1 for lda package
+docs.lda <- docs
+for(i in 1:length(docs.lda)){
+  docs.lda[[i]][1,] <- as.integer(docs[[i]][1,]-1)
+  if(dim(docs.lda[[i]])[1] != 2) message(paste("wrong number of rows in document", i))
+  if(dim(docs.lda[[i]])[2] < 1) message(paste("wrong number of columns in document", i))
+}
+
+lda <- lda.collapsed.gibbs.sampler(docs.lda,
+                            K=nK,
+                            vocab=vocab,
+                            num.iterations = 500, # 25 is the number used in the lda demo
+                            0.1, # from demo
+                            0.1, # from demo
+                            compute.log.likelihood=TRUE)
+
+plot(lda$log.likelihoods[1,], 
+     ylab="log likelihood",
+     xlab="iteration",
+     main="full log likelihood (including the prior)")
+plot(lda$log.likelihoods[2,], 
+     ylab="log likelihood",
+     xlab="iteration",
+     main="log likelihood of the observations\n conditioned on the assignments")
+
+top.topic.words(lda$topics, 10, by.score=TRUE) ## Get the top words in the cluster
+```
+
+```{r lda_doc_loadings}
+lda.loadings <- t(lda$document_sums) / colSums(lda$document_sums)
+colnames(lda.loadings) <- paste0("topic_", 1:nK)
+
+lda.loadings <- cbind(out$meta, lda.loadings)
+df.temp.lda <- left_join(df.temp, lda.loadings, by=c( "child", "age_weeks", "wn.count" ))
+df.lda <- df.temp.lda %>%
+  ungroup() %>%
+  left_join(df, by=c("utt", "orth")) %>% # adding the phon column back in
+  select(utt, orth, phon, starts_with("topic_") ) 
+  
+
+write.table(df.lda, file=paste0("contexts_LDA_winutts", wn, ".txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")
+
+hist(unlist(lda.loadings[,5:16]), breaks=50)
+```
+
+```{r lda_threshold}
+df.threshold <- gather(df.lda, key="topic", value="loading", starts_with("topic_"))
+
+thresholds <- seq(0,.75,.025) # what thresholds to try
+for(threshold in thresholds){
+  df.threshold[[paste0("thresh_",threshold)]] <- ifelse(df.threshold$loading > threshold, 1, 0)
+}
+
+df.threshold <- df.threshold %>% 
+  select(-loading) %>% 
+  gather(key="threshold", value="include", starts_with("thresh_")) %>% 
+  spread(key=topic, value=include) %>% 
+  extract(col=threshold, into="threshold", regex="_(0*[.]*[[:digit:]]+)", convert=TRUE) 
+
+df.threshold$num_topics <- rowSums(select(df.threshold, starts_with("topic_")))
+
+df.threshold.plot <- df.threshold %>% 
+  group_by(threshold) %>% 
+  summarize(mean_num_topics=mean(num_topics, na.rm=T), 
+            perc_zero_topic=length(num_topics[num_topics==0])/length(num_topics),
+            perc_one_topic=length(num_topics[num_topics==1])/length(num_topics),
+            perc_one_or_two_topic=length(num_topics[num_topics < 3 & num_topics > 0])/length(num_topics),
+            perc_two_topic=length(num_topics[num_topics==2])/length(num_topics),
+            perc_more_topic=length(num_topics[num_topics>2])/length(num_topics)) %>% 
+  gather(key="measure", value="value", -threshold)
+df.threshold.plot$measure <- factor(df.threshold.plot$measure, 
+                        levels = c("mean_num_topics", "perc_zero_topic", "perc_one_topic", "perc_one_or_two_topic", "perc_two_topic", "perc_more_topic"),
+                        labels = c("mean_num_topics", "zero contexts", "one context", "one or two contexts", "two contexts", "more than two contexts"))
+
+ggplot(filter(df.threshold.plot, measure=="mean_num_topics"), aes(x=threshold, y=value)) + 
+  geom_line() + 
+  scale_y_continuous(breaks=0:12) +
+  scale_x_continuous(breaks=round(seq(min(thresholds), max(thresholds), by=.05), 2)) +
+  geom_line(y=1, linetype=2) +
+  labs(y=NULL) +
+  ggtitle(paste0("LDA: mean number of contexts per utterance\nutterances per document=", wn))
+ggsave(filename=paste0("plots/topicmodeling/topic_thresholds_LDA_means_winutts", wn ,".png"), width=8, height=8, units="in")
+
+ggplot(filter(df.threshold.plot, measure!="mean_num_topics"), aes(x=threshold, y=value, color=measure)) + 
+  geom_line() + 
+  scale_x_continuous(breaks=round(seq(min(thresholds), max(thresholds), by=.05), 2)) +
+  labs(y="Percent of total utterances") +
+  ggtitle(paste0("LDA: number of contexts per utterance\nutterances per document=", wn))
+ggsave(filename=paste0("plots/topicmodeling/topic_thresholds_LDA_perc_winutts", wn ,".png"), width=12, height=8, units="in")
+```
+
+
+```{r lda_apply_threshold}
+# apply threshold
+lda.threshold <- .3 # set threshold for inclusion in a context
+df.lda.bin <- df.lda %>% 
+  gather(key="topic", value="loading", starts_with("topic_"))
+df.lda.bin$include <- ifelse(df.lda.bin$loading > lda.threshold, 1, 0)
+df.lda.bin <- df.lda.bin %>% 
+  select(-loading) %>% 
+  spread(key=topic, value=include)
+
+write.table(df.lda.bin, file=paste0("contexts_LDA_bin_winutts", wn, ".txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")
+```
+
 
 ```{r stm_model, cache=TRUE}
 # Metadata covariates for topical prevalence allow the observed metadata to affect the frequency with which a topic is discussed. 
@@ -221,7 +332,6 @@ ggsave(filename=paste0("plots/topicmodeling/searchK_results_iter_winutts", wn ,"
 # Covariates in topical content allow the observed metadata to affect the word rate use within a given topic–that is, how a particular topic is discussed.
 # A topical content variable allows for the vocabulary used to talk about a particular topic to vary.
 # As with all mixed-membership topic models, the posterior is intractable and non-convex, which creates a multimodal estimation problem that can be sensitive to initialization. Put differently, the answers the estimation procedure comes up with may depend on starting values of the parameters (e.g., the distribution over words for a particular topic). There are two approaches to dealing with this that the STM package facilitates. The first is to use a specific intitialization based on the method of moments, which is deterministic and globally consistent under reasonable conditions (Roberts et al. Forthcoming). This is known as a spectral initialization.10 In practice we have found this intialization to be very helpful. This can be chosen by setting init.type = "Spectral" in the stm function. We use this option in the above example. This means that no matter the seed that is set, the same results will be generated. However, it currently does not scale to extremely large vocabularies (uncommon in most applications) in which case alternative initializations are available
-nK <- 12
 fit.null <- stm(out$documents, # the documents
            out$vocab, # the words
            K = nK, # number of topics
@@ -323,22 +433,24 @@ ggplot(prev.ests.df, aes(x=child, y=mean, fill=child)) +
   facet_wrap(~topic) + 
   theme(axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
   labs(y="topic prevalence", x=NULL, title="Topic prevalence by child\nwith 95CI error bars")
-ggsave(filename=paste0("plots/topicmodeling/topic_prevalence_winutts", wn ,".png"), width=12, height=12, units="in")
+ggsave(filename=paste0("plots/topicmodeling/topic_prevalence_STM_winutts", wn ,".png"), width=12, height=12, units="in")
 ```
 
 The topic loading for a document is the percentage of words attributable to a latent topic. [https://scholar.princeton.edu/sites/default/files/bstewart/files/ajpsappendix.pdf](https://scholar.princeton.edu/sites/default/files/bstewart/files/ajpsappendix.pdf)
-```{r stm_doc_weights}
-thetas <- as.data.frame(fit$theta)
-colnames(thetas) <- paste0("topic_", 1:nK)
-thetas <- cbind(out$meta, thetas)
-df.temp <- left_join(df.temp, thetas, by=c( "child", "age_weeks", "wn.count" ))
-df.stm <- df.temp %>%
+```{r stm_doc_loadings}
+stm.loadings  <- as.data.frame(fit$theta)
+colnames(stm.loadings) <- paste0("topic_", 1:nK)
+stm.loadings <- cbind(out$meta, stm.loadings)
+df.temp.stm <- left_join(df.temp, stm.loadings, by=c( "child", "age_weeks", "wn.count" ))
+df.stm <- df.temp.stm %>%
   ungroup() %>%
-  select(utt, orth, starts_with("topic_") )
+  left_join(df, by=c("utt", "orth")) %>% # adding the phon column back in
+  select(utt, orth, phon, starts_with("topic_") ) 
+  
 
 write.table(df.stm, file=paste0("contexts_STM_winutts", wn, ".txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
-hist(unlist(thetas[,5:16]), breaks=50)
+hist(unlist(stm.loadings[,5:16]), breaks=50)
 ```
 
 
@@ -377,18 +489,109 @@ ggplot(filter(df.threshold.plot, measure=="mean_num_topics"), aes(x=threshold, y
   scale_x_continuous(breaks=round(seq(min(thresholds), max(thresholds), by=.05), 2)) +
   geom_line(y=1, linetype=2) +
   labs(y=NULL) +
-  ggtitle(paste0("mean number of contexts per utterance\nutterances per document=", wn))
-ggsave(filename=paste0("plots/topicmodeling/topic_thresholds_means_winutts", wn ,".png"), width=8, height=8, units="in")
+  ggtitle(paste0("STM: mean number of contexts per utterance\nutterances per document=", wn))
+ggsave(filename=paste0("plots/topicmodeling/topic_thresholds_STM_means_winutts", wn ,".png"), width=8, height=8, units="in")
 
 ggplot(filter(df.threshold.plot, measure!="mean_num_topics"), aes(x=threshold, y=value, color=measure)) + 
   geom_line() + 
   #facet_wrap(~measure, scales="free_y") + 
   scale_x_continuous(breaks=round(seq(min(thresholds), max(thresholds), by=.05), 2)) +
   labs(y="Percent of total utterances") +
-  ggtitle(paste0("number of contexts per utterance\nutterances per document=", wn))
-ggsave(filename=paste0("plots/topicmodeling/topic_thresholds_perc_winutts", wn ,".png"), width=12, height=8, units="in")
+  ggtitle(paste0("STM: number of contexts per utterance\nutterances per document=", wn))
+ggsave(filename=paste0("plots/topicmodeling/topic_thresholds_STM_perc_winutts", wn ,".png"), width=12, height=8, units="in")
+```
 
-threshold <- .2 # set threshold for inclusion in a context
+
+```{r stm_apply_threshold}
+# apply threshold
+stm.threshold <- .2 # set threshold for inclusion in a context
+df.stm.bin <- df.stm %>% 
+  gather(key="topic", value="loading", starts_with("topic_"))
+df.stm.bin$include <- ifelse(df.stm.bin$loading > stm.threshold, 1, 0)
+df.stm.bin <- df.stm.bin %>% 
+  select(-loading) %>% 
+  spread(key=topic, value=include)
+
+write.table(df.stm.bin, file=paste0("contexts_STM_bin_winutts", wn, ".txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")
+```
+
+## agreement
+```{r xtabs}
+WL <- read.table("contexts_WL.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") %>% 
+  mutate_each(funs(y=ifelse(.>0, 1, 0)), mealtime:routines) # for word list analysis only, make all contexts either 1 or 0 (smoothing over 1.5's from expand_windows)
+# remove underscores from WL orth column
+WL$orth <- gsub(x=WL$orth, pattern="_", replacement=" ")
+WL.long <- gather(WL, key="WL", value="include", -utt, -orth, -phon) 
+
+STM.con <- read.table(paste0("contexts_STM_winutts", wn, ".txt"), header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
+STM.con.long <- gather(STM.con, key="STM.con", value="include", -utt, -orth, -phon)
+
+STM.bin <- read.table(paste0("contexts_STM_bin_winutts", wn, ".txt"), header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
+STM.bin.long <- gather(STM.bin, key="STM.bin", value="include", -utt, -orth, -phon)
+
+HJ.con <- read.table("contexts_HJ_prop.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
+HJ.con.long <- gather(HJ.con, key="HJ.con", value="include", -utt, -orth, -phon)
+
+HJ.bin <- read.table("contexts_HJ_bin.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
+HJ.bin.long <-  gather(HJ.bin, key="HJ.bin", value="include", -utt, -orth, -phon)
+
+
+## xtabs
+WL.long <- filter(WL.long, include==1) %>% 
+  select(-include)
+
+STM.bin.long <- filter(STM.bin.long, include==1) %>% 
+  select(-include)
+
+freqs <- full_join(WL.long, STM.bin.long, by="utt")
+length(unique(WL$utt)); length(unique(STM.bin$utt)); length(unique(freqs$utt)) # how many utterances included
+
+freqs <- freqs %>% 
+  count(WL, STM.bin)
+
+x_WL_STM.bin <- xtabs(n ~ WL + STM.bin, data=freqs)
+summary(x_WL_STM.bin) # chi-squared test of independence
+kable(x_WL_STM.bin)
+
+library(vcd)
+assocstats(x_WL_STM.bin) # cramers v
+```
+
+```{r logistic_regression}
+nrow(WL); nrow(STM.con); nrow(STM.bin); nrow(HJ.con); nrow(HJ.bin)
+
+# drop orth and phon in case there are superficial issues matching them with the join() below
+WL <- select(WL, -orth, -phon)
+STM.con <- select(STM.con, -orth, -phon)
+STM.bin <- select(STM.bin, -orth, -phon)
+HJ.con <- select(HJ.con, -orth, -phon)
+HJ.bin <- select(HJ.bin, -orth, -phon)
+colnames(WL)[-1] <- paste0("WL_", colnames(WL)[-1])
+colnames(STM.con)[-1] <- paste0("STM.con_", colnames(STM.con)[-1])
+colnames(STM.bin)[-1] <- paste0("STM.bin_", colnames(STM.bin)[-1])
+colnames(HJ.con)[-1] <- paste0("HJ.con_", colnames(HJ.con)[-1])
+colnames(HJ.bin)[-1] <- paste0("HJ.bin_", colnames(HJ.bin)[-1])
+
+all.methods <- full_join(WL, STM.con, by="utt") %>% 
+  full_join(STM.bin, by="utt") %>% 
+  full_join(HJ.con, by="utt") %>% 
+  full_join(HJ.bin, by="utt")
+nrow(all.methods)  
+
+# multivariate logistic regression
+# WL_multivariate <- glm(as.matrix(select(all.methods, starts_with("WL_"))) ~ as.matrix(select(all.methods, starts_with("STM.con_"))), family = binomial(link="logit")) 
+# Manova(WL_multivariate, type=3) # Performs a multivariate test of each predictor 
+
+all.methods <- na.omit(all.methods) # listwise deletion (i.e. only analyze utterances we have for every method)
+WL_contexts <- as.matrix(select(all.methods, starts_with("WL_")))
+STM.con_contexts <- as.matrix(select(all.methods, starts_with("STM.con_")))
+WL_multivariate <- MCMCglmm(WL_contexts ~ STM.con_contexts, data=all.methods, family="categorical")
+
+WL_mealtime <- glm(all.methods$WL_mealtime ~ as.matrix(select(all.methods, starts_with("STM.con_"))), family = binomial(link="logit")) 
+
+summary(mreg) # Provides coefficients as well as standard errors and signficance tests #
+
+
 ```
 
 
