@@ -136,10 +136,11 @@ df <- read.table("contexts_HJ_prop.txt", header=1, sep="\t", stringsAsFactors=F,
 
 ```{r topic_modeling_data_wrangling}
 library(stm)
+library(lda)
 
 df <- df[ , 1:3] # only keep the first three columns (there should only be three columns anyway, but just to be sure)
 
-df.temp <- df %>%
+df.wn.count <- df %>%
   select(-phon) %>%
   extract(col=utt, into=c("child", "age_weeks"), regex="^([[:alpha:]]{2})([[:digit:]]{2})", remove=FALSE) %>%
   extract(col=utt, into=c("file", "utt.num"), regex="^([[:alpha:]]{2}[[:digit:]]{2})[.]cha_([[:digit:]]+)", remove=FALSE) %>%
@@ -147,7 +148,7 @@ df.temp <- df %>%
 
 wn <- 30 # number of utterances in each window
 # add wn blank lines at the end of each file, so we can break it into wn-utterance windows without spanning recordings
-df.temp <- group_by(df.temp, file) %>%
+df.wn.count <- group_by(df.wn.count, file) %>%
   do({
     max.utt.num <- as.numeric(max(as.numeric(.$utt.num)))
     new.rows <- data.frame(utt=NA, 
@@ -163,12 +164,12 @@ df.temp <- group_by(df.temp, file) %>%
     return(file.data)
     })
 
-df.temp <- na.omit(df.temp) # delete the extra empty rows made as a buffer between recordings
+df.wn.count <- na.omit(df.wn.count) # delete the extra empty rows made as a buffer between recordings
 
-stopifnot(wn >= max(table(df.temp$wn.count))) # if this is greater than wn, error!
+stopifnot(wn >= max(table(df.wn.count$wn.count))) # if this is greater than wn, error!
 
 # collapse utterances from within each wn-utterance window
-doc.data <- group_by(df.temp, wn.count) %>%
+doc.data <- group_by(df.wn.count, wn.count) %>%
   dplyr::select(child, age_weeks, orth, wn.count) %>%
   do({
     doc.data <- data.frame(child=.$child[1],
@@ -176,6 +177,11 @@ doc.data <- group_by(df.temp, wn.count) %>%
                       documents=paste(.$orth, collapse=" "))
   }) 
 doc.data$child <- as.factor(doc.data$child)
+
+# adding the phon column back in
+df.wn.count <- df.wn.count %>%
+    ungroup() %>%
+    left_join(df, by=c("utt", "orth")) 
 ```
 
 ```{r topic_modeling_prep}
@@ -219,7 +225,6 @@ nK <- 12
 
 
 ```{r lda_model}
-library(lda)
 # Need to reindex docs to start counting vocab at 0 instead of 1 for lda package
 docs.lda <- docs
 for(i in 1:length(docs.lda)){
@@ -234,6 +239,7 @@ lda <- lda.collapsed.gibbs.sampler(docs.lda,
                             num.iterations = 500, # 25 is the number used in the lda demo
                             0.1, # from demo
                             0.1, # from demo
+                            burnin = 5,
                             compute.log.likelihood=TRUE)
 
 plot(lda$log.likelihoods[1,], 
@@ -245,20 +251,15 @@ plot(lda$log.likelihoods[2,],
      xlab="iteration",
      main="log likelihood of the observations\n conditioned on the assignments")
 
-top.topic.words(lda$topics, 10, by.score=TRUE) ## Get the top words in the cluster
+top.topic.words(lda$topics, 10, by.score=TRUE) ## Get the top words for each topic
 ```
 
 ```{r lda_doc_loadings}
-lda.loadings <- t(lda$document_sums) / colSums(lda$document_sums)
-colnames(lda.loadings) <- paste0("topic_", 1:nK)
-
-lda.loadings <- cbind(out$meta, lda.loadings)
-df.temp.lda <- left_join(df.temp, lda.loadings, by=c( "child", "age_weeks", "wn.count" ))
-df.lda <- df.temp.lda %>%
-  ungroup() %>%
-  left_join(df, by=c("utt", "orth")) %>% # adding the phon column back in
-  select(utt, orth, phon, starts_with("topic_") ) 
-  
+# from topic_modeling_functions.r
+df.lda <- doc_loadings(method="lda", 
+                             model=lda, 
+                             meta=out$meta, 
+                             df.wn.count)   
 
 write.table(df.lda, file=paste0("contexts_LDA_winutts", wn, ".txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
@@ -266,49 +267,16 @@ hist(unlist(lda.loadings[,5:16]), breaks=50)
 ```
 
 ```{r lda_threshold}
-df.threshold <- gather(df.lda, key="topic", value="loading", starts_with("topic_"))
+thresholds <- seq(0,.75,.05) # what thresholds to try
 
-thresholds <- seq(0,.75,.025) # what thresholds to try
-for(threshold in thresholds){
-  df.threshold[[paste0("thresh_",threshold)]] <- ifelse(df.threshold$loading > threshold, 1, 0)
-}
-
-df.threshold <- df.threshold %>% 
-  select(-loading) %>% 
-  gather(key="threshold", value="include", starts_with("thresh_")) %>% 
-  spread(key=topic, value=include) %>% 
-  extract(col=threshold, into="threshold", regex="_(0*[.]*[[:digit:]]+)", convert=TRUE) 
-
-df.threshold$num_topics <- rowSums(select(df.threshold, starts_with("topic_")))
-
-df.threshold.plot <- df.threshold %>% 
-  group_by(threshold) %>% 
-  summarize(mean_num_topics=mean(num_topics, na.rm=T), 
-            perc_zero_topic=length(num_topics[num_topics==0])/length(num_topics),
-            perc_one_topic=length(num_topics[num_topics==1])/length(num_topics),
-            perc_one_or_two_topic=length(num_topics[num_topics < 3 & num_topics > 0])/length(num_topics),
-            perc_two_topic=length(num_topics[num_topics==2])/length(num_topics),
-            perc_more_topic=length(num_topics[num_topics>2])/length(num_topics)) %>% 
-  gather(key="measure", value="value", -threshold)
-df.threshold.plot$measure <- factor(df.threshold.plot$measure, 
-                        levels = c("mean_num_topics", "perc_zero_topic", "perc_one_topic", "perc_one_or_two_topic", "perc_two_topic", "perc_more_topic"),
-                        labels = c("mean_num_topics", "zero contexts", "one context", "one or two contexts", "two contexts", "more than two contexts"))
-
-ggplot(filter(df.threshold.plot, measure=="mean_num_topics"), aes(x=threshold, y=value)) + 
-  geom_line() + 
-  scale_y_continuous(breaks=0:12) +
-  scale_x_continuous(breaks=round(seq(min(thresholds), max(thresholds), by=.05), 2)) +
-  geom_line(y=1, linetype=2) +
-  labs(y=NULL) +
-  ggtitle(paste0("LDA: mean number of contexts per utterance\nutterances per document=", wn))
-ggsave(filename=paste0("plots/topicmodeling/topic_thresholds_LDA_means_winutts", wn ,".png"), width=8, height=8, units="in")
-
-ggplot(filter(df.threshold.plot, measure!="mean_num_topics"), aes(x=threshold, y=value, color=measure)) + 
-  geom_line() + 
-  scale_x_continuous(breaks=round(seq(min(thresholds), max(thresholds), by=.05), 2)) +
-  labs(y="Percent of total utterances") +
-  ggtitle(paste0("LDA: number of contexts per utterance\nutterances per document=", wn))
-ggsave(filename=paste0("plots/topicmodeling/topic_thresholds_LDA_perc_winutts", wn ,".png"), width=12, height=8, units="in")
+# from topic_modeling_functions.r
+# any additional values to be saved in the plot name can be included as extra arguments
+threshold_plots(df.lda, 
+                thresholds=thresholds, 
+                method="lda",
+                save.to="plots/topicmodeling",
+                wn=wn,
+                remove.stops=TRUE) 
 ```
 
 
@@ -332,27 +300,27 @@ write.table(df.lda.bin, file=paste0("contexts_LDA_bin_winutts", wn, ".txt"), quo
 # Covariates in topical content allow the observed metadata to affect the word rate use within a given topic–that is, how a particular topic is discussed.
 # A topical content variable allows for the vocabulary used to talk about a particular topic to vary.
 # As with all mixed-membership topic models, the posterior is intractable and non-convex, which creates a multimodal estimation problem that can be sensitive to initialization. Put differently, the answers the estimation procedure comes up with may depend on starting values of the parameters (e.g., the distribution over words for a particular topic). There are two approaches to dealing with this that the STM package facilitates. The first is to use a specific intitialization based on the method of moments, which is deterministic and globally consistent under reasonable conditions (Roberts et al. Forthcoming). This is known as a spectral initialization.10 In practice we have found this intialization to be very helpful. This can be chosen by setting init.type = "Spectral" in the stm function. We use this option in the above example. This means that no matter the seed that is set, the same results will be generated. However, it currently does not scale to extremely large vocabularies (uncommon in most applications) in which case alternative initializations are available
-fit.null <- stm(out$documents, # the documents
+stm.null <- stm(out$documents, # the documents
            out$vocab, # the words
            K = nK, # number of topics
            max.em.its = 75, # set to run for a maximum of 75 EM iterations
            data = out$meta, # all the variables
            init.type = "Spectral")
-fit.cont <- stm(out$documents, # the documents
+stm.cont <- stm(out$documents, # the documents
            out$vocab, # the words
            K = nK, # number of topics
            content =~ child,
            max.em.its = 75, 
            data = out$meta, 
            init.type = "Spectral")
-fit.prev <- stm(out$documents, # the documents
+stm.prev <- stm(out$documents, # the documents
            out$vocab, # the words
            K = nK, # number of topics
            prevalence =~ child,
            max.em.its = 75, 
            data = out$meta, 
            init.type = "Spectral")
-fit.both <- stm(out$documents, # the documents
+stm.both <- stm(out$documents, # the documents
            out$vocab, # the words
            K = nK, # number of topics
            prevalence =~ child, 
@@ -361,47 +329,47 @@ fit.both <- stm(out$documents, # the documents
            data = out$meta, 
            init.type = "Spectral")
 
-fits <- list(fit.null=fit.null, fit.cont=fit.cont, fit.prev=fit.prev, fit.both=fit.both)
+stms <- list(stm.null=stm.null, stm.cont=stm.cont, stm.prev=stm.prev, stm.both=stm.both)
 
 sink("plots/topicmodeling/modelinfo.txt", append = T, type="output")
 paste0("\n",date(), "\n")
-for(f in 1:length(fits)){
-  print((names(fits)[[f]]))
+for(f in 1:length(stms)){
+  print((names(stms)[[f]]))
   print(paste("\n", wn, "utterances per document\n"))
-  fit <- fits[[f]]
+  stm <- stms[[f]]
   
-  pdf(paste0("plots/topicmodeling/topics_winutts", wn, "_",names(fits)[[f]], ".pdf"))
-  plot.STM(fit, type = "summary", main = paste0("Topics\n", names(fits)[[f]])) 
+  pdf(paste0("plots/topicmodeling/topics_winutts", wn, "_",names(stms)[[f]], ".pdf"))
+  plot.STM(stm, type = "summary", main = paste0("Topics\n", names(stms)[[f]])) 
   dev.off()
   
-  print(labelTopics(fit))
-  print(findThoughts(fit, texts=out$meta$documents, topics=1:nK, n=3))
+  print(labelTopics(stm))
+  print(findThoughts(stm, texts=out$meta$documents, topics=1:nK, n=3))
   
-  pdf(paste0("plots/topicmodeling/convergence_winutts", wn, "_",names(fits)[[f]], ".pdf"))
-  plot(fit$convergence$bound, type = "l",
+  pdf(paste0("plots/topicmodeling/convergence_winutts", wn, "_",names(stms)[[f]], ".pdf"))
+  plot(stm$convergence$bound, type = "l",
      ylab = "Approximate Objective",
-     main = paste0("Convergence\n", names(fits)[[f]]))
+     main = paste0("Convergence\n", names(stms)[[f]]))
   dev.off()
   
-  pdf(paste0("plots/topicmodeling/topic_net_winutts", wn, "_",names(fits)[[f]], ".pdf"))
-  # topicCorr(fit) # lots of output :)
-  plot(topicCorr(fit), main = paste0("Topic correlations\n", names(fits)[[f]]))
+  pdf(paste0("plots/topicmodeling/topic_net_winutts", wn, "_",names(stms)[[f]], ".pdf"))
+  # topicCorr(stm) # lots of output :)
+  plot(topicCorr(stm), main = paste0("Topic correlations\n", names(stms)[[f]]))
   dev.off()
   
-  pdf(paste0("plots/topicmodeling/topic_heatmap_winutts", wn, "_",names(fits)[[f]], ".pdf"))
-  c <- topicCorr(fit)$cor # just the correlations between topics
+  pdf(paste0("plots/topicmodeling/topic_heatmap_winutts", wn, "_",names(stms)[[f]], ".pdf"))
+  c <- topicCorr(stm)$cor # just the correlations between topics
   print(round(c, 2))
   diag(c) <- NA # remove the 1's on the diagonal so we can see the variation in the correlations
-  heatmap(c, keep.dendro=F, symm=TRUE, main = paste0("Topic correlations: max", round(max(c), 2), "\n", names(fits)[[f]]))
+  heatmap(c, keep.dendro=F, symm=TRUE, main = paste0("Topic correlations: max", round(max(c), 2), "\n", names(stms)[[f]]))
   dev.off()
 }
 sink(NULL)
 
-fit <- fits$fit.both
+stm <- stms$stm.both
 ```
 
 ```{r stm_estimateEffect}
-est <- estimateEffect(1:nK ~ child, fit, meta=out$meta)
+est <- estimateEffect(1:nK ~ child, stm, meta=out$meta)
 
 prev.ests <- plot(est, "child")
 # mean point estimates
@@ -438,15 +406,11 @@ ggsave(filename=paste0("plots/topicmodeling/topic_prevalence_STM_winutts", wn ,"
 
 The topic loading for a document is the percentage of words attributable to a latent topic. [https://scholar.princeton.edu/sites/default/files/bstewart/files/ajpsappendix.pdf](https://scholar.princeton.edu/sites/default/files/bstewart/files/ajpsappendix.pdf)
 ```{r stm_doc_loadings}
-stm.loadings  <- as.data.frame(fit$theta)
-colnames(stm.loadings) <- paste0("topic_", 1:nK)
-stm.loadings <- cbind(out$meta, stm.loadings)
-df.temp.stm <- left_join(df.temp, stm.loadings, by=c( "child", "age_weeks", "wn.count" ))
-df.stm <- df.temp.stm %>%
-  ungroup() %>%
-  left_join(df, by=c("utt", "orth")) %>% # adding the phon column back in
-  select(utt, orth, phon, starts_with("topic_") ) 
-  
+# from topic_modeling_functions.r
+df.stm <- doc_loadings(method="stm", 
+                             model=stm, 
+                             meta=out$meta, 
+                             df.wn.count) 
 
 write.table(df.stm, file=paste0("contexts_STM_winutts", wn, ".txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
@@ -455,50 +419,14 @@ hist(unlist(stm.loadings[,5:16]), breaks=50)
 
 
 ```{r stm_threshold}
-df.threshold <- gather(df.stm, key="topic", value="loading", starts_with("topic_"))
-
-thresholds <- seq(0,.75,.025) # what thresholds to try
-for(threshold in thresholds){
-  df.threshold[[paste0("thresh_",threshold)]] <- ifelse(df.threshold$loading > threshold, 1, 0)
-}
-
-df.threshold <- df.threshold %>% 
-  select(-loading) %>% 
-  gather(key="threshold", value="include", starts_with("thresh_")) %>% 
-  spread(key=topic, value=include) %>% 
-  extract(col=threshold, into="threshold", regex="_(0*[.]*[[:digit:]]+)", convert=TRUE) 
-
-df.threshold$num_topics <- rowSums(select(df.threshold, starts_with("topic_")))
-
-df.threshold.plot <- df.threshold %>% 
-  group_by(threshold) %>% 
-  summarize(mean_num_topics=mean(num_topics, na.rm=T), 
-            perc_zero_topic=length(num_topics[num_topics==0])/length(num_topics),
-            perc_one_topic=length(num_topics[num_topics==1])/length(num_topics),
-            perc_one_or_two_topic=length(num_topics[num_topics < 3 & num_topics > 0])/length(num_topics),
-            perc_two_topic=length(num_topics[num_topics==2])/length(num_topics),
-            perc_more_topic=length(num_topics[num_topics>2])/length(num_topics)) %>% 
-  gather(key="measure", value="value", -threshold)
-df.threshold.plot$measure <- factor(df.threshold.plot$measure, 
-                        levels = c("mean_num_topics", "perc_zero_topic", "perc_one_topic", "perc_one_or_two_topic", "perc_two_topic", "perc_more_topic"),
-                        labels = c("mean_num_topics", "zero contexts", "one context", "one or two contexts", "two contexts", "more than two contexts"))
-
-ggplot(filter(df.threshold.plot, measure=="mean_num_topics"), aes(x=threshold, y=value)) + 
-  geom_line() + 
-  scale_y_continuous(breaks=0:12) +
-  scale_x_continuous(breaks=round(seq(min(thresholds), max(thresholds), by=.05), 2)) +
-  geom_line(y=1, linetype=2) +
-  labs(y=NULL) +
-  ggtitle(paste0("STM: mean number of contexts per utterance\nutterances per document=", wn))
-ggsave(filename=paste0("plots/topicmodeling/topic_thresholds_STM_means_winutts", wn ,".png"), width=8, height=8, units="in")
-
-ggplot(filter(df.threshold.plot, measure!="mean_num_topics"), aes(x=threshold, y=value, color=measure)) + 
-  geom_line() + 
-  #facet_wrap(~measure, scales="free_y") + 
-  scale_x_continuous(breaks=round(seq(min(thresholds), max(thresholds), by=.05), 2)) +
-  labs(y="Percent of total utterances") +
-  ggtitle(paste0("STM: number of contexts per utterance\nutterances per document=", wn))
-ggsave(filename=paste0("plots/topicmodeling/topic_thresholds_STM_perc_winutts", wn ,".png"), width=12, height=8, units="in")
+# from topic_modeling_functions.r
+# any additional values to be saved in the plot name can be included as extra arguments
+threshold_plots(df.stm, 
+                   thresholds=thresholds, # what thresholds to try
+                   method="stm",
+                   save.to="plots/topicmodeling",
+                   wn=wn,
+                   remove.stops=TRUE) 
 ```
 
 
