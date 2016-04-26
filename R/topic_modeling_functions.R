@@ -69,3 +69,17 @@ threshold_plots <- function(df.model, thresholds, method, save.to, ...){
     ggtitle(paste0(method, ": number of contexts per utterance"))
  ggsave(filename=paste0(save.to, "/topic_thresholds_", method, "_perc_", additional_args ,".png"), width=8, height=8, units="in")
 }
+
+apply_threshold <- function(df.model, threshold){
+  
+  stopifnot(require(dplyr), require(tidyr))
+  
+  df.bin <- df.model %>% 
+    gather(key="topic", value="loading", starts_with("topic_"))
+  df.bin$include <- ifelse(df.bin$loading > threshold, 1, 0)
+  df.bin <- df.bin %>% 
+    select(-loading) %>% 
+    spread(key=topic, value=include)
+  
+  return(df.bin)
+}

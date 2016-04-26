@@ -283,12 +283,8 @@ threshold_plots(df.lda,
 ```{r lda_apply_threshold}
 # apply threshold
 lda.threshold <- .3 # set threshold for inclusion in a context
-df.lda.bin <- df.lda %>% 
-  gather(key="topic", value="loading", starts_with("topic_"))
-df.lda.bin$include <- ifelse(df.lda.bin$loading > lda.threshold, 1, 0)
-df.lda.bin <- df.lda.bin %>% 
-  select(-loading) %>% 
-  spread(key=topic, value=include)
+# from topic_modeling_functions.r
+df.lda.bin <- apply_threshold(df.lda, lda.threshold)
 
 write.table(df.lda.bin, file=paste0("contexts_LDA_bin_winutts", wn, ".txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")
 ```
@@ -433,12 +429,8 @@ threshold_plots(df.stm,
 ```{r stm_apply_threshold}
 # apply threshold
 stm.threshold <- .2 # set threshold for inclusion in a context
-df.stm.bin <- df.stm %>% 
-  gather(key="topic", value="loading", starts_with("topic_"))
-df.stm.bin$include <- ifelse(df.stm.bin$loading > stm.threshold, 1, 0)
-df.stm.bin <- df.stm.bin %>% 
-  select(-loading) %>% 
-  spread(key=topic, value=include)
+# from topic_modeling_functions.r
+df.stm.bin <- apply_threshold(df.stm, stm.threshold)
 
 write.table(df.stm.bin, file=paste0("contexts_STM_bin_winutts", wn, ".txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")
 ```
