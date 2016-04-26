@@ -437,46 +437,26 @@ write.table(df.stm.bin, file=paste0("contexts_STM_bin_winutts", wn, ".txt"), quo
 ```
 
 ## agreement
-```{r xtabs}
+```{r agreement_data_wrangling}
 WL <- read.table("contexts_WL.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") %>% 
   mutate_each(funs(y=ifelse(.>0, 1, 0)), mealtime:routines) # for word list analysis only, make all contexts either 1 or 0 (smoothing over 1.5's from expand_windows)
 # remove underscores from WL orth column
 WL$orth <- gsub(x=WL$orth, pattern="_", replacement=" ")
-WL.long <- gather(WL, key="WL", value="include", -utt, -orth, -phon) 
-
 STM.con <- read.table(paste0("contexts_STM_winutts", wn, ".txt"), header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
-STM.con.long <- gather(STM.con, key="STM.con", value="include", -utt, -orth, -phon)
-
 STM.bin <- read.table(paste0("contexts_STM_bin_winutts", wn, ".txt"), header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
-STM.bin.long <- gather(STM.bin, key="STM.bin", value="include", -utt, -orth, -phon)
-
 HJ.con <- read.table("contexts_HJ_prop.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
-HJ.con.long <- gather(HJ.con, key="HJ.con", value="include", -utt, -orth, -phon)
-
 HJ.bin <- read.table("contexts_HJ_bin.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
-HJ.bin.long <-  gather(HJ.bin, key="HJ.bin", value="include", -utt, -orth, -phon)
-
-
-## xtabs
-WL.long <- filter(WL.long, include==1) %>% 
-  select(-include)
-
-STM.bin.long <- filter(STM.bin.long, include==1) %>% 
-  select(-include)
-
-freqs <- full_join(WL.long, STM.bin.long, by="utt")
-length(unique(WL$utt)); length(unique(STM.bin$utt)); length(unique(freqs$utt)) # how many utterances included
-
-freqs <- freqs %>% 
-  count(WL, STM.bin)
-
-x_WL_STM.bin <- xtabs(n ~ WL + STM.bin, data=freqs)
-summary(x_WL_STM.bin) # chi-squared test of independence
-kable(x_WL_STM.bin)
-
-library(vcd)
-assocstats(x_WL_STM.bin) # cramers v
 ```
+
+```{r xtabs}
+cat_agreement(cat.codes=list(WL=WL, 
+                             STM.bin=STM.bin))
+cat_agreement(cat.codes=list(WL=WL, 
+                             HJ.bin=HJ.bin))
+cat_agreement(cat.codes=list(HJ.bin=HJ.bin, 
+                             STM.bin=STM.bin))
+```
+
 
 ```{r logistic_regression}
 nrow(WL); nrow(STM.con); nrow(STM.bin); nrow(HJ.con); nrow(HJ.bin)
