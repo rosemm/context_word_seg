@@ -5,7 +5,8 @@
 # Copy-paste the following code to the console, and hit enter:
 if(!require(devtools)) install.packages("devtools")
 library(devtools)
-source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/coding_scripts.R")
+source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/R/coding_functions.R")
+# After running the above line, you should see a little message that says something like "SHA-1 hash of file is 25456e04b9ad899ae911235c8fc51a60d4d94115"
 
 # Step 2: Begin coding!
 # Copy-paste the following code to the console, and hit enter:
