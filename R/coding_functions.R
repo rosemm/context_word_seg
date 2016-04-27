@@ -165,7 +165,7 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
   # which files still have NAs for contexts?
   still_to_code <- dplyr::filter(coding_doc, pass==this_pass & is.na(context))
   while(nrow(still_to_code)==0) {
-    this_pass=this_pass+1
+    this_pass <- this_pass + 1
     still_to_code <- dplyr::filter(coding_doc, pass==this_pass & is.na(context))
   }
 
@@ -213,7 +213,6 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
       # select a starting utterance at random from the starting values
       start.num <- sample(1:length(start_vals), 1) 
       start <- start_vals[start.num]
-      message(start)
       
       # if that section has already been fully coded, select new starting values until you get some stuff that hasn't been coded yet
       wait <- Sys.time() # only keep looping for a max of 5 seconds, then just go with whatever's there
@@ -290,12 +289,12 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
         coding_doc[coding_doc$UttNum==this_doc$UttNum[i] & 
                      coding_doc$file==this_doc$file[i] & 
                      coding_doc$pass==this_doc$pass[i],]$coder <- this_doc[i,]$coder
-        coding_doc[coding_doc$UttNum==this_doc[i,]$UttNum & 
-                     coding_doc$file==this_doc[i,]$file & 
-                     coding_doc$pass==this_doc[i,]$pass,]$date <- this_doc[i,]$date
-        coding_doc[coding_doc$UttNum==this_doc[i,]$UttNum & 
-                     coding_doc$file==this_doc[i,]$file & 
-                     coding_doc$pass==this_doc[i,]$pass,]$context <- this_doc[i,]$context
+        coding_doc[coding_doc$UttNum==this_doc$UttNum[i] & 
+                     coding_doc$file==this_doc$file[i] & 
+                     coding_doc$pass==this_doc$pass[i],]$date <- this_doc[i,]$date
+        coding_doc[coding_doc$UttNum==this_doc$UttNum[i] & 
+                     coding_doc$file==this_doc$file[i] & 
+                     coding_doc$pass==this_doc$pass[i],]$context <- this_doc[i,]$context
       }
       if (length(still_to_code_this_doc_passes)==0) {
         this_doc$pass[i] <- max_pass + 1 # if this utterance has already been fully coded, add a new pass for it
@@ -305,14 +304,12 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
     }
     
     
-    
     Ncoded <- Ncoded + 1 # bump up the coding counter
     if(Ncoded %% 10 == 0) { # the number of coded sections is divisible by 10
       message(paste("\nAwesome! You've coded ", Ncoded, " windows! I'll just save your progress real quick."))
       # write updated coding_doc to file
       write.table(coding_doc, file="coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
     }
-    
     
     # check whether to keep coding or quit
     code_another <- readline("\nCode another one? (Y/N) ")
@@ -321,7 +318,7 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
       message("\nOkay, sounds good. I'll save your work.\n")
     } else { 
       message(paste("\n", sample(encouragements,1), "\n")) 
-      Sys.sleep(.75) # pause before loading the next transcript (this just makes it feel nicer)
+      Sys.sleep(1) # pause before loading the next transcript (this just makes it feel nicer)
     }
     
   }
