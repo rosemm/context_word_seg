@@ -284,7 +284,7 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
       this_doc$LineNum[i] <- median(dplyr::filter(coding_doc, file==this_doc$file[i] & UttNum==this_doc$UttNum[i])$LineNum)
       
       # is this an utterance in the coding doc?
-      if(filter(coding_doc, UttNum==this_doc$UttNum[i] & file==this_doc$file[i])){
+      if(dplyr::filter(coding_doc, UttNum==this_doc$UttNum[i] & file==this_doc$file[i])){
         if (length(still_to_code_this_doc_passes) > 0) {
           this_doc$pass[i] <- min(still_to_code_this_doc_passes) # set pass to the lowest pass value that shows up in still_to_code_this_doc for this utterance
           # update coding_doc
