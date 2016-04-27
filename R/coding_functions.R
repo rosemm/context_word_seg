@@ -203,9 +203,9 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
     message("Selecting utterances...")
     
     # if there are more than 30 utterances left to code still in this document, pick a window
-    if(nrow(dplyr::filter(still_to_code, file==this.file & pass==this.pass)) > 30){
+    if(nrow(dplyr::filter(still_to_code, file==this.file & pass==this_pass)) > 30){
       # the total number of utterances in this transcript
-      all.utts <- dplyr::filter(coding_doc, file==this.file & pass==this.pass)$UttNum       
+      all.utts <- dplyr::filter(coding_doc, file==this.file & pass==this_pass)$UttNum       
       Nutts <- max(all.utts)
       # the vector of starting values for coding windows
       start_vals <- seq(from=start_at, to=Nutts, by=window_size) 
@@ -225,7 +225,7 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
         start <- start_vals[start.num]
       }
     } else {
-      start <- dplyr::filter(still_to_code, file==this.file, pass==this.pass)$UttNum[1] # if there are fewer than 30 utterances left, just start at the beginning
+      start <- dplyr::filter(still_to_code, file==this.file, pass==this_pass)$UttNum[1] # if there are fewer than 30 utterances left, just start at the beginning
     }
     
     this.transcript <- transcripts[[this.file]]
