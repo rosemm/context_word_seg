@@ -127,10 +127,86 @@ write.table(df, file="contexts_WL.txt", quote=F, col.names=T, row.names=F, appen
 ```
 
 ## tag contexts by human coder judgments
-```{r}
-# run code in context_coding_cleaning.r to retrieve and clean codes
-df <- read.table("contexts_HJ_prop.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this overwrites the word list context df above
+```{r HJ_data_wrangling}
+source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/R/coding_functions.R")
+# set working directory to transcript coding folder on server
+# setwd("/Volumes/cas-fs2/baldwinlab/Maier/Transcript Coding")
+doc_doctor()
+
+master_doc <- collect_codes()
+
+setwd("/Users/TARDIS/Documents/STUDIES/context_word_seg")
+write.table(master_doc, file="master_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+# master_doc <- read.table("master_doc.txt", header=1, sep="\t", stringsAsFactors=F)
+
+# # to update coding doc leaving only utterances that are below criterion on number of codes, to fill in the thin places
+# update_doc <- UpdateDoc(master_doc, criterion = 10)
+# write.table(update_doc, file="coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+
+master_doc_clean <- master_doc %>% 
+  process_codes(min.codes=10, max.codes=10) %>% 
+  clean_contexts(key_file="context_cleaning_keys.txt") %>% 
+  clean_categories(key_file="categories_cleaning_keys.txt")
+
+master_doc_count <- master_doc_clean %>%
+  select(utt, category) %>%
+  count(utt, category ) %>%
+  spread(key=category, value=n, fill = 0) %>%
+  separate(col=utt, into=c("file", "UttNum"), sep="_" , remove=F) %>%
+  arrange(file, as.numeric(UttNum) ) 
+master_doc_prop <- master_doc_count %>% 
+  ungroup() %>%
+  dplyr::select(-utt, -file, -UttNum) %>%
+  mutate(total=rowSums(., na.rm=FALSE)) %>% 
+  mutate_each(funs(./total)) 
+master_doc_prop$utt <- master_doc_count$utt  # to add back in the non-numeric columns
+master_doc_prop$total <- NULL  # delete column
+  
+df.hj.con <- left_join(df[,1:3], master_doc_prop, by="utt" ) 
+
+##########################################
+# number of utterances per context
+##########################################
+counts <- sort(colSums(master_doc_count[,4:ncol(master_doc_count)]),decreasing = TRUE)
+plot.data <- data.frame(n.utts=counts, 
+                        context=factor(names(counts), levels=names(counts)))
+plot.data$over.med <- ifelse(plot.data$n.utts > median(counts), "yes", "no")
+ggplot(plot.data, aes(x=context, y=n.utts, fill=over.med)) +
+  geom_bar(stat = "identity", show.legend = F) +
+  labs(x=NULL, y="Number of utterances tagged") +
+  theme(axis.text.x = element_text(angle=330, vjust=1, hjust=0)) 
+ggsave("plots/HJ/uttspercontext.png", width=12, height=5, units="in")
+ggplot(plot.data, aes(x=context, y=n.utts, fill=over.med)) +
+  geom_bar(stat = "identity", show.legend = F) +
+  labs(x=NULL, y="log(Number of utterances tagged)") +
+  scale_y_log10() +
+  theme(axis.text.x = element_text(angle=330, vjust=1, hjust=0)) 
+ggsave("plots/HJ/uttspercontext_logtrans.png", width=12, height=5, units="in")
+
+
+write.table(df.hj.con, file="contexts_HJ_con.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+# df.hj.con <- read.table("contexts_HJ_con.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
 ```
+
+```{r HJ_threshold}
+thresholds <- seq(0,.75,.05) # what thresholds to try
+
+# any additional values to be saved in the plot name can be included as extra arguments
+threshold_plots(df.hj.con, 
+                thresholds=thresholds, 
+                method="HJ",
+                save.to="plots/HJ") 
+```
+
+```{r HJ_apply_threshold}
+# apply threshold
+hj.threshold <- .25 # set threshold for inclusion in a context
+
+df.hj.bin <- apply_threshold(df.hj.con, hj.threshold)
+
+write.table(df.hj.bin, file=paste0("contexts_HJ_bin.txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")
+```
+
 
 ## tag contexts by topic modeling
 ![](stm_comparison.png)
@@ -264,13 +340,13 @@ df.lda <- doc_loadings(method="lda",
 
 write.table(df.lda, file=paste0("contexts_LDA_winutts", wn, ".txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
-hist(unlist(lda.loadings[,5:16]), breaks=50)
+hist(unlist(df.lda[,4:ncol(df.lda)]), breaks=50)
 ```
 
 ```{r lda_threshold}
 thresholds <- seq(0,.75,.05) # what thresholds to try
 
-# from topic_modeling_functions.r
+
 # any additional values to be saved in the plot name can be included as extra arguments
 threshold_plots(df.lda, 
                 thresholds=thresholds, 
@@ -284,7 +360,7 @@ threshold_plots(df.lda,
 ```{r lda_apply_threshold}
 # apply threshold
 lda.threshold <- .3 # set threshold for inclusion in a context
-# from topic_modeling_functions.r
+
 df.lda.bin <- apply_threshold(df.lda, lda.threshold)
 
 write.table(df.lda.bin, file=paste0("contexts_LDA_bin_winutts", wn, ".txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")
@@ -416,7 +492,7 @@ hist(unlist(stm.loadings[,5:16]), breaks=50)
 
 
 ```{r stm_threshold}
-# from topic_modeling_functions.r
+
 # any additional values to be saved in the plot name can be included as extra arguments
 threshold_plots(df.stm, 
                    thresholds=thresholds, # what thresholds to try
@@ -430,7 +506,7 @@ threshold_plots(df.stm,
 ```{r stm_apply_threshold}
 # apply threshold
 stm.threshold <- .2 # set threshold for inclusion in a context
-# from topic_modeling_functions.r
+
 df.stm.bin <- apply_threshold(df.stm, stm.threshold)
 
 write.table(df.stm.bin, file=paste0("contexts_STM_bin_winutts", wn, ".txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")
