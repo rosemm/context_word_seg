@@ -518,39 +518,33 @@ clean_contexts <- function(doc, key_file="context_cleaning_keys.txt" ){
   doc$context <- as.factor(doc$context)
   summary(doc$context)
   
-  doc <- filter(doc, context !="TEST") # cleaning
+  doc <- dplyr::filter(doc, context !="TEST") # cleaning
   
   return(doc)
 }
 
 clean_categories <- function(doc, key_file="categories_cleaning_keys.txt" ){
-  
-  categories_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
-  
-  # check for codes in doc that aren't in the categories_keys yet
-  codes <- unique(doc$context)
-  nomatch <- codes[-match(categories_keys$context_clean, codes)]
   # check if any context codes are missing from the categories key, and if so add them
-  new_codes(raw_codes=codes, cols=c("context_clean", "category"), key_file)
+  new_codes(raw_codes=unique(doc$context), cols=c("context_clean", "category"), key_file)
   # read in the key again, to get any updates
   categories_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
   
-  # add categories to master doc
+  # add categories to doc
   doc <- left_join(doc, categories_keys, by=c("context" = "context_clean"))
 
-  if(length(unique((doc$category))) != length(unique((categories_keys$category)))) stop("Error in number of categories.")
+  stopifnot( length(unique(doc$category)) == length(unique(categories_keys$category)) )
   
   summary(as.factor(doc$category)) 
   
   # check to make sure that one coder isn't contributing 2 hits on the same category for the same utterance
-  # e.g. if a coder tagged an utterance as "burping ; mealtime" then it would result in "mealtime" and "mealtime" as the categories
+  # e.g. if a coder tagged an utterance as "eating ; mealtime" then it would result in "mealtime" and "mealtime" as the categories
   cat.check <- doc %>%
-    group_by(utt, coder, date, category) %>%
-    summarize(hits=n() ) 
-  table(cat.check$hits) # see how many times a single utterance is coded by the same coder multiple times with the same category
+    count(utt, coder, date, category) 
+  table(cat.check$n) # see how many times a single utterance is coded by the same coder multiple times with the same category
   
   # only keep one of the same category code per coder per day (i.e. if there's more than one hit from the same coder on the same day for the same category, collapse it)
-  doc <-  select(cat.check, utt, coder, date, category) # drop the extra columns
+  clean_doc <- cat.check %>% 
+    select( utt, coder, date, category ) # drop the extra columns
   
-  return(doc)
+  return(clean_doc)
 }
