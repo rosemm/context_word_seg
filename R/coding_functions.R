@@ -106,6 +106,45 @@ BlankDoc <- function(wd="./transcripts/", for.coding=TRUE){
 }
 # write.table(coding_doc, file="coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
+UpdateDoc <- function(master_doc, criterion){
+  # update an existing, partially coded document, to focus coders on the thin parts
+  
+  stopifnot(require(dplyr), require(tidyr))
+  
+  below.crit <- master_doc %>%
+    unite(utt, file, UttNum) %>% 
+    count(utt) %>% 
+    filter(n < criterion) # only keep utterances that have not been coded at least criterion times
+ 
+  message(paste0(nrow(below.crit), " utterances still have fewer than ", criterion, " codes (", 100*round(nrow(below.crit)/nrow(master_doc), 2),"% of total). \nWriting a new coding_doc with just those utterances..."))
+  
+  # the line numbers, utterance number, and file name for everything in master_doc
+  nums <- select(master_doc, LineNum, UttNum, file) %>% 
+    na.omit() %>% 
+    unique() %>% 
+    unite(utt, file, UttNum, remove=FALSE) %>% 
+    as.tbl()
+  
+  # make a new coding doc with just the utterances below criterion number of codes
+  update_doc <- below.crit %>% 
+    left_join(nums, by="utt") %>% 
+    select(LineNum, UttNum, file) 
+  
+  update_doc$coder <- NA
+  update_doc$date <- NA
+  update_doc$context <- NA
+  # each utterance should be coded multiple times if there is overlap between windows. 
+  # duplicate the coding rows for each time an utterance should be coded
+  update_doc1 <- update_doc
+  update_doc1$pass <- 1
+  update_doc2 <- update_doc
+  update_doc2$pass <- 2
+  update_doc3 <- update_doc
+  update_doc3$pass <- 3
+  
+  update_doc <- rbind(update_doc1, update_doc2, update_doc3)
+}
+
 CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
   # check whether packages need to be installed
   list.of.packages <- c("dplyr", "car")
