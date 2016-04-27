@@ -106,17 +106,17 @@ BlankDoc <- function(wd="./transcripts/", for.coding=TRUE){
 }
 # write.table(blank_doc, file="blank_coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
-UpdateDoc <- function(master_doc, criterion){
+UpdateDoc <- function(doc, criterion){
   # update an existing, partially coded document, to focus coders on the thin parts
   
   stopifnot(require(dplyr), require(tidyr))
   
-  below.crit <- master_doc %>%
+  below.crit <- doc %>%
     unite(utt, file, UttNum) %>% 
     count(utt) %>% 
     filter(n < criterion) # only keep utterances that have not been coded at least criterion times
  
-  # the line numbers, utterance number, and file name for everything in master_doc
+  # the line numbers, utterance number, and file name for everything in doc
   nums <- BlankDoc() %>% 
     select(LineNum, UttNum, file) %>% 
     unite(utt, file, UttNum, remove=FALSE) %>% 
@@ -130,7 +130,7 @@ UpdateDoc <- function(master_doc, criterion){
     na.omit() %>% 
     arrange(file, LineNum) 
 
-message(paste0(nrow(update_doc), " utterances still have fewer than ", criterion, " codes (", 100*round(nrow(below.crit)/nrow(master_doc), 2),"% of total). \nWriting a new coding_doc with just those utterances..."))
+message(paste0(nrow(update_doc), " utterances still have fewer than ", criterion, " codes (", 100*round(nrow(below.crit)/nrow(doc), 2),"% of total). \nWriting a new coding_doc with just those utterances..."))
   
   update_doc$coder <- NA
   update_doc$date <- NA
@@ -393,17 +393,17 @@ collect_codes <- function(){
     doc <- read.table(docs[i], header=1, sep="\t", stringsAsFactors=F)
     coded <- dplyr::filter(doc, !is.na(context))
     if( nrow(dplyr::filter(coded, coder=="RM" | coder=="TEST" | coder=="" & !is.na(date))) != 0 ) stop("Run doc_doctor first. There are bad cases here.")
-    if(i==1) master_doc <- coded else master_doc <- rbind(master_doc, coded)
+    if(i==1) doc <- coded else doc <- rbind(doc, coded)
   }
   # clean up some bad punctuation
-  master_doc$context <- gsub(pattern=",", x=master_doc$context, replacement=";", fixed=T)
-  master_doc$context <- gsub(pattern="/", x=master_doc$context, replacement=";", fixed=T)
-  master_doc$context <- tolower(master_doc$context)
+  doc$context <- gsub(pattern=",", x=doc$context, replacement=";", fixed=T)
+  doc$context <- gsub(pattern="/", x=doc$context, replacement=";", fixed=T)
+  doc$context <- tolower(doc$context)
   
-  message(" Removing ", nrow(master_doc) - nrow(unique(master_doc)), " duplicate rows.")
-  master_doc <- unique(master_doc) # there are duplicate rows because of copying the coding docs when I was originally starting the RAs on coding
+  message(" Removing ", nrow(doc) - nrow(unique(doc)), " duplicate rows.")
+  doc <- unique(doc) # there are duplicate rows because of copying the coding docs when I was originally starting the RAs on coding
   
-  return(master_doc)
+  return(doc)
 }
 
 new_codes <- function( raw_codes, cols=c("raw", "clean"), key_file ){
@@ -449,7 +449,7 @@ new_codes <- function( raw_codes, cols=c("raw", "clean"), key_file ){
           } 
 }
 
-process_codes <- function(master_doc, min.codes=10, max.codes=10, key_file="context_cleaning_keys.txt" ){
+process_codes <- function(doc, min.codes=10, max.codes=10){
   if(!require(tidyr)) install.packages("tidyr"); library(tidyr)
   if(!require(dplyr)) install.packages("dplyr"); library(dplyr)
   if(!require(psych)) install.packages("psych"); library(psych)
@@ -457,14 +457,14 @@ process_codes <- function(master_doc, min.codes=10, max.codes=10, key_file="cont
   
   cleaning_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
   
-  master_doc <- master_doc %>% 
-    dplyr::filter( !grepl("^[[:blank:]]*$",master_doc$context)) %>% # cleaning out empty codes
+  doc <- doc %>% 
+    dplyr::filter( !grepl("^[[:blank:]]*$",doc$context)) %>% # cleaning out empty codes
     tidyr::unite(utt, file, UttNum) %>% 
     as.tbl() # for speed
   
-  master_doc$coder <- toupper(master_doc$coder)
+  doc$coder <- toupper(doc$coder)
   
-  RA_info <- master_doc %>%
+  RA_info <- doc %>%
     dplyr::select(utt, coder, context, pass) %>%
     group_by(coder) %>%
     dplyr::summarize(n_utts_codes=n())
@@ -472,60 +472,63 @@ process_codes <- function(master_doc, min.codes=10, max.codes=10, key_file="cont
   message("\nRAs have coded this many utterances:\n") ; print(as.data.frame(RA_info))
   
   # only keep utterances that have been coded at least [min.codes] times and no more than [max.codes] times
-  in.range <- master_doc %>%
+  in.range <- doc %>%
     count(utt) %>%
     dplyr::filter(n >= min.codes & n <= max.codes) %>% 
     select(utt) %>% # drop the n column
-    left_join(master_doc, by="utt")
+    left_join(doc, by="utt")
   
   # for utterances with more than [max.codes], randomly select [max.codes] of them
-  above.max.sample <- master_doc %>% 
+  above.max.sample <- doc %>% 
     count(utt) %>%
     dplyr::filter(n > max.codes) %>% # only keep utterances with more than [max.codes]
     select(utt) %>% # drop the n column
-    left_join(master_doc, by="utt") %>% # re-expand it back to master_doc, but only for the selected utts
+    left_join(doc, by="utt") %>% # re-expand it back to doc, but only for the selected utts
     group_by(utt) %>% 
     sample_n(max.codes) # group_by() and then sample_n() takes random samples from each group
   
-  master_doc_keep <- rbind(in.range, above.max.sample)  
+  doc_keep <- rbind(in.range, above.max.sample)  
   
-  message("Removing ", length(unique(master_doc$utt)) - length(unique(master_doc_keep$utt)) , " utterances because they have been coded fewer than ", min.codes, " times across all coders.\n")    
-  message( 100*round( length(unique(master_doc_keep$utt))/length(unique(master_doc$utt)), 4), "% of total utterances are included in analyses.\n" )
+  message("Removing ", length(unique(doc$utt)) - length(unique(doc_keep$utt)) , " utterances because they have been coded fewer than ", min.codes, " times across all coders.\n")    
+  message( 100*round( length(unique(doc_keep$utt))/length(unique(doc$utt)), 4), "% of total utterances are included in analyses.\n" )
   
-  master_doc_keep$context <- as.factor(master_doc_keep$context)
+  doc_keep$context <- as.factor(doc_keep$context)
   
   maxcontexts <- 10 # the maximum number of contexts that can be read for one window
   
-  master_doc_keep <- master_doc_keep %>% 
+  doc_keep <- doc_keep %>% 
     tidyr::separate(col=context, into=paste("context", 1:maxcontexts, sep="."), sep="[[:blank:]]*;[[:blank:]]*", extra="drop") %>% 
     tidyr::gather(key="contextnum", value="context", starts_with("context."), na.rm=TRUE)
-  
+return(doc_keep)
+}
+
+clean_contexts <- function(doc, key_file="context_cleaning_keys.txt" ){
   # check if any codes in the coding doc are missing from the cleaning key, and if so add them
-  raw_codes <- sort(unique(master_doc_keep$context))
+  raw_codes <- sort(unique(doc$context))
   new_codes(raw_codes, cols=c("context_raw", "context_clean"), key_file)
   # read in the key again, to get any updates
   cleaning_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
   
   for(i in 1:nrow(cleaning_keys)){
-    rows <- grep(pattern=paste("^", cleaning_keys[i,1], "$", sep=""), x=master_doc_keep$context, value=F)
-    master_doc_keep[rows,] # just for checking
-    master_doc_keep$context <- gsub(pattern=paste("^", cleaning_keys[i,1], "$", sep=""), x=master_doc_keep$context, replacement=cleaning_keys[i,2])
-    master_doc_keep[rows,] # just for checking
+    rows <- grep(pattern=paste("^", cleaning_keys[i,1], "$", sep=""), x=doc$context, value=F)
+    doc[rows,] # just for checking
+    doc$context <- gsub(pattern=paste("^", cleaning_keys[i,1], "$", sep=""), x=doc$context, replacement=cleaning_keys[i,2])
+    doc[rows,] # just for checking
   }
-  master_doc_keep$context <- as.factor(master_doc_keep$context)
-  summary(master_doc_keep$context)
+  doc$context <- as.factor(doc$context)
+  summary(doc$context)
   
-  master_doc_keep <- filter(master_doc_keep, context !="TEST") # cleaning
+  doc <- filter(doc, context !="TEST") # cleaning
   
-  return(master_doc_keep)
+  return(doc)
 }
 
-process_categories <- function(master_doc_keep, key_file="categories_cleaning_keys.txt" ){
+clean_categories <- function(doc, key_file="categories_cleaning_keys.txt" ){
   
   categories_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
   
-  # check for codes in master_doc_keep that aren't in the categories_keys yet
-  codes <- unique(master_doc_keep$context)
+  # check for codes in doc that aren't in the categories_keys yet
+  codes <- unique(doc$context)
   nomatch <- codes[-match(categories_keys$context_clean, codes)]
   # check if any context codes are missing from the categories key, and if so add them
   new_codes(raw_codes=codes, cols=c("context_clean", "category"), key_file)
@@ -533,21 +536,21 @@ process_categories <- function(master_doc_keep, key_file="categories_cleaning_ke
   categories_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
   
   # add categories to master doc
-  master_doc_keep <- left_join(master_doc_keep, categories_keys, by=c("context" = "context_clean"))
+  doc <- left_join(doc, categories_keys, by=c("context" = "context_clean"))
 
-  if(length(unique((master_doc_keep$category))) != length(unique((categories_keys$category)))) stop("Error in number of categories.")
+  if(length(unique((doc$category))) != length(unique((categories_keys$category)))) stop("Error in number of categories.")
   
-  summary(as.factor(master_doc_keep$category)) 
+  summary(as.factor(doc$category)) 
   
   # check to make sure that one coder isn't contributing 2 hits on the same category for the same utterance
   # e.g. if a coder tagged an utterance as "burping ; mealtime" then it would result in "mealtime" and "mealtime" as the categories
-  cat.check <- master_doc_keep %>%
+  cat.check <- doc %>%
     group_by(utt, coder, date, category) %>%
     summarize(hits=n() ) 
   table(cat.check$hits) # see how many times a single utterance is coded by the same coder multiple times with the same category
   
   # only keep one of the same category code per coder per day (i.e. if there's more than one hit from the same coder on the same day for the same category, collapse it)
-  master_doc_keep <-  select(cat.check, utt, coder, date, category) # drop the extra columns
+  doc <-  select(cat.check, utt, coder, date, category) # drop the extra columns
   
-  return(master_doc_keep)
+  return(doc)
 }
