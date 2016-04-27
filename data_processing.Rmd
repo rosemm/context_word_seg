@@ -173,19 +173,21 @@ plot.data <- data.frame(n.utts=counts,
 plot.data$over.med <- ifelse(plot.data$n.utts > median(counts), "yes", "no")
 ggplot(plot.data, aes(x=context, y=n.utts, fill=over.med)) +
   geom_bar(stat = "identity", show.legend = F) +
+  scale_fill_manual(values = c("yes" = "darkgreen","no" = "grey")) +
   labs(x=NULL, y="Number of utterances tagged") +
   theme(axis.text.x = element_text(angle=330, vjust=1, hjust=0)) 
 ggsave("plots/HJ/uttspercontext.png", width=12, height=5, units="in")
 ggplot(plot.data, aes(x=context, y=n.utts, fill=over.med)) +
   geom_bar(stat = "identity", show.legend = F) +
+  scale_fill_manual(values = c("yes" = "darkgreen","no" = "grey")) +
   labs(x=NULL, y="log(Number of utterances tagged)") +
   scale_y_log10() +
   theme(axis.text.x = element_text(angle=330, vjust=1, hjust=0)) 
 ggsave("plots/HJ/uttspercontext_logtrans.png", width=12, height=5, units="in")
 
 
-write.table(df.hj.con, file="contexts_HJ_con.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
-# df.hj.con <- read.table("contexts_HJ_con.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
+write.table(df.hj.con, file="contexts_HJ.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+# df.hj.con <- read.table("contexts_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
 ```
 
 ```{r HJ_threshold}
@@ -520,7 +522,7 @@ WL <- read.table("contexts_WL.txt", header=1, sep="\t", stringsAsFactors=F, quot
 WL$orth <- gsub(x=WL$orth, pattern="_", replacement=" ")
 STM.con <- read.table(paste0("contexts_STM_winutts", wn, ".txt"), header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
 STM.bin <- read.table(paste0("contexts_STM_bin_winutts", wn, ".txt"), header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
-HJ.con <- read.table("contexts_HJ_prop.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
+HJ.con <- read.table("contexts_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
 HJ.bin <- read.table("contexts_HJ_bin.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
 ```
 
