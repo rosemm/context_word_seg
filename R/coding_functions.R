@@ -116,8 +116,6 @@ UpdateDoc <- function(master_doc, criterion){
     count(utt) %>% 
     filter(n < criterion) # only keep utterances that have not been coded at least criterion times
  
-  message(paste0(nrow(below.crit), " utterances still have fewer than ", criterion, " codes (", 100*round(nrow(below.crit)/nrow(master_doc), 2),"% of total). \nWriting a new coding_doc with just those utterances..."))
-  
   # the line numbers, utterance number, and file name for everything in master_doc
   nums <- BlankDoc() %>% 
     select(LineNum, UttNum, file) %>% 
@@ -131,6 +129,8 @@ UpdateDoc <- function(master_doc, criterion){
     select(LineNum, UttNum, file) %>% 
     na.omit() %>% 
     arrange(file, LineNum) 
+
+message(paste0(nrow(update_doc), " utterances still have fewer than ", criterion, " codes (", 100*round(nrow(below.crit)/nrow(master_doc), 2),"% of total). \nWriting a new coding_doc with just those utterances..."))
   
   update_doc$coder <- NA
   update_doc$date <- NA
