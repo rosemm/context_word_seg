@@ -449,7 +449,7 @@ new_codes <- function( raw_codes, cols=c("raw", "clean"), key_file ){
           } 
 }
 
-process_codes <- function(master_doc, criterion=3, key_file="context_cleaning_keys.txt" ){
+process_codes <- function(master_doc, min.codes=10, max.codes=10, key_file="context_cleaning_keys.txt" ){
   if(!require(tidyr)) install.packages("tidyr"); library(tidyr)
   if(!require(dplyr)) install.packages("dplyr"); library(dplyr)
   if(!require(psych)) install.packages("psych"); library(psych)
@@ -457,36 +457,48 @@ process_codes <- function(master_doc, criterion=3, key_file="context_cleaning_ke
   
   cleaning_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
   
-  master_doc <- filter(master_doc,  !grepl("^[[:blank:]]*$",master_doc$context)) # cleaning out empty codes
+  master_doc <- master_doc %>% 
+    dplyr::filter( !grepl("^[[:blank:]]*$",master_doc$context)) %>% # cleaning out empty codes
+    tidyr::unite(utt, file, UttNum) %>% 
+    as.tbl() # for speed
+  
+  master_doc$coder <- toupper(master_doc$coder)
   
   RA_info <- master_doc %>%
-    tidyr::unite( utt, file, UttNum) %>%
     dplyr::select(utt, coder, context, pass) %>%
     group_by(coder) %>%
     dplyr::summarize(n_utts_codes=n())
   
   message("\nRAs have coded this many utterances:\n") ; print(as.data.frame(RA_info))
   
-  # only keep utterances that have been coded at least [criterion] times
-  keep <- master_doc %>%
-    tidyr::unite( utt, file, UttNum) %>%
-    dplyr::select(utt, coder, context, pass) %>%
-    group_by(utt) %>%
-    dplyr::summarize(n=n()) %>%
-    dplyr::filter(n > (criterion-1)) %>%
-    dplyr::select(utt)
+  # only keep utterances that have been coded at least [min.codes] times and no more than [max.codes] times
+  in.range <- master_doc %>%
+    count(utt) %>%
+    dplyr::filter(n >= min.codes & n <= max.codes) %>% 
+    select(utt) %>% # drop the n column
+    left_join(master_doc, by="utt")
   
-  master_doc_keep <- merge(tidyr::unite(master_doc, utt, file, UttNum), keep, by="utt", all.x=FALSE, all.y=TRUE )
+  # for utterances with more than [max.codes], randomly select [max.codes] of them
+  above.max.sample <- master_doc %>% 
+    count(utt) %>%
+    dplyr::filter(n > max.codes) %>% # only keep utterances with more than [max.codes]
+    select(utt) %>% # drop the n column
+    left_join(master_doc, by="utt") %>% # re-expand it back to master_doc, but only for the selected utts
+    group_by(utt) %>% 
+    sample_n(max.codes) # group_by() and then sample_n() takes random samples from each group
   
-  message("Removing ", nrow(master_doc)-nrow(master_doc_keep) , " utterances because they have been coded fewer than ", criterion, " times across all coders.\n")    
-  message( 100*round( nrow(keep)/13350, 4), "% of total utterances are included in analyses.\n" )
+  master_doc_keep <- rbind(in.range, above.max.sample)  
+  
+  message("Removing ", length(unique(master_doc$utt)) - length(unique(master_doc_keep$utt)) , " utterances because they have been coded fewer than ", min.codes, " times across all coders.\n")    
+  message( 100*round( length(unique(master_doc_keep$utt))/length(unique(master_doc$utt)), 4), "% of total utterances are included in analyses.\n" )
   
   master_doc_keep$context <- as.factor(master_doc_keep$context)
   
-  maxcontexts <- 10 # the maximum number of contexts that can be read for one window (30 utterances)
+  maxcontexts <- 10 # the maximum number of contexts that can be read for one window
   
-  master_doc_keep <- tidyr::separate(master_doc_keep, col=context, into=paste("context", 1:maxcontexts, sep="."), sep="[[:blank:]]*;[[:blank:]]*", extra="drop")
-  master_doc_keep <- tidyr::gather(master_doc_keep, key="contextnum", value="context", which(colnames(master_doc_keep)==paste("context",1, sep=".")):which(colnames(master_doc_keep)==paste("context",maxcontexts, sep=".")), na.rm=T)
+  master_doc_keep <- master_doc_keep %>% 
+    tidyr::separate(col=context, into=paste("context", 1:maxcontexts, sep="."), sep="[[:blank:]]*;[[:blank:]]*", extra="drop") %>% 
+    tidyr::gather(key="contextnum", value="context", starts_with("context."), na.rm=TRUE)
   
   # check if any codes in the coding doc are missing from the cleaning key, and if so add them
   raw_codes <- sort(unique(master_doc_keep$context))
