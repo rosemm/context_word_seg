@@ -104,7 +104,7 @@ BlankDoc <- function(wd="./transcripts/", for.coding=TRUE){
   
   return(coding_doc)
 }
-# write.table(coding_doc, file="coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+# write.table(blank_doc, file="blank_coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
 UpdateDoc <- function(master_doc, criterion){
   # update an existing, partially coded document, to focus coders on the thin parts
@@ -119,16 +119,18 @@ UpdateDoc <- function(master_doc, criterion){
   message(paste0(nrow(below.crit), " utterances still have fewer than ", criterion, " codes (", 100*round(nrow(below.crit)/nrow(master_doc), 2),"% of total). \nWriting a new coding_doc with just those utterances..."))
   
   # the line numbers, utterance number, and file name for everything in master_doc
-  nums <- select(master_doc, LineNum, UttNum, file) %>% 
-    na.omit() %>% 
-    unique() %>% 
+  nums <- BlankDoc() %>% 
+    select(LineNum, UttNum, file) %>% 
     unite(utt, file, UttNum, remove=FALSE) %>% 
+    unique() %>% 
     as.tbl()
   
   # make a new coding doc with just the utterances below criterion number of codes
   update_doc <- below.crit %>% 
     left_join(nums, by="utt") %>% 
-    select(LineNum, UttNum, file) 
+    select(LineNum, UttNum, file) %>% 
+    na.omit() %>% 
+    arrange(file, LineNum) 
   
   update_doc$coder <- NA
   update_doc$date <- NA
@@ -172,7 +174,7 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
   start_at <- sample(starts, 1) # the utterance to begin counting the windows from (randomly selected)
   if(is.na(start_at)) stop("Error in this_pass value. To allow more passes, use a smaller slide_by value.")
   
-  message("\nHello, and welcome to coding. :)")
+  message("\nHello, and welcome to coding. :)\n")
   
   coder_response <- ""
   while(grepl(pattern="^$", x=coder_response)){
@@ -188,7 +190,7 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
   while(all_done==FALSE){
     # whenever coding is done, stop and save.
     if( nrow(dplyr::filter(coding_doc, is.na(context)))==0 ) {
-      message("Holy moley! The coding is DONE!! Wow, thank you!\n<3")
+      message("\nHoly moley! The coding is DONE!! Wow, thank you!\n<3\n")
       all_done <- TRUE
     }
     
@@ -199,25 +201,37 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
     
     # select utterances 
     message("Selecting utterances...")
-    Nutts <- max(dplyr::filter(coding_doc, file==this.file)$UttNum) # the total number of utterances in this transcript
-    start_vals <- seq(from=start_at, to=Nutts, by=window_size) # the vector of starting values for coding windows
-    start.num <- sample(1:length(start_vals), 1) # select a starting utterance at random from the starting values
-    start <- start_vals[start.num]
     
-    # if that section has already been fully coded, select new starting values until you get some stuff that hasn't been coded yet
-    wait <- Sys.time() # only keep looping for a max of 5 seconds, then just go with whatever's there
-    while( Sys.time() - wait < as.difftime(5, units = "secs") & !anyNA(dplyr::filter(coding_doc, file==this.file & start-1 < UttNum & UttNum < start+window_size & pass==this_pass)$context ) ){
-      # select a new starting utterance from the starting values
-      # loop through the list of starting values until we find one that hasn't been fully codes
-      start.num <- start.num + 1 
-      if(start.num > length(start_vals)) start.num <- 1 # if we're at the end of the list, start over
+    # if there are more than 30 utterances left to code still in this document, pick a window
+    if(nrow(dplyr::filter(still_to_code, file==this.file & pass==this.pass)) > 30){
+      # the total number of utterances in this transcript
+      all.utts <- dplyr::filter(coding_doc, file==this.file & pass==this.pass)$UttNum       
+      Nutts <- max(all.utts)
+      # the vector of starting values for coding windows
+      start_vals <- seq(from=start_at, to=Nutts, by=window_size) 
+      start_vals <- start_vals[start_vals %in% all.utts] # only keep start_vals that are actually available in this file
+      # select a starting utterance at random from the starting values
+      start.num <- sample(1:length(start_vals), 1) 
       start <- start_vals[start.num]
+      message(start)
+      
+      # if that section has already been fully coded, select new starting values until you get some stuff that hasn't been coded yet
+      wait <- Sys.time() # only keep looping for a max of 5 seconds, then just go with whatever's there
+      while( Sys.time() - wait < as.difftime(5, units = "secs") & !anyNA(dplyr::filter(coding_doc, file==this.file & start-1 < UttNum & UttNum < start+window_size & pass==this_pass)$context ) ){
+        # select a new starting utterance from the starting values
+        # loop through the list of starting values until we find one that hasn't been fully coded
+        start.num <- start.num + 1 
+        if(start.num > length(start_vals)) start.num <- 1 # if we're at the end of the list, start over
+        start <- start_vals[start.num]
+      }
+    } else {
+      start <- dplyr::filter(still_to_code, file==this.file, pass==this.pass)$UttNum[1] # if there are fewer than 30 utterances left, just start at the beginning
     }
     
     this.transcript <- transcripts[[this.file]]
     
     # print participants
-    message(paste("The participants in this recording are: " , dplyr::filter(this.transcript, speaker=="@Par")$utterance ))
+    message(paste0("The participants in this recording are: " , dplyr::filter(this.transcript, speaker=="@Par")$utterance ))
     
     # print window
     window <- dplyr::filter(this.transcript, start-1 < UttNum & UttNum < start+window_size)
@@ -245,7 +259,7 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
     
     # save context info
     this_doc <- data.frame(LineNum=NA,
-                           UttNum=start:(start+window_size-1), 
+                           UttNum=window$UttNum, 
                            file=this.file, 
                            coder=coder_response, 
                            date=date, 
@@ -262,6 +276,7 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
     
     # if a particular utterance has been coded previously, then set the pass to the next value that's still uncoded
     for(i in 1:nrow(this_doc)){
+      # for this utterance, which passes still haven't been coded?
       still_to_code_this_doc_passes <- dplyr::filter(still_to_code_this_doc, UttNum==this_doc$UttNum[i])$pass
       
       max_pass <- max(dplyr::filter(coding_doc, file==this_doc$file[i] & UttNum==this_doc$UttNum[i])$pass) # the highest pass value available for this Utterance in the coding doc
@@ -269,12 +284,12 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
       
       this_doc$LineNum[i] <- median(dplyr::filter(coding_doc, file==this_doc$file[i] & UttNum==this_doc$UttNum[i])$LineNum)
       
-      if (length(still_to_code_this_doc_passes)>0) {
+      if (length(still_to_code_this_doc_passes) > 0) {
         this_doc$pass[i] <- min(still_to_code_this_doc_passes) # set pass to the lowest pass value that shows up in still_to_code_this_doc for this utterance
         # update coding_doc
-        coding_doc[coding_doc$UttNum==this_doc[i,]$UttNum & 
-                     coding_doc$file==this_doc[i,]$file & 
-                     coding_doc$pass==this_doc[i,]$pass,]$coder <- this_doc[i,]$coder
+        coding_doc[coding_doc$UttNum==this_doc$UttNum[i] & 
+                     coding_doc$file==this_doc$file[i] & 
+                     coding_doc$pass==this_doc$pass[i],]$coder <- this_doc[i,]$coder
         coding_doc[coding_doc$UttNum==this_doc[i,]$UttNum & 
                      coding_doc$file==this_doc[i,]$file & 
                      coding_doc$pass==this_doc[i,]$pass,]$date <- this_doc[i,]$date
