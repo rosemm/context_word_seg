@@ -283,24 +283,27 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
       
       this_doc$LineNum[i] <- median(dplyr::filter(coding_doc, file==this_doc$file[i] & UttNum==this_doc$UttNum[i])$LineNum)
       
-      if (length(still_to_code_this_doc_passes) > 0) {
-        this_doc$pass[i] <- min(still_to_code_this_doc_passes) # set pass to the lowest pass value that shows up in still_to_code_this_doc for this utterance
-        # update coding_doc
-        coding_doc[coding_doc$UttNum==this_doc$UttNum[i] & 
-                     coding_doc$file==this_doc$file[i] & 
-                     coding_doc$pass==this_doc$pass[i],]$coder <- this_doc[i,]$coder
-        coding_doc[coding_doc$UttNum==this_doc$UttNum[i] & 
-                     coding_doc$file==this_doc$file[i] & 
-                     coding_doc$pass==this_doc$pass[i],]$date <- this_doc[i,]$date
-        coding_doc[coding_doc$UttNum==this_doc$UttNum[i] & 
-                     coding_doc$file==this_doc$file[i] & 
-                     coding_doc$pass==this_doc$pass[i],]$context <- this_doc[i,]$context
-      }
-      if (length(still_to_code_this_doc_passes)==0) {
-        this_doc$pass[i] <- max_pass + 1 # if this utterance has already been fully coded, add a new pass for it
-        # update coding_doc
-        coding_doc <- rbind(coding_doc, this_doc[i,])
-      }
+      # is this an utterance in the coding doc?
+      if(filter(coding_doc, UttNum==this_doc$UttNum[i] & file==this_doc$file[i])){
+        if (length(still_to_code_this_doc_passes) > 0) {
+          this_doc$pass[i] <- min(still_to_code_this_doc_passes) # set pass to the lowest pass value that shows up in still_to_code_this_doc for this utterance
+          # update coding_doc
+          coding_doc[coding_doc$UttNum==this_doc$UttNum[i] & 
+                       coding_doc$file==this_doc$file[i] & 
+                       coding_doc$pass==this_doc$pass[i],]$coder <- this_doc$coder[i]
+          coding_doc[coding_doc$UttNum==this_doc$UttNum[i] & 
+                       coding_doc$file==this_doc$file[i] & 
+                       coding_doc$pass==this_doc$pass[i],]$date <- this_doc$date[i]
+          coding_doc[coding_doc$UttNum==this_doc$UttNum[i] & 
+                       coding_doc$file==this_doc$file[i] & 
+                       coding_doc$pass==this_doc$pass[i],]$context <- this_doc$context[i]
+        } else if (length(still_to_code_this_doc_passes)==0) {
+          this_doc$pass[i] <- max_pass + 1 # if this utterance has already been fully coded, add a new pass for it
+          # update coding_doc
+          this_doc$LineNum[i] <- unqiue(filter(coding_doc, file==this_doc$file[i] & this_doc$UttNum[i])$LineNum)
+          coding_doc <- rbind(coding_doc, this_doc[i,]) 
+        }
+      } # if this utterance isn't in the coding doc (i.e. it's not on the list to be coded), don't save anything for it
     }
     
     
