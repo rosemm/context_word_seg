@@ -65,7 +65,13 @@ apply_threshold <- function(df.model, threshold){
     gather(key="topic", value="loading", -utt, -orth, -phon)
   df.bin$include <- ifelse(df.bin$loading > threshold, 1, 0)
   df.bin <- df.bin %>% 
-    select(-loading) %>% 
+    select(-loading) 
+  
+  # any contexts that are all 0's (i.e. any contexts which have no utterances assigned)?
+  topics.occurring <- unique(filter(df.bin, include==1)$topic)
+  
+  df.bin <- df.bin %>%
+    filter(topic %in% topics.occurring) %>% 
     spread(key=topic, value=include)
   
   return(df.bin)
