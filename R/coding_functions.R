@@ -303,7 +303,7 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
         } else if (length(still_to_code_this_doc_passes)==0) {
           this_doc$pass[i] <- max_pass + 1 # if this utterance has already been fully coded, add a new pass for it
           # update coding_doc
-          this_doc$LineNum[i] <- unqiue(filter(coding_doc, file==this.file & this_doc$UttNum[i])$LineNum)
+          this_doc$LineNum[i] <- unique(filter(coding_doc, file==this.file & this_doc$UttNum[i])$LineNum)
           coding_doc <- rbind(coding_doc, this_doc[i,]) 
         }
       } # if this utterance isn't in the coding doc (i.e. it's not on the list to be coded), don't save anything for it
