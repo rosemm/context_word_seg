@@ -456,8 +456,6 @@ process_codes <- function(doc, min.codes=10, max.codes=10){
   if(!require(psych)) install.packages("psych"); library(psych)
   if(!require(GPArotation)) install.packages("GPArotation"); library(GPArotation)
   
-  cleaning_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
-  
   doc <- doc %>% 
     dplyr::filter( !grepl("^[[:blank:]]*$",doc$context)) %>% # cleaning out empty codes
     tidyr::unite(utt, file, UttNum) %>% 
@@ -472,16 +470,20 @@ process_codes <- function(doc, min.codes=10, max.codes=10){
   
   message("\nRAs have coded this many utterances:\n") ; print(as.data.frame(RA_info))
   
+  counts <- doc %>%
+    filter(!is.na(context)) %>% 
+    count(utt)
+  
+  message("\nUtterances have been coded this many times across coders:\n") ; print(summary(counts$n))
+  
   # only keep utterances that have been coded at least [min.codes] times and no more than [max.codes] times
-  in.range <- doc %>%
-    count(utt) %>%
+  in.range <- counts
     dplyr::filter(n >= min.codes & n <= max.codes) %>% 
     select(utt) %>% # drop the n column
     left_join(doc, by="utt")
   
   # for utterances with more than [max.codes], randomly select [max.codes] of them
-  above.max.sample <- doc %>% 
-    count(utt) %>%
+  above.max.sample <- counts
     dplyr::filter(n > max.codes) %>% # only keep utterances with more than [max.codes]
     select(utt) %>% # drop the n column
     left_join(doc, by="utt") %>% # re-expand it back to doc, but only for the selected utts
