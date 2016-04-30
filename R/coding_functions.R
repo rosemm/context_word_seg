@@ -535,7 +535,7 @@ clean_categories <- function(doc, key_file="categories_cleaning_keys.txt" ){
   # add categories to doc
   doc <- left_join(doc, categories_keys, by=c("context" = "context_clean"))
 
-  stopifnot( length(unique(doc$category)) == length(unique(categories_keys$category)) )
+  # stopifnot( length(unique(doc$category)) == length(unique(categories_keys$category)) )
   
   summary(as.factor(doc$category)) 
   
