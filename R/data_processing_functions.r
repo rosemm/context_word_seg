@@ -314,7 +314,7 @@ assess_seg <- function(seg.phon.stream, words, dict){
 }
 
 # for bootstrapping nontexts:
-par_function <- function(dataframe, N.types=NULL, N.utts=NULL, by.size=TRUE, dict, expand, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version){ # this is the function that should be done in parallel on the 12 cores of each node
+par_function <- function(dataframe, N.types=NULL, N.utts=NULL, by.size=TRUE, dict, expand=FALSE, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version){ # this is the function that should be done in parallel on the 12 cores of each node
   if(expand & prop) stop("Cannot have both expand and prop TRUE - expand does not work with prop.")
   if(!any(MI, TP)) stop("At least one of MI and TP must be true.")
   if(!is.character(dataframe) & !is.null(N.types)) message("NOTE: Cannot specify N.types when providing a real dataframe.")
@@ -343,7 +343,7 @@ par_function <- function(dataframe, N.types=NULL, N.utts=NULL, by.size=TRUE, dic
     }
 
   } 
-  if(is.data.frame(dataframe)) df <- dataframe # if the given data
+  if(is.data.frame(dataframe)) df <- dataframe # if the given dataframe is a data.frame, then use that
     
   if(nrow(df) == 0) stop("df didn't load")
   if(nrow(dict) == 0) stop("dict didn't load")
