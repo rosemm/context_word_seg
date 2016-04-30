@@ -518,7 +518,7 @@ aciss_function <- function(fun.version, id, starts, iter, par_function_args){
   
   # map function and data to jobs and submit
   ids  <- batchMap(reg, batch_function, starts)
-  done <- submitJobs(reg, resources = list(nodes = 20, walltime=21600)) # expected to run for 6 hours (21600 seconds)
+  done <- submitJobs(reg, resources = list(nodes = 20)) # expected to run for 6 hours (21600 seconds)
 }
 
 # make an artificial language
