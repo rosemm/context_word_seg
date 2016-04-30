@@ -614,75 +614,7 @@ WL_mealtime <- glm(all.methods$WL_mealtime ~ as.matrix(select(all.methods, start
 
 ## run on aciss
 ```{r}
-library(BatchJobs)
 
-library(dplyr); library(tidyr); library(doParallel); library(devtools)
-
-starts <- 1:20
-
-batch_function <- function(starts){
-  library(dplyr)
-  library(tidyr)
-  library(devtools)
-  fun.version <- "2400f7eeb4395" # refers to the current commit for data_processing_functions.r
-  source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r", 
-             sha1=fun.version)
-  
-  # note that df should have the context columns already (from lists, human coding, or topic modeling, etc.)
-  # df <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_HJ_voting.txt"); prop=FALSE; expand=FALSE
-  # df <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_HJ_prop.txt"); prop=TRUE; expand=FALSE
-  df <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_WL.txt") ; prop=FALSE; expand=TRUE
-  if(nrow(df) == 0) stop("df didn't load")
-  
-  dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
-  if(nrow(dict) == 0) stop("dict didn't load")
-  
-  iter <- 50 # the number of times to generate random samples
-  
-  library(doParallel)
-  registerDoParallel()
-  r <- foreach(1:iter, 
-               .combine = rbind, 
-               .packages=c("dplyr", "tidyr", "devtools") ) %dopar% par_function(dataframe=df,
-                                                                                dict=dict,
-                                                                                expand=expand,
-                                                                                seg.utts=TRUE,
-                                                                                TP=FALSE,
-                                                                                MI=TRUE, 
-                                                                                verbose=FALSE, 
-                                                                                prop=prop,
-                                                                                cutoff=.85,
-                                                                                nontext=TRUE,
-                                                                                fun.version=fun.version)
-}
-# create a registry
-id <- "bootstrapWL2"
-reg.wl <- makeRegistry(id = id)
-
-# map function and data to jobs and submit
-ids  <- batchMap(reg.wl, batch_function, starts)
-done <- submitJobs(reg.wl, resources = list(nodes = 20, walltime=28800)) # expected to run for 8 hours (28800 seconds)
-
-
-# create a registry
-id <- "bootstrapHJpropContext2"
-reg.prop.con2 <- makeRegistry(id = id)
-
-# map function and data to jobs and submit
-ids  <- batchMap(reg.prop.con2, batch_function, starts)
-done <- submitJobs(reg.prop.con2, resources = list(nodes = 12, walltime=28800)) # expected to run for 8 hours (28800 seconds)
-
-showStatus(reg.prop.con2)
-
-# create a registry
-id <- "bootstrapHJpropNontext2"
-reg.prop.non2 <- makeRegistry(id = id)
-
-# map function and data to jobs and submit
-ids  <- batchMap(reg.prop.non2, batch_function, starts)
-done <- submitJobs(reg.prop.non2, resources = list(nodes = 12, walltime=28800)) # expected to run for 8 hours (28800 seconds)
-
-showStatus(reg.prop.non2)
 ```
 
 ## read in aciss results
