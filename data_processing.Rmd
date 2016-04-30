@@ -613,29 +613,19 @@ WL_mealtime <- glm(all.methods$WL_mealtime ~ as.matrix(select(all.methods, start
 
 
 ## run on aciss
+This code is all run on ACISS (the UO high performance cluster), not on your local machine. 
 ```{r aciss_first_time_only, eval=FALSE}
+# system('ssh rosem@login.aciss.uoregon.edu') # SSH into ACISS
+# system('module add R/3.1.3') # start R
+
 # http://blogs.uoregon.edu/rclub/2015/06/02/easy-massively-parallel-r-on-uos-aciss-cluster/
 # https://nsaunders.wordpress.com/2015/04/01/configuring-the-r-batchjobs-package-for-torque-batch-queues/
 
 # http://aciss-computing.uoregon.edu/2013/09/04/how-to-submission-queues/
 
 ###################################
-# First time: install BatchJobs
+# Write simple.tmpl file for BatchJobs configuration
 ###################################
-library(devtools)
-install_github("tudo-r/BatchJobs")
-library(BatchJobs)
-
-###########################################################
-# configure BatchJobs (do this on your local machine, and then use sftp to send .Batchjobs.R and simple.tmpl to your working directory on ACISS)
-###########################################################
-# set up batchjobs configuration for this project to override the global settings
-batch.conf <- readLines("/Library/Frameworks/R.framework/Versions/3.1/Resources/library/BatchJobs/etc/BatchJobs_global_config.R")
-batch.conf[1] <- "cluster.functions = makeClusterFunctionsTorque('simple.tmpl')"
-
-
-writeLines(batch.conf, ".BatchJobs.R", sep="\n") # write this file to the current working directory
-
 # from https://raw.githubusercontent.com/tudo-r/BatchJobs/master/examples/cfTorque/simple.tmpl
 simple <- "#PBS -N <%= job.name %>
 ## merge standard error and output
@@ -653,12 +643,70 @@ R CMD BATCH --no-save --no-restore '<%= rscript %>' /dev/stdout
 "
 
 writeLines(simple, "simple.tmpl", sep="\n")
+
+###################################
+# install BatchJobs
+###################################
+library(devtools)
+install_github("tudo-r/BatchJobs")
+library(BatchJobs)
+
+###########################################################
+# configure BatchJobs (do this on your local machine, and then use sftp to send .Batchjobs.R and simple.tmpl to your working directory on ACISS)
+###########################################################
+# set up batchjobs configuration for this project to override the global settings
+batch.conf <- readLines("/Library/Frameworks/R.framework/Versions/3.1/Resources/library/BatchJobs/etc/BatchJobs_global_config.R")
+batch.conf[1] <- "cluster.functions = makeClusterFunctionsTorque('simple.tmpl')"
+
+writeLines(batch.conf, ".BatchJobs.R", sep="\n") # write this file to the current working directory
 ```
 
 
-```{r}
+```{r on_aciss_setup}
+rm(list = ls())
+system('rm -r *files') # delete any old BatchJobs folders
 
+library(dplyr); library(tidyr); library(doParallel); library(devtools); library(BatchJobs)
+sessionInfo() # to check
+getConfig() # to check
+
+# read in the functions written for this analysis
+source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/R/data_processing_functions.r")
+
+df_LDA <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_files/contexts_LDA_bin_winutts30.txt")
+
+df_STM <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_files/contexts_STM_bin_winutts30.txt")
+
+df_HJ <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_files/contexts_HJ_bin.txt") 
+
+df_WL <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_files/contexts_WL.txt") 
+df_WL[df_WL==1.5] <- 1 # replace all 1.5's with 1's, so it doesn't distinguish between utterances originally tagged with key words and ones picked up by the +-2 uterance smoothing
+
+dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
+
+fun.version <- "b7785839035" # fun.version refers to the current commit for data_processing_functions.r
 ```
+
+```{r on_aciss_nontexts}
+par_function_args <- list(dataframe=df_WL, 
+                          N.types=NULL, 
+                          N.utts=NULL, 
+                          by.size=FALSE, 
+                          dict=dict, 
+                          expand=FALSE, 
+                          seg.utts=TRUE, 
+                          TP=FALSE, 
+                          MI=TRUE, 
+                          verbose=FALSE, 
+                          prop=FALSE, 
+                          cutoff=.85, 
+                          nontext=TRUE, 
+                          fun.version=fun.version)
+
+aciss_function(fun.version, id="WL_nontexts", starts=1:20, iter=50, par_function_args) # 20 starts and 50 iter gives 1000 samples for each nontext
+showStatus(makeRegistry(id = "WL_nontexts"))
+```
+
 
 ## read in aciss results
 ```{r}
