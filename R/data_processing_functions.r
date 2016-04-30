@@ -474,6 +474,31 @@ par_function_test <- function(dataframe, verbose){
   }
 }
 
+aciss_function <- function(fun.version, id, starts, iter, par_function_args){
+  # fun.version refers to the current commit for data_processing_functions.r
+  
+  batch_function <- function(start){
+    library(devtools)
+    source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/R/data_processing_functions.r", 
+               sha1=fun.version)
+    iter <- iter # the number of times to generate random samples
+    
+    library(doParallel)
+    registerDoParallel()
+    r <- foreach(1:iter, 
+                 .inorder=FALSE,
+                 .combine = rbind, 
+                 .packages=c("dplyr", "tidyr", "devtools", "BBmisc") ) %dopar% par_function(par_function_args)
+  }
+  
+  # create a registry
+  reg <- makeRegistry(id = id)
+  
+  # map function and data to jobs and submit
+  ids  <- batchMap(reg, batch_function, starts)
+  done <- submitJobs(reg, resources = list(nodes = 20, walltime=21600)) # expected to run for 6 hours (21600 seconds)
+}
+
 # make an artificial language
 make_corpus <- function(dist=c("unif", "skewed"), N.utts=1000, N.types=1800, smallest.most.freq=FALSE, monosyl=FALSE){ 
   N.type <- round(N.types/3, 0)
