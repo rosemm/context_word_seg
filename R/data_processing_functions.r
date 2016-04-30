@@ -315,6 +315,28 @@ assess_seg <- function(seg.phon.stream, words, dict){
 
 # for bootstrapping nontexts:
 par_function <- function(dataframe, N.types=NULL, N.utts=NULL, by.size=TRUE, dict, expand=FALSE, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version){ # this is the function that should be done in parallel on the 12 cores of each node
+  
+  # accept arguments as a list
+  if (is.list(dataframe)) {
+    if (all(c("dataframe", "dict") %in% names(dataframe))) {
+      dataframe <- dataframe[["dataframe"]]
+      dict <- dataframe[["dict"]]
+      if("N.types" %in% names(dataframe)) N.types <- dataframe[["N.types"]]
+      if("N.utts" %in% names(dataframe)) N.utts <- dataframe[["N.utts"]]
+      if("by.size" %in% names(dataframe)) by.size <- dataframe[["by.size"]]
+      if("expand" %in% names(dataframe)) expand <- dataframe[["expand"]]
+      if("seg.utts" %in% names(dataframe)) seg.utts <- dataframe[["seg.utts"]]
+      if("TP" %in% names(dataframe)) TP <- dataframe[["TP"]]
+      if("MI" %in% names(dataframe)) MI <- dataframe[["MI"]]
+      if("verbose" %in% names(dataframe)) verbose <- dataframe[["verbose"]]
+      if("prop" %in% names(dataframe)) prop <- dataframe[["prop"]]
+      if("cutoff" %in% names(dataframe)) cutoff <- dataframe[["cutoff"]]
+      if("nontext" %in% names(dataframe)) nontext <- dataframe[["nontext"]]
+      if("fun.version" %in% names(dataframe)) fun.version <- dataframe[["fun.version"]]
+    }
+    else stop("arguments are a list, but does not have components 'dataframe' and 'dict'")
+  }
+  
   if(expand & prop) stop("Cannot have both expand and prop TRUE - expand does not work with prop.")
   if(!any(MI, TP)) stop("At least one of MI and TP must be true.")
   if(!is.character(dataframe) & !is.null(N.types)) message("NOTE: Cannot specify N.types when providing a real dataframe.")
