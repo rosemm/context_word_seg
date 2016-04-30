@@ -314,7 +314,7 @@ assess_seg <- function(seg.phon.stream, words, dict){
 }
 
 # for bootstrapping nontexts:
-par_function <- function(dataframe, N.types=NULL, N.utts=NULL, by.size=TRUE, dict, expand=FALSE, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version){ # this is the function that should be done in parallel on the 12 cores of each node
+par_function <- function(dataframe, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, expand=FALSE, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version=NULL){ # this is the function that should be done in parallel on the 12 cores of each node
   
   # accept arguments as a list
   if (is.list(dataframe)) {
