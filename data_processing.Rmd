@@ -551,6 +551,9 @@ WL$orth <- gsub(x=WL$orth, pattern="_", replacement=" ")
 STM.con <- read.table(paste0("contexts_STM_winutts", wn, ".txt"), header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
 STM.bin <- read.table(paste0("contexts_STM_bin_winutts", wn, ".txt"), header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
 
+LDA.con <- read.table(paste0("contexts_LDA_winutts", wn, ".txt"), header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
+LDA.bin <- read.table(paste0("contexts_LDA_bin_winutts", wn, ".txt"), header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
+
 HJ.con <- read.table("contexts_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
 HJ.bin <- read.table("contexts_HJ_bin.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
 ```
@@ -572,16 +575,22 @@ nrow(WL); nrow(STM.con); nrow(STM.bin); nrow(HJ.con); nrow(HJ.bin)
 WL <- select(WL, -orth, -phon)
 STM.con <- select(STM.con, -orth, -phon)
 STM.bin <- select(STM.bin, -orth, -phon)
+LDA.con <- select(LDA.con, -orth, -phon)
+LDA.bin <- select(LDA.bin, -orth, -phon)
 HJ.con <- select(HJ.con, -orth, -phon)
 HJ.bin <- select(HJ.bin, -orth, -phon)
 colnames(WL)[-1] <- paste0("WL_", colnames(WL)[-1])
 colnames(STM.con)[-1] <- paste0("STM.con_", colnames(STM.con)[-1])
 colnames(STM.bin)[-1] <- paste0("STM.bin_", colnames(STM.bin)[-1])
+colnames(LDA.con)[-1] <- paste0("LDA.con_", colnames(LDA.con)[-1])
+colnames(LDA.bin)[-1] <- paste0("LDA.bin_", colnames(LDA.bin)[-1])
 colnames(HJ.con)[-1] <- paste0("HJ.con_", colnames(HJ.con)[-1])
 colnames(HJ.bin)[-1] <- paste0("HJ.bin_", colnames(HJ.bin)[-1])
 
 all.methods <- full_join(WL, STM.con, by="utt") %>% 
   full_join(STM.bin, by="utt") %>% 
+  full_join(LDA.con, by="utt") %>% 
+  full_join(LDA.bin, by="utt") %>%
   full_join(HJ.con, by="utt") %>% 
   full_join(HJ.bin, by="utt")
 nrow(all.methods)  
