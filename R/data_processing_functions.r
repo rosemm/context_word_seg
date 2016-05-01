@@ -198,9 +198,9 @@ context_results <- function(df, seg.utts=TRUE){
   return(context.data)
 }
 
-seg <- function(phon.stream, unique.phon.pairs, seg.utts=TRUE){
+seg <- function(phon.stream, unique.phon.pairs, seg.utts=TRUE, quiet=TRUE){
   
-  message("leave utterance boundaries? ", seg.utts)
+  if(!quiet) message("leave utterance boundaries? ", seg.utts)
   
   if( length(phon.stream) == 1 ) { # if phon.stream isn't already vectorized syllables, make it so
     phon.stream <- gsub(x=phon.stream, pattern=" ", replacement="-")
@@ -211,18 +211,21 @@ seg <- function(phon.stream, unique.phon.pairs, seg.utts=TRUE){
   if( length(phon.stream) > 1 ){
     for(i in 2:length(phon.stream)){
       
+      this.pair <- dplyr::filter(unique.phon.pairs, syl1==phon.stream[i-1] & syl2==phon.stream[i])
+      if(nrow(this.pair) != 1) stop(paste0("ERROR at ", i, "th element of phon.stream: more or less than one entry for seg"))
+      
       # decide whether to place a boundary between this syllable (i) and the one before it
       if(seg.utts){
         
-        print(dplyr::filter(unique.phon.pairs, syl1==phon.stream[i-1] & syl2==phon.stream[i]))
+        if(!quiet) print(this.pair)
         
         seg <- ifelse(phon.stream[i]=="###" | phon.stream[i-1]=="###", 1, # utterance boundaries are given as word boundaries
-                      dplyr::filter(unique.phon.pairs, syl1==phon.stream[i-1] & syl2==phon.stream[i])$seg)
+                      this.pair$seg)
       } else {
-        seg <- dplyr::filter(unique.phon.pairs, syl1==phon.stream[i-1] & syl2==phon.stream[i])$seg
+        seg <- this.pair$seg
       }
       
-      message("seg is ", seg, " for position ", i, " in phon.stream")
+      if(!quiet) message("seg is ", seg, " for position ", i, " in phon.stream")
       
       if(length(seg) != 1) stop(paste("ERROR at ", i, "th element of phon.stream: more or less than one entry for seg", sep=""))
       
