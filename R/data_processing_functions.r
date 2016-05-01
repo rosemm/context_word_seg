@@ -236,7 +236,7 @@ seg <- function(phon.stream, unique.phon.pairs, seg.utts=TRUE, quiet=TRUE){
 }
 
 segment_speech <- function(cutoff, stat, data, consider.freq=FALSE, seg.utts=TRUE, quiet=TRUE){
-  unique.phon.pairs <- data$unique.phon.pairs
+  unique.phon.pairs <- as.tbl(data$unique.phon.pairs) # making it a tbl for speed
   phon.stream <- data$streams$phon.stream
   
   if(stat=="TP") {
@@ -418,21 +418,21 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
   } # end of for loop
   
   # assess segmentation
-  stat.results <- data.frame(recall=NULL, precision=NULL, stat=NULL, nontext=NULL) # empty storage variable
   MIs <- vector("list", length(names(data))); names(MIs) <- names(data) # empty storage variable
   TPs <- vector("list", length(names(data))); names(TPs) <- names(data) # empty storage variable
   for(k in 1:length(names(data))){
-    
     message(paste0("assessing segmentation for ", names(data)[k], "..."))
     
     if(TP){
       data[[k]]$TP85$seg.results <- assess_seg(seg.phon.stream=data[[k]]$TP85$seg.phon.stream, words=data[[k]]$streams$words, dict=dict)
       TPresults <- colMeans(data[[k]]$TP85$seg.results[,3:4], na.rm=T)
+      TPresults <- as.data.frame(t(TPresults)) # make it a data.frame
       TPresults$stat <- "TP"
     }
     if(MI){
       data[[k]]$MI85$seg.results <- assess_seg(seg.phon.stream=data[[k]]$MI85$seg.phon.stream, words=data[[k]]$streams$words, dict=dict)
       MIresults <- colMeans(data[[k]]$MI85$seg.results[,3:4], na.rm=T)
+      MIresults <- as.data.frame(t(MIresults)) # make it a data.frame
       MIresults$stat <- "MI"
     }
     
@@ -442,10 +442,10 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
       this.result$TPN.segd.units <- median(data[[k]]$TP85$seg.results$N.segd.units)
       this.result$MIN.segd.units <- median(data[[k]]$MI85$seg.results$N.segd.units)
     } else if(MI){
-      this.result <- as.data.frame(rbind(MIresults))
+      this.result <- MIresults
       this.result$MIN.segd.units <- median(data[[k]]$MI85$seg.results$N.segd.units)
     } else if(TP){
-      this.result <- as.data.frame(rbind(TPresults))
+      this.result <- TPresults
       this.result$TPN.segd.units <- median(data[[k]]$TP85$seg.results$N.segd.units)
     }
 
@@ -458,15 +458,17 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
     this.result$TTR <- data[[k]]$streams$N.types/data[[k]]$streams$N.tokens
     this.result$mean.MI <- ifelse(MI, mean(data[[k]]$unique.phon.pairs$MI), NA)
     this.result$mean.TP <- ifelse(TP, mean(data[[k]]$unique.phon.pairs$TP), NA)
-    stat.results <- rbind(stat.results, this.result)
+    if(k==1) {
+      stat.results <- this.result # on the first run through the for loop
+    } else stat.results <- rbind(stat.results, this.result) # all subsequent runs
     
     if(verbose & MI) MIs[[k]] <- data[[k]]$unique.phon.pairs$MI
     if(verbose & TP) TPs[[k]] <- data[[k]]$unique.phon.pairs$TP
   } # end of for loop
   
   message("saving results...")
-  message("here are the results: \n")
-  print(stat.results)
+  if(!quiet) message("here are the results: \n")
+  if(!quiet) print(stat.results)
   stat.results$nontext <- as.factor(as.character(stat.results$nontext))
   stat.results$recall <- as.numeric(stat.results$recall)
   stat.results$precision <- as.numeric(stat.results$precision)
