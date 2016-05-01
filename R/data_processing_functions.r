@@ -395,7 +395,7 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
   # segment speech
   # note that this loop is slow
   for(k in 1:length(names(data))){ 
-    message(paste0("processing ", names(data)[k], "..."))
+    message(paste0("segmenting speech for ", names(data)[k], "..."))
     if(TP){
       data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=cutoff,
                                                        stat = "TP", 
@@ -415,6 +415,8 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
   MIs <- vector("list", length(names(data))); names(MIs) <- names(data) # empty storage variable
   TPs <- vector("list", length(names(data))); names(TPs) <- names(data) # empty storage variable
   for(k in 1:length(names(data))){
+    
+    message(paste0("assessing segmentation for ", names(data)[k], "..."))
     
     if(TP){
       data[[k]]$TP85$seg.results <- assess_seg(seg.phon.stream=data[[k]]$TP85$seg.phon.stream, words=data[[k]]$streams$words, dict=dict)
