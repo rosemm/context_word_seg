@@ -684,11 +684,11 @@ df_WL[df_WL==1.5] <- 1 # replace all 1.5's with 1's, so it doesn't distinguish b
 
 dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
 
-fun.version <- "b7785839035" # fun.version refers to the current commit for data_processing_functions.r
+fun.version <- "1307938ce49" # fun.version refers to the current commit for data_processing_functions.r
 ```
 
 ```{r on_aciss_nontexts}
-par_function_args <- list(dataframe=df_WL, 
+par_function_args <- list(dataframe=NULL, 
                           N.types=NULL, 
                           N.utts=NULL, 
                           by.size=FALSE, 
@@ -701,10 +701,31 @@ par_function_args <- list(dataframe=df_WL,
                           prop=FALSE, 
                           cutoff=.85, 
                           nontext=TRUE, 
+                          quiet=FALSE,
                           fun.version=fun.version)
 
-aciss_function(fun.version, id="WL_nontexts", starts=1:20, iter=50, par_function_args) # 20 starts and 50 iter gives 1000 samples for each nontext
-showStatus(makeRegistry(id = "WL_nontexts"))
+# 20 starts and 50 iter gives 1000 samples for each nontext
+par_function_args[[1]] <- df_WL
+aciss_function(fun.version, id="nontexts_WL", starts=1:20, iter=50, par_function_args) 
+
+par_function_args[[1]] <- df_STM
+aciss_function(fun.version, id="nontexts_STM", starts=1:20, iter=50, par_function_args) 
+
+par_function_args[[1]] <- df_HJ
+aciss_function(fun.version, id="nontexts_HJ", starts=1:20, iter=50, par_function_args)
+
+par_function_args[[1]] <- df_LDA
+aciss_function(fun.version, id="nontexts_LDA", starts=1:20, iter=50, par_function_args)
+
+showStatus(makeRegistry(id = "nontexts_WL")); showStatus(makeRegistry(id = "nontexts_STM")); showStatus(makeRegistry(id = "nontexts_HJ")); showStatus(makeRegistry(id = "nontexts_LDA"))
+
+# loadResults(makeRegistry(id = "nontexts_WL"))
+
+# killJobs(makeRegistry(id = "nontexts_WL"),findRunning(makeRegistry(id = "nontexts_WL")))
+# killJobs(makeRegistry(id = "nontexts_HJ"),findRunning(makeRegistry(id = "nontexts_HJ")))
+# killJobs(makeRegistry(id = "nontexts_LDA"),findRunning(makeRegistry(id = "nontexts_LDA")))
+# killJobs(makeRegistry(id = "nontexts_STM"),findRunning(makeRegistry(id = "nontexts_STM")))
+
 ```
 
 
