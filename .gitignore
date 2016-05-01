@@ -31,6 +31,7 @@ nontexts_SizeSimSKEW/
 nontexts_SizeSimUNIF/
 nontexts_humanjudgments/
 nontexts_wordlists/
+nontexts_*-files
 contexts_humanjudgments/
 CORPUS_brent_ratner
 CORPUS_korman_from_swingley2005
@@ -51,5 +52,3 @@ stm
 *.pdf
 "Topics\nfit.null.txt"
 words by contexts_CDIcheck.csv
-
-
