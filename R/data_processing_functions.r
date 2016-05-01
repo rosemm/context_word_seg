@@ -209,6 +209,8 @@ seg <- function(phon.stream, unique.phon.pairs, seg.utts=TRUE){
   if( length(phon.stream) > 1 ){
     for(i in 2:length(phon.stream)){
       
+      message("leave utterance boundaries? ", seg.utts)
+      
       # decide whether to place a boundary between this syllable (i) and the one before it
       if(seg.utts){
         seg <- ifelse(phon.stream[i]=="###" | phon.stream[i-1]=="###", 1, # utterance boundaries are given as word boundaries
@@ -216,6 +218,8 @@ seg <- function(phon.stream, unique.phon.pairs, seg.utts=TRUE){
       } else {
         seg <- dplyr::filter(unique.phon.pairs, syl1==phon.stream[i-1] & syl2==phon.stream[i])$seg
       }
+      
+      message("seg is ", seg, " for position ", i, " in phon.stream")
       
       if(length(seg) != 1) stop(paste("ERROR at ", i, "th element of phon.stream: more or less than one entry for seg", sep=""))
       
