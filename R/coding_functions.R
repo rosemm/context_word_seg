@@ -150,9 +150,12 @@ message(paste0(nrow(update_doc), " utterances still have fewer than ", criterion
 
 CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
   # check whether packages need to be installed
-  list.of.packages <- c("dplyr", "car")
+  list.of.packages <- c("dplyr", "car", "tidyr", "pbkrtest")
   new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
   if(length(new.packages)) install.packages(new.packages)
+  for(p in list.of.packages) {
+    library(p, character.only=TRUE)
+  }
   
   # first, clean all of the transcripts
   message("Prepping the transcripts...")
