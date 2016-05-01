@@ -613,7 +613,7 @@ WL_mealtime <- glm(all.methods$WL_mealtime ~ as.matrix(select(all.methods, start
 
 
 ## run on aciss
-This code is all run on ACISS (the UO high performance cluster), not on your local machine. 
+This code is all run on ACISS (the UO high performance cluster), not on my local machine. 
 ```{r on_aciss_first_time_only, eval=FALSE}
 # system('ssh rosem@login.aciss.uoregon.edu') # SSH into ACISS
 # system('module add R/3.1.3') # start R
@@ -657,8 +657,14 @@ library(BatchJobs)
 # set up batchjobs configuration for this project to override the global settings
 batch.conf <- readLines("/Library/Frameworks/R.framework/Versions/3.1/Resources/library/BatchJobs/etc/BatchJobs_global_config.R")
 batch.conf[1] <- "cluster.functions = makeClusterFunctionsTorque('simple.tmpl')"
+batch.conf[3] <- "mail.done = 'first+last'"
+batch.conf[length(batch.conf)+1] <-"mail.to = '<rosem@uoregon.edu>'"
+batch.conf[length(batch.conf)+1] <-"mail.from = '<rosem@uoregon.edu>'"
 
 writeLines(batch.conf, ".BatchJobs.R", sep="\n") # write this file to the current working directory
+
+# then SFTP the .BatchJobs.R file to ACISS
+# system('sftp rosem@ftn.aciss.uoregon.edu')
 ```
 
 
@@ -684,7 +690,7 @@ df_WL[df_WL==1.5] <- 1 # replace all 1.5's with 1's, so it doesn't distinguish b
 
 dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
 
-fun.version <- "a2ff73b8b0c83f" # fun.version refers to the current commit for data_processing_functions.r
+fun.version <- "64ce775dad31f28a" # fun.version refers to the current commit for data_processing_functions.r
 ```
 
 ```{r on_aciss_nontexts, eval=FALSE}
@@ -706,16 +712,16 @@ par_function_args <- list(dataframe=NULL,
 
 # 20 starts and 100 iter gives 2000 samples for each nontext (takes about 40min per 1000 samples)
 par_function_args[[1]] <- df_WL
-aciss_function(fun.version, id="nontexts_WL", starts=1:20, iter=100, par_function_args) 
+aciss_function(fun.version, id="nontexts_WL", starts=1:50, iter=100, par_function_args) 
 
 par_function_args[[1]] <- df_STM
-aciss_function(fun.version, id="nontexts_STM", starts=1:20, iter=100, par_function_args) 
+aciss_function(fun.version, id="nontexts_STM", starts=1:50, iter=100, par_function_args) 
 
 par_function_args[[1]] <- df_HJ
-aciss_function(fun.version, id="nontexts_HJ", starts=1:20, iter=100, par_function_args)
+aciss_function(fun.version, id="nontexts_HJ", starts=1:50, iter=100, par_function_args)
 
 par_function_args[[1]] <- df_LDA
-aciss_function(fun.version, id="nontexts_LDA", starts=1:20, iter=100, par_function_args)
+aciss_function(fun.version, id="nontexts_LDA", starts=1:50, iter=100, par_function_args)
 
 showStatus(makeRegistry(id = "nontexts_WL")); showStatus(makeRegistry(id = "nontexts_STM")); showStatus(makeRegistry(id = "nontexts_HJ")); showStatus(makeRegistry(id = "nontexts_LDA"))
 
@@ -726,6 +732,7 @@ showStatus(makeRegistry(id = "nontexts_WL")); showStatus(makeRegistry(id = "nont
 # killJobs(makeRegistry(id = "nontexts_LDA"),findRunning(makeRegistry(id = "nontexts_LDA")))
 # killJobs(makeRegistry(id = "nontexts_STM"),findRunning(makeRegistry(id = "nontexts_STM")))
 
+# system('sftp rosem@ftn.aciss.uoregon.edu')
 ```
 
 Use SFTP to get the folders BatchJobs makes and put them on my local machine. 
@@ -827,8 +834,7 @@ context_results$measure <- as.factor(context_results$measure)
 
 # for adding to nontext dataframe
 context_ests <- context_results %>% 
-  unite(col="analysis", method, context, remove=FALSE) %>% 
-  select(criterion, analysis, measure, value) %>% 
+  select(criterion, method, context, measure, value) %>% 
   rename(context.est=value)
 
 ```
@@ -856,11 +862,9 @@ nontext_results$method <- factor(nontext_results$method,
 nontext_results <- nontext_results %>% 
   gather( key="measure", value="value", recall, precision) %>% 
   unite(col="criterion", stat, cutoff, sep="_", remove=FALSE) %>% 
-  rename(nontext=nontext) 
+  rename(context=nontext) 
 
-nontext_results$measure <- as.factor(nontext_results$measure)
-
-full_results <- left_join(nontext_results, context_ests) # add context estimates
+full_results <- left_join(nontext_results, context_ests, by=c("criterion", "method", "context", "measure")) # add context estimates
 ```
 
 ## global results
@@ -916,64 +920,45 @@ global_results <- global_results %>%
 ggplot(full_results, aes(x=context, y=value)) +
   geom_boxplot() +
   # geom_boxplot(color=NA, fill=NA, outlier.colour= NA) +
-  facet_wrap( ~ method + measure, scales="free_x", ncol=2) +
-  geom_point(aes(x=context, y=context.est, color=context), size=4, show.legend=FALSE) + 
+  facet_wrap( ~ method + measure, scales="free", ncol=2) +
+  geom_point(aes(x=context, y=context.est, color=method), size=4, show.legend=FALSE) + 
   geom_hline(data=global_results, aes(yintercept=value), linetype = 2, size=1.5) + 
   theme(text = element_text(size=30), axis.ticks = element_blank(), axis.text.x = element_blank()) +
   labs(x=NULL, y=NULL)
 ggsave(filename="plots/allmethods_results_boxplots.png", width=12, height=20, units="in")
 
-# with histograms instead of boxplots, to examine the nontext distributions (for shape, skew, etc.)
-ggplot(filter(full.results, criterion=="MI85"), aes(x=value))+
+
+for(this.method in unique(full_results$method)){
+  # with histograms instead of boxplots, to examine the nontext distributions (for shape, skew, etc.)
+p <- ggplot(filter(full_results, method==this.method), aes(x=value))+
   geom_histogram() +
-  geom_vline(aes(color=context, xintercept=context.est), size=2) + 
-  facet_wrap(~ measure + context, scales="free", ncol=7) +
-  theme(text = element_text(size=20), axis.ticks = element_blank()) +
+  geom_vline(aes(color=method, xintercept=context.est), size=2, show.legend=FALSE) + 
+  facet_wrap(~ measure + context, scales="free", nrow=2) +
+  theme(text = element_text(size=15), axis.ticks = element_blank(), axis.text.y = element_blank()) +
   labs(x=NULL, y=NULL)
+  ggsave(p, filename=paste0("plots/allmethods_results_hist_", this.method ,".png"), width=20, height=6, units="in")
+}
+
 ```
 
 
-## combine results into plotable dataframe
-```{r}
+## significance test
+```{r bootstrap_pvals}
+# bootstrap p-values
+full_results$above.est <- ifelse(full_results$value > full_results$context.est, 1, 0)
+tests <- full_results %>%
+  group_by(method, context, criterion, measure) %>%
+  summarize(p.val = mean(above.est))
+tests$stars <- ifelse(tests$p.val < .001, "***",
+                      ifelse(tests$p.val < .01, "**",
+                             ifelse(tests$p.val < .05, "*", 
+                                    ifelse(tests$p.val < .1, "+", ""))))
 
-library(tidyr)
-nontext.results <- nontext.results %>%
-  mutate(cutoff=85) %>%
-  unite(criterion, stat, cutoff, sep="", remove=F) %>%
-  gather(measure, value, recall:precision) %>%
-  rename(context=nontext)
-
-context.results <- data.frame(context=NULL, criterion=NULL, measure=NULL, context.est=NULL)
-for (k in 1:length(names(context.data)) ){
-  
-  criteria <- c("TP85", "MI85")
-  
-  for (c in 1:length(criteria)){
-    context.est <- colMeans(context.data[[k]][[criteria[c]]]$seg.results[,c(3:4)], na.rm=T)
-    estimates <- as.data.frame(context.est)
-    estimates$measure <- row.names(estimates)
-    estimates$context <- names(context.data)[k]
-    estimates$criterion <- criteria[c]
-    row.names(estimates) <- NULL
-    
-    context.results <- rbind(context.results, estimates) # add the results from this context and criterion to the rest
-  }
-}  
-
-full.results <- left_join(nontext.results, context.results)
-
-# add global estimates
-global_results <- data.frame(measure=NA, criterion=NA, global.est=NA)
-global_results[1,] <- c("recall",    "TP85", colMeans(global.data$TP85$seg.results[, 3:4], na.rm=T)[1])
-global_results[2,] <- c("precision", "TP85", colMeans(global.data$TP85$seg.results[, 3:4], na.rm=T)[2])
-global_results[3,] <- c("recall",    "MI85", colMeans(global.data$MI85$seg.results[, 3:4], na.rm=T)[1])
-global_results[4,] <- c("precision", "MI85", colMeans(global.data$MI85$seg.results[, 3:4], na.rm=T)[2])
-global_results$global.est <- as.numeric(global_results$global.est)
-
-full.results <- left_join(full.results, global_results)
+kable(filter(tests, criterion=="MI85")[,-2], digits=3)
 ```
 
-## THE PLOT
+
+## THE PLOT (old --- one method at a time)
 ```{r}
 full.results$context <- factor(full.results$context, levels=c("mealtime", "bedtime", "diaper.change", "bathtime", "body.touch", "play", "routines"))
 ggplot(filter(full.results, criterion=="MI85"), aes(x=context, y=value))+
