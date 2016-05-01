@@ -423,3 +423,12 @@ network_plot <- function(data, title=""){
   plot(bsk.network, vertex.label=ifelse(V(bsk.network)$name=="'tV", "'tV", ""))
   return(plot.igraph(bsk.network, vertex.label="", main=title))
 }
+
+add_stars <- function(tests){
+  # add stars for significance to a table with p values
+  tests$stars <- ifelse(tests$p.val < .001, "***",
+                  ifelse(tests$p.val < .01, "**",
+                         ifelse(tests$p.val < .05, "*", 
+                                ifelse(tests$p.val < .1, "+", ""))))
+  return(tests)
+}

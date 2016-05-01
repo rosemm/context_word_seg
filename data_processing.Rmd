@@ -946,15 +946,17 @@ p <- ggplot(filter(full_results, method==this.method), aes(x=value))+
 ```{r bootstrap_pvals}
 # bootstrap p-values
 full_results$above.est <- ifelse(full_results$value > full_results$context.est, 1, 0)
-tests <- full_results %>%
+tests.contexts <- full_results %>%
   group_by(method, context, criterion, measure) %>%
-  summarize(p.val = mean(above.est))
-tests$stars <- ifelse(tests$p.val < .001, "***",
-                      ifelse(tests$p.val < .01, "**",
-                             ifelse(tests$p.val < .05, "*", 
-                                    ifelse(tests$p.val < .1, "+", ""))))
+  summarize(p.val = mean(above.est)) %>% 
+  add_stars() # from analysis_functions.r
 
-kable(filter(tests, criterion=="MI85")[,-2], digits=3)
+tests.methods <- full_results %>%
+  group_by(method, criterion, measure) %>%
+  summarize(p.val = mean(above.est)) %>% 
+  add_stars() # from analysis_functions.r
+
+kable(filter(tests.contexts, criterion=="MI85")[,-2], digits=3)
 ```
 
 
