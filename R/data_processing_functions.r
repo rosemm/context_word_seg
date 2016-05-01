@@ -82,18 +82,18 @@ calc_MI = function(phon.pairs, phon.stream, MI=TRUE, TP=TRUE){
     # NOTE: Since syllable transitions spanning an utterance boundary have been removed, this only counts freq of syl1 / all non-utterance-final syllables
     # This more closely approximates the sense of TP as conditional probability (see e.g. Saffran et al. 1996). 
     # If all occurences of a syllable are counted (including utterance-final occurences for syl1), then the TP can (and does) go far above 1 since there are many more units of syllables than bi-syllable pairs
-    phon.pairs <- left_join(phon.pairs, A.at1)
-    phon.pairs <- left_join(phon.pairs, B.at2)
+    phon.pairs <- left_join(phon.pairs, A.at1, by="syl1")
+    phon.pairs <- left_join(phon.pairs, B.at2, by="syl2")
 
     syls <- data.frame(syl=phon.stream[phon.stream != "###"]) %>%
       count(syl) %>%
       mutate(p=n/length(unique(phon.stream[phon.stream != "###"])))
     # merge in sylable info for syl1
     colnames(syls) <- c("syl1", "A.freq.tot", "p.A")
-    phon.pairs <- left_join(phon.pairs, syls)
+    phon.pairs <- left_join(phon.pairs, syls, by="syl1")
     # merge in sylable info for syl2
     colnames(syls) <- c("syl2", "B.freq.tot", "p.B")
-    phon.pairs <- left_join(phon.pairs, syls)
+    phon.pairs <- left_join(phon.pairs, syls, by="syl2")
   
   # add a column for the syllable pair (helps for joining this table with pairs.count later)
   phon.pairs <- phon.pairs %>%
@@ -103,7 +103,7 @@ calc_MI = function(phon.pairs, phon.stream, MI=TRUE, TP=TRUE){
   pairs.count <- phon.pairs %>%
     group_by(pair) %>%
     summarize(AB.freq=n())
-  phon.pairs <- left_join(phon.pairs, pairs.count) # add the AB frequency counts to the phon.pairs table
+  phon.pairs <- left_join(phon.pairs, pairs.count, by="pair") # add the AB frequency counts to the phon.pairs table
   
   # calculate MI and TP
   
@@ -119,7 +119,7 @@ calc_MI = function(phon.pairs, phon.stream, MI=TRUE, TP=TRUE){
     # get rank order
     TPrank <- unique(phon.pairs)
     TPrank$TP.rank <- 1:nrow(TPrank)
-    phon.pairs <- left_join(phon.pairs, select(TPrank, pair, TP.rank))
+    phon.pairs <- left_join(phon.pairs, select(TPrank, pair, TP.rank), by="pair")
   } 
   if(MI){
     phon.pairs <- phon.pairs %>% 
@@ -314,28 +314,27 @@ assess_seg <- function(seg.phon.stream, words, dict){
 }
 
 # for bootstrapping nontexts:
-par_function <- function(dataframe, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, expand=FALSE, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version=NULL){ # this is the function that should be done in parallel on the 12 cores of each node
+par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, expand=FALSE, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version=NULL){ # this is the function that should be done in parallel on the 12 cores of each node
   
   # accept arguments as a list
-  if (is.list(dataframe)) {
-    if (all(c("dataframe", "dict") %in% names(dataframe))) {
-      dataframe <- dataframe[["dataframe"]]
-      dict <- dataframe[["dict"]]
-      if("N.types" %in% names(dataframe)) N.types <- dataframe[["N.types"]]
-      if("N.utts" %in% names(dataframe)) N.utts <- dataframe[["N.utts"]]
-      if("by.size" %in% names(dataframe)) by.size <- dataframe[["by.size"]]
-      if("expand" %in% names(dataframe)) expand <- dataframe[["expand"]]
-      if("seg.utts" %in% names(dataframe)) seg.utts <- dataframe[["seg.utts"]]
-      if("TP" %in% names(dataframe)) TP <- dataframe[["TP"]]
-      if("MI" %in% names(dataframe)) MI <- dataframe[["MI"]]
-      if("verbose" %in% names(dataframe)) verbose <- dataframe[["verbose"]]
-      if("prop" %in% names(dataframe)) prop <- dataframe[["prop"]]
-      if("cutoff" %in% names(dataframe)) cutoff <- dataframe[["cutoff"]]
-      if("nontext" %in% names(dataframe)) nontext <- dataframe[["nontext"]]
-      if("fun.version" %in% names(dataframe)) fun.version <- dataframe[["fun.version"]]
-    }
-    else stop("arguments are a list, but does not have components 'dataframe' and 'dict'")
-  }
+  if (is.list(x)) {
+    if (all(c("dataframe", "dict") %in% names(x))) {
+      dataframe <- x[["dataframe"]]
+      dict <- x[["dict"]]
+      if("N.types" %in% names(x)) N.types <- x[["N.types"]]
+      if("N.utts" %in% names(x)) N.utts <- x[["N.utts"]]
+      if("by.size" %in% names(x)) by.size <- x[["by.size"]]
+      if("expand" %in% names(x)) expand <- x[["expand"]]
+      if("seg.utts" %in% names(x)) seg.utts <- x[["seg.utts"]]
+      if("TP" %in% names(x)) TP <- x[["TP"]]
+      if("MI" %in% names(x)) MI <- x[["MI"]]
+      if("verbose" %in% names(x)) verbose <- x[["verbose"]]
+      if("prop" %in% names(x)) prop <- x[["prop"]]
+      if("cutoff" %in% names(x)) cutoff <- x[["cutoff"]]
+      if("nontext" %in% names(x)) nontext <- x[["nontext"]]
+      if("fun.version" %in% names(x)) fun.version <- x[["fun.version"]]
+    } else stop("arguments are a list, but does not have components 'dataframe' and 'dict'")
+  } else dataframe <- x
   
   if(expand & prop) stop("Cannot have both expand and prop TRUE - expand does not work with prop.")
   if(!any(MI, TP)) stop("At least one of MI and TP must be true.")
@@ -499,7 +498,7 @@ par_function_test <- function(dataframe, verbose){
 aciss_function <- function(fun.version, id, starts, iter, par_function_args){
   # fun.version refers to the current commit for data_processing_functions.r
   
-  batch_function <- function(start){
+  batch_function <- function(start, par_function_args){
     library(devtools)
     source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/R/data_processing_functions.r", 
                sha1=fun.version)
@@ -517,8 +516,8 @@ aciss_function <- function(fun.version, id, starts, iter, par_function_args){
   reg <- makeRegistry(id = id)
   
   # map function and data to jobs and submit
-  ids  <- batchMap(reg, batch_function, starts)
-  done <- submitJobs(reg, resources = list(nodes = 20)) # expected to run for 6 hours (21600 seconds)
+  ids  <- batchMap(reg, batch_function, starts, more.args=list(par_function_args=par_function_args))
+  done <- submitJobs(reg, resources = list(nodes = 1, ppn=1)) 
 }
 
 # make an artificial language
