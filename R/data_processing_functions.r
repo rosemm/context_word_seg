@@ -646,7 +646,22 @@ contexts_by_size <- function(df, N.sizes, min.utt=100){
   return(df)
 }
 
+read_batch <- function(dir){
+  # dir="nontexts_HJ-files"
+  jobs <- list.files(paste0(dir, "/jobs"))
+  for(j in jobs){
+    load(paste0(dir, "/jobs/", j, "/", as.numeric(j), "-result.RData")) # makes an object named "result"
+    if(!is.null(result)){
+      if(as.numeric(j)==1){
+        results <- result
+      } else results <- rbind(results, result)
+    } # end of if !is.null(result) statement
+  } # end of for loop
+  return(results)
+}
+
 process_batch_results <- function(id, dir, combine=c("rbind", "list")){
+  # only works in the original working directory where BatchJobs was run (i.e. on ACISS)
   results <- data.frame(V1=NULL)
   id <- paste0(dir, "/", id)
 
@@ -670,6 +685,23 @@ process_batch_results <- function(id, dir, combine=c("rbind", "list")){
 
 clean_batch_results <- function(results){
   # combine and organize results
+  
+  # EXAMPLE:
+  # # on aciss:
+  # # system('rm boot_results.RData')
+  # results <- list(SizeSkew=loadResults(reg.size.skew), 
+  #                 SizeUnif=loadResults(reg.size.unif),
+  #                 TTRskew=loadResults(reg.ttr.skew),
+  #                 TTRunif=loadResults(reg.ttr.unif))
+  # save(results, file="boot_results.RData")  
+  # # copy via sftp to local machine
+  # load("bootstrap_results_Mar2016/boot_results.RData") # this is generated on ACISS using loadResults() and then saved and sftp to local machine
+  # names(results)
+  # 
+  # # cleaning on local machine:
+  # sim.results.list <- clean_batch_results(results)
+  # sim.results <- sim.results.list[[1]]
+  
   MIs <- vector("list", length(names(results))); names(MIs) <- names(results) # empty storage variable
   TPs <- vector("list", length(names(results))); names(TPs) <- names(results)  # empty storage variable
   stat.results <- vector("list", length(names(results))); names(stat.results) <- names(results)  # empty storage variable
