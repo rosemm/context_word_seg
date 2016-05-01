@@ -128,7 +128,7 @@ calc_MI = function(phon.pairs, phon.stream, MI=TRUE, TP=TRUE){
     # get rank order for MI 
     MIrank <- unique(phon.pairs)
     MIrank$MI.rank <- 1:nrow(MIrank)
-    phon.pairs <- left_join(phon.pairs, select(MIrank, pair, MI.rank)) 
+    phon.pairs <- left_join(phon.pairs, select(MIrank, pair, MI.rank), by="pair") 
   } 
   
   output <- unique(phon.pairs) # Only keep one instance of each syllable pair
@@ -219,9 +219,8 @@ seg <- function(phon.stream, unique.phon.pairs, seg.utts=TRUE, quiet=TRUE){
       } else {
         seg <- this.pair$seg
       }
-      if(!quiet) print(this.pair); message("position ", i, " in phon.stream\n", "sy1: ", phon.stream[i-1], "\nsyl2: ", phon.stream[i], "\nseg: ", seg)
+      if(!quiet) message("position ", i, " in phon.stream\n", "sy1: ", phon.stream[i-1], "\nsyl2: ", phon.stream[i], "\nseg: ", seg)
 
-      
       if(length(seg) != 1) stop(paste("ERROR at ", i, "th element of phon.stream: more or less than one entry for seg", sep=""))
       
       seg.phon.stream[i]<- ifelse(seg==1, 
@@ -236,7 +235,7 @@ seg <- function(phon.stream, unique.phon.pairs, seg.utts=TRUE, quiet=TRUE){
   return(seg.phon.stream)
 }
 
-segment_speech <- function(cutoff, stat, data, consider.freq=FALSE, seg.utts=TRUE){
+segment_speech <- function(cutoff, stat, data, consider.freq=FALSE, seg.utts=TRUE, quiet=TRUE){
   unique.phon.pairs <- data$unique.phon.pairs
   phon.stream <- data$streams$phon.stream
   
@@ -274,7 +273,7 @@ segment_speech <- function(cutoff, stat, data, consider.freq=FALSE, seg.utts=TRU
 #     })
 #   ##################
   
-  seg.phon.stream <- seg(phon.stream, unique.phon.pairs, seg.utts=seg.utts)
+  seg.phon.stream <- seg(phon.stream, unique.phon.pairs, seg.utts=seg.utts, quiet=quiet)
   
   return(seg.phon.stream)
 }
@@ -319,7 +318,7 @@ assess_seg <- function(seg.phon.stream, words, dict){
 }
 
 # for bootstrapping nontexts:
-par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, expand=FALSE, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version=NULL){ # this is the function that should be done in parallel on the 12 cores of each node
+par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, expand=FALSE, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version=NULL, quiet=TRUE){ # this is the function that should be done in parallel on the 12 cores of each node
   
   # accept arguments as a list
   if (is.list(x)) {
@@ -337,6 +336,7 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
       if("prop" %in% names(x)) prop <- x[["prop"]]
       if("cutoff" %in% names(x)) cutoff <- x[["cutoff"]]
       if("nontext" %in% names(x)) nontext <- x[["nontext"]]
+      if("quiet" %in% names(x)) quiet <- x[["quiet"]]
       if("fun.version" %in% names(x)) fun.version <- x[["fun.version"]]
     } else stop("arguments are a list, but does not have components 'dataframe' and 'dict'")
   } else dataframe <- x
@@ -406,14 +406,14 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
                                                        stat = "TP", 
                                                        data = data[[k]],
                                                        seg.utts = seg.utts,
-                                                       quiet=FALSE)
+                                                       quiet=quiet)
     }
     if(MI){
       data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff = cutoff,
                                                        stat = "MI", 
                                                        data = data[[k]],
                                                        seg.utts = seg.utts,
-                                                       quiet=FALSE)
+                                                       quiet=quiet)
     }
   } # end of for loop
   
