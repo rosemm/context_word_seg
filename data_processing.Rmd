@@ -614,7 +614,7 @@ WL_mealtime <- glm(all.methods$WL_mealtime ~ as.matrix(select(all.methods, start
 
 ## run on aciss
 This code is all run on ACISS (the UO high performance cluster), not on your local machine. 
-```{r aciss_first_time_only, eval=FALSE}
+```{r on_aciss_first_time_only, eval=FALSE}
 # system('ssh rosem@login.aciss.uoregon.edu') # SSH into ACISS
 # system('module add R/3.1.3') # start R
 
@@ -662,7 +662,7 @@ writeLines(batch.conf, ".BatchJobs.R", sep="\n") # write this file to the curren
 ```
 
 
-```{r on_aciss_setup}
+```{r on_aciss_setup, eval=FALSE}
 rm(list = ls())
 system('rm -r *files') # delete any old BatchJobs folders
 
@@ -684,10 +684,10 @@ df_WL[df_WL==1.5] <- 1 # replace all 1.5's with 1's, so it doesn't distinguish b
 
 dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
 
-fun.version <- "1307938ce49" # fun.version refers to the current commit for data_processing_functions.r
+fun.version <- "a2ff73b8b0c83f" # fun.version refers to the current commit for data_processing_functions.r
 ```
 
-```{r on_aciss_nontexts}
+```{r on_aciss_nontexts, eval=FALSE}
 par_function_args <- list(dataframe=NULL, 
                           N.types=NULL, 
                           N.utts=NULL, 
@@ -701,21 +701,21 @@ par_function_args <- list(dataframe=NULL,
                           prop=FALSE, 
                           cutoff=.85, 
                           nontext=TRUE, 
-                          quiet=FALSE,
+                          quiet=TRUE,
                           fun.version=fun.version)
 
-# 20 starts and 50 iter gives 1000 samples for each nontext
+# 20 starts and 100 iter gives 2000 samples for each nontext (takes about 40min per 1000 samples)
 par_function_args[[1]] <- df_WL
-aciss_function(fun.version, id="nontexts_WL", starts=1:20, iter=50, par_function_args) 
+aciss_function(fun.version, id="nontexts_WL", starts=1:20, iter=100, par_function_args) 
 
 par_function_args[[1]] <- df_STM
-aciss_function(fun.version, id="nontexts_STM", starts=1:20, iter=50, par_function_args) 
+aciss_function(fun.version, id="nontexts_STM", starts=1:20, iter=100, par_function_args) 
 
 par_function_args[[1]] <- df_HJ
-aciss_function(fun.version, id="nontexts_HJ", starts=1:20, iter=50, par_function_args)
+aciss_function(fun.version, id="nontexts_HJ", starts=1:20, iter=100, par_function_args)
 
 par_function_args[[1]] <- df_LDA
-aciss_function(fun.version, id="nontexts_LDA", starts=1:20, iter=50, par_function_args)
+aciss_function(fun.version, id="nontexts_LDA", starts=1:20, iter=100, par_function_args)
 
 showStatus(makeRegistry(id = "nontexts_WL")); showStatus(makeRegistry(id = "nontexts_STM")); showStatus(makeRegistry(id = "nontexts_HJ")); showStatus(makeRegistry(id = "nontexts_LDA"))
 
@@ -728,20 +728,12 @@ showStatus(makeRegistry(id = "nontexts_WL")); showStatus(makeRegistry(id = "nont
 
 ```
 
+Use SFTP to get the folders BatchJobs makes and put them on my local machine. 
 
 ## read in aciss results
-```{r}
-HJnontext.results1 <- process_batch_results(id="bootstrapHJpropNontext", dir="nontexts_humanjudgments")
-HJnontext.results2 <- process_batch_results(id="bootstrapHJpropNontext2", dir="nontexts_humanjudgments")
-HJnontext.results <- HJnontext.results2 
-HJnontext.results$analysis <- "nontext"
+```{r process_aciss_results}
 
-HJcontext.results1 <- process_batch_results(id="bootstrapHJpropContext", dir="contexts_humanjudgments")
-HJcontext.results2 <- process_batch_results(id="bootstrapHJpropContext1", dir="contexts_humanjudgments")
-HJcontext.results <- rbind(HJcontext.results1, HJcontext.results2)
-HJcontext.results$analysis <- "context"
 
-HJresults <- rbind(HJcontext.results, HJnontext.results)
 HJresults.summary <- HJresults %>%
   gather(key=measure, value=value, recall:precision) %>%
   group_by(analysis, nontext, measure) %>%
@@ -772,8 +764,107 @@ ggplot(HJresults.summary, aes(x=context, y=mean, fill=analysis)) +
   labs(x=NULL) 
 ```
 
+## context results
+```{r context_results}
+
+dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
+
+df_STM <- read.table("contexts_files/contexts_STM_bin_winutts30.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
+df_LDA <- read.table("contexts_files/contexts_LDA_bin_winutts30.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
+df_HJ <- read.table("contexts_files/contexts_HJ_bin.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
+df_WL <- read.table("contexts_files/contexts_WL.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
+
+par_function_args <- list(dataframe=NULL, 
+                          N.types=NULL, 
+                          N.utts=NULL, 
+                          by.size=FALSE, 
+                          dict=dict, 
+                          expand=FALSE, 
+                          seg.utts=TRUE, 
+                          TP=FALSE, 
+                          MI=TRUE, 
+                          verbose=FALSE, 
+                          prop=FALSE, 
+                          cutoff=.85, 
+                          nontext=FALSE, 
+                          quiet=TRUE,
+                          fun.version=fun.version)
+
+par_function_args[[1]] <- df_WL
+context_WL <- par_function(par_function_args)
+
+par_function_args[[1]] <- df_STM
+context_STM <- par_function(par_function_args)
+
+par_function_args[[1]] <- df_LDA
+context_LDA <- par_function(par_function_args)
+
+par_function_args[[1]] <- df_HJ
+context_HJ <- par_function(par_function_args)
+```
+
+
+```{r context_results_data_wrangling}
+# combine all the context results into one data frame
+context_WL$method <- "WL"
+context_STM$method <- "STM"
+context_LDA$method <- "LDA"
+context_HJ$method <- "HJ"
+
+context_results <- rbind(context_WL, context_STM, context_LDA, context_HJ)
+
+context_results$method <- factor(context_results$method, 
+                                 levels=c("WL", "STM", "LDA", "HJ"), 
+                                 labels = c("word lists", "topic modeling (STM)", "topic modeling (LDA)", "subjective judgments")) 
+
+# gather for plotting
+context_results <- context_results %>% 
+  gather( key="measure", value="value", recall, precision) %>% 
+  unite(col="criterion", stat, cutoff, sep="_", remove=FALSE) %>% 
+  rename(context=nontext) 
+
+context_results$measure <- as.factor(context_results$measure)
+
+# for adding to nontext dataframe
+context_ests <- context_results %>% 
+  unite(col="analysis", method, context, remove=FALSE) %>% 
+  select(criterion, analysis, measure, value) %>% 
+  rename(context.est=value)
+
+```
+
+## nontext results
+```{r nontext_results_data_wrangling}
+nontext_WL <- read_batch(dir="nontexts_WL-files")
+nontext_STM <- read_batch(dir="nontexts_STM-files")
+nontext_LDA <- read_batch(dir="nontexts_LDA-files")
+nontext_HJ <- read_batch(dir="nontexts_HJ-files")
+
+# combine all the context results into one data frame
+nontext_WL$method <- "WL"
+nontext_STM$method <- "STM"
+nontext_LDA$method <- "LDA"
+nontext_HJ$method <- "HJ"
+
+nontext_results <- rbind(nontext_WL, nontext_STM, nontext_LDA, nontext_HJ)
+
+nontext_results$method <- factor(nontext_results$method, 
+                                 levels=c("WL", "STM", "LDA", "HJ"), 
+                                 labels = c("word lists", "topic modeling (STM)", "topic modeling (LDA)", "subjective judgments")) 
+
+# gather for plotting
+nontext_results <- nontext_results %>% 
+  gather( key="measure", value="value", recall, precision) %>% 
+  unite(col="criterion", stat, cutoff, sep="_", remove=FALSE) %>% 
+  rename(nontext=nontext) 
+
+nontext_results$measure <- as.factor(nontext_results$measure)
+
+full_results <- left_join(nontext_results, context_ests) # add context estimates
+```
+
 ## global results
-```{r}
+```{r global_data}
 global.data <- list(N.utterances=nrow(df), streams=NULL, phon.pairs=NULL, unique.phon.pairs=NULL) # storage variable
 
 global.data$streams <- make_streams(df)
@@ -786,31 +877,7 @@ hist(global.data$unique.phon.pairs$MI, main="Global MI")
 hist(global.data$unique.phon.pairs$TP, main="Global TP")
 ```
 
-## context results
-```{r}
-colnames(df)[which(is.na(colnames(df)) )] <- "none" # replace NA with "none"
-
-context.data <- context_results(df=df, seg.utts=TRUE) # calls make_streams() and calc_MI()
-
-# present results
-par(mfrow=c(1,2))
-for(k in 1:length(colnames(contexts))){
-  hist(context.data[[k]]$unique.phon.pairs$MI, main=paste("Mutual Information,\n", colnames(contexts)[k], "context"), xlim=c(min(global.data$unique.phon.pairs$MI), max(global.data$unique.phon.pairs$MI)))
-  
-  hist(context.data[[k]]$unique.phon.pairs$TP, main=paste("Transitional Probability,\n", colnames(contexts)[k], "context"), xlim=c(0,1))
-}
-
-
-# how many utterances are in each context corpus?
-N.utt <- vector("numeric", length=length(colnames(contexts)))
-for(k in 1:length(colnames(contexts))){
-  N.utt[k] <- context.data[[k]]$N.utterances
-}
-names(N.utt) <- colnames(contexts)
-```
-
-## segment speech
-```{r}
+```{r global_seg_speech}
 global.data$TP85$seg.phon.stream <- segment_speech(cutoff=.85, 
                                                    stat="TP", 
                                                    data=global.data)
@@ -818,24 +885,9 @@ global.data$TP85$seg.phon.stream <- segment_speech(cutoff=.85,
 global.data$MI85$seg.phon.stream <- segment_speech(cutoff=.85, 
                                                    stat="MI", 
                                                    data=global.data)
-
-for(k in 1:length(names(context.data))){
-  
-  message(paste("processing ", names(contexts)[k], "...", sep=""))
-      
-  context.data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=.85, 
-                                                           stat="TP", 
-                                                           data=context.data[[k]])
-  
-  context.data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff=.85, 
-                                                           stat="MI", 
-                                                           data=context.data[[k]])
-  
-}
 ```
 
-## assess segmentation
-```{r}
+```{r global_assess_seg}
 global.data$TP85$seg.results <- assess_seg(seg.phon.stream=global.data$TP85$seg.phon.stream, words=global.data$streams$words, dict=dict)
 colMeans(global.data$TP85$seg.results[,3:4], na.rm=T)
 
@@ -843,33 +895,46 @@ global.data$MI85$seg.results <- assess_seg(seg.phon.stream=global.data$MI85$seg.
 colMeans(global.data$MI85$seg.results[,3:4], na.rm=T)
 saveRDS(global.data, file="results/global_results.rds")
 
-for(k in 1:length(names(context.data))){
-  
-  message(paste("processing ", names(contexts)[k], "...", sep=""))
-  message("TPs...")
-      
-  context.data[[k]]$TP85$seg.results <- assess_seg(seg.phon.stream=context.data[[k]]$TP85$seg.phon.stream, words=context.data[[k]]$streams$words, dict=dict)
-  
-  print(colMeans(context.data[[k]]$TP85$seg.results[,3:4], na.rm=T))
-  
-  message("MIs...")
-  context.data[[k]]$MI85$seg.results <- assess_seg(seg.phon.stream=context.data[[k]]$MI85$seg.phon.stream, words=context.data[[k]]$streams$words, dict=dict)
-  
-  print(colMeans(context.data[[k]]$MI85$seg.results[,3:4], na.rm=T))
-}
-# saveRDS(context.data, file="results/context_results_WL.rds") # save the word list results
-# saveRDS(context.data, file="results/context_results_HJ.rds") # save the human judgment context results
-# context.data <- readRDS("results/context_results_WL.rds")
-# context.data <- readRDS("results/context_results_HL.rds")
+global_results <- colMeans(global.data$MI85$seg.results[,3:4], na.rm=T)
+global_results <- as.data.frame(t(global_results)) # make it a data.frame
+global_results$stat <- "MI"
+global_results$cutoff <- .85
+global_results$N.utts <- global.data$N.utterances
+global_results$N.segd.units <- unique(global.data$MI85$seg.results$N.segd.units)
+global_results$N.words <- global.data$streams$N.tokens
+global_results$TTR <- global.data$streams$N.types/global.data$streams$N.tokens
+
+global_results <- global_results %>% 
+  gather( key="measure", value="value", recall, precision) %>% 
+  unite(col="criterion", stat, cutoff, sep="_", remove=FALSE) %>% 
+  left_join(unique(select(context_results, measure, method)), by="measure")
 ```
+
+## THE PLOT (all methods)
+```{r the_plot}
+
+ggplot(full_results, aes(x=context, y=value)) +
+  geom_boxplot() +
+  # geom_boxplot(color=NA, fill=NA, outlier.colour= NA) +
+  facet_wrap( ~ method + measure, scales="free_x", ncol=2) +
+  geom_point(aes(x=context, y=context.est, color=context), size=4, show.legend=FALSE) + 
+  geom_hline(data=global_results, aes(yintercept=value), linetype = 2, size=1.5) + 
+  theme(text = element_text(size=30), axis.ticks = element_blank(), axis.text.x = element_blank()) +
+  labs(x=NULL, y=NULL)
+ggsave(filename="plots/allmethods_results_boxplots.png", width=12, height=20, units="in")
+
+# with histograms instead of boxplots, to examine the nontext distributions (for shape, skew, etc.)
+ggplot(filter(full.results, criterion=="MI85"), aes(x=value))+
+  geom_histogram() +
+  geom_vline(aes(color=context, xintercept=context.est), size=2) + 
+  facet_wrap(~ measure + context, scales="free", ncol=7) +
+  theme(text = element_text(size=20), axis.ticks = element_blank()) +
+  labs(x=NULL, y=NULL)
+```
+
 
 ## combine results into plotable dataframe
 ```{r}
-#####################################################
-# use batchjobs_script.r to run nontext comparison distributions on ACISS (HPC)
-#####################################################
-nontext.results <- process_batch_results(id="bootstrapWL1", dir="nontexts_wordlists")
-
 
 library(tidyr)
 nontext.results <- nontext.results %>%
@@ -898,14 +963,14 @@ for (k in 1:length(names(context.data)) ){
 full.results <- left_join(nontext.results, context.results)
 
 # add global estimates
-global.results <- data.frame(measure=NA, criterion=NA, global.est=NA)
-global.results[1,] <- c("recall",    "TP85", colMeans(global.data$TP85$seg.results[, 3:4], na.rm=T)[1])
-global.results[2,] <- c("precision", "TP85", colMeans(global.data$TP85$seg.results[, 3:4], na.rm=T)[2])
-global.results[3,] <- c("recall",    "MI85", colMeans(global.data$MI85$seg.results[, 3:4], na.rm=T)[1])
-global.results[4,] <- c("precision", "MI85", colMeans(global.data$MI85$seg.results[, 3:4], na.rm=T)[2])
-global.results$global.est <- as.numeric(global.results$global.est)
+global_results <- data.frame(measure=NA, criterion=NA, global.est=NA)
+global_results[1,] <- c("recall",    "TP85", colMeans(global.data$TP85$seg.results[, 3:4], na.rm=T)[1])
+global_results[2,] <- c("precision", "TP85", colMeans(global.data$TP85$seg.results[, 3:4], na.rm=T)[2])
+global_results[3,] <- c("recall",    "MI85", colMeans(global.data$MI85$seg.results[, 3:4], na.rm=T)[1])
+global_results[4,] <- c("precision", "MI85", colMeans(global.data$MI85$seg.results[, 3:4], na.rm=T)[2])
+global_results$global.est <- as.numeric(global_results$global.est)
 
-full.results <- left_join(full.results, global.results)
+full.results <- left_join(full.results, global_results)
 ```
 
 ## THE PLOT
