@@ -212,20 +212,15 @@ seg <- function(phon.stream, unique.phon.pairs, seg.utts=TRUE, quiet=TRUE){
     for(i in 2:length(phon.stream)){
       
       this.pair <- dplyr::filter(unique.phon.pairs, syl1==phon.stream[i-1] & syl2==phon.stream[i])
-      if(nrow(this.pair) != 1) stop(paste0("ERROR at ", i, "th element of phon.stream: more or less than one entry for seg"))
-      
       # decide whether to place a boundary between this syllable (i) and the one before it
       if(seg.utts){
-        
-        if(!quiet) print(this.pair)
-        
         seg <- ifelse(phon.stream[i]=="###" | phon.stream[i-1]=="###", 1, # utterance boundaries are given as word boundaries
                       this.pair$seg)
       } else {
         seg <- this.pair$seg
       }
-      
-      if(!quiet) message("seg is ", seg, " for position ", i, " in phon.stream")
+      if(!quiet) print(this.pair); message("position ", i, " in phon.stream\n", "sy1: ", phon.stream[i-1], "\nsyl2: ", phon.stream[i], "\nseg: ", seg)
+
       
       if(length(seg) != 1) stop(paste("ERROR at ", i, "th element of phon.stream: more or less than one entry for seg", sep=""))
       
@@ -410,13 +405,15 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
       data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=cutoff,
                                                        stat = "TP", 
                                                        data = data[[k]],
-                                                       seg.utts = seg.utts)
+                                                       seg.utts = seg.utts,
+                                                       quiet=FALSE)
     }
     if(MI){
       data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff = cutoff,
                                                        stat = "MI", 
                                                        data = data[[k]],
-                                                       seg.utts = seg.utts)
+                                                       seg.utts = seg.utts,
+                                                       quiet=FALSE)
     }
   } # end of for loop
   
