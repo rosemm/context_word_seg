@@ -457,6 +457,9 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
     if(verbose & TP) TPs[[k]] <- data[[k]]$unique.phon.pairs$TP
   } # end of for loop
   
+  message("saving results...")
+  message("here are the results: \n")
+  print(stat.results)
   stat.results$nontext <- as.factor(as.character(stat.results$nontext))
   stat.results$recall <- as.numeric(stat.results$recall)
   stat.results$precision <- as.numeric(stat.results$precision)
