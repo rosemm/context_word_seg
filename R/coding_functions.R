@@ -520,12 +520,11 @@ clean_contexts <- function(doc, key_file="context_cleaning_keys.txt" ){
   # read in the key again, to get any updates
   cleaning_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
   
-  for(i in 1:nrow(cleaning_keys)){
-    rows <- grep(pattern=paste("^", cleaning_keys[i,1], "$", sep=""), x=doc$context, value=F)
-    doc[rows,] # just for checking
-    doc$context <- gsub(pattern=paste("^", cleaning_keys[i,1], "$", sep=""), x=doc$context, replacement=cleaning_keys[i,2])
-    doc[rows,] # just for checking
-  }
+  doc <- doc %>% 
+    left_join(cleaning_keys, by=c("context"="context_raw")) %>% 
+    select( -context ) %>% 
+    rename(context = context_clean)
+  
   doc$context <- as.factor(doc$context)
   summary(doc$context)
   
