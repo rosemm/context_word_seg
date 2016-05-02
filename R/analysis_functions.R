@@ -69,6 +69,7 @@ apply_threshold <- function(df.model, threshold){
   
   # any contexts that are all 0's (i.e. any contexts which have no utterances assigned)?
   topics.occurring <- unique(filter(df.bin, include==1)$topic)
+  message("\nDropping ", length(unique(df.bin$topic)) - length(topics.occurring), " contexts because they are not above threshold on any utterance.\n")
   
   df.bin <- df.bin %>%
     filter(topic %in% topics.occurring) %>% 

@@ -510,7 +510,8 @@ process_codes <- function(doc, min.codes=10, max.codes=10){
   doc_keep <- doc_keep %>% 
     tidyr::separate(col=context, into=paste("context", 1:maxcontexts, sep="."), sep="[[:blank:]]*;[[:blank:]]*", extra="drop") %>% 
     tidyr::gather(key="contextnum", value="context", starts_with("context."), na.rm=TRUE)
-return(doc_keep)
+
+  return(doc_keep)
 }
 
 clean_contexts <- function(doc, key_file="context_cleaning_keys.txt" ){
