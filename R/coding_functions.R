@@ -484,13 +484,14 @@ process_codes <- function(doc, min.codes=10, max.codes=10){
   message("\nUtterances have been coded this many times across coders:\n") ; print(summary(counts$n))
   
   # only keep utterances that have been coded at least [min.codes] times and no more than [max.codes] times
-  in.range <- counts
-    dplyr::filter(n >= min.codes & n <= max.codes) %>% 
+  in.range <- counts %>% 
+    dplyr::filter(n >= min.codes) %>% 
+    dplyr::filter(n <= max.codes) %>% 
     select(utt) %>% # drop the n column
     left_join(doc, by="utt")
   
   # for utterances with more than [max.codes], randomly select [max.codes] of them
-  above.max.sample <- counts
+  above.max.sample <- counts %>% 
     dplyr::filter(n > max.codes) %>% # only keep utterances with more than [max.codes]
     select(utt) %>% # drop the n column
     left_join(doc, by="utt") %>% # re-expand it back to doc, but only for the selected utts
