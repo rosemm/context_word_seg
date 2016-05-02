@@ -13,7 +13,10 @@
 |biting                  |biting                   |
 |blowing bubbles         |blowing bubbles          |
 |blowing raspberries     |touching                 |
+|bottle feeding          |mealtime                 |
 |bouncing                |playtime                 |
+|breakfast               |mealtime                 |
+|breastfeeding           |mealtime                 |
 |brushing hair           |dressing                 |
 |burping                 |mealtime                 |
 |car                     |outside                  |
@@ -33,9 +36,11 @@
 |cuddling                |touching                 |
 |dancing                 |playtime                 |
 |diaper change           |diaper change            |
+|dinner                  |mealtime                 |
 |directing attention     |interaction              |
 |dressing                |dressing                 |
 |drinking                |mealtime                 |
+|drinking milk           |mealtime                 |
 |drooling                |drooling                 |
 |drying                  |bathtime                 |
 |eating something wrong  |eating something wrong   |
@@ -46,6 +51,7 @@
 |fussing                 |fussing                  |
 |gas                     |fussing                  |
 |getting ready           |dressing                 |
+|getting up              |sleep                    |
 |going potty             |diaper change            |
 |grooming                |touching                 |
 |grunting                |interaction              |
@@ -66,7 +72,9 @@
 |leaving                 |outside                  |
 |listening               |interaction              |
 |looking                 |interaction              |
+|lunch                   |mealtime                 |
 |lying                   |lying                    |
+|lying down              |sleep                    |
 |making mess             |making mess              |
 |mealtime                |mealtime                 |
 |messing up              |messing up               |
