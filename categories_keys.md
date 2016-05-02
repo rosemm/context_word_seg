@@ -10,7 +10,7 @@
 |before leaving          |outside                  |
 |being hungry            |being hungry             |
 |being tired             |being tired              |
-|biting                  |biting                   |
+|biting                  |being naughty            |
 |blowing bubbles         |blowing bubbles          |
 |blowing raspberries     |touching                 |
 |bottle feeding          |mealtime                 |
@@ -22,7 +22,7 @@
 |car                     |outside                  |
 |changing clothes        |dressing                 |
 |chewing                 |mealtime                 |
-|chiding                 |interaction              |
+|chiding                 |being naughty            |
 |clapping                |interaction              |
 |clean up                |housework                |
 |cleaning                |housework                |
@@ -43,7 +43,7 @@
 |drinking milk           |mealtime                 |
 |drooling                |drooling                 |
 |drying                  |bathtime                 |
-|eating something wrong  |eating something wrong   |
+|eating something wrong  |being naughty            |
 |entertaining            |playtime                 |
 |exercising              |playtime                 |
 |filming                 |taking pictures          |
@@ -73,11 +73,10 @@
 |listening               |interaction              |
 |looking                 |interaction              |
 |lunch                   |mealtime                 |
-|lying                   |lying                    |
 |lying down              |sleep                    |
-|making mess             |making mess              |
+|making mess             |being naughty            |
 |mealtime                |mealtime                 |
-|messing up              |messing up               |
+|messing up              |being naughty            |
 |morning time            |morning time             |
 |moving                  |playtime                 |
 |music                   |music                    |
@@ -107,7 +106,7 @@
 |pre-feeding             |mealtime                 |
 |pre-mealtime            |mealtime                 |
 |pre-nap                 |sleep                    |
-|pulling hair            |pulling hair             |
+|pulling hair            |being naughty            |
 |putting on the bib      |mealtime                 |
 |raining                 |raining                  |
 |relieving tummy ache    |sick                     |
