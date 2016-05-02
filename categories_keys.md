@@ -1,301 +1,141 @@
-|context (raw)            |context category (clean) |
-|:------------------------|:------------------------|
-|                         |TEST                     |
-|after bath               |post-bath                |
-|after bathtime           |post-bedtime             |
-|after diapering          |post-diaper              |
-|after eating             |post-mealtime            |
-|after feeding            |post-mealtime            |
-|after meal               |post-mealtime            |
-|after mealtime           |post-mealtime            |
-|after nap                |post-nap                 |
-|after naptime            |post-nap                 |
-|after sickness           |post-sick                |
-|after sleep              |post-nap                 |
-|after sleeping           |post-bedtime             |
-|answering the telephone  |answering the telephone  |
-|applying teething gel    |applying teething gel    |
-|babbling                 |babbling                 |
-|baking                   |cooking                  |
-|baptism                  |baptism                  |
-|batg                     |bathtime                 |
-|bath                     |bathtime                 |
-|BATH                     |bathtime                 |
-|bath time                |bathtime                 |
-|bathing                  |bathtime                 |
-|bathroom                 |bathroom                 |
-|bathtime                 |bathtime                 |
-|bed time                 |bedtime                  |
-|bedtime                  |bedtime                  |
-|before bath              |pre-bath                 |
-|before bath time         |pre-bath                 |
-|before bed               |pre-bedtime              |
-|before bedtime           |pre-bedtime              |
-|before diapering         |pre-diaper               |
-|before feeding           |pre-mealtime             |
-|before going out         |before leaving           |
-|before leaving           |before leaving           |
-|before meal              |pre-mealtime             |
-|before meal time         |pre-mealtime             |
-|before mealtime          |pre-mealtime             |
-|before nap               |pre-nap                  |
-|before napping           |pre-bedtime              |
-|before swimming          |pre-swimming             |
-|beforing snacks          |pre-mealtime             |
-|being hungry             |being hungry             |
-|being sick               |sick                     |
-|being sleepy             |being tired              |
-|being tired              |being tired              |
-|being uncomfortable      |fussing                  |
-|being upset              |fussing                  |
-|biting                   |biting                   |
-|blowing bubbles          |blowing bubbles          |
-|blowing raspberries      |blowing raspberries      |
-|boiling water            |cooking                  |
-|bottle                   |mealtime                 |
-|bottle feeding           |mealtime                 |
-|bounching                |bouncing                 |
-|bouncing                 |bouncing                 |
-|bouncing chair           |bouncing                 |
-|breakfast                |mealtime                 |
-|breastfeeding            |mealtime                 |
-|brushing                 |brushing hair            |
-|brushing hair            |brushing hair            |
-|burping                  |burping                  |
-|camera                   |taking pictures          |
-|car ride                 |car                      |
-|car trip                 |car                      |
-|changing                 |diaper change            |
-|changing clothes         |changing clothes         |
-|changing diaper          |diaper change            |
-|chewing                  |chewing                  |
-|chiding                  |chiding                  |
-|clapping                 |clapping                 |
-|clean up                 |clean up                 |
-|cleaning                 |cleaning                 |
-|cleaning the child       |cleaning the child       |
-|cleaning up              |cleaning                 |
-|coaxing words from baby  |talking                  |
-|comforting               |soothing                 |
-|coming back              |coming home              |
-|coming home              |coming home              |
-|communicating            |talking                  |
-|consoling                |soothing                 |
-|conversing               |talking                  |
-|conversing with child    |talking                  |
-|cooing                   |cooing                   |
-|cooking                  |cooking                  |
-|coughing                 |coughing                 |
-|crawling                 |crawling                 |
-|crying                   |crying                   |
-|cuddling                 |cuddling                 |
-|Cuddling                 |cuddling                 |
-|dancing                  |dancing                  |
-|defecating               |pooping                  |
-|diaper cahnge            |diaper change            |
-|diaper change            |diaper change            |
-|diapering                |diaper change            |
-|dinner time              |mealtime                 |
-|dinnertime               |mealtime                 |
-|directing attention      |directing attention      |
-|doing chores             |housework                |
-|doing housework          |housework                |
-|drawing attention        |directing attention      |
-|dressing                 |dressing                 |
-|drinking                 |drinking                 |
-|driving                  |car                      |
-|drooling                 |drooling                 |
-|drying                   |drying                   |
-|drying after bath        |drying                   |
-|drying off               |drying                   |
-|eating                   |mealtime                 |
-|eating something wrong   |eating something wrong   |
-|end of mealtime          |post-mealtime            |
-|entertaining             |entertaining             |
-|excreting waste          |pooping                  |
-|exercising               |exercising               |
-|feeding                  |mealtime                 |
-|Feeding                  |mealtime                 |
-|feeding bottle           |mealtime                 |
-|feeding time             |mealtime                 |
-|filming                  |filming                  |
-|finishing bath           |post-bath                |
-|friends                  |friends                  |
-|fussibg                  |fussing                  |
-|fussing                  |fussing                  |
-|gas                      |gas                      |
-|getting attention        |directing attention      |
-|getting dressed          |dressing                 |
-|getting on clothes       |changing clothes         |
-|getting ready            |getting ready            |
-|getting ready for bed    |pre-bedtime              |
-|getting ready for doctor |pre-doctors visit        |
-|getting sick             |spitting up              |
-|getting up               |post-nap                 |
-|going out                |leaving                  |
-|going potty              |going potty              |
-|going to sleep           |bedtime                  |
-|grooming                 |grooming                 |
-|grunting                 |grunting                 |
-|guided observation       |directing attention      |
-|hearing                  |hearing                  |
-|hiccuping                |hiccups                  |
-|hiccupping               |hiccups                  |
-|hiccups                  |hiccups                  |
-|hicupping                |hiccups                  |
-|holding                  |holding                  |
-|holding child            |holding child            |
-|house chores             |housework                |
-|housework                |housework                |
-|in crib                  |in crib                  |
-|in the kitchen           |in the kitchen           |
-|inactive                 |inactive                 |
-|interaction              |talking                  |
-|ironing                  |ironing                  |
-|joint attention          |joint attention          |
-|kicking                  |kicking                  |
-|kissing                  |kissing                  |
-|laughing                 |laughing                 |
-|laying outside           |outside                  |
-|learning words           |learning words           |
-|leaving                  |leaving                  |
-|listening                |listening                |
-|looking                  |looking                  |
-|lying                    |lying                    |
-|making mess              |making mess              |
-|meal                     |mealtime                 |
-|meal time                |mealtime                 |
-|mealtime                 |mealtime                 |
-|messing up               |messing up               |
-|morning time             |morning time             |
-|moving                   |moving                   |
-|music                    |music                    |
-|nap time                 |nap time                 |
-|napping                  |nap time                 |
-|naptime                  |nap time                 |
-|newspaper                |newspaper                |
-|nibbling                 |mealtime                 |
-|nine                     |none                     |
-|none                     |none                     |
-|observing                |observing                |
-|on a walk                |walking                  |
-|outside                  |outside                  |
-|palying                  |playing                  |
-|peeing                   |peeing                   |
-|peekaboo                 |playtime                 |
-|photo                    |taking pictures          |
-|pkaying                  |playtime                 |
-|plaing                   |playing                  |
-|play                     |playtime                 |
-|play time                |playtime                 |
-|playiing                 |playing                  |
-|playin                   |playing                  |
-|playing                  |playtime                 |
-|playing outside          |outside                  |
-|playing with ball        |playing                  |
-|playing with dog         |playing                  |
-|playing with pet         |playing                  |
-|playtime                 |playtime                 |
-|pooping                  |pooping                  |
-|post bath                |post-bath                |
-|post meal                |post-mealtime            |
-|post-bath                |post-bath                |
-|Post-bath                |post-bath                |
-|post-bathing             |post-bath                |
-|post-changing            |post-diaper              |
-|post-feeding             |post-feeding             |
-|post-meal                |post-mealtime            |
-|potty training           |potty training           |
-|pre bath                 |pre-bath                 |
-|pre diaper change        |pre-diaper               |
-|pre meal                 |pre-mealtime             |
-|pre-bath                 |pre-bath                 |
-|pre-bathing              |pre-bath                 |
-|pre-bedtime              |pre-bedtime              |
-|pre-change               |pre-change               |
-|pre-changing             |pre-diaper               |
-|pre-doctors visit        |pre-doctors visit        |
-|pre-dressing             |pre-dressing             |
-|pre-feeding              |pre-feeding              |
-|pre-meal                 |pre-mealtime             |
-|preparing food           |cooking                  |
-|preparing for bath       |pre-bedtime              |
-|preparing for bed        |pre-bedtime              |
-|preparing for bedtime    |pre-bedtime              |
-|preparing meal           |cooking                  |
-|pulling hair             |pulling hair             |
-|putting down             |pre-bedtime              |
-|putting on the bib       |putting on the bib       |
-|putting to bed           |bedtime                  |
-|reading                  |storytime                |
-|relieving hiccups        |hiccups                  |
-|relieving tummy ache     |relieving tummy ache     |
-|rolling                  |rolling                  |
-|rolling around           |rolling                  |
-|rolling over             |rolling                  |
-|seeing                   |observing                |
-|shopping                 |shopping                 |
-|shouting                 |shouting                 |
-|sick                     |sick                     |
-|singing                  |singing                  |
-|sleep time               |bedtime                  |
-|sleeping                 |bedtime                  |
-|sleeptime                |bedtime                  |
-|smiling                  |smiling                  |
-|snack                    |mealtime                 |
-|snacktime                |mealtime                 |
-|sneezing                 |sneezing                 |
-|snuggling                |cuddling                 |
-|soething                 |soothing                 |
-|soothing                 |soothing                 |
-|soothng                  |soothing                 |
-|sooyhing                 |soothing                 |
-|sothing                  |soothing                 |
-|speaking                 |talking                  |
-|spitting up              |spitting up              |
-|storytime                |storytime                |
-|stretching               |stretching               |
-|sucking                  |sucking                  |
-|sucking thumb            |sucking thumb            |
-|sun bathing              |outside                  |
-|sunbathing               |sunbathing               |
-|sunning                  |outside                  |
-|swimming                 |swimming                 |
-|swimmming                |swimming                 |
-|swinging                 |swinging                 |
-|taking a photo           |taking pictures          |
-|taking a picture         |taking pictures          |
-|taking photo             |taking pictures          |
-|taking photos            |taking pictures          |
-|taking pictures          |taking pictures          |
-|takling                  |talking                  |
-|talking                  |talking                  |
-|talking photos           |taking pictures          |
-|talking to child         |talking                  |
-|taping                   |taping                   |
-|tea time                 |mealtime                 |
-|teasing                  |teasing                  |
-|teething                 |teething                 |
-|television               |TV                       |
-|thinking                 |thinking                 |
-|thumb sucking            |sucking thumb            |
-|thumb-sucking            |sucking thumb            |
-|ticking                  |tickling                 |
-|tickling                 |tickling                 |
-|toilet                   |going potty              |
-|touching                 |touching                 |
-|undressing               |undressing               |
-|videotaping              |taping                   |
-|waiting for food         |pre-mealtime             |
-|waking                   |waking up                |
-|waking up                |waking up                |
-|walking                  |walking                  |
-|washing                  |washing                  |
-|washing dishes           |washing dishes           |
-|washing face             |washing face             |
-|watching                 |watching                 |
-|watching television      |TV                       |
-|watching tv              |TV                       |
-|watching TV              |TV                       |
-|yawning                  |yawning                  |
-|yelling                  |shouting                 |
+|context (raw)           |context category (clean) |
+|:-----------------------|:------------------------|
+|answering the telephone |answering the telephone  |
+|applying teething gel   |fussing                  |
+|babbling                |interaction              |
+|baptism                 |baptism                  |
+|bathroom                |bathroom                 |
+|bathtime                |bathtime                 |
+|bedtime                 |sleep                    |
+|before leaving          |outside                  |
+|being hungry            |being hungry             |
+|being tired             |being tired              |
+|biting                  |biting                   |
+|blowing bubbles         |blowing bubbles          |
+|blowing raspberries     |touching                 |
+|bouncing                |playtime                 |
+|brushing hair           |dressing                 |
+|burping                 |mealtime                 |
+|car                     |outside                  |
+|changing clothes        |dressing                 |
+|chewing                 |mealtime                 |
+|chiding                 |interaction              |
+|clapping                |interaction              |
+|clean up                |housework                |
+|cleaning                |housework                |
+|cleaning the child      |touching                 |
+|coming home             |outside                  |
+|cooing                  |interaction              |
+|cooking                 |housework                |
+|coughing                |coughing                 |
+|crawling                |playtime                 |
+|crying                  |fussing                  |
+|cuddling                |touching                 |
+|dancing                 |playtime                 |
+|diaper change           |diaper change            |
+|directing attention     |interaction              |
+|dressing                |dressing                 |
+|drinking                |mealtime                 |
+|drooling                |drooling                 |
+|drying                  |bathtime                 |
+|eating something wrong  |eating something wrong   |
+|entertaining            |playtime                 |
+|exercising              |playtime                 |
+|filming                 |taking pictures          |
+|friends                 |friends                  |
+|fussing                 |fussing                  |
+|gas                     |fussing                  |
+|getting ready           |dressing                 |
+|going potty             |diaper change            |
+|grooming                |touching                 |
+|grunting                |interaction              |
+|hearing                 |interaction              |
+|hiccups                 |hiccups                  |
+|holding                 |touching                 |
+|holding child           |touching                 |
+|housework               |housework                |
+|in crib                 |sleep                    |
+|in the kitchen          |housework                |
+|inactive                |none                     |
+|ironing                 |housework                |
+|joint attention         |interaction              |
+|kicking                 |playtime                 |
+|kissing                 |touching                 |
+|laughing                |interaction              |
+|learning words          |interaction              |
+|leaving                 |outside                  |
+|listening               |interaction              |
+|looking                 |interaction              |
+|lying                   |lying                    |
+|making mess             |making mess              |
+|mealtime                |mealtime                 |
+|messing up              |messing up               |
+|morning time            |morning time             |
+|moving                  |playtime                 |
+|music                   |music                    |
+|nap time                |sleep                    |
+|newspaper               |newspaper                |
+|none                    |none                     |
+|observing               |interaction              |
+|outside                 |outside                  |
+|peeing                  |diaper change            |
+|playing                 |playtime                 |
+|playtime                |playtime                 |
+|pooping                 |diaper change            |
+|post-bath               |bathtime                 |
+|post-bedtime            |sleep                    |
+|post-diaper             |diaper change            |
+|post-feeding            |mealtime                 |
+|post-mealtime           |mealtime                 |
+|post-nap                |sleep                    |
+|post-sick               |sick                     |
+|potty training          |bathroom                 |
+|pre-bath                |bathtime                 |
+|pre-bedtime             |sleep                    |
+|pre-change              |diaper change            |
+|pre-diaper              |diaper change            |
+|pre-doctors visit       |pre-doctors visit        |
+|pre-dressing            |dressing                 |
+|pre-feeding             |mealtime                 |
+|pre-mealtime            |mealtime                 |
+|pre-nap                 |sleep                    |
+|pulling hair            |pulling hair             |
+|putting on the bib      |mealtime                 |
+|raining                 |raining                  |
+|relieving tummy ache    |sick                     |
+|rolling                 |playtime                 |
+|scared                  |fussing                  |
+|shopping                |shopping                 |
+|shouting                |interaction              |
+|sick                    |sick                     |
+|singing                 |interaction              |
+|smiling                 |interaction              |
+|sneezing                |sneezing                 |
+|soothing                |fussing                  |
+|spitting up             |mealtime                 |
+|storytime               |interaction              |
+|stretching              |stretching               |
+|sucking                 |touching                 |
+|sucking thumb           |touching                 |
+|sunbathing              |outside                  |
+|swimming                |swimming                 |
+|swinging                |playtime                 |
+|taking pictures         |taking pictures          |
+|talking                 |interaction              |
+|taping                  |taking pictures          |
+|teasing                 |interaction              |
+|teething                |fussing                  |
+|thinking                |thinking                 |
+|tickling                |touching                 |
+|touching                |touching                 |
+|TV                      |TV                       |
+|undressing              |dressing                 |
+|waking up               |sleep                    |
+|walking                 |playtime                 |
+|washing                 |bathtime                 |
+|washing dishes          |housework                |
+|washing face            |bathtime                 |
+|washing hair            |bathtime                 |
+|washing up              |housework                |
+|watching                |interaction              |
+|yawning                 |sleep                    |
