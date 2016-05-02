@@ -529,6 +529,7 @@ clean_contexts <- function(doc, key_file="context_cleaning_keys.txt" ){
   summary(doc$context)
   
   doc <- dplyr::filter(doc, context !="TEST") # cleaning
+  doc <- dplyr::filter(doc, context !="") # cleaning
   
   return(doc)
 }
@@ -538,6 +539,12 @@ clean_categories <- function(doc, key_file="categories_cleaning_keys.txt" ){
   new_codes(raw_codes=unique(doc$context), cols=c("context_clean", "category"), key_file)
   # read in the key again, to get any updates
   categories_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
+  
+  # print a nice (.md) version of the categories_cleaning_keys.txt, to link to online
+  tb <- categories_keys
+  colnames(tb) <- c("context (raw)", "context category (clean)")
+  tb <- knitr::kable(tb)
+  writeLines(tb, "categories_keys.md")
   
   # add categories to doc
   doc <- left_join(doc, categories_keys, by=c("context" = "context_clean"))
