@@ -394,10 +394,14 @@ collect_codes <- function(){
   
   # pull out the coded portion from each doc
   for(i in 1:length(docs)){
-    doc <- read.table(docs[i], header=1, sep="\t", stringsAsFactors=F)
-    coded <- dplyr::filter(doc, !is.na(context))
-    if( nrow(dplyr::filter(coded, coder=="RM" | coder=="TEST" | coder=="" & !is.na(date))) != 0 ) stop("Run doc_doctor first. There are bad cases here.")
-    if(i==1) doc <- coded else doc <- rbind(doc, coded)
+    this.doc <- read.table(docs[i], header=1, sep="\t", stringsAsFactors=F)
+    coded <- dplyr::filter(this.doc, !is.na(context))
+    stopifnot( nrow(dplyr::filter(coded, coder=="RM" | coder=="TEST" | coder=="" & !is.na(date))) == 0 )
+    if(i==1) {
+        doc <- coded 
+      } else {
+        doc <- base::rbind(doc, coded)
+    }
   }
   # clean up some bad punctuation
   doc$context <- gsub(pattern=",", x=doc$context, replacement=";", fixed=T)
