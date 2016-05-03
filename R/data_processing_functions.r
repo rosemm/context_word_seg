@@ -360,16 +360,19 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
       dict <- lang[[2]] # the dictionary
     } else stop("Only recognized dists are 'skewed' or 'unif'.")
     
-    if(by.size){
-      # use that corpus to generate a size sim contexts file
-      df <- contexts_by_size(df=corpus, N.sizes=20, min.utt=100)
-    } else {
-      df <- corpus
+    df <- corpus
+    
+    if(!by.size){
       df$N.uttAll <- 1 # make a column of ones for the whole corpus (i.e. use everything)
     }
-
   } 
   if(is.data.frame(dataframe)) df <- dataframe # if the given dataframe is a data.frame, then use that
+  
+  if(by.size){
+    df <- dplyr::select(df, utt, orth, phon) # only keep the utt, orth, and phon columns
+    # use that corpus to generate a size sim contexts file
+    df <- contexts_by_size(df=corpus, N.sizes=20, min.utt=100)
+  }
     
   if(nrow(df) == 0) stop("df didn't load")
   if(nrow(dict) == 0) stop("dict didn't load")
@@ -418,8 +421,7 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
   } # end of for loop
   
   # assess segmentation
-  MIs <- vector("list", length(names(data))); names(MIs) <- names(data) # empty storage variable
-  TPs <- vector("list", length(names(data))); names(TPs) <- names(data) # empty storage variable
+  addl.info <- vector("list", length(names(data))); names(addl.info) <- names(data) # empty storage variable
   for(k in 1:length(names(data))){
     message(paste0("assessing segmentation for ", names(data)[k], "..."))
     
@@ -458,12 +460,20 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
     this.result$TTR <- data[[k]]$streams$N.types/data[[k]]$streams$N.tokens
     this.result$mean.MI <- ifelse(MI, mean(data[[k]]$unique.phon.pairs$MI), NA)
     this.result$mean.TP <- ifelse(TP, mean(data[[k]]$unique.phon.pairs$TP), NA)
-    if(k==1) {
-      stat.results <- this.result # on the first run through the for loop
-    } else stat.results <- rbind(stat.results, this.result) # all subsequent runs
     
-    if(verbose & MI) MIs[[k]] <- data[[k]]$unique.phon.pairs$MI
-    if(verbose & TP) TPs[[k]] <- data[[k]]$unique.phon.pairs$TP
+    this.addl.info <- data[[k]]$unique.phon.pairs
+    this.addl.info$context <- names(data)[k]
+    
+    if(k==1) {
+      # on the first run through the for loop
+      stat.results <- this.result 
+      addl.info <- this.addl.info
+    } else {
+      # all subsequent runs
+      stat.results <- rbind(stat.results, this.result) 
+      addl.info <- rbind(addl.info, this.addl.info)
+    }
+    
   } # end of for loop
   
   message("saving results...")
@@ -475,7 +485,7 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
   stat.results$SHA1 <- fun.version
   
   if(verbose){
-    return( list(stat.results=stat.results, MIs=MIs, TPs=TPs) )
+    return( list(stat.results=stat.results, addl.info=addl.info) )
   } else {
     return(stat.results)
   }
