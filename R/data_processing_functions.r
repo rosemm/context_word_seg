@@ -371,7 +371,7 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
   if(by.size){
     df <- dplyr::select(df, utt, orth, phon) # only keep the utt, orth, and phon columns
     # use that corpus to generate a size sim contexts file
-    df <- contexts_by_size(df=corpus, N.sizes=20, min.utt=100)
+    df <- contexts_by_size(df=df, N.sizes=20, min.utt=100)
   }
     
   if(nrow(df) == 0) stop("df didn't load")
