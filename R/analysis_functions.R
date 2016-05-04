@@ -272,6 +272,29 @@ clean_batch_results <- function(results){
   return(list(sim.results=sim.results, MIs=MIs, TPs=TPs))
 }
 
+plot_context_vs_nontext <- function(context_results, nontext_results, global_results, outcome, save.to, ...){
+  
+  stopifnot(require(ggplot2), require(dplyr), require(tidyr))
+  
+  additional_args <- as.data.frame(list(...), stringsAsFactors=FALSE)
+  additional_args <- paste0(colnames(additional_args), additional_args, collapse="_")
+  
+  colnames(context_results)[colnames(context_results)==outcome] <- "outcome"
+  colnames(nontext_results)[colnames(nontext_results)==outcome] <- "outcome"
+  
+  for(method in 1:unique(context_results$method.short)){
+    p <- ggplot(nontext_results, aes(x=context, y=outcome)) + 
+      geom_boxplot() +
+      facet_wrap( ~ method , scales="free") +
+      geom_point(data=context_results, aes(x=context, y=outcome, color=method), size=4, show.legend=FALSE) + 
+      theme(text = element_text(size=30), axis.ticks = element_blank(), axis.text.x = element_blank()) +
+      labs(x=NULL, y=NULL, title=paste(method, outcome)) 
+    if(!is.null(global_results) ) p <- p +  geom_hline(data=global_results, aes(yintercept=value), linetype = 2, size=1.5)
+    ggsave(filename=paste0(save.to, "/results_", outcome, "_", method, "_", additional_args ,".png"), width=8, height=8, units="in")
+  }
+}
+
+
 plot_seg_results <- function(seg.results, title=NULL, boxplot=TRUE, scatterplot=FALSE, by=c("syl", "contexts")){
   # add break by N.syl option (check whether 1, 2, + syllable words are getting segmented correctly)
   plot <- ggplot(seg.results, aes(x=seg.result, y=freq.segd)) 
