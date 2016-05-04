@@ -106,15 +106,28 @@ BlankDoc <- function(wd="./transcripts/", for.coding=TRUE){
 }
 # write.table(blank_doc, file="blank_coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
-UpdateDoc <- function(doc, criterion){
+UpdateDoc <- function(doc, criterion, unique.coders){
   # update an existing, partially coded document, to focus coders on the thin parts
   
-  stopifnot(require(dplyr), require(tidyr))
+  stopifnot(require(dplyr), require(tidyr), require(lubridate))
   
-  below.crit <- doc %>%
-    unite(utt, file, UttNum) %>% 
-    count(utt) %>% 
-    filter(n < criterion) # only keep utterances that have not been coded at least criterion times
+  doc$day <- as.POSIXct(doc$date, origin = '1970-01-01 00:00:00')
+  
+  if(!unique.coders){
+    counts <- doc %>%
+      unite(utt, file, UttNum) %>% 
+      count(utt)
+  }
+  if(unique.coders) {
+    counts <- doc %>%
+      unite(utt, file, UttNum) %>%
+      count(utt, coder) %>% 
+      count(utt) # running count twice makes it only max one hit per coder per utterance
+  }
+  # only keep utterances that have not been coded at least criterion times  
+  below.crit <- counts %>%   
+      filter(n < criterion) 
+  
  
   # the line numbers, utterance number, and file name for everything in doc
   blank_doc <- BlankDoc() %>% 
@@ -131,7 +144,7 @@ UpdateDoc <- function(doc, criterion){
     na.omit() %>% 
     arrange(file, LineNum) 
 
-message(paste0(nrow(update_doc), " utterances still have fewer than ", criterion, " codes (", 100*round(nrow(below.crit)/length(unique(blank_doc$utt)), 2),"% of total). \nWriting a new coding_doc with just those utterances..."))
+message(paste0(nrow(update_doc), " utterances still have fewer than ", criterion, " codes (", 100*round(nrow(update_doc)/length(unique(blank_doc$utt)), 2),"% of total). \nWriting a new coding_doc with just those utterances..."))
   
   update_doc$coder <- NA
   update_doc$date <- NA
@@ -265,7 +278,7 @@ CodeContexts <- function(this_pass=1, window_size=30, slide_by=3){
                            UttNum=window$UttNum, 
                            file=this.file, 
                            coder=coder_response, 
-                           date=date, 
+                           date=as.integer(Sys.time()), 
                            context=context_response, 
                            pass=NA)
     this_doc$file <- as.character(this_doc$file)
@@ -457,31 +470,43 @@ new_codes <- function( raw_codes, cols=c("raw", "clean"), key_file ){
           } 
 }
 
-process_codes <- function(doc, min.codes=10, max.codes=10){
+process_codes <- function(doc, min.codes=10, max.codes=10, unique.coders){
   if(!require(tidyr)) install.packages("tidyr"); library(tidyr)
   if(!require(dplyr)) install.packages("dplyr"); library(dplyr)
   if(!require(psych)) install.packages("psych"); library(psych)
   if(!require(GPArotation)) install.packages("GPArotation"); library(GPArotation)
   
   doc <- doc %>% 
-    dplyr::filter( !grepl("^[[:blank:]]*$",doc$context)) %>% # cleaning out empty codes
+    dplyr::filter( !grepl(pattern="^[[:blank:]]*$", x=doc$context)) %>% # cleaning out empty codes
     tidyr::unite(utt, file, UttNum) %>% 
     as.tbl() # for speed
   
   doc$coder <- toupper(doc$coder)
+  
+  doc$id <- 1:nrow(doc) # a unique id for each coding event
   
   RA_info <- doc %>%
     dplyr::select(utt, coder, context, pass) %>%
     group_by(coder) %>%
     dplyr::summarize(n_utts_codes=n())
   
-  message("\nRAs have coded this many utterances:\n") ; print(as.data.frame(RA_info))
+  message("\nRAs have coded this many utterances (raw coding):\n") ; print(as.data.frame(RA_info))
+  
+  if(unique.coders){
+    # for utterances with more than 1 coding event from the same coder, randonly select 1 of them
+    doc.unique <- doc %>% 
+      group_by(utt, coder) %>% 
+      sample_n(1) # group_by() and then sample_n() takes random samples from each group (utt, coder)
+    message("Removing ", nrow(doc) - nrow(doc.unique), " coding events (", 100*round(nrow(doc.unique)/nrow(doc), 2) ,"%) because the same utterance has been coded more than one time by the same coder.\n")   
+    doc <- doc.unique
+  }
   
   counts <- doc %>%
     filter(!is.na(context)) %>% 
     count(utt)
   
-  message("\nUtterances have been coded this many times across coders:\n") ; print(summary(counts$n))
+  message("NOTE: Only allow each coder to code each utterance once? ", unique.coders)
+  message("Utterances have been coded this many times across coders:\n") ; print(summary(counts$n))
   
   # only keep utterances that have been coded at least [min.codes] times and no more than [max.codes] times
   in.range <- counts %>% 
@@ -496,20 +521,26 @@ process_codes <- function(doc, min.codes=10, max.codes=10){
     select(utt) %>% # drop the n column
     left_join(doc, by="utt") %>% # re-expand it back to doc, but only for the selected utts
     group_by(utt) %>% 
-    sample_n(max.codes) # group_by() and then sample_n() takes random samples from each group
+    sample_n(max.codes) # group_by() and then sample_n() takes random samples from each group (utt)
   
   doc_keep <- rbind(in.range, above.max.sample)  
   
   message("Removing ", length(unique(doc$utt)) - length(unique(doc_keep$utt)) , " utterances because they have been coded fewer than ", min.codes, " times across all coders.\n")    
   message( 100*round( length(unique(doc_keep$utt))/length(unique(doc$utt)), 4), "% of total utterances are included in analyses.\n" )
   
+  RA_update <- doc_keep %>% 
+    count(coder) %>% 
+    arrange(n)
+  
+  message("\nRAs have coded this many utterances (after all of the cleaning and exclusions):\n") ; print(as.data.frame(RA_update))
   doc_keep$context <- as.factor(doc_keep$context)
   
   maxcontexts <- 10 # the maximum number of contexts that can be read for one window
   
   doc_keep <- doc_keep %>% 
     tidyr::separate(col=context, into=paste("context", 1:maxcontexts, sep="."), sep="[[:blank:]]*;[[:blank:]]*", extra="drop") %>% 
-    tidyr::gather(key="contextnum", value="context", starts_with("context."), na.rm=TRUE)
+    tidyr::gather(key="contextnum", value="context", starts_with("context."), na.rm=TRUE) %>% 
+    dplyr::filter(!grepl(pattern="^[[:blank:]]*$", x=context))
 
   return(doc_keep)
 }
@@ -526,11 +557,10 @@ clean_contexts <- function(doc, key_file="context_cleaning_keys.txt" ){
     select( -context ) %>% 
     rename(context = context_clean)
   
+  doc <- dplyr::filter(doc, context !="TEST") # cleaning
+  
   doc$context <- as.factor(doc$context)
   summary(doc$context)
-  
-  doc <- dplyr::filter(doc, context !="TEST") # cleaning
-  doc <- dplyr::filter(doc, context !="") # cleaning
   
   return(doc)
 }

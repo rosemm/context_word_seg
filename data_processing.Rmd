@@ -145,14 +145,15 @@ write.table(master_doc, file="master_doc.txt", quote=F, col.names=T, row.names=F
 # update_doc <- UpdateDoc(master_doc, criterion = 10)
 # write.table(update_doc, file="coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
-master_doc_clean <- master_doc %>% 
+contexts_clean <- master_doc %>% 
   process_codes(min.codes=10, max.codes=10) %>% 
-  clean_contexts(key_file="context_cleaning_keys.txt") %>% 
+  clean_contexts(key_file="context_cleaning_keys.txt")
+context_cats <- contexts_clean %>% 
   clean_categories(key_file="categories_cleaning_keys.txt") 
 # note that running clean_categories also updates the .md file, which pushes to here https://github.com/rosemm/context_word_seg/blob/master/categories_keys.md
 
 
-master_doc_count <- master_doc_clean %>%
+master_doc_count <- context_cats %>%
   select(utt, category) %>%
   count(utt, category ) %>%
   spread(key=category, value=n, fill = 0) %>%
@@ -168,6 +169,8 @@ master_doc_prop$total <- NULL  # delete column
   
 df.hj.raw <- left_join(df[,1:3], master_doc_prop, by="utt" ) 
 write.table(df.hj.raw, file="contexts_files/contexts_HJ_raw.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+
+votes <- master_doc_count[, 4:ncol( master_doc_count )]
 
 ##########################################
 # number of utterances per context
@@ -221,7 +224,7 @@ write.table(df.hj.misc, file="contexts_files/contexts_HJ.txt", quote=F, col.name
 ```
 
 ```{r HJ_threshold}
-df.hj.con <- read.table("contexts_files/contexts_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
+df.hj.con <- read.table("contexts_files/contexts_HJ_raw.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
 
 thresholds <- seq(0,.75,.05) # what thresholds to try
 
@@ -230,7 +233,7 @@ threshold_plots(df.hj.con,
                 thresholds=thresholds, 
                 method="HJ",
                 save.to="plots/HJ",
-                misc.cutoff="median") 
+                misc.cutoff="none") 
 ```
 
 ```{r HJ_apply_threshold}
@@ -708,10 +711,10 @@ df_WL[df_WL==1.5] <- 1 # replace all 1.5's with 1's, so it doesn't distinguish b
 
 dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
 
-fun.version <- "64ce775dad31f28a" # fun.version refers to the current commit for data_processing_functions.r
+fun.version <- "19595e8a8d4ee85" # fun.version refers to the current commit for data_processing_functions.r
 ```
 
-```{r on_aciss_nontexts, eval=FALSE}
+```{r on_aciss_params, eval=FALSE}
 par_function_args <- list(dataframe=NULL, 
                           N.types=NULL, 
                           N.utts=NULL, 
@@ -727,18 +730,22 @@ par_function_args <- list(dataframe=NULL,
                           nontext=TRUE, 
                           quiet=TRUE,
                           fun.version=fun.version)
+```
+
+
+```{r on_aciss_nontexts, eval=FALSE}
 
 # 20 starts and 100 iter gives 2000 samples for each nontext (takes about 40min per 1000 samples)
-par_function_args[[1]] <- df_WL
+par_function_args$dataframe <- df_WL
 aciss_function(fun.version, id="nontexts_WL", starts=1:50, iter=100, par_function_args) 
 
-par_function_args[[1]] <- df_STM
+par_function_args$dataframe <- df_STM
 aciss_function(fun.version, id="nontexts_STM", starts=1:50, iter=100, par_function_args) 
 
-par_function_args[[1]] <- df_HJ
+par_function_args$dataframe <- df_HJ
 aciss_function(fun.version, id="nontexts_HJ", starts=1:50, iter=100, par_function_args)
 
-par_function_args[[1]] <- df_LDA
+par_function_args$dataframe <- df_LDA
 aciss_function(fun.version, id="nontexts_LDA", starts=1:50, iter=100, par_function_args)
 
 showStatus(makeRegistry(id = "nontexts_WL")); showStatus(makeRegistry(id = "nontexts_STM")); showStatus(makeRegistry(id = "nontexts_HJ")); showStatus(makeRegistry(id = "nontexts_LDA"))
@@ -751,6 +758,49 @@ showStatus(makeRegistry(id = "nontexts_WL")); showStatus(makeRegistry(id = "nont
 # killJobs(makeRegistry(id = "nontexts_STM"),findRunning(makeRegistry(id = "nontexts_STM")))
 
 # system('sftp rosem@ftn.aciss.uoregon.edu')
+```
+
+```{r on_aciss_simulations, eval=FALSE}
+###########################################
+# does cutoff affect results?
+###########################################
+starts <- seq(.4, .9, by=.05)
+par_function_args$cutoff <- as.name("start") # doesn't work
+
+par_function_args$dataframe <- df_WL
+aciss_function(fun.version, id="Sim_cutoff_WL", starts=starts, iter=500, par_function_args) 
+
+par_function_args$dataframe <- df_STM
+aciss_function(fun.version, id="Sim_cutoff_STM", starts=starts, iter=500, par_function_args) 
+
+par_function_args$dataframe <- df_HJ
+aciss_function(fun.version, id="Sim_cutoff_HJ", starts=starts, iter=500, par_function_args)
+
+par_function_args$dataframe <- df_LDA
+aciss_function(fun.version, id="Sim_cutoff_LDA", starts=starts, iter=500, par_function_args)
+
+showStatus(makeRegistry(id = "Sim_cutoff_WL")); showStatus(makeRegistry(id = "Sim_cutoff_STM")); showStatus(makeRegistry(id = "Sim_cutoff_HJ")); showStatus(makeRegistry(id = "Sim_cutoff_LDA"))
+
+###########################################
+# does corpus size affect results?
+###########################################
+par_function_args$cutoff <- .85 # reset from previous
+par_function_args$by.size <- TRUE
+
+par_function_args$dataframe <- df_WL[ ,1:3]
+aciss_function(fun.version, id="Sim_size_Korman", starts=1:50, iter=100, par_function_args)
+
+par_function_args$dataframe <- "skewed"
+aciss_function(fun.version, id="Sim_size_skew", starts=1:50, iter=100, par_function_args)
+
+par_function_args$dataframe <- "unif"
+aciss_function(fun.version, id="Sim_size_unif", starts=1:50, iter=100, par_function_args)
+
+showStatus(makeRegistry(id = "Sim_size_Korman")); showStatus(makeRegistry(id = "Sim_size_skew")); showStatus(makeRegistry(id = "Sim_size_unif"))
+
+# to correct mistakes:
+# killJobs(makeRegistry(id = "Sim_cutoff_LDA"),findRunning(makeRegistry(id = "Sim_cutoff_LDA")))
+# removeRegistry(makeRegistry(id = "Sim_size_Korman"), ask="no")
 ```
 
 Use SFTP to get the folders BatchJobs makes and put them on my local machine. 
@@ -798,6 +848,7 @@ df_STM <- read.table("contexts_files/contexts_STM_bin_winutts30.txt", sep="\t", 
 df_LDA <- read.table("contexts_files/contexts_LDA_bin_winutts30.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
 df_HJ <- read.table("contexts_files/contexts_HJ_bin.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
 df_WL <- read.table("contexts_files/contexts_WL.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
+df_WL[df_WL==1.5] <- 1 # replace all 1.5's with 1's, so it doesn't distinguish between utterances originally tagged with key words and ones picked up by the +-2 uterance smoothing
 
 par_function_args <- list(dataframe=NULL, 
                           N.types=NULL, 
@@ -808,24 +859,28 @@ par_function_args <- list(dataframe=NULL,
                           seg.utts=TRUE, 
                           TP=FALSE, 
                           MI=TRUE, 
-                          verbose=FALSE, 
+                          verbose=TRUE, 
                           prop=FALSE, 
                           cutoff=.85, 
                           nontext=FALSE, 
                           quiet=TRUE,
                           fun.version=fun.version)
 
-par_function_args[[1]] <- df_WL
-context_WL <- par_function(par_function_args)
+par_function_args$dataframe <- df_WL
+context_WL_results <- par_function(par_function_args)
+context_WL <- context_WL_results$stat.results
 
-par_function_args[[1]] <- df_STM
-context_STM <- par_function(par_function_args)
+par_function_args$dataframe <- df_STM
+context_STM_results <- par_function(par_function_args)
+context_STM <- context_STM_results$stat.results
 
-par_function_args[[1]] <- df_LDA
-context_LDA <- par_function(par_function_args)
+par_function_args$dataframe <- df_LDA
+context_LDA_results <- par_function(par_function_args)
+context_LDA <- context_LDA_results$stat.results
 
-par_function_args[[1]] <- df_HJ
-context_HJ <- par_function(par_function_args)
+par_function_args$dataframe <- df_HJ
+context_HJ_results <- par_function(par_function_args)
+context_HJ <- context_HJ_results$stat.results
 ```
 
 
@@ -942,8 +997,21 @@ ggplot(full_results, aes(x=context, y=value)) +
   geom_point(aes(x=context, y=context.est, color=method), size=4, show.legend=FALSE) + 
   geom_hline(data=global_results, aes(yintercept=value), linetype = 2, size=1.5) + 
   theme(text = element_text(size=30), axis.ticks = element_blank(), axis.text.x = element_blank()) +
-  labs(x=NULL, y=NULL)
+  labs(x=NULL, y=NULL) 
 ggsave(filename="plots/allmethods_results_boxplots.png", width=12, height=20, units="in")
+
+# each method individually
+for(m in levels(full_results$method)){
+  p <- ggplot(filter(full_results, method==m & N.utts > 99), aes(x=context, y=value)) +
+    geom_boxplot() +
+    # geom_boxplot(color=NA, fill=NA, outlier.colour= NA) +
+    facet_wrap( ~ measure, scales="free", ncol=2) +
+    geom_point(aes(x=context, y=context.est, color=context), size=4, show.legend=FALSE) + 
+    geom_hline(data=global_results, aes(yintercept=value), linetype = 2, size=1.5) + 
+    theme(text = element_text(size=30), axis.ticks = element_blank(), axis.text.x = element_text(angle=330, vjust=1, hjust=0)) +
+    labs(x=NULL, y=NULL) 
+  ggsave(p, filename=paste0("plots/allmethods_results_boxplots_", m, ".png"), width=16, height=10, units="in")
+}
 
 
 for(this.method in unique(full_results$method)){
@@ -975,7 +1043,7 @@ tests.methods <- full_results %>%
   summarize(p.val = mean(above.est)) %>% 
   add_stars() # from analysis_functions.r
 
-kable(filter(tests.contexts, criterion=="MI85")[,-2], digits=3)
+kable(filter(tests.contexts, criterion=="MI_0.85")[,-3], digits=3)
 ```
 
 ```{r what_predicts_context_effect}
@@ -998,6 +1066,41 @@ filter(understand, N.utts > 4000) # which context is so much larger than all of 
 understand <- filter(understand, context !="routines")
 u <- lm(p.val ~ N.utts + MIN.segd.units + N.words + TTR, data=understand)
 summary(u)
+
+```
+
+```{r explore_MI_dists}
+rs <- list(context_WL_results=context_WL_results, 
+          context_STM_results=context_STM_results,
+          context_LDA_results=context_LDA_results,
+          context_HJ_results=context_HJ_results)
+names(rs) <- gsub(x=names(rs), pattern="context_", replacement="")
+names(rs) <- gsub(x=names(rs), pattern="_results", replacement="")
+for(i in 1:length(rs)){
+  method <- names(rs)[i]
+  plot.data <- rs[[i]]$addl.info
+  plot.data.PR85 <-  plot.data %>% 
+    group_by(context) %>% 
+    summarize(freq85PR = quantile(AB.freq, .85),
+              mi85PR = quantile(MI, .85))
+  plot.data <- plot.data %>% 
+    left_join(plot.data.PR85, by="context")
+  plot.data$high.freq <- ifelse(plot.data$AB.freq >= plot.data$freq85PR, "high.freq", "low.freq")
+  plot.data$high.MI <- ifelse(plot.data$MI >= plot.data$mi85PR, "high.MI", "low.MI")
+  plot.data <- unite(plot.data, col=type, high.freq, high.MI, sep="_", remove = FALSE)
+  
+  p <- ggplot(plot.data, aes(y=MI, x=AB.freq)) +
+    geom_point(alpha=.2) +
+    facet_wrap(~ context, scales = "free_y") +
+    scale_x_log10() +
+    geom_hline(aes(yintercept=mi85PR), color="blue", lty=2) + 
+    ggtitle(method)
+  print(p)
+  message(method)
+  print(xtabs(~AB.freq + high.MI, data=plot.data)[1:15,])
+  message("...truncating freq otput...")
+}
+
 ```
 
 
