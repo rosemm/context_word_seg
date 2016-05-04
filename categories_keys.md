@@ -43,6 +43,7 @@
 |drinking milk           |mealtime                 |
 |drooling                |drooling                 |
 |drying                  |bathtime                 |
+|eating fingers          |eating fingers           |
 |eating something wrong  |being naughty            |
 |entertaining            |playtime                 |
 |exercising              |playtime                 |
@@ -86,6 +87,7 @@
 |observing               |interaction              |
 |outside                 |outside                  |
 |peeing                  |diaper change            |
+|peek-a-boo              |playtime                 |
 |playing                 |playtime                 |
 |playtime                |playtime                 |
 |pooping                 |diaper change            |
@@ -106,12 +108,14 @@
 |pre-feeding             |mealtime                 |
 |pre-mealtime            |mealtime                 |
 |pre-nap                 |sleep                    |
+|pre-swimming            |swimming                 |
 |pulling hair            |being naughty            |
 |putting on the bib      |mealtime                 |
 |raining                 |raining                  |
 |relieving tummy ache    |sick                     |
 |rolling                 |playtime                 |
 |scared                  |fussing                  |
+|shaking hands           |touching                 |
 |shopping                |shopping                 |
 |shouting                |interaction              |
 |sick                    |sick                     |
@@ -144,5 +148,6 @@
 |washing face            |bathtime                 |
 |washing hair            |bathtime                 |
 |washing up              |housework                |
+|watch tennis            |interaction              |
 |watching                |interaction              |
 |yawning                 |sleep                    |

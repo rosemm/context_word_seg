@@ -1,5 +1,4 @@
 context_raw	context_clean
-	
 after bath	post-bath
 after bathtime	post-bedtime
 after diapering	post-diaper
@@ -110,6 +109,7 @@ drying	drying
 drying after bath	drying
 drying off	drying
 eating	mealtime
+eating fingers	eating fingers
 eating something wrong	eating something wrong
 end of mealtime	post-mealtime
 entertaining	entertaining
@@ -192,6 +192,7 @@ on a walk	walking
 outside	outside
 palying	playing
 peeing	peeing
+peek-a-boo	peek-a-boo
 peekaboo	playtime
 photo	taking pictures
 pkaying	playtime
@@ -247,6 +248,7 @@ rolling around	rolling
 rolling over	rolling
 scared	scared
 seeing	observing
+shaking hands	shaking hands
 shopping	shopping
 shouting	shouting
 sick	sick
@@ -264,6 +266,7 @@ sneezing	sneezing
 snuggling	cuddling
 soething	soothing
 soothing	soothing
+soothinkg	soothing
 soothng	soothing
 sooyhing	soothing
 sothing	soothing
@@ -303,6 +306,7 @@ ticking	tickling
 tickling	tickling
 toilet	going potty
 touching	touching
+toweling off	drying
 undressing	undressing
 videotaping	taping
 visiting friend	friends
@@ -315,6 +319,7 @@ washing dishes	washing dishes
 washing face	washing face
 washing hair	washing hair
 washing up	washing up
+watch tennis	watch tennis
 watching	watching
 watching television	TV
 watching tv	TV
