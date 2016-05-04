@@ -401,25 +401,67 @@ corpus_decriptives <- function(corpus, data, contexts, dict){
   return(list(word.freq=freqs, syls.per.utt=syls.per.utt, syl.summary=summary)) 
 }
 
-network_plot <- function(data, title=""){
-  unique.phon.pairs <- data$unique.phon.pairs
-  bsk.network<-graph.data.frame(unique.phon.pairs, directed=T) # edge list, with additional attributes
-  bad.edges <- E(bsk.network)[E(bsk.network)$MI < quantile(unique.phon.pairs$MI, .85)] #identify those edges with MI below the cutoff for segmentation
-  bsk.network<-delete.edges(bsk.network, bad.edges) #exclude them from the graph
-  
-  
-  
-  V(bsk.network)$size <- table(data$streams$phon.stream) # size nodes by frequency 
-  message(paste("max freq", max(V(bsk.network)$size)))
-  V(bsk.network)$size <- V(bsk.network)$size/(.03*max(V(bsk.network)$size)) # size nodes by frequency 
-  bad.vs <- V(bsk.network)[V(bsk.network)$size < .5] #identify those nodes with freq below 5
-  bsk.network<-delete.vertices(bsk.network, bad.vs) #exclude them from the graph
-  
-  # For example we can separate some vertices (people) by color:
-  V(bsk.network)$color<-ifelse(V(bsk.network)$name=="'bIg", 'darkgreen', 'lightgrey') #useful for highlighting certain people. Works by matching the name attribute of the vertex to the one specified in the 'ifelse' expression
-  E(bsk.network)$width <- E(bsk.network)$MI/5
-  E(bsk.network)$arrow.width <- .3
-  
+network_plot <- function(data=NULL, context=NULL, title=""){
+  if(!is.null(data)){
+    unique.phon.pairs <- data$unique.phon.pairs
+    # need to give it a data frame containing a symbolic edge list in the first two columns. Additional columns are considered as edge attributes. 
+    bsk.network<-graph.data.frame(unique.phon.pairs, directed=T) # edge list, with additional attributes
+    bad.edges <- E(bsk.network)[E(bsk.network)$MI < quantile(unique.phon.pairs$MI, .85)] #identify those edges with MI below the cutoff for segmentation
+    bsk.network<-delete.edges(bsk.network, bad.edges) #exclude them from the graph
+    
+    V(bsk.network)$size <- table(data$streams$phon.stream) # size nodes by frequency 
+    message(paste("max freq", max(V(bsk.network)$size)))
+    V(bsk.network)$size <- V(bsk.network)$size/(.03*max(V(bsk.network)$size)) # size nodes by frequency 
+    bad.vs <- V(bsk.network)[V(bsk.network)$size < .5] #identify those nodes with freq below 5
+    bsk.network<-delete.vertices(bsk.network, bad.vs) #exclude them from the graph
+    
+    # For example we can separate some vertices (people) by color:
+    V(bsk.network)$color<-ifelse(V(bsk.network)$name=="'bIg", 'darkgreen', 'lightgrey') #useful for highlighting certain people. Works by matching the name attribute of the vertex to the one specified in the 'ifelse' expression
+    E(bsk.network)$width <- E(bsk.network)$MI/5
+    E(bsk.network)$arrow.width <- .3
+  } else if(!is.null(context)){
+    # context <- votes
+    context$utt <- 1:nrow(context)
+    context <- as.tbl(context) %>% 
+      gather(key, value, -utt) %>% 
+      filter(value > 0) %>% 
+      arrange(utt) %>% 
+      group_by(utt) %>% 
+      do({
+        summarize(., words=paste(rep(key, value), collapse=";"))
+      }) %>% 
+      separate(col=words, into=paste0("word", 10:50), sep=";", extra ="drop") 
+    
+    # drop columns with all NAs
+    drop <- NULL
+    for(i in 1:ncol(context)){
+      if(!any(!is.na(context[,i]))) {
+        drop <- c(drop, i)
+      }
+    }
+    context <- context[,-drop] # drop columns with all NAs
+    
+    t <- context %>% 
+      ungroup() %>% 
+      select(-utt) 
+    edges <- data.frame(context1=NULL, context2=NULL)
+    for(i in 1:(ncol(t)-1)){
+      for(j in (i+1):ncol(t)){
+        # print(j) # to check that the counting is working right :) 
+        temp.edges <- t[, c(i, j)]
+        colnames(temp.edges) <- c("context1", "context2")
+        edges <- rbind(edges, temp.edges)
+        head(t[, c(i, j)]); j=j+1
+      }  
+    } # end for loops
+    # clean up
+    edges$context1 <- gsub(x=edges$context1, pattern="NA", replacement=NA)
+    edges$context2 <- gsub(x=edges$context2, pattern="NA", replacement=NA)
+    edges <- na.omit(edges)
+    
+    library(igraph)
+    bsk.network <- graph.data.frame(edges, directed=F)
+  }
   
   plot(bsk.network, vertex.label=ifelse(V(bsk.network)$name=="'tV", "'tV", ""))
   return(plot.igraph(bsk.network, vertex.label="", main=title))
