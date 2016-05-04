@@ -142,11 +142,11 @@ write.table(master_doc, file="master_doc.txt", quote=F, col.names=T, row.names=F
 # master_doc <- read.table("master_doc.txt", header=1, sep="\t", stringsAsFactors=F)
 
 # # to update coding doc leaving only utterances that are below criterion on number of codes, to fill in the thin places
-# update_doc <- UpdateDoc(master_doc, criterion = 10, unique.coders=TRUE)
+# update_doc <- UpdateDoc(master_doc, criterion = 5, unique.coders=TRUE)
 # write.table(update_doc, file="coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
 contexts_clean <- master_doc %>% 
-  process_codes(min.codes=10, max.codes=10) %>% 
+  process_codes(min.codes=5, max.codes=5, unique.coders=TRUE) %>% 
   clean_contexts(key_file="context_cleaning_keys.txt")
 context_cats <- contexts_clean %>% 
   clean_categories(key_file="categories_cleaning_keys.txt") 
