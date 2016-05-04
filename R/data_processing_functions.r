@@ -456,8 +456,13 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
     this.result$nontext <- names(data)[[k]]
     this.result$cutoff <- cutoff
     this.result$N.utts <- data[[k]]$N.utterances
-    this.result$N.words <- data[[k]]$streams$N.types    
+    this.result$N.syl <- data[[k]]$streams$N.syl
+    this.result$N.tokens <- data[[k]]$streams$N.tokens
+    this.result$N.types <- data[[k]]$streams$N.types
     this.result$TTR <- data[[k]]$streams$N.types/data[[k]]$streams$N.tokens
+    highest.freq <- max(max(data[[k]]$unique.phon.pairs$A.freq.tot), max(data[[k]]$unique.phon.pairs$B.freq.tot))
+    this.result$highest.freq.syl <- highest.freq 
+    this.result$prop.most.freq <- highest.freq/data[[k]]$streams$N.syl
     this.result$mean.MI <- ifelse(MI, mean(data[[k]]$unique.phon.pairs$MI), NA)
     this.result$mean.TP <- ifelse(TP, mean(data[[k]]$unique.phon.pairs$TP), NA)
     
