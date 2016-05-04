@@ -282,7 +282,7 @@ plot_context_vs_nontext <- function(context_results, nontext_results, global_res
   colnames(context_results)[colnames(context_results)==outcome] <- "outcome"
   colnames(nontext_results)[colnames(nontext_results)==outcome] <- "outcome"
   
-  for(method in 1:unique(context_results$method.short)){
+  for(method in unique(context_results$method.short)){
     p <- ggplot(nontext_results, aes(x=context, y=outcome)) + 
       geom_boxplot() +
       facet_wrap( ~ method , scales="free") +
