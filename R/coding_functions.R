@@ -483,12 +483,10 @@ process_codes <- function(doc, min.codes=10, max.codes=10, unique.coders){
   
   doc$coder <- toupper(doc$coder)
   
-  doc$id <- 1:nrow(doc) # a unique id for each coding event
-  
   RA_info <- doc %>%
     dplyr::select(utt, coder, context, pass) %>%
-    group_by(coder) %>%
-    dplyr::summarize(n_utts_codes=n())
+    count(coder) %>%
+    arrange(n)
   
   message("\nRAs have coded this many utterances (raw coding):\n") ; print(as.data.frame(RA_info))
   
@@ -572,7 +570,7 @@ clean_categories <- function(doc, key_file="categories_cleaning_keys.txt" ){
   categories_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
   
   # print a nice (.md) version of the categories_cleaning_keys.txt, to link to online
-  tb <- categories_keys
+  tb <- arrange(categories_keys, category)
   colnames(tb) <- c("context (raw)", "context category (clean)")
   tb <- knitr::kable(tb)
   writeLines(tb, "categories_keys.md")

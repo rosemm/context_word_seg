@@ -142,7 +142,7 @@ write.table(master_doc, file="master_doc.txt", quote=F, col.names=T, row.names=F
 # master_doc <- read.table("master_doc.txt", header=1, sep="\t", stringsAsFactors=F)
 
 # # to update coding doc leaving only utterances that are below criterion on number of codes, to fill in the thin places
-# update_doc <- UpdateDoc(master_doc, criterion = 10)
+# update_doc <- UpdateDoc(master_doc, criterion = 10, unique.coders=TRUE)
 # write.table(update_doc, file="coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
 contexts_clean <- master_doc %>% 
@@ -171,6 +171,7 @@ df.hj.raw <- left_join(df[,1:3], master_doc_prop, by="utt" )
 write.table(df.hj.raw, file="contexts_files/contexts_HJ_raw.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
 votes <- master_doc_count[, 4:ncol( master_doc_count )]
+
 
 ##########################################
 # number of utterances per context
