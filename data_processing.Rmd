@@ -681,7 +681,8 @@ df_LDA <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_
 
 df_STM <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_files/contexts_STM_bin_winutts30.txt")
 
-df_HJ <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_files/contexts_HJ_bin.txt") 
+df_HJ <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_files/contexts_HJ_bin.txt")
+df_HJ <- df_HJ[ ,c(TRUE, TRUE, TRUE, colSums(df_HJ[,4:ncol(df_HJ)], na.rm=T) > 100)] # only keep contexts with at least 100 utterances, otherwise it's hard to estimate
 
 df_WL <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_files/contexts_WL.txt") 
 df_WL[df_WL==1.5] <- 1 # replace all 1.5's with 1's, so it doesn't distinguish between utterances originally tagged with key words and ones picked up by the +-2 uterance smoothing
@@ -763,9 +764,14 @@ showStatus(makeRegistry(id = "Sim_cutoff_WL")); showStatus(makeRegistry(id = "Si
 ###########################################
 par_function_args$cutoff <- .85 # reset from previous
 par_function_args$by.size <- TRUE
-
+par_function_args$N.types <- NULL
+par_function_args$N.utts <- NULL
+  
 par_function_args$dataframe <- df_WL[ ,1:3]
-aciss_function(fun.version, id="Sim_size_Korman", starts=1:50, iter=50, par_function_args)
+aciss_function(fun.version, id="Sim_size_Korman", starts=1:100, iter=10, par_function_args) # this takes much longer to run, so need to use fewer iterations so ACISS doesn't kill the job
+
+par_function_args$N.types <- 1000
+par_function_args$N.utts <- 1000
 
 par_function_args$dataframe <- "skewed"
 aciss_function(fun.version, id="Sim_size_skew", starts=1:50, iter=100, par_function_args)
@@ -860,6 +866,7 @@ dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char =""
 df_STM <- read.table("contexts_files/contexts_STM_bin_winutts30.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
 df_LDA <- read.table("contexts_files/contexts_LDA_bin_winutts30.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
 df_HJ <- read.table("contexts_files/contexts_HJ_bin.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
+df_HJ <- df_HJ[ ,c(TRUE, TRUE, TRUE, colSums(df_HJ[,4:ncol(df_HJ)], na.rm=T) > 100)] # only keep contexts with at least 100 utterances, otherwise it's hard to estimate
 df_WL <- read.table("contexts_files/contexts_WL.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
 df_WL[df_WL==1.5] <- 1 # replace all 1.5's with 1's, so it doesn't distinguish between utterances originally tagged with key words and ones picked up by the +-2 uterance smoothing
 
@@ -906,6 +913,7 @@ context_HJ$method <- "HJ"
 
 context_results <- rbind(context_WL, context_STM, context_LDA, context_HJ)
 
+context_results$method.short <- factor(context_results$method)
 context_results$method <- factor(context_results$method, 
                                  levels=c("WL", "STM", "LDA", "HJ"), 
                                  labels = c("word lists", "topic modeling (STM)", "topic modeling (LDA)", "subjective judgments")) 
@@ -940,6 +948,7 @@ nontext_HJ$method <- "HJ"
 
 nontext_results <- rbind(nontext_WL, nontext_STM, nontext_LDA, nontext_HJ)
 
+nontext_results$method.short <- factor(nontext_results$method)
 nontext_results$method <- factor(nontext_results$method, 
                                  levels=c("WL", "STM", "LDA", "HJ"), 
                                  labels = c("word lists", "topic modeling (STM)", "topic modeling (LDA)", "subjective judgments")) 
@@ -954,46 +963,27 @@ full_results <- left_join(nontext_results, context_ests, by=c("criterion", "meth
 ```
 
 ## global results
-```{r global_data}
-global.data <- list(N.utterances=nrow(df), streams=NULL, phon.pairs=NULL, unique.phon.pairs=NULL) # storage variable
+```{r global_results}
+par_function_args <- list(dataframe=NULL, 
+                          N.types=NULL, 
+                          N.utts=NULL, 
+                          by.size=FALSE, 
+                          dict=dict, 
+                          expand=FALSE, 
+                          seg.utts=TRUE, 
+                          TP=FALSE, 
+                          MI=TRUE, 
+                          verbose=TRUE, 
+                          prop=FALSE, 
+                          cutoff=.85, 
+                          nontext=FALSE, 
+                          quiet=TRUE,
+                          fun.version=fun.version)
 
-global.data$streams <- make_streams(df)
-global.data$unique.phon.pairs <- calc_MI(phon.pairs=global.data$streams$phon.pairs, phon.stream=global.data$streams$phon.stream)
-
-
-hist(global.data$unique.phon.pairs$MI, main="Global MI")
-# hist(global.data$unique.phon.pairs$MI.1, main="Global MI 1 \nred line shows chance"); abline(v=1, lty=2, col="red")
-# hist(global.data$unique.phon.pairs$MI.2, main="Global MI 2\nred line shows chance"); abline(v=1, lty=2, col="red")
-hist(global.data$unique.phon.pairs$TP, main="Global TP")
-```
-
-```{r global_seg_speech}
-global.data$TP85$seg.phon.stream <- segment_speech(cutoff=.85, 
-                                                   stat="TP", 
-                                                   data=global.data)
-
-global.data$MI85$seg.phon.stream <- segment_speech(cutoff=.85, 
-                                                   stat="MI", 
-                                                   data=global.data)
-```
-
-```{r global_assess_seg}
-global.data$TP85$seg.results <- assess_seg(seg.phon.stream=global.data$TP85$seg.phon.stream, words=global.data$streams$words, dict=dict)
-colMeans(global.data$TP85$seg.results[,3:4], na.rm=T)
-
-global.data$MI85$seg.results <- assess_seg(seg.phon.stream=global.data$MI85$seg.phon.stream, words=global.data$streams$words, dict=dict)
-colMeans(global.data$MI85$seg.results[,3:4], na.rm=T)
-saveRDS(global.data, file="results/global_results.rds")
-
-global_results <- colMeans(global.data$MI85$seg.results[,3:4], na.rm=T)
-global_results <- as.data.frame(t(global_results)) # make it a data.frame
-global_results$stat <- "MI"
-global_results$cutoff <- .85
-global_results$N.utts <- global.data$N.utterances
-global_results$N.segd.units <- unique(global.data$MI85$seg.results$N.segd.units)
-global_results$N.words <- global.data$streams$N.tokens
-global_results$TTR <- global.data$streams$N.types/global.data$streams$N.tokens
-
+par_function_args$dataframe <- df_WL[ , 1:3] # only taking the first three columns
+global_data_results <- par_function(par_function_args)
+global_results  <- global_data_results$stat.results
+    
 global_results <- global_results %>% 
   gather( key="measure", value="value", recall, precision) %>% 
   unite(col="criterion", stat, cutoff, sep="_", remove=FALSE) %>% 
@@ -1002,6 +992,22 @@ global_results <- global_results %>%
 
 ## THE PLOT (all methods)
 ```{r the_plot}
+# any additional values to be saved in the plot name can be included as extra arguments
+plot_context_vs_nontext(context_results, 
+                        nontext_results, 
+                        global_results, 
+                        outcome="TTR", 
+                        save.to="plots/context_vs_nontext")
+plot_context_vs_nontext(context_results, 
+                        nontext_results, 
+                        global_results=NULL, 
+                        outcome="highest.freq.syl", 
+                        save.to="plots/context_vs_nontext")
+plot_context_vs_nontext(context_results, 
+                        nontext_results, 
+                        global_results, 
+                        outcome="prop.most.freq", 
+                        save.to="plots/context_vs_nontext")
 
 ggplot(full_results, aes(x=context, y=value)) +
   geom_boxplot() +
