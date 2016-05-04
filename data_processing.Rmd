@@ -688,7 +688,7 @@ df_WL[df_WL==1.5] <- 1 # replace all 1.5's with 1's, so it doesn't distinguish b
 
 dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
 
-fun.version <- "19595e8a8d4ee85" # fun.version refers to the current commit for data_processing_functions.r
+fun.version <- "8e1b6319ab44f" # fun.version refers to the current commit for data_processing_functions.r
 ```
 
 ```{r on_aciss_params, eval=FALSE}
@@ -765,7 +765,7 @@ par_function_args$cutoff <- .85 # reset from previous
 par_function_args$by.size <- TRUE
 
 par_function_args$dataframe <- df_WL[ ,1:3]
-aciss_function(fun.version, id="Sim_size_Korman", starts=1:50, iter=100, par_function_args)
+aciss_function(fun.version, id="Sim_size_Korman", starts=1:50, iter=50, par_function_args)
 
 par_function_args$dataframe <- "skewed"
 aciss_function(fun.version, id="Sim_size_skew", starts=1:50, iter=100, par_function_args)
@@ -783,9 +783,45 @@ showStatus(makeRegistry(id = "Sim_size_Korman")); showStatus(makeRegistry(id = "
 Use SFTP to get the folders BatchJobs makes and put them on my local machine. 
 
 ## read in aciss results
-```{r process_aciss_results}
+```{r sim_results_data_wrangling}
+size_skew <- read_batch(dir="Sim_size_skew-files")
+size_unif <- read_batch(dir="Sim_size_unif-files")
+size_korm <- read_batch(dir="Sim_size_Korman-files")
+
+# combine all the sim results into one data frame
+size_skew$sim <- "size"
+size_unif$sim <- "size"
+size_korm$sim <- "size"
+size_skew$method <- "skew"
+size_unif$method <- "unif"
+size_korm$method <- "korman"
+
+sim_results <- rbind(size_skew, size_unif)
+
+sim_results$method <- factor(sim_results$method, 
+                             levels=c("skew", "unif", "korman"),
+                             labels=c("art lang (skew)", "art lang (unif)", "Korman"))
+sim_results$sim <- factor(sim_results$sim)
+
+# gather for plotting
+sim_results <- sim_results %>% 
+  gather( key="measure", value="value", recall, precision) %>% 
+  unite(col="criterion", stat, cutoff, sep="_", remove=FALSE) 
+
+```
+
+```{r sim_result_plotting}
+ggplot(filter(sim_results, sim=="size"), aes(x=N.utts, y=value)) +
+  geom_jitter(alpha=.2, width = 0.4) +
+  facet_wrap( ~ method + measure, scales="free_y", ncol=2) +
+  theme(text = element_text(size=30), axis.ticks = element_blank()) +
+  labs(x=NULL, y=NULL) 
+ggsave(filename="plots/sim_results/sim_results_size.png", width=12, height=20, units="in")
+
+```
 
 
+```{r}
 HJresults.summary <- HJresults %>%
   gather(key=measure, value=value, recall:precision) %>%
   group_by(analysis, nontext, measure) %>%
