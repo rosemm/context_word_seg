@@ -149,7 +149,8 @@ make_streams = function(df, seg.utts=TRUE){
   # how many unique syllables are there?
   syllables <- unique(phon.stream)
   # syllables <- sample(syllables, 200) # for testing, just use some random syllables
-  N.syl <- length(syllables)
+  N.syl.types <- length(syllables)
+  N.syl.tokens <- length(phon.stream)
   
   # make phon stream into a list of all of the bisyllable pairs that occur
   phon.pairs <- data.frame(syl1=phon.stream[1:length(phon.stream)-1], syl2=phon.stream[2:length(phon.stream)])
@@ -166,7 +167,7 @@ make_streams = function(df, seg.utts=TRUE){
   N.types <- length(words)
   N.tokens <- length(orth.stream)
   
-  output <- list(phon.stream=phon.stream, syllables=syllables, N.syl=N.syl, phon.pairs=phon.pairs, orth.stream=orth.stream, words=words, N.types=N.types, N.tokens=N.tokens)
+  output <- list(phon.stream=phon.stream, syllables=syllables, N.syl.types=N.syl.types, N.syl.tokens=N.syl.tokens, phon.pairs=phon.pairs, orth.stream=orth.stream, words=words, N.types=N.types, N.tokens=N.tokens)
   return(output)
 }
 
@@ -456,13 +457,14 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
     this.result$nontext <- names(data)[[k]]
     this.result$cutoff <- cutoff
     this.result$N.utts <- data[[k]]$N.utterances
-    this.result$N.syl <- data[[k]]$streams$N.syl
+    this.result$N.syl.tokens <- data[[k]]$streams$N.syl.tokens
+    this.result$N.syl.types <- data[[k]]$streams$N.syl.types
     this.result$N.tokens <- data[[k]]$streams$N.tokens
     this.result$N.types <- data[[k]]$streams$N.types
     this.result$TTR <- data[[k]]$streams$N.types/data[[k]]$streams$N.tokens
     highest.freq <- max(max(data[[k]]$unique.phon.pairs$A.freq.tot), max(data[[k]]$unique.phon.pairs$B.freq.tot))
     this.result$highest.freq.syl <- highest.freq 
-    this.result$prop.most.freq <- highest.freq/data[[k]]$streams$N.syl
+    this.result$prop.most.freq <- highest.freq/data[[k]]$streams$N.syl.tokens
     this.result$mean.MI <- ifelse(MI, mean(data[[k]]$unique.phon.pairs$MI), NA)
     this.result$mean.TP <- ifelse(TP, mean(data[[k]]$unique.phon.pairs$TP), NA)
     
