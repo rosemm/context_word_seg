@@ -172,9 +172,16 @@ make_streams = function(df, seg.utts=TRUE){
 }
 
 context_results <- function(df, seg.utts=TRUE){
-  message(paste("\ncontext_results using all but the following columns:", paste(colnames(df)[1:3], collapse=", ")))
-  context.names <- colnames(df)[4:ncol(df)] # retains contexts as they were used for column names, regardless of where they came from (works for any context defining method)
-  
+  if(ncol(df) > 3){
+    message(paste("\ncontext_results using all but the following columns:", paste(colnames(df)[1:3], collapse=", ")))
+    # retains contexts as they were used for column names, regardless of where they came from (works for any context defining method)
+    context.names <- colnames(df)[4:ncol(df)]
+  } else {
+    message("\nNo context columns in df, so analyzing as global.")
+    df$global <- 1 # add a column of 1's, to include everything
+    # if there are no context columns, analyze as global
+    context.names <- as.vector("global")
+  }
   context.data <- vector("list", length(context.names)) # storage variable
   names(context.data) <- context.names
   
@@ -377,7 +384,12 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
     
   if(nrow(df) == 0) stop("df didn't load")
   if(nrow(dict) == 0) stop("dict didn't load")
-  context.names <- colnames(df[4:ncol(df)])
+  if(ncol(df) > 3){
+    context.names <- colnames(df[4:ncol(df)])
+  } else {
+    context.names <- as.vector("global")
+  }
+  
   
   if(prop){
     # change probabilities into 1 or 0 probabalistically based on their values
