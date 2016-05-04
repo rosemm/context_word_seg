@@ -281,16 +281,20 @@ plot_context_vs_nontext <- function(context_results, nontext_results, global_res
   
   colnames(context_results)[colnames(context_results)==outcome] <- "outcome"
   colnames(nontext_results)[colnames(nontext_results)==outcome] <- "outcome"
-  
-  for(method in unique(context_results$method.short)){
-    p <- ggplot(nontext_results, aes(x=context, y=outcome)) + 
+  if(!is.null(global_results)){
+    colnames(global_results)[colnames(global_results)==outcome] <- "outcome"
+  }
+    
+  colors <- c("#D53E4F", "#66C2A5", "#3288BD", "#F46D43")
+  names(colors) <- unique(context_results$method.short)
+  for(m in unique(context_results$method.short)){
+    p <- ggplot(filter(nontext_results, method.short==m), aes(x=reorder(context, N.utts), y=outcome)) + 
       geom_boxplot() +
-      facet_wrap( ~ method , scales="free") +
-      geom_point(data=context_results, aes(x=context, y=outcome, color=method), size=4, show.legend=FALSE) + 
+      geom_point(data=filter(context_results, method.short==m), aes(x=context, y=outcome), color=colors[[as.character(m)]], size=4, show.legend=FALSE) + 
       theme(text = element_text(size=30), axis.ticks = element_blank(), axis.text.x = element_blank()) +
-      labs(x=NULL, y=NULL, title=paste(method, outcome)) 
-    if(!is.null(global_results) ) p <- p +  geom_hline(data=global_results, aes(yintercept=value), linetype = 2, size=1.5)
-    ggsave(filename=paste0(save.to, "/results_", outcome, "_", method, "_", additional_args ,".png"), width=8, height=8, units="in")
+      labs(x=NULL, y=NULL, title=paste(m, outcome)) 
+    if(!is.null(global_results)) p <- p +  geom_hline(data=global_results, aes(yintercept=outcome), linetype = 2, size=1.5)
+    ggsave(p, filename=paste0(save.to, "/results_", outcome, "_", m, "_", additional_args ,".png"), width=8, height=8, units="in")
   }
 }
 
