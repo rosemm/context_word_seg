@@ -168,7 +168,7 @@ master_doc_prop$utt <- master_doc_count$utt  # to add back in the non-numeric ut
 master_doc_prop$total <- NULL  # delete column
   
 df.hj.raw <- left_join(df[,1:3], master_doc_prop, by="utt" ) 
-write.table(df.hj.raw, file="contexts_files/contexts_HJ_raw.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+write.table(df.hj.raw, file="contexts_files/contexts_HJ.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
 votes <- master_doc_count[, 4:ncol( master_doc_count )]
 
@@ -188,7 +188,7 @@ ggplot(count.data, aes(x=context, y=n.utts, fill=over.med)) +
   scale_fill_manual(values = c("yes" = "darkgreen","no" = "grey")) +
   labs(x=NULL, y="Number of utterances tagged") +
   theme(axis.text.x = element_text(angle=330, vjust=1, hjust=0)) 
-ggsave("plots/HJ/uttsper_context.png", width=12, height=5, units="in")
+ggsave("plots/HJ/uttsper_context.png", width=16, height=5, units="in")
 ggplot(count.data, aes(x=context, y=n.utts, fill=over.med)) +
   geom_bar(stat = "identity", show.legend = F) +
   geom_text(aes(label=n.utts), position=position_dodge(width=0.9), vjust=-0.25)+
@@ -196,36 +196,12 @@ ggplot(count.data, aes(x=context, y=n.utts, fill=over.med)) +
   labs(x=NULL, y="log(Number of utterances tagged)") +
   scale_y_log10() +
   theme(axis.text.x = element_text(angle=330, vjust=1, hjust=0)) 
-ggsave("plots/HJ/uttsper_context_logtrans.png", width=12, height=5, units="in")
+ggsave("plots/HJ/uttsper_context_logtrans.png", width=16, height=5, units="in")
 
-##########################################
-# for contexts with fewer than the median number of utterances, replace with "misc"
-##########################################
-master_doc_count.misc <- master_doc_count %>% 
-  gather(key="context", value="value", -utt, -file, -UttNum) %>% 
-  left_join(count.data, by="context") 
-master_doc_count.misc$context <- ifelse(master_doc_count.misc$over.med=="no", "misc", master_doc_count.misc$context)  
-master_doc_count.misc <- master_doc_count.misc %>% 
-  select(utt, context, value) %>% 
-  group_by(utt, context) %>% 
-  summarise(value=sum(value)) %>% 
-  spread(key=context, value=value)
-master_doc_prop.misc <- master_doc_count.misc %>% 
-  ungroup() %>%
-  dplyr::select(-utt) %>%
-  mutate(total=rowSums(., na.rm=FALSE)) %>% 
-  mutate_each(funs(./total)) %>% 
-  select(-total)
-master_doc_prop.misc$utt <- master_doc_count.misc$utt  # to add back in the non-numeric utt column
-
-df.hj.misc <- left_join(df[,1:3], master_doc_prop.misc, by="utt" ) 
-
-write.table(df.hj.misc, file="contexts_files/contexts_HJ.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
-# df.hj.con <- read.table("contexts_files/contexts_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
 ```
 
 ```{r HJ_threshold}
-df.hj.con <- read.table("contexts_files/contexts_HJ_raw.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
+df.hj.con <- read.table("contexts_files/contexts_HJ.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") 
 
 thresholds <- seq(0,.75,.05) # what thresholds to try
 
