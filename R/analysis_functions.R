@@ -279,11 +279,22 @@ plot_context_vs_nontext <- function(context_results, nontext_results, global_res
   additional_args <- as.data.frame(list(...), stringsAsFactors=FALSE)
   additional_args <- paste0(colnames(additional_args), additional_args, collapse="_")
   
-  colnames(context_results)[colnames(context_results)==outcome] <- "outcome"
-  colnames(nontext_results)[colnames(nontext_results)==outcome] <- "outcome"
-  if(!is.null(global_results)){
-    colnames(global_results)[colnames(global_results)==outcome] <- "outcome"
+  facet <- length(unique(context_results[, colnames(context_results)==outcome])) > 1 # is there is more than one level for outcome?
+  if(facet){
+    colnames(context_results)[colnames(context_results)=="value"] <- "outcome"
+    colnames(nontext_results)[colnames(nontext_results)=="value"] <- "outcome"
+    if(!is.null(global_results)){
+      colnames(global_results)[colnames(global_results)=="value"] <- "outcome"
+    }
+  } else {
+    colnames(context_results)[colnames(context_results)==outcome] <- "outcome"
+    colnames(nontext_results)[colnames(nontext_results)==outcome] <- "outcome"
+    if(!is.null(global_results)){
+      colnames(global_results)[colnames(global_results)==outcome] <- "outcome"
+    }
   }
+  
+  
     
   colors <- c("#D53E4F", "#66C2A5", "#3288BD", "#F46D43")
   names(colors) <- unique(context_results$method.short)
@@ -294,6 +305,7 @@ plot_context_vs_nontext <- function(context_results, nontext_results, global_res
       theme(text = element_text(size=30), axis.ticks = element_blank(), axis.text.x = element_blank()) +
       labs(x=NULL, y=NULL, title=paste(m, outcome)) 
     if(!is.null(global_results)) p <- p +  geom_hline(data=global_results, aes(yintercept=outcome), linetype = 2, size=1.5)
+    if(facet) p <- p + facet_wrap(~measure)
     ggsave(p, filename=paste0(save.to, "/results_", outcome, "_", m, "_", additional_args ,".png"), width=8, height=8, units="in")
   }
 }
