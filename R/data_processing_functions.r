@@ -146,12 +146,6 @@ make_streams = function(df, seg.utts=TRUE){
   # delete "syllables" that are just empty space
   phon.stream <- phon.stream[ !grepl(pattern="^[[:space:]]*$", x=phon.stream) ]
   
-  # how many unique syllables are there?
-  syllables <- unique(phon.stream)
-  # syllables <- sample(syllables, 200) # for testing, just use some random syllables
-  N.syl.types <- length(syllables)
-  N.syl.tokens <- length(phon.stream)
-  
   # make phon stream into a list of all of the bisyllable pairs that occur
   phon.pairs <- data.frame(syl1=phon.stream[1:length(phon.stream)-1], syl2=phon.stream[2:length(phon.stream)])
   # delete rows that code for utterance boundary (the result is that syllable pairs across utterance boundaries are simply unattested)
@@ -162,12 +156,27 @@ make_streams = function(df, seg.utts=TRUE){
   orth.stream <- orth.stream[!grepl(pattern="^[[:punct:]]+$", x=orth.stream)] # remove any "words" that are only punctuation marks
   orth.stream <- orth.stream[!grepl(pattern="^[[:space:]]*$", x=orth.stream)] # remove any "words" that are only blank space
   
+  # STATS TO COLLECT
+  # how many syllables are there?
+  syllables <- unique(phon.stream)
+  # syllables <- sample(syllables, 200) # for testing, just use some random syllables
+  N.syl.types <- length(syllables)
+  N.syl.tokens <- length(phon.stream)
+  
   # how many unique words are there?
   words <- unique(orth.stream)
   N.types <- length(words)
   N.tokens <- length(orth.stream)
   
-  output <- list(phon.stream=phon.stream, syllables=syllables, N.syl.types=N.syl.types, N.syl.tokens=N.syl.tokens, phon.pairs=phon.pairs, orth.stream=orth.stream, words=words, N.types=N.types, N.tokens=N.tokens)
+  # how long are the utterances?
+  orth.stats <- gsub(x=df$orth, pattern="_", replacement=" ", fixed=TRUE) # removing underscores
+  words.in.utts <- sapply(orth.stats, strsplit, split=" ")
+  words.per.utt <- sapply(words.in.utts, length)
+  
+  syls.in.utts <- sapply(df$phon, strsplit, split=" ")
+  syls.per.utt <- sapply(syls.in.utts, length)
+  
+  output <- list(phon.stream=phon.stream, syllables=syllables, N.syl.types=N.syl.types, N.syl.tokens=N.syl.tokens, phon.pairs=phon.pairs, orth.stream=orth.stream, words=words, N.types=N.types, N.tokens=N.tokens, words.per.utt=words.per.utt, syls.per.utt=syls.per.utt)
   return(output)
 }
 
@@ -468,6 +477,7 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
     this.result$stat <- as.factor(as.character(this.result$stat))
     this.result$nontext <- names(data)[[k]]
     this.result$cutoff <- cutoff
+    # stats to save for anlaysis and comparison
     this.result$N.utts <- data[[k]]$N.utterances
     this.result$N.syl.tokens <- data[[k]]$streams$N.syl.tokens
     this.result$N.syl.types <- data[[k]]$streams$N.syl.types
@@ -479,6 +489,10 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
     this.result$prop.most.freq <- highest.freq/data[[k]]$streams$N.syl.tokens
     this.result$mean.MI <- ifelse(MI, mean(data[[k]]$unique.phon.pairs$MI), NA)
     this.result$mean.TP <- ifelse(TP, mean(data[[k]]$unique.phon.pairs$TP), NA)
+    this.result$mean.words.per.utt <- mean(data[[k]]$streams$words.per.utt)
+    this.result$mean.syls.per.utt <- mean(data[[k]]$streams$syls.per.utt)
+    this.result$prop.one.word.utt <- sum(data[[k]]$streams$words.per.utt==1)/length(data[[k]]$streams$words.per.utt)
+    this.result$prop.one.syl.utt <- sum(data[[k]]$streams$syls.per.utt==1)/length(data[[k]]$streams$syls.per.utt)
     
     this.addl.info <- data[[k]]$unique.phon.pairs
     this.addl.info$context <- names(data)[k]
