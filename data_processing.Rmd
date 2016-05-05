@@ -630,6 +630,8 @@ This code is all run on ACISS (the UO high performance cluster), not on my local
 ###################################
 # from https://raw.githubusercontent.com/tudo-r/BatchJobs/master/examples/cfTorque/simple.tmpl
 simple <- "#PBS -N <%= job.name %>
+#PBS -M rosem@uoregon.edu
+#PBS -m abe
 ## merge standard error and output
 #PBS -j oe
 ## direct streams to our logfile
@@ -637,6 +639,7 @@ simple <- "#PBS -N <%= job.name %>
 #PBS -l walltime=<%= resources$walltime %>,nodes=<%= resources$nodes %>,vmem=<%= resources$memory %>
 ## remove this line if your cluster does not support arrayjobs
 #PBS -t 1-<%= arrayjobs %>
+
 
 ## Run R:
 ## we merge R output with stdout from PBS, which gets then logged via -o option
@@ -806,7 +809,7 @@ size_skew$method <- "skew"
 size_unif$method <- "unif"
 size_korm$method <- "korman"
 
-sim_results <- rbind(size_skew, size_unif)
+sim_results <- rbind(size_skew, size_unif, size_korm)
 
 sim_results$method <- factor(sim_results$method, 
                              levels=c("skew", "unif", "korman"),
@@ -821,12 +824,43 @@ sim_results <- sim_results %>%
 ```
 
 ```{r sim_result_plotting}
+# all simulations: precision and recall
 ggplot(filter(sim_results, sim=="size"), aes(x=N.utts, y=value)) +
   geom_jitter(alpha=.2, width = 0.4) +
-  facet_wrap( ~ method + measure, scales="free_y", ncol=2) +
+  facet_wrap( ~ method + measure, scales="free", ncol=2) +
   theme(text = element_text(size=30), axis.ticks = element_blank()) +
   labs(x=NULL, y=NULL) 
 ggsave(filename="plots/sim_results/sim_results_size.png", width=12, height=20, units="in")
+
+# just Korman corpus: precision and recall
+ggplot(filter(sim_results, sim=="size" & method=="Korman"), aes(x=N.utts, y=value)) +
+  geom_jitter(alpha=.2, width = 0.4) +
+  facet_wrap( ~ measure, scales="free", ncol=2) +
+  theme(text = element_text(size=30), axis.ticks = element_blank()) +
+  labs(x="Number of utterances", y=NULL) 
+ggsave(filename="plots/sim_results/sim_results_size_Korman.png", width=12, height=6, units="in")
+
+# Korman corpus with context estimates: precision and recall
+ggplot(filter(sim_results, sim=="size" & method=="Korman"), aes(x=N.utts, y=value)) +
+  geom_jitter(alpha=.2, width = 0.4) +
+  geom_point(context_results, aes(color=method, shape=method), size=4, show.legend=TRUE) +
+  facet_wrap( ~ measure, scales="free", ncol=2) +
+  theme(text = element_text(size=30), axis.ticks = element_blank()) +
+  labs(x="Number of utterances", y=NULL) 
+# Korman corpus with context estimates: TTR
+ggplot(filter(sim_results, sim=="size" & method=="Korman"), aes(x=N.utts, y=TTR)) +
+  geom_jitter(alpha=.2, width = 0.4) +
+  geom_point(context_results, aes(color=method, shape=method), size=4, show.legend=TRUE) +
+  facet_wrap( ~ measure, scales="free", ncol=2) +
+  theme(text = element_text(size=30), axis.ticks = element_blank()) +
+  labs(x="Number of utterances", y=NULL) 
+# Korman corpus with context estimates: prop most freq syl
+ggplot(filter(sim_results, sim=="size" & method=="Korman"), aes(x=N.utts, y=TTR)) +
+  geom_jitter(alpha=.2, width = 0.4) +
+  geom_point(context_results, aes(color=method, shape=method), size=4, show.legend=TRUE) +
+  facet_wrap( ~ measure, scales="free", ncol=2) +
+  theme(text = element_text(size=30), axis.ticks = element_blank()) +
+  labs(x="Number of utterances", y=NULL) 
 
 ```
 
@@ -987,7 +1021,9 @@ par_function_args <- list(dataframe=NULL,
 par_function_args$dataframe <- df_WL[ , 1:3] # only taking the first three columns
 global_data_results <- par_function(par_function_args)
 global_results  <- global_data_results$stat.results
-    
+```
+
+```{r global_results_data_wrangling}
 global_results <- global_results %>% 
   gather( key="measure", value="value", recall, precision) %>% 
   unite(col="criterion", stat, cutoff, sep="_", remove=FALSE) %>% 
@@ -1000,12 +1036,22 @@ global_results <- global_results %>%
 plot_context_vs_nontext(context_results, 
                         nontext_results, 
                         global_results, 
+                        outcome="measure", 
+                        save.to="plots/context_vs_nontext")
+plot_context_vs_nontext(context_results, 
+                        nontext_results, 
+                        global_results, 
                         outcome="TTR", 
                         save.to="plots/context_vs_nontext")
 plot_context_vs_nontext(context_results, 
                         nontext_results, 
                         global_results=NULL, 
                         outcome="highest.freq.syl", 
+                        save.to="plots/context_vs_nontext")
+plot_context_vs_nontext(context_results, 
+                        nontext_results, 
+                        global_results, 
+                        outcome="prop.most.freq", 
                         save.to="plots/context_vs_nontext")
 plot_context_vs_nontext(context_results, 
                         nontext_results, 
