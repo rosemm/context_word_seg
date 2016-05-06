@@ -576,7 +576,7 @@ aciss_function <- function(fun.version, id, starts, iter, par_function_args, wal
   
   # map function and data to jobs and submit
   batchMap(reg, batch_function, starts, more.args=list(par_function_args=par_function_args))
-  submitJobs(reg, ids, resources = list(walltime=walltime), chunks.as.arrayjobs=TRUE) 
+  # submitJobs(reg, ids, resources = list(walltime=walltime), chunks.as.arrayjobs=TRUE) 
   submitJobs(reg, resources = list(walltime=walltime)) 
 }
 
