@@ -273,7 +273,7 @@ clean_batch_results <- function(results){
   return(list(sim.results=sim.results, MIs=MIs, TPs=TPs))
 }
 
-plot_context_vs_nontext <- function(context_results, nontext_results, global_results, outcome, annotate=NULL, save.to, ...){
+plot_context_vs_nontext <- function(context_results, nontext_results, global_results, outcome, annotate=NULL, xlabs=FALSE, save.to, ...){
   
   stopifnot(require(ggplot2), require(dplyr), require(tidyr))
   
@@ -305,6 +305,12 @@ plot_context_vs_nontext <- function(context_results, nontext_results, global_res
   for(m in unique(context_results$method.short)){
     con.data <- filter(context_results, method.short==as.character(m))
     non.data <- filter(nontext_results, method.short==as.character(m))
+    if(!is.null(annotate)){
+      lab.data <- con.data %>% 
+        select(method, method.short, context, outcome, annotate) %>% 
+        unique()
+    }
+    
     p <- ggplot(non.data, aes(x=reorder(context, N.utts), y=outcome)) + 
       geom_boxplot() +
       geom_point(data=con.data, color=colors[[as.character(m)]], size=4, show.legend=FALSE) + 
@@ -312,7 +318,8 @@ plot_context_vs_nontext <- function(context_results, nontext_results, global_res
       labs(x=NULL, y=NULL, title=paste(m, outcome)) 
     if(!is.null(global_results)) p <- p +  geom_hline(data=global_results, aes(yintercept=outcome), linetype = 2, size=1.5)
     if(facet) p <- p + facet_wrap(~measure)
-    if(!is.null(annotate)) p <- p + geom_text(data=con.data, aes(label=annotate, y=min(outcome)), nudge_y = -0.1, size=4)
+    if(!is.null(annotate)) p <- p + geom_text(data=lab.data, aes(label=annotate,x=reorder(context, N.utts), y=outcome), size=4)
+    if(xlabs) p <- p + theme(axis.text.x = element_text(angle=330, vjust=1, hjust=0))
     ggsave(p, filename=paste0(save.to, "/", outcome, "_", m, "_", additional_args ,".png"), width=8, height=8, units="in")
   }
 }
