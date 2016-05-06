@@ -689,11 +689,12 @@ df_WL[df_WL==1.5] <- 1 # replace all 1.5's with 1's, so it doesn't distinguish b
 
 dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
 
-fun.version <- "b95f9042a41278e" # fun.version refers to the current commit for data_processing_functions.r
+fun.version <- "1f3e798156a8ba" # fun.version refers to the current commit for data_processing_functions.r
 ```
 
 ```{r on_aciss_params, eval=FALSE}
 par_function_args <- list(dataframe=NULL, 
+                          consider.freq=FALSE,
                           N.types=NULL, 
                           N.utts=NULL, 
                           by.size=FALSE, 
@@ -727,6 +728,22 @@ par_function_args$dataframe <- df_LDA
 aciss_function(fun.version, id="nontexts_LDA", starts=1:50, iter=100, par_function_args)
 
 showStatus(makeRegistry(id = "nontexts_WL")); showStatus(makeRegistry(id = "nontexts_STM")); showStatus(makeRegistry(id = "nontexts_HJ")); showStatus(makeRegistry(id = "nontexts_LDA"))
+
+# Include freq cutoff as well (a la Swingley 2008)
+par_function_args$consider.freq <- TRUE
+par_function_args$dataframe <- df_WL
+aciss_function(fun.version, id="nontexts_WL_freq", starts=1:50, iter=100, par_function_args) 
+
+par_function_args$dataframe <- df_STM
+aciss_function(fun.version, id="nontexts_STM_freq", starts=1:50, iter=100, par_function_args) 
+
+par_function_args$dataframe <- df_HJ
+aciss_function(fun.version, id="nontexts_HJ_freq", starts=1:50, iter=100, par_function_args)
+
+par_function_args$dataframe <- df_LDA
+aciss_function(fun.version, id="nontexts_LDA_freq", starts=1:50, iter=100, par_function_args)
+
+showStatus(makeRegistry(id = "nontexts_WL_freq")); showStatus(makeRegistry(id = "nontexts_STM_freq")); showStatus(makeRegistry(id = "nontexts_HJ_freq")); showStatus(makeRegistry(id = "nontexts_LDA_freq"))
 
 system('qstat -antu rosem') # to show all of my current jobs
 

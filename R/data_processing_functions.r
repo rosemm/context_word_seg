@@ -335,13 +335,14 @@ assess_seg <- function(seg.phon.stream, words, dict){
 }
 
 # for bootstrapping nontexts:
-par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, expand=FALSE, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version=NULL, quiet=TRUE){ # this is the function that should be done in parallel on the 12 cores of each node
+par_function <- function(x, consider.freq=FALSE, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, expand=FALSE, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version=NULL, quiet=TRUE){ # this is the function that should be done in parallel on the 12 cores of each node
   
   # accept arguments as a list
   if (is.list(x)) {
     if (all(c("dataframe", "dict") %in% names(x))) {
       dataframe <- x[["dataframe"]]
       dict <- x[["dict"]]
+      if("consider.freq" %in% names(x)) consider.freq <- x[["consider.freq"]]
       if("N.types" %in% names(x)) N.types <- x[["N.types"]]
       if("N.utts" %in% names(x)) N.utts <- x[["N.utts"]]
       if("by.size" %in% names(x)) by.size <- x[["by.size"]]
@@ -431,6 +432,7 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
                                                        stat = "TP", 
                                                        data = data[[k]],
                                                        seg.utts = seg.utts,
+                                                       consider.freq = consider.freq,
                                                        quiet=quiet)
     }
     if(MI){
@@ -438,6 +440,7 @@ par_function <- function(x, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, 
                                                        stat = "MI", 
                                                        data = data[[k]],
                                                        seg.utts = seg.utts,
+                                                       consider.freq = consider.freq,
                                                        quiet=quiet)
     }
   } # end of for loop
