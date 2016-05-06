@@ -855,7 +855,7 @@ ggsave(filename="plots/sim_results/sim_results_size_Korman.png", width=12, heigh
 # Korman corpus with context estimates: precision and recall
 ggplot(filter(sim_results, sim=="size" & method=="Korman"), aes(x=N.utts, y=value)) +
   geom_jitter(alpha=.2, width = 0.4) +
-  geom_point(data=context_results, aes(x=N.utts, y=value, color=method), size=4, alpha=.5) +
+  geom_point(data=context_all, aes(x=N.utts, y=value, color=method), size=4, alpha=.5) +
   facet_wrap( ~ measure, scales="free", ncol=2) +
   theme(text = element_text(size=30), axis.ticks = element_blank()) +
   labs(x="Number of utterances", y=NULL) 
@@ -863,14 +863,14 @@ ggsave(filename="plots/sim_results/sim_results_size_Korman_withcontexts.png", wi
 # Korman corpus with context estimates: TTR
 ggplot(filter(sim_results, sim=="size" & method=="Korman"), aes(x=N.utts, y=TTR)) +
   geom_jitter(alpha=.2, width = 0.4) +
-  geom_point(data=context_results, aes(color=method, shape=method), size=4, show.legend=TRUE) +
+  geom_point(data=context_all, aes(color=method, shape=method), size=4, show.legend=TRUE) +
   facet_wrap( ~ measure, scales="free", ncol=2) +
   theme(text = element_text(size=30), axis.ticks = element_blank()) +
   labs(x="Number of utterances", y=NULL) 
 # Korman corpus with context estimates: prop most freq syl
 ggplot(filter(sim_results, sim=="size" & method=="Korman"), aes(x=N.utts, y=TTR)) +
   geom_jitter(alpha=.2, width = 0.4) +
-  geom_point(data=context_results, aes(color=method, shape=method), size=4, show.legend=TRUE) +
+  geom_point(data=context_all, aes(color=method, shape=method), size=4, show.legend=TRUE) +
   facet_wrap( ~ measure, scales="free", ncol=2) +
   theme(text = element_text(size=30), axis.ticks = element_blank()) +
   labs(x="Number of utterances", y=NULL) 
@@ -940,18 +940,22 @@ par_function_args <- list(dataframe=NULL,
 par_function_args$dataframe <- df_WL
 context_WL_results <- par_function(par_function_args)
 context_WL <- context_WL_results$stat.results
+context_WL_detail <- context_WL_results$addl.info
 
 par_function_args$dataframe <- df_STM
 context_STM_results <- par_function(par_function_args)
 context_STM <- context_STM_results$stat.results
+context_STM_detail <- context_STM_results$addl.info
 
 par_function_args$dataframe <- df_LDA
 context_LDA_results <- par_function(par_function_args)
 context_LDA <- context_LDA_results$stat.results
+context_LDA_detail <- context_LDA_results$addl.info
 
 par_function_args$dataframe <- df_HJ
 context_HJ_results <- par_function(par_function_args)
 context_HJ <- context_HJ_results$stat.results
+context_HJ_detail <- context_HJ_results$addl.info
 ```
 
 
@@ -962,26 +966,50 @@ context_STM$method <- "STM"
 context_LDA$method <- "LDA"
 context_HJ$method <- "HJ"
 
-context_results <- rbind(context_WL, context_STM, context_LDA, context_HJ)
+context_all <- rbind(context_WL, context_STM, context_LDA, context_HJ)
 
-context_results$method.short <- factor(context_results$method)
-context_results$method <- factor(context_results$method, 
+context_all$method.short <- factor(context_all$method)
+context_all$method <- factor(context_all$method, 
                                  levels=c("WL", "STM", "LDA", "HJ"), 
                                  labels = c("word lists", "topic modeling (STM)", "topic modeling (LDA)", "subjective judgments")) 
 
+
 # gather for plotting
-context_results <- context_results %>% 
+context_all <- context_all %>% 
   gather( key="measure", value="value", recall, precision) %>% 
   unite(col="criterion", stat, cutoff, sep="_", remove=FALSE) %>% 
   rename(context=nontext) 
 
-context_results$measure <- as.factor(context_results$measure)
+context_all$measure <- as.factor(context_all$measure)
 
 # for adding to nontext dataframe
-context_ests <- context_results %>% 
+context_ests <- context_all %>% 
   select(criterion, method, context, measure, value) %>% 
   rename(context.est=value)
+```
 
+```{r context_detail_data_wrangling}
+# combine all the context additional info into one data frame
+context_WL_detail$method <- "WL"
+context_STM_detail$method <- "STM"
+context_LDA_detail$method <- "LDA"
+context_HJ_detail$method <- "HJ"
+
+context_detail <- rbind(context_WL_detail, context_STM_detail, context_LDA_detail, context_HJ_detail)
+
+context_detail$method.short <- factor(context_detail$method)
+context_detail$method <- factor(context_detail$method, 
+                                 levels=c("WL", "STM", "LDA", "HJ"), 
+                                 labels = c("word lists", "topic modeling (STM)", "topic modeling (LDA)", "subjective judgments")) 
+context_detail_summary <- context_detail %>% 
+  group_by(method.short, context) %>% 
+  summarise(which.A=which.max(A.freq.tot), 
+            which.B=which.max(B.freq.tot),
+            freq.syl.A=syl1[which.A], 
+            freq.syl.B=syl2[which.B],
+            most.freq.syl=unique(freq.syl.A,freq.syl.B))
+  
+context_all <- left_join(context_all, select(context_detail_summary, method.short, context, most.freq.syl))
 ```
 
 ## nontext results
@@ -1040,36 +1068,33 @@ global_results  <- global_data_results$stat.results
 global_results <- global_results %>% 
   gather( key="measure", value="value", recall, precision) %>% 
   unite(col="criterion", stat, cutoff, sep="_", remove=FALSE) %>% 
-  left_join(unique(select(context_results, measure, method)), by="measure")
+  left_join(unique(select(context_all, measure, method)), by="measure")
 ```
 
 ## THE PLOT (all methods)
 ```{r the_plot}
 # any additional values to be saved in the plot name can be included as extra arguments
-plot_context_vs_nontext(context_results, 
+plot_context_vs_nontext(context_all, 
                         nontext_results, 
                         global_results, 
                         outcome="measure", 
                         save.to="plots/context_vs_nontext")
-plot_context_vs_nontext(context_results, 
+plot_context_vs_nontext(context_all, 
                         nontext_results, 
                         global_results, 
                         outcome="TTR", 
                         save.to="plots/context_vs_nontext")
-plot_context_vs_nontext(context_results, 
+plot_context_vs_nontext(context_all, 
                         nontext_results, 
                         global_results=NULL, 
                         outcome="highest.freq.syl", 
+                        annotate="most.freq.syl",
                         save.to="plots/context_vs_nontext")
-plot_context_vs_nontext(context_results, 
+plot_context_vs_nontext(context_all, 
                         nontext_results, 
                         global_results, 
                         outcome="prop.most.freq", 
-                        save.to="plots/context_vs_nontext")
-plot_context_vs_nontext(context_results, 
-                        nontext_results, 
-                        global_results, 
-                        outcome="prop.most.freq", 
+                        annotate="most.freq.syl",
                         save.to="plots/context_vs_nontext")
 
 ggplot(full_results, aes(x=context, y=value)) +

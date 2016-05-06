@@ -272,7 +272,7 @@ clean_batch_results <- function(results){
   return(list(sim.results=sim.results, MIs=MIs, TPs=TPs))
 }
 
-plot_context_vs_nontext <- function(context_results, nontext_results, global_results, outcome, save.to, ...){
+plot_context_vs_nontext <- function(context_results, nontext_results, global_results, outcome, annotate=NULL, save.to, ...){
   
   stopifnot(require(ggplot2), require(dplyr), require(tidyr))
   
@@ -294,18 +294,22 @@ plot_context_vs_nontext <- function(context_results, nontext_results, global_res
     }
   }
   
+  if(!is.null(annotate)){
+    colnames(context_results)[colnames(context_results)==annotate] <- "annotate"
+  }
   
     
   colors <- c("#D53E4F", "#66C2A5", "#3288BD", "#F46D43")
   names(colors) <- unique(context_results$method.short)
   for(m in unique(context_results$method.short)){
-    p <- ggplot(filter(nontext_results, method.short==m), aes(x=reorder(context, N.utts), y=outcome)) + 
-      geom_boxplot() +
-      geom_point(data=filter(context_results, method.short==m), aes(x=context, y=outcome), color=colors[[as.character(m)]], size=4, show.legend=FALSE) + 
+    p <- ggplot(filter(context_results, method.short==m), aes(x=context)) + 
+      geom_boxplot(data=filter(nontext_results, method.short==m), aes(x=reorder(context, N.utts), y=outcome)) +
+      geom_point(aes(y=outcome), color=colors[[as.character(m)]], size=4, show.legend=FALSE) + 
       theme(text = element_text(size=30), axis.ticks = element_blank(), axis.text.x = element_blank()) +
       labs(x=NULL, y=NULL, title=paste(m, outcome)) 
     if(!is.null(global_results)) p <- p +  geom_hline(data=global_results, aes(yintercept=outcome), linetype = 2, size=1.5)
     if(facet) p <- p + facet_wrap(~measure)
+    if(!is.null(annotate)) p <- p + geom_text( aes(label=annotate, y=min(outcome)), nudge_y = -0.1)
     ggsave(p, filename=paste0(save.to, "/results_", outcome, "_", m, "_", additional_args ,".png"), width=8, height=8, units="in")
   }
 }
