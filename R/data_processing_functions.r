@@ -575,9 +575,9 @@ aciss_function <- function(fun.version, id, starts, iter, par_function_args, wal
   # chunked <- chunk(ids, chunk.size = 10)
   
   # map function and data to jobs and submit
-  batchMap(reg, batch_function, starts, more.args=list(par_function_args=par_function_args))
   # submitJobs(reg, ids, resources = list(walltime=walltime), chunks.as.arrayjobs=TRUE) 
-  submitJobs(reg, resources = list(walltime=walltime)) 
+  ids  <- batchMap(reg, batch_function, starts, more.args=list(par_function_args=par_function_args))
+  done <- submitJobs(reg, resources = list(nodes = 1, ppn=1, walltime=walltime)) 
 }
 
 # make an artificial language
