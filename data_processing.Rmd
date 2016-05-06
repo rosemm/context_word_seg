@@ -637,7 +637,8 @@ simple <- "#PBS -N <%= job.name %>
 ## direct streams to our logfile
 #PBS -o <%= log.file %>
 #PBS -l walltime=<%= resources$walltime %>,nodes=1:ppn=12,vmem=<%= resources$memory %>
-
+## remove this line if your cluster does not support arrayjobs
+#PBS -t 1-<%= arrayjobs %>
 
 ## Run R:
 ## we merge R output with stdout from PBS, which gets then logged via -o option
