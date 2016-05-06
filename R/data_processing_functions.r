@@ -552,7 +552,7 @@ par_function_test <- function(dataframe, verbose){
   }
 }
 
-aciss_function <- function(fun.version, id, starts, iter, par_function_args){
+aciss_function <- function(fun.version, id, starts, iter, par_function_args, walltime=9600){
   # fun.version refers to the current commit for data_processing_functions.r
   
   batch_function <- function(start, par_function_args){
@@ -571,10 +571,12 @@ aciss_function <- function(fun.version, id, starts, iter, par_function_args){
   
   # create a registry
   reg <- makeRegistry(id = id)
+  ids <- getJobIds(reg)
+  chunked <- chunk(ids, chunk.size = 10)
   
   # map function and data to jobs and submit
-  ids  <- batchMap(reg, batch_function, starts, more.args=list(par_function_args=par_function_args))
-  done <- submitJobs(reg, resources = list(nodes = 1, ppn=1)) 
+  batchMap(reg, batch_function, starts, more.args=list(par_function_args=par_function_args))
+  done <- submitJobs(reg, ids, resources = list(walltime=walltime), chunks.as.arrayjobs=TRUE) 
 }
 
 # make an artificial language

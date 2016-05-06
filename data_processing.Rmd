@@ -631,7 +631,7 @@ This code is all run on ACISS (the UO high performance cluster), not on my local
 # from https://raw.githubusercontent.com/tudo-r/BatchJobs/master/examples/cfTorque/simple.tmpl
 simple <- "#PBS -N <%= job.name %>
 #PBS -M rosem@uoregon.edu
-#PBS -m abe
+#PBS -m a
 ## merge standard error and output
 #PBS -j oe
 ## direct streams to our logfile
@@ -663,6 +663,7 @@ batch.conf[1] <- "cluster.functions = makeClusterFunctionsTorque('simple.tmpl')"
 
 writeLines(batch.conf, ".BatchJobs.R", sep="\n") # write this file to the current working directory
 
+loadConfig()
 # then SFTP the .BatchJobs.R file to ACISS
 # system('sftp rosem@ftn.aciss.uoregon.edu')
 ```
@@ -691,7 +692,7 @@ df_WL[df_WL==1.5] <- 1 # replace all 1.5's with 1's, so it doesn't distinguish b
 
 dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
 
-fun.version <- "b297e2f85b7862" # fun.version refers to the current commit for data_processing_functions.r
+fun.version <- "b5c71a90637e33" # fun.version refers to the current commit for data_processing_functions.r
 ```
 
 ```{r on_aciss_params, eval=FALSE}
@@ -730,6 +731,8 @@ aciss_function(fun.version, id="nontexts_LDA", starts=1:50, iter=100, par_functi
 
 showStatus(makeRegistry(id = "nontexts_WL")); showStatus(makeRegistry(id = "nontexts_STM")); showStatus(makeRegistry(id = "nontexts_HJ")); showStatus(makeRegistry(id = "nontexts_LDA"))
 
+system('qstat -antu rosem') # to show all of my current jobs
+
 # loadResults(makeRegistry(id = "nontexts_WL"))
 
 # killJobs(makeRegistry(id = "nontexts_WL"),findRunning(makeRegistry(id = "nontexts_WL")))
@@ -748,16 +751,16 @@ starts <- seq(.4, .9, by=.05)
 par_function_args$cutoff <- as.name("start") # doesn't work
 
 par_function_args$dataframe <- df_WL
-aciss_function(fun.version, id="Sim_cutoff_WL", starts=starts, iter=500, par_function_args) 
+aciss_function(fun.version, id="Sim_cutoff_WL", starts=starts, iter=12, par_function_args) 
 
 par_function_args$dataframe <- df_STM
-aciss_function(fun.version, id="Sim_cutoff_STM", starts=starts, iter=500, par_function_args) 
+aciss_function(fun.version, id="Sim_cutoff_STM", starts=starts, iter=12, par_function_args) 
 
 par_function_args$dataframe <- df_HJ
-aciss_function(fun.version, id="Sim_cutoff_HJ", starts=starts, iter=500, par_function_args)
+aciss_function(fun.version, id="Sim_cutoff_HJ", starts=starts, iter=12, par_function_args)
 
 par_function_args$dataframe <- df_LDA
-aciss_function(fun.version, id="Sim_cutoff_LDA", starts=starts, iter=500, par_function_args)
+aciss_function(fun.version, id="Sim_cutoff_LDA", starts=starts, iter=12, par_function_args)
 
 showStatus(makeRegistry(id = "Sim_cutoff_WL")); showStatus(makeRegistry(id = "Sim_cutoff_STM")); showStatus(makeRegistry(id = "Sim_cutoff_HJ")); showStatus(makeRegistry(id = "Sim_cutoff_LDA"))
 
@@ -770,7 +773,7 @@ par_function_args$N.types <- NULL
 par_function_args$N.utts <- NULL
   
 par_function_args$dataframe <- df_WL[ ,1:3]
-aciss_function(fun.version, id="Sim_size_Korman", starts=1:100, iter=5, par_function_args) # this takes much longer to run, so need to use fewer iterations so ACISS doesn't kill the job
+aciss_function(fun.version, id="Sim_size_Korman", starts=1:100, iter=12, par_function_args) # this takes much longer to run, so need to use fewer iterations so ACISS doesn't kill the job
 
 par_function_args$N.types <- 1000
 par_function_args$N.utts <- 1000
@@ -838,21 +841,22 @@ ggsave(filename="plots/sim_results/sim_results_size_Korman.png", width=12, heigh
 # Korman corpus with context estimates: precision and recall
 ggplot(filter(sim_results, sim=="size" & method=="Korman"), aes(x=N.utts, y=value)) +
   geom_jitter(alpha=.2, width = 0.4) +
-  geom_point(context_results, aes(color=method, shape=method), size=4, show.legend=TRUE) +
+  geom_point(data=context_results, aes(x=N.utts, y=value, color=method), size=4, alpha=.5) +
   facet_wrap( ~ measure, scales="free", ncol=2) +
   theme(text = element_text(size=30), axis.ticks = element_blank()) +
   labs(x="Number of utterances", y=NULL) 
+ggsave(filename="plots/sim_results/sim_results_size_Korman_withcontexts.png", width=12, height=6, units="in")
 # Korman corpus with context estimates: TTR
 ggplot(filter(sim_results, sim=="size" & method=="Korman"), aes(x=N.utts, y=TTR)) +
   geom_jitter(alpha=.2, width = 0.4) +
-  geom_point(context_results, aes(color=method, shape=method), size=4, show.legend=TRUE) +
+  geom_point(data=context_results, aes(color=method, shape=method), size=4, show.legend=TRUE) +
   facet_wrap( ~ measure, scales="free", ncol=2) +
   theme(text = element_text(size=30), axis.ticks = element_blank()) +
   labs(x="Number of utterances", y=NULL) 
 # Korman corpus with context estimates: prop most freq syl
 ggplot(filter(sim_results, sim=="size" & method=="Korman"), aes(x=N.utts, y=TTR)) +
   geom_jitter(alpha=.2, width = 0.4) +
-  geom_point(context_results, aes(color=method, shape=method), size=4, show.legend=TRUE) +
+  geom_point(data=context_results, aes(color=method, shape=method), size=4, show.legend=TRUE) +
   facet_wrap( ~ measure, scales="free", ncol=2) +
   theme(text = element_text(size=30), axis.ticks = element_blank()) +
   labs(x="Number of utterances", y=NULL) 
