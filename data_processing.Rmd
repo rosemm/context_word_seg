@@ -630,13 +630,11 @@ This code is all run on ACISS (the UO high performance cluster), not on my local
 ###################################
 # from https://raw.githubusercontent.com/tudo-r/BatchJobs/master/examples/cfTorque/simple.tmpl
 simple <- "#PBS -N <%= job.name %>
-#PBS -M rosem@uoregon.edu
-#PBS -m a
 ## merge standard error and output
 #PBS -j oe
 ## direct streams to our logfile
 #PBS -o <%= log.file %>
-#PBS -l walltime=<%= resources$walltime %>,nodes=1:ppn=12,vmem=<%= resources$memory %>
+#PBS -l walltime=<%= resources$walltime %>,nodes=<%= resources$nodes %>,vmem=<%= resources$memory %>
 ## remove this line if your cluster does not support arrayjobs
 #PBS -t 1-<%= arrayjobs %>
 
@@ -691,7 +689,7 @@ df_WL[df_WL==1.5] <- 1 # replace all 1.5's with 1's, so it doesn't distinguish b
 
 dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
 
-fun.version <- "b98b5a84a2f9cec" # fun.version refers to the current commit for data_processing_functions.r
+fun.version <- "b95f9042a41278e" # fun.version refers to the current commit for data_processing_functions.r
 ```
 
 ```{r on_aciss_params, eval=FALSE}
