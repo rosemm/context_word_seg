@@ -714,7 +714,7 @@ par_function_args <- list(dataframe=NULL,
 
 ```{r on_aciss_nontexts, eval=FALSE}
 
-# 20 starts and 100 iter gives 2000 samples for each nontext (takes about 40min per 1000 samples)
+# 20 starts and 100 iter gives 2000 samples for each nontext (takes about 60min per 1000 samples)
 par_function_args$dataframe <- df_WL
 aciss_function(fun.version, id="nontexts_WL", starts=1:50, iter=100, par_function_args) 
 
