@@ -571,12 +571,13 @@ aciss_function <- function(fun.version, id, starts, iter, par_function_args, wal
   
   # create a registry
   reg <- makeRegistry(id = id)
-  ids <- getJobIds(reg)
-  chunked <- chunk(ids, chunk.size = 10)
+  # ids <- getJobIds(reg)
+  # chunked <- chunk(ids, chunk.size = 10)
   
   # map function and data to jobs and submit
   batchMap(reg, batch_function, starts, more.args=list(par_function_args=par_function_args))
-  done <- submitJobs(reg, ids, resources = list(walltime=walltime), chunks.as.arrayjobs=TRUE) 
+  submitJobs(reg, ids, resources = list(walltime=walltime), chunks.as.arrayjobs=TRUE) 
+  submitJobs(reg, resources = list(walltime=walltime)) 
 }
 
 # make an artificial language
