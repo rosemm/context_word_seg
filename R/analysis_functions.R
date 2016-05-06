@@ -169,8 +169,8 @@ logistic_regressions <- function(all.methods, outcome_method, predictor_method, 
 
 
 
-read_batch <- function(dir){
-  # dir="nontexts_HJ-files"
+read_batch <- function(dir, quiet=TRUE){
+  # dir="nontexts_WL-files"
   jobs <- list.files(paste0(dir, "/jobs"))
   for(j in jobs){
     load(paste0(dir, "/jobs/", j, "/", as.numeric(j), "-result.RData")) # makes an object named "result"
@@ -178,6 +178,7 @@ read_batch <- function(dir){
       if(as.numeric(j)==1){
         results <- result
       } else results <- rbind(results, result)
+      if(!quiet) message(j)
     } # end of if !is.null(result) statement
   } # end of for loop
   return(results)
@@ -279,7 +280,7 @@ plot_context_vs_nontext <- function(context_results, nontext_results, global_res
   additional_args <- as.data.frame(list(...), stringsAsFactors=FALSE)
   additional_args <- paste0(colnames(additional_args), additional_args, collapse="_")
   
-  facet <- length(unique(context_results[, colnames(context_results)==outcome])) > 1 # is there is more than one level for outcome?
+  facet <- length(levels(context_results[, colnames(context_results)==outcome])) > 1 # is there is more than one level for outcome?
   if(facet){
     colnames(context_results)[colnames(context_results)=="value"] <- "outcome"
     colnames(nontext_results)[colnames(nontext_results)=="value"] <- "outcome"
@@ -302,15 +303,17 @@ plot_context_vs_nontext <- function(context_results, nontext_results, global_res
   colors <- c("#D53E4F", "#66C2A5", "#3288BD", "#F46D43")
   names(colors) <- unique(context_results$method.short)
   for(m in unique(context_results$method.short)){
-    p <- ggplot(filter(context_results, method.short==m), aes(x=context)) + 
-      geom_boxplot(data=filter(nontext_results, method.short==m), aes(x=reorder(context, N.utts), y=outcome)) +
-      geom_point(aes(y=outcome), color=colors[[as.character(m)]], size=4, show.legend=FALSE) + 
+    con.data <- filter(context_results, method.short==as.character(m))
+    non.data <- filter(nontext_results, method.short==as.character(m))
+    p <- ggplot(non.data, aes(x=reorder(context, N.utts), y=outcome)) + 
+      geom_boxplot() +
+      geom_point(data=con.data, color=colors[[as.character(m)]], size=4, show.legend=FALSE) + 
       theme(text = element_text(size=30), axis.ticks = element_blank(), axis.text.x = element_blank()) +
       labs(x=NULL, y=NULL, title=paste(m, outcome)) 
     if(!is.null(global_results)) p <- p +  geom_hline(data=global_results, aes(yintercept=outcome), linetype = 2, size=1.5)
     if(facet) p <- p + facet_wrap(~measure)
-    if(!is.null(annotate)) p <- p + geom_text( aes(label=annotate, y=min(outcome)), nudge_y = -0.1)
-    ggsave(p, filename=paste0(save.to, "/results_", outcome, "_", m, "_", additional_args ,".png"), width=8, height=8, units="in")
+    if(!is.null(annotate)) p <- p + geom_text(data=con.data, aes(label=annotate, y=min(outcome)), nudge_y = -0.1, size=4)
+    ggsave(p, filename=paste0(save.to, "/", outcome, "_", m, "_", additional_args ,".png"), width=8, height=8, units="in")
   }
 }
 
