@@ -325,6 +325,46 @@ plot_context_vs_nontext <- function(context_results, nontext_results, global_res
 }
 
 
+test_context_vs_nontext <- function(context_results, nontext_results, outcome){
+  # for adding to nontext dataframe
+  facet <- length(levels(context_results[, colnames(context_results)==outcome])) > 1 # is there is more than one level for outcome?
+  if(facet){
+    colnames(context_results)[colnames(context_results)=="value"] <- "outcome"
+    colnames(nontext_results)[colnames(nontext_results)=="value"] <- "outcome"
+    context_ests <- context_results %>% 
+      select(criterion, method, context, measure, value) %>% 
+      rename(context.est=value)
+  } else {
+    colnames(context_results)[colnames(context_results)==outcome] <- "outcome"
+    colnames(nontext_results)[colnames(nontext_results)==outcome] <- "outcome"
+    context_ests <- context_results %>% 
+      select(criterion, method, context, outcome) %>% 
+      rename(context.est=outcome)
+   }
+  
+  full_results <- left_join(nontext_results, context_ests) # add context estimates
+  
+  # bootstrap p-values
+  full_results$above.est <- ifelse(full_results$outcome > full_results$context.est, 1, 0)
+  
+  if(facet){
+    tests.contexts <- full_results %>%
+      group_by(method, context, criterion, measure)
+  } else{
+    tests.contexts <- full_results %>%
+      group_by(method, context, criterion)
+  }
+  tests.contexts <- tests.contexts %>%
+    summarize(p.val = mean(above.est)) %>% 
+    add_stars() # from analysis_functions.r
+  # 
+  # tests.methods <- full_results %>%
+  #   group_by(method, criterion, measure) %>%
+  #   summarize(p.val = mean(above.est)) %>% 
+  #   add_stars() # from analysis_functions.r
+  return(tests.contexts)
+}
+
 plot_seg_results <- function(seg.results, title=NULL, boxplot=TRUE, scatterplot=FALSE, by=c("syl", "contexts")){
   # add break by N.syl option (check whether 1, 2, + syllable words are getting segmented correctly)
   plot <- ggplot(seg.results, aes(x=seg.result, y=freq.segd)) 
