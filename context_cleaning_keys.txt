@@ -48,6 +48,7 @@ being uncomfortable	fussing
 being upset	fussing
 biting	biting
 blowing bubbles	blowing bubbles
+blowing bubles	blowing bubbles
 blowing raspberries	blowing raspberries
 boiling water	cooking
 bottle	bottle feeding
@@ -69,6 +70,7 @@ changing diaper	diaper change
 chewing	chewing
 chiding	chiding
 clapping	clapping
+clapping hands	clapping
 clean up	clean up
 cleaning	cleaning
 cleaning the child	cleaning the child
@@ -119,6 +121,7 @@ feeding	mealtime
 Feeding	mealtime
 feeding bottle	bottle feeding
 feeding time	mealtime
+feeling scared	scared
 fighting	fussing
 filming	filming
 finishing bath	post-bath
@@ -134,6 +137,7 @@ getting ready	getting ready
 getting ready for bed	pre-bedtime
 getting ready for doctor	pre-doctors visit
 getting sick	sick
+getting undressed	undressing
 getting up	getting up
 going out	leaving
 going potty	going potty
@@ -197,6 +201,7 @@ peekaboo	playtime
 photo	taking pictures
 pkaying	playtime
 plaing	playtime
+plashing	splashing
 play	playtime
 play time	playtime
 playiing	playtime
@@ -253,7 +258,9 @@ shopping	shopping
 shouting	shouting
 sick	sick
 sick baby	sick
+sighing	sighing
 singing	singing
+sitting	sitting
 sleep time	bedtime
 sleeping	bedtime
 sleeptime	bedtime
@@ -272,10 +279,15 @@ sooyhing	soothing
 sothing	soothing
 speaking	talking
 spitting up	spitting up
+splashing	splashing
+standing	standing
+standing up	standing
+story telling	storytime
 storytelling	storytime
 storytime	storytime
 stretching	stretching
 sucking	sucking
+sucking fingers	sucking fingers
 sucking thumb	sucking thumb
 sun bathing	outside
 sunbathing	sunbathing
@@ -291,6 +303,8 @@ taking photos	taking pictures
 taking picture	taking pictures
 taking pictures	taking pictures
 takling	talking
+talkig	talking
+talkign	talking
 talking	talking
 talking photos	taking pictures
 talking to child	talking
@@ -321,6 +335,7 @@ washing hair	washing hair
 washing up	washing up
 watch tennis	watch tennis
 watching	watching
+watching t.v.	TV
 watching television	TV
 watching tv	TV
 watching TV	TV

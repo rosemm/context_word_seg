@@ -118,14 +118,19 @@ shaking hands	touching
 shopping	shopping
 shouting	interaction
 sick	sick
+sighing	sighing
 singing	interaction
+sitting	sitting
 smiling	interaction
 sneezing	sneezing
 soothing	fussing
 spitting up	mealtime
+splashing	bathtime
+standing	standing
 storytime	interaction
 stretching	stretching
 sucking	touching
+sucking fingers	touching
 sucking thumb	touching
 sunbathing	outside
 swimming	swimming
