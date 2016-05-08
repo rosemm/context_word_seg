@@ -46,26 +46,45 @@ threshold_plots <- function(df.model, thresholds, method, save.to, ...){
     scale_x_continuous(breaks=round(seq(min(thresholds), max(thresholds), by=.05), 2)) +
     geom_line(y=1, linetype=2) +
     labs(y=NULL) +
-    ggtitle(paste0(method, ": mean number of contexts per utterance"))
+    ggtitle(paste0(method, ": mean number of contexts per utterance")) + 
+    theme(text = element_text(size=20))
   ggsave(filename=paste0(save.to, "/thresholds_", method, "_means_", additional_args ,".png"), width=8, height=8, units="in")
   
   ggplot(filter(plot.data, measure!="mean_num_topics"), aes(x=threshold, y=value, color=measure)) + 
     geom_line() + 
     scale_x_continuous(breaks=round(seq(min(thresholds), max(thresholds), by=.05), 2)) +
     labs(y="Percent of total utterances") +
-    ggtitle(paste0(method, ": number of contexts per utterance"))
+    ggtitle(paste0(method, ": number of contexts per utterance")) + 
+    theme(text = element_text(size=20))
   ggsave(filename=paste0(save.to, "/thresholds_", method, "_perc_", additional_args ,".png"), width=8, height=8, units="in")
 }
 
-apply_threshold <- function(df.model, threshold){
+apply_threshold <- function(df.model, threshold, plots=FALSE, method=NULL, save.to=NULL){
   
   stopifnot(require(dplyr), require(tidyr))
+  if(plots) stopifnot(require(ggplot2), !is.null(method), !is.null(save.to))
   
-  df.bin <- df.model %>% 
+  df.long <- df.model %>% 
     gather(key="topic", value="loading", -utt, -orth, -phon)
-  df.bin$include <- ifelse(df.bin$loading > threshold, 1, 0)
-  df.bin <- df.bin %>% 
+  df.long$include <- ifelse(df.long$loading > threshold, 1, 0)
+  df.bin <- df.long %>% 
     select(-loading) 
+  if(plots){
+    ggplot(df.long, aes(x=loading)) + 
+      geom_histogram() + 
+      facet_wrap(~topic) + 
+      geom_vline(xintercept=threshold, color="red", lty=2) + 
+      theme(text = element_text(size=20)) + 
+      ggtitle("Topic loadings on utterances\nthreshold shown in red")
+    ggsave(filename=paste0(save.to, "/threshold_", method, "_hists_by_context.png"), width=16, height=12, units="in")
+    ggplot(filter(df.long, loading > 0), aes(x=loading)) + 
+      geom_histogram() + 
+      facet_wrap(~topic, scales="free_y") + 
+      geom_vline(xintercept=threshold, color="red", lty=2) + 
+      theme(text = element_text(size=20)) + 
+      ggtitle("Topic loadings (excluding 0) on utterances\nthreshold shown in red")
+    ggsave(filename=paste0(save.to, "/threshold_", method, "_hists_by_context_drop0s.png"), width=16, height=12, units="in")
+  }
   
   # any contexts that are all 0's (i.e. any contexts which have no utterances assigned)?
   topics.occurring <- unique(filter(df.bin, include==1)$topic)
