@@ -116,11 +116,11 @@ for(k in 1:length(names(contexts))){
     temp.codes[[names(contexts)[k]]][grep(pattern=paste0("\\<", words[w], "\\>"), x=temp.codes$orth )] <- 1 
   }
 }
-df <- left_join(df, temp.codes, by="orth") # join temp.codes back to full df
+df_WL <- left_join(df, temp.codes, by="orth") # join temp.codes back to full df
 
-df <- expand_windows(df, context.names=names(contexts)) # extend context codes 2 utterances before and after each hit
+df_WL <- expand_windows(df_WL, context.names=names(contexts)) # extend context codes 2 utterances before and after each hit
 
-write.table(df, file="contexts_files/contexts_WL.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+write.table(df_WL, file="contexts_files/contexts_WL.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 # df <- read.table("contexts_files/contexts_WL.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this overwrites the word list context df above
 ```
 
@@ -361,6 +361,7 @@ top.topic.words(lda$topics, 10, by.score=TRUE) ## Get the top words for each top
 ```
 
 ```{r lda_doc_loadings}
+source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/R/topic_modeling_functions.R")
 # from topic_modeling_functions.r
 df.lda <- doc_loadings(method="lda", 
                              model=lda, 
@@ -516,7 +517,7 @@ df.stm <- doc_loadings(method="stm",
 
 write.table(df.stm, file=paste0("contexts_files/contexts_STM_winutts", wn, ".txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
-hist(unlist(stm.loadings[,5:16]), breaks=50)
+hist(unlist(df.stm[,5:16]), breaks=50)
 ```
 
 
