@@ -10,9 +10,6 @@ library(stm)
 library(vcd)
 library(car)
 
-# read in the functions written for this analysis
-source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_functions.r")
-source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/topic_modeling_functions.r")
 setwd("/Users/TARDIS/Documents/STUDIES/context_word_seg")
 ```
 
@@ -58,7 +55,7 @@ for(b in 1:length(bigrams)){
 # add context for each word to dictionary
 c <- gather(contexts, key="context", value="word") %>%
   filter(word!="")
-c <- left_join(c, dict) 
+c <- left_join(c, dict, by="word") 
 
 c.missed <- filter(c, grepl(x=word, pattern="_", fixed=T)) # grab the bigrams
 search_in <- df$orth
@@ -78,7 +75,7 @@ con.freq <- c   %>%
   summarize(mean=mean(freq), max=max(freq), min=min(freq), median=median(freq))
 
 ggplot(c, aes(x=as.factor(word.num), y=freq, fill=context)) + 
-  geom_bar(position=position_dodge(), stat="identity", show_guide=F) +
+  geom_bar(position=position_dodge(), stat="identity", show.legend=F) +
   facet_wrap(~context, scales="free", ncol=4) +
   theme(text = element_text(size=20), axis.ticks = element_blank(), axis.text.x = element_blank() ) +
   labs(x=NULL, y=NULL)
@@ -103,6 +100,7 @@ write.table(contexts.occuring, file="contexts.occuring.csv", sep=",", row.names=
 
 ## code contexts in df by word lists
 ```{r}
+source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/R/data_processing_functions.r")
 df <- df[ , 1:3] # only keep the first three columns (there should only be three columns anyway, but just to be sure)
 
 temp <- unique(df$orth) # to speed up processing, only code each unique utterance once (then we'll join it back to the full df)
@@ -118,7 +116,7 @@ for(k in 1:length(names(contexts))){
     temp.codes[[names(contexts)[k]]][grep(pattern=paste0("\\<", words[w], "\\>"), x=temp.codes$orth )] <- 1 
   }
 }
-df <- left_join(df, temp.codes) # join temp.codes back to full df
+df <- left_join(df, temp.codes, by="orth") # join temp.codes back to full df
 
 df <- expand_windows(df, context.names=names(contexts)) # extend context codes 2 utterances before and after each hit
 
@@ -171,11 +169,10 @@ master_doc_prop <- master_doc_count %>%
 master_doc_prop$utt <- master_doc_count$utt  # to add back in the non-numeric utt column
 master_doc_prop$total <- NULL  # delete column
   
-df.hj.prop <- left_join(df[,1:3], master_doc_prop, by="utt" ) 
-write.table(df.hj.prop, file="contexts_files/contexts_HJ.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+df.hj.con <- left_join(df[,1:3], master_doc_prop, by="utt" ) 
+write.table(df.hj.con, file="contexts_files/contexts_HJ.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
 votes <- master_doc_count[, 4:ncol( master_doc_count )]
-
 
 ##########################################
 # number of utterances per context
@@ -221,7 +218,8 @@ threshold_plots(df.hj.con,
 # apply threshold
 hj.threshold <- .25 # set threshold for inclusion in a context
 
-df.hj.bin <- apply_threshold(df.hj.con, hj.threshold)
+df.hj.bin <- apply_threshold(df.hj.con, hj.threshold, 
+                             plot=T, method="HJ", save.to="plots/HJ")
 
 write.table(df.hj.bin, file=paste0("contexts_files/contexts_HJ_bin.txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
@@ -689,7 +687,7 @@ df_WL[df_WL==1.5] <- 1 # replace all 1.5's with 1's, so it doesn't distinguish b
 
 dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
 
-fun.version <- "1f3e798156a8ba" # fun.version refers to the current commit for data_processing_functions.r
+fun.version <- "a84aa0d616281d80" # fun.version refers to the current commit for data_processing_functions.r
 ```
 
 ```{r on_aciss_params, eval=FALSE}
@@ -922,6 +920,7 @@ df_WL <- read.table("contexts_files/contexts_WL.txt", sep="\t", quote="", commen
 df_WL[df_WL==1.5] <- 1 # replace all 1.5's with 1's, so it doesn't distinguish between utterances originally tagged with key words and ones picked up by the +-2 uterance smoothing
 
 par_function_args <- list(dataframe=NULL, 
+                          consider.freq=FALSE,
                           N.types=NULL, 
                           N.utts=NULL, 
                           by.size=FALSE, 
@@ -956,6 +955,31 @@ par_function_args$dataframe <- df_HJ
 context_HJ_results <- par_function(par_function_args)
 context_HJ <- context_HJ_results$stat.results
 context_HJ_detail <- context_HJ_results$addl.info
+
+##########
+# with freq
+##########
+par_function_args$consider.freq <- TRUE
+
+par_function_args$dataframe <- df_WL
+context_WL_freq_results <- par_function(par_function_args)
+context_WL_freq <- context_WL_freq_results$stat.results
+context_WL_freq_detail <- context_WL_freq_results$addl.info
+
+par_function_args$dataframe <- df_STM
+context_STM_freq_results <- par_function(par_function_args)
+context_STM_freq <- context_STM_freq_results$stat.results
+context_STM_freq_detail <- context_STM_freq_results$addl.info
+
+par_function_args$dataframe <- df_LDA
+context_LDA_freq_results <- par_function(par_function_args)
+context_LDA_freq <- context_LDA_freq_results$stat.results
+context_LDA_freq_detail <- context_LDA_freq_results$addl.info
+
+par_function_args$dataframe <- df_HJ
+context_HJ_freq_results <- par_function(par_function_args)
+context_HJ_freq <- context_HJ_freq_results$stat.results
+context_HJ_freq_detail <- context_HJ_freq_results$addl.info
 ```
 
 
@@ -982,10 +1006,29 @@ context_all <- context_all %>%
 
 context_all$measure <- as.factor(context_all$measure)
 
-# for adding to nontext dataframe
-context_ests <- context_all %>% 
-  select(criterion, method, context, measure, value) %>% 
-  rename(context.est=value)
+############
+# with freq
+#############
+# combine all the context results into one data frame
+context_WL_freq$method <- "WL"
+context_STM_freq$method <- "STM"
+context_LDA_freq$method <- "LDA"
+context_HJ_freq$method <- "HJ"
+
+context_all_freq <- rbind(context_WL_freq, context_STM_freq, context_LDA_freq, context_HJ_freq)
+
+context_all_freq$method.short <- factor(context_all_freq$method)
+context_all_freq$method <- factor(context_all_freq$method, 
+                                 levels=c("WL", "STM", "LDA", "HJ"), 
+                                 labels = c("word lists", "topic modeling (STM)", "topic modeling (LDA)", "subjective judgments")) 
+
+
+# gather for plotting
+context_all_freq <- context_all_freq %>% 
+  unite(col="criterion", stat, cutoff, sep="_", remove=FALSE) %>% 
+  rename(context=nontext) 
+
+
 ```
 
 ```{r context_detail_data_wrangling}
@@ -1039,11 +1082,38 @@ nontext_results <- nontext_results %>%
   rename(context=nontext) 
 
 full_results <- left_join(nontext_results, context_ests, by=c("criterion", "method", "context", "measure")) # add context estimates
+
+
+################  
+# with freq
+################# 
+nontext_WL <- read_batch(dir="nontexts_WL_freq-files")
+nontext_STM <- read_batch(dir="nontexts_STM_freq-files")
+nontext_LDA <- read_batch(dir="nontexts_LDA_freq-files")
+nontext_HJ <- read_batch(dir="nontexts_HJ_freq-files")
+
+# combine all the context results into one data frame
+nontext_WL$method <- "WL"
+nontext_STM$method <- "STM"
+nontext_LDA$method <- "LDA"
+nontext_HJ$method <- "HJ"
+
+nontext_results_freq <- rbind(nontext_WL, nontext_STM, nontext_LDA, nontext_HJ)
+
+nontext_results_freq$method.short <- factor(nontext_results_freq$method)
+nontext_results_freq$method <- factor(nontext_results_freq$method, 
+                                 levels=c("WL", "STM", "LDA", "HJ"), 
+                                 labels = c("word lists", "topic modeling (STM)", "topic modeling (LDA)", "subjective judgments")) 
+
+nontext_results_freq <- nontext_results_freq %>% 
+  unite(col="criterion", stat, cutoff, sep="_", remove=FALSE) %>% 
+  rename(context=nontext) 
 ```
 
 ## global results
 ```{r global_results}
 par_function_args <- list(dataframe=NULL, 
+                          consider.freq=FALSE,
                           N.types=NULL, 
                           N.utts=NULL, 
                           by.size=FALSE, 
@@ -1078,23 +1148,52 @@ plot_context_vs_nontext(context_all,
                         nontext_results, 
                         global_results, 
                         outcome="measure", 
+                        xlabs=TRUE,
                         save.to="plots/context_vs_nontext")
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global_results=NULL, 
+                        outcome="precision", 
+                        xlabs=TRUE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE)
 plot_context_vs_nontext(context_all, 
                         nontext_results, 
                         global_results, 
                         outcome="TTR", 
+                        xlabs=TRUE,, 
                         save.to="plots/context_vs_nontext")
 plot_context_vs_nontext(context_all, 
                         nontext_results, 
                         global_results=NULL, 
                         outcome="highest.freq.syl", 
-                        annotate="most.freq.syl",
+                        # annotate="most.freq.syl",
                         save.to="plots/context_vs_nontext")
 plot_context_vs_nontext(context_all, 
                         nontext_results, 
                         global_results, 
                         outcome="prop.most.freq", 
-                        annotate="most.freq.syl",
+                        # annotate="most.freq.syl",
+                        save.to="plots/context_vs_nontext")
+plot_context_vs_nontext(context_all, 
+                        nontext_results, 
+                        global_results, 
+                        outcome="mean.syls.per.utt", 
+                        save.to="plots/context_vs_nontext")
+plot_context_vs_nontext(context_all, 
+                        nontext_results, 
+                        global_results, 
+                        outcome="mean.words.per.utt", 
+                        save.to="plots/context_vs_nontext")
+plot_context_vs_nontext(context_all, 
+                        nontext_results, 
+                        global_results, 
+                        outcome="prop.one.word.utt", 
+                        save.to="plots/context_vs_nontext")
+plot_context_vs_nontext(context_all, 
+                        nontext_results, 
+                        global_results, 
+                        outcome="prop.one.syl.utt", 
                         save.to="plots/context_vs_nontext")
 
 ggplot(full_results, aes(x=context, y=value)) +
@@ -1137,18 +1236,9 @@ p <- ggplot(filter(full_results, method==this.method), aes(x=value))+
 
 ## significance test
 ```{r bootstrap_pvals}
-# bootstrap p-values
-full_results$above.est <- ifelse(full_results$value > full_results$context.est, 1, 0)
 
-tests.contexts <- full_results %>%
-  group_by(method, context, criterion, measure) %>%
-  summarize(p.val = mean(above.est)) %>% 
-  add_stars() # from analysis_functions.r
-
-tests.methods <- full_results %>%
-  group_by(method, criterion, measure) %>%
-  summarize(p.val = mean(above.est)) %>% 
-  add_stars() # from analysis_functions.r
+tests.contexts.measure <- test_context_vs_nontext(context_all, nontext_results, outcome="measure")
+tests.contexts.TTR <- test_context_vs_nontext(context_all, nontext_results, outcome="TTR")
 
 kable(filter(tests.contexts, criterion=="MI_0.85")[,-3], digits=3)
 ```
