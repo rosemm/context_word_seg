@@ -1,7 +1,7 @@
 
 nontext_cols <- function(df){
-  non <- df[ , 4:ncol(df)]
-  message(paste("nontext_cols using all but the following columns:", paste(colnames(df)[1:3], collapse=", ")))
+  non <- dplyr::select(df, -utt, -orth, -phon)
+  message(paste("nontext_cols using all but the following columns:", paste(colnames(df)[!colnames(df) %in% colnames(non)], collapse=", ")))
   context.names <- colnames(non)
   
   # shuffle the context columns
@@ -15,9 +15,9 @@ nontext_cols <- function(df){
 }  
 
 sample_probs <- function(df){
+  sample <- dplyr::select(df, -utt, -orth, -phon)
   # change probabilities into 1 or 0 probabalistically based on their values
-  sample <- df[ , 4:ncol(df)]
-  message(paste("sample_probs using all but the following columns:", paste(colnames(df)[1:3], collapse=", ")))
+  message(paste("sample_probs using all but the following columns:", paste(colnames(df)[!colnames(df) %in% colnames(sample)], collapse=", ")))
   
   for(r in 1:nrow(sample)){
     for(c in 1:ncol(sample)){
@@ -29,8 +29,6 @@ sample_probs <- function(df){
   return(sample)
 }
   
-
-
 expand_windows <- function(df, context.names){
   contextcols <- which(colnames(df) %in% context.names)
   stopifnot(require(dplyr), require(tidyr))
@@ -232,7 +230,6 @@ context_results <- function(df, seg.utts=TRUE){
 }
 
 seg <- function(phon.stream, unique.phon.pairs, seg.utts=TRUE, quiet=TRUE){
-  
   if(!quiet) message("leave utterance boundaries? ", seg.utts)
   
   if( length(phon.stream) == 1 ) { # if phon.stream isn't already vectorized syllables, make it so
@@ -240,6 +237,7 @@ seg <- function(phon.stream, unique.phon.pairs, seg.utts=TRUE, quiet=TRUE){
     phon.stream <- strsplit(phon.stream, split="-")[[1]]
   }
   
+  message("...segmenting phon stream...")
   seg.phon.stream <- phon.stream
   if( length(phon.stream) > 1 ){
     for(i in 2:length(phon.stream)){
@@ -275,25 +273,31 @@ segment_speech <- function(cutoff, stat, data, consider.freq=FALSE, seg.utts=TRU
   if(stat=="TP") {
     TP.cutoff <- quantile(unique.phon.pairs$TP, cutoff)
     message(paste("...TP cutoff is", round(TP.cutoff, 3)))
-    unique.phon.pairs$TPseg <- ifelse(unique.phon.pairs$TP < TP.cutoff, 1, 0)
+    unique.phon.pairs$TPseg <- ifelse(unique.phon.pairs$TP < TP.cutoff, 1,
+                                      ifelse(unique.phon.pairs$TP >= TP.cutoff, 0, NA))
   } else if(stat=="MI") {
     MI.cutoff <- quantile(unique.phon.pairs$MI, cutoff)
     message(paste("...MI cutoff is", round(MI.cutoff, 3)))
-    unique.phon.pairs$MIseg <- ifelse(unique.phon.pairs$MI < MI.cutoff, 1, 0)
+    unique.phon.pairs$MIseg <- ifelse(unique.phon.pairs$MI < MI.cutoff, 1,
+                                        ifelse(unique.phon.pairs$MI >= MI.cutoff, 0, NA))
   } else {stop("ERROR: Enter stat='TP' or stat='MI' only")}
   
   # to consider frequency as well, only segment units that are above freqency threshold as well as above TP/MI threshold
+  freq.cutoff <- NA
   if(consider.freq){
     freq.cutoff <- quantile(unique.phon.pairs$AB.freq, cutoff)
     message(paste("...frequency cutoff is", round(freq.cutoff, 3)))
-    unique.phon.pairs$seg <- ifelse(is.na(unique.phon.pairs$AB.freq), NA,
-                                    ifelse(unique.phon.pairs$AB.freq < freq.cutoff, 0, 
-                                           ifelse(unique.phon.pairs$MIseg==1 | unique.phon.pairs$TPseg==1, 1, 0)))
+    unique.phon.pairs$freqseg <- ifelse(unique.phon.pairs$AB.freq < freq.cutoff, 1,
+                                    ifelse(unique.phon.pairs$AB.freq >= freq.cutoff, 0, NA))
+    
+    if(stat=="TP") unique.phon.pairs$seg <- ifelse(unique.phon.pairs$TPseg==1 | unique.phon.pairs$freqseg==1, 1, 0)
+    if(stat=="MI") unique.phon.pairs$seg <- ifelse(unique.phon.pairs$MIseg==1 | unique.phon.pairs$freqseg==1, 1, 0)
+    
   } else if(stat=="TP") {
     unique.phon.pairs$seg <- unique.phon.pairs$TPseg
   } else if(stat=="MI") {
     unique.phon.pairs$seg <- unique.phon.pairs$MIseg
-  } else {stop("ERROR: Enter stat='TP' or stat='MI' only")}
+  } else stop("ERROR: Enter stat='TP' or stat='MI' only")
   
 #   # faster version # http://blogs.uoregon.edu/rclub/2015/11/03/using-dplyr-to-batch-analyses/
 #   # requires df
@@ -308,10 +312,11 @@ segment_speech <- function(cutoff, stat, data, consider.freq=FALSE, seg.utts=TRU
   
   seg.phon.stream <- seg(phon.stream, unique.phon.pairs, seg.utts=seg.utts, quiet=quiet)
   
-  return(seg.phon.stream)
+  return(list(seg.phon.stream=seg.phon.stream, freq.cutoff=freq.cutoff))
 }
 
-assess_seg <- function(seg.phon.stream, words, dict){
+assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embedding.rule=FALSE, trisyl.limit=FALSE){
+  words <- streams$words
   # extract units from segmented stream
   collapsed.temp <- paste(seg.phon.stream, collapse="-")
   collapsed <- paste(collapsed.temp, "-", sep="") # add a - to the very end, so every unit will have - as the last character
@@ -321,15 +326,74 @@ assess_seg <- function(seg.phon.stream, words, dict){
   unique.units <- data.frame(phon=unique(units) )
   
   # compare extracted units to dictionary words
-  this.dict <- dplyr::filter(dict, word %in% words)[,c("word", "phon")] 
+  this.dict <- dplyr::filter(dict, word %in% words)[,c("word", "phon", "N.syl")] 
   
   # number of hits and false alarms
   unique.units$precision <- ifelse(unique.units$phon %in% this.dict$phon, 1, 0) # if this segmented unit is in the dict it's a hit, if it's not in the dictionary it's a false alarm
   # number of hits and misses
-  this.dict$recall <- ifelse(this.dict$phon %in% unique.units$phon, 1, 0)
+  this.dict$recall <- ifelse(this.dict$phon %in% unique.units$phon, 1, 0) # if this dictionary entry is in the segmented units, it's a hit. Otherwise it's a miss. 
+  
+  # add N.syl for units that aren't in the dictionary
+  unique.units$N.syl <- NA
+  for(i in 1:nrow(unique.units)){
+    unique.units$N.syl[i] <- length(strsplit(as.character(unique.units$phon[i]), split="-", fixed=TRUE)[[1]])
+  }
+  unique.units <- filter(unique.units, N.syl > 0) # this removes a line that's a blank phon 
+  
+  if(!is.null(freq.cutoff)){
+    # from Swingley2005: "Monosyllables were considered wordlike if they exceeded the criterial frequency percentile."
+    syls.freq <- as.data.frame(table(streams$phon.stream))
+    unique.units <- left_join(unique.units, syls.freq, by=c("phon" = "Var1"))
+    
+    # if it is monosyllabic and less than freq.cutoff, then remove
+    unique.units$remove <- ifelse(unique.units$N.syl > 1, 0,
+                                  ifelse(unique.units$Freq >= freq.cutoff, 0,
+                                         ifelse(unique.units$Freq < freq.cutoff, 1, NA)))
+    unique.units <- unique.units %>% 
+      filter(remove != 0) %>% 
+      select(-remove)
+  }
+  
+  if(trisyl.limit){
+    # from Swingley2005: "Sequences longer than three syllables were not evaluated for wordhood, on the grounds that (1) almost no 4-syllable sequences would exceed the mutual information criteria, and (2) over 96% of Dutch and English word types have fewer than 4 syllables, and the longer ones are nearly always rare. Thus, modeling the acquisition of 1-, 2-, and 3-syllable words provides good coverage of the infants lexical environment."
+    message(paste0("Removing ", sum(unique.units$N.syl >=4) , " units (", 100*round(sum(unique.units$N.syl >=4)/nrow(unique.units), 3), "% of all seg'd units) because they are longer than 3 syllables."))
+    unique.units <- filter(unique.units, N.syl < 4) # this removes all units longer than 3 syllables
+  }
+  
+  if(embedding.rule){
+    # From Swingley2005: "Postulated words embedded in other postulated words were excluded. For example, suppose that the bisyllable lephone met the bigram criteria, and the trisyllable telephone met the trigram criteria. Only telephone would be considered a word. This exclusion was motivated by the finding that infants extracting a bisyllabic word (e.g., kingdom) do not appear to treat the stressed syllable of that word (e.g., king) as familiar (Jusczyk et al., 1999)."
+    unique.units$remove <- NA
+    unique.units$phon <- as.character(unique.units$phon)
+    temp.unique.units <- data.frame(NULL)
+    for(s in sort(unique(unique.units$N.syl)) ){
+      # for each unit length (number of syllables) observed, remove any smaller units that contain its syllables
+      this.length <- filter(unique.units, N.syl==s)
+      # print(s)
+      for(i in 1:nrow(this.length)){
+        this.phon <- this.length$phon[i]
+        # surround each character with [] so it will be treated literally for regex
+        test.phon <- paste(paste0("[", strsplit(this.phon, split=NULL)[[1]], "]"), collapse="")
+        
+        remove.beg <- grep(pattern=paste0("^", test.phon, "-"), x=filter(unique.units, N.syl > s)$phon)
+        remove.mid <- grep(pattern=paste0("-", test.phon, "-"), x=filter(unique.units, N.syl > s)$phon)
+        remove.end <- grep(pattern=paste0("-", test.phon, "$"), x=filter(unique.units, N.syl > s)$phon)
+        remove <- unique(c(remove.beg, remove.mid, remove.end))
+        
+        this.length$remove[i] <- ifelse(length(remove) > 0, 1, 0) # if there is at least one word that contains this syllable/these syllables, remove=1, otherwise remove=0
+        # print(this.phon)
+        # print(filter(unique.units, N.syl > s)[remove, ])
+      } # end phon unit for loop
+      temp.unique.units <- rbind(temp.unique.units, this.length)
+    } # end syllable for loop
+    message(paste0("Removing ", sum(temp.unique.units$remove), " units (", 100*round(sum(temp.unique.units$remove)/nrow(unique.units), 3), "% of all seg'd units) because they occur within larger units (Swingley2005 embedding constraint)."))
+    unique.units <- temp.unique.units %>% 
+      filter(remove != 1) %>% 
+      select(-remove)
+  } 
   
   # results <- merge(this.dict, unique.units, by="phon", all=T)
-  results <- dplyr::full_join(this.dict, unique.units, by="phon")
+  results <- dplyr::full_join(this.dict, unique.units, by=c("phon", "N.syl"))
+  
   
   # segmentation result
   results$seg.result <- as.factor(ifelse(results$recall==1 & results$precision==1, "hit", 
@@ -351,7 +415,7 @@ assess_seg <- function(seg.phon.stream, words, dict){
 }
 
 # for bootstrapping nontexts:
-par_function <- function(x, consider.freq=FALSE, N.types=NULL, N.utts=NULL, by.size=TRUE, dict=NULL, expand=FALSE, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version=NULL, quiet=TRUE){ # this is the function that should be done in parallel on the 12 cores of each node
+par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE, trisyl.limit=FALSE, N.types=NULL, N.utts=NULL, by.size=TRUE, expand=FALSE, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version=NULL, quiet=TRUE){ # this is the function that should be done in parallel on the 12 cores of each node
   
   # accept arguments as a list
   if (is.list(x)) {
@@ -359,6 +423,7 @@ par_function <- function(x, consider.freq=FALSE, N.types=NULL, N.utts=NULL, by.s
       dataframe <- x[["dataframe"]]
       dict <- x[["dict"]]
       if("consider.freq" %in% names(x)) consider.freq <- x[["consider.freq"]]
+      if("embedding.rule" %in% names(x)) embedding.rule <- x[["embedding.rule"]] 
       if("N.types" %in% names(x)) N.types <- x[["N.types"]]
       if("N.utts" %in% names(x)) N.utts <- x[["N.utts"]]
       if("by.size" %in% names(x)) by.size <- x[["by.size"]]
@@ -441,23 +506,28 @@ par_function <- function(x, consider.freq=FALSE, N.types=NULL, N.utts=NULL, by.s
   
   # segment speech
   # note that this loop is slow
+  freq.cutoff <- list(TP85=NULL, MI85=NULL)
   for(k in 1:length(names(data))){ 
     message(paste0("segmenting speech for ", names(data)[k], "..."))
     if(TP){
-      data[[k]]$TP85$seg.phon.stream <- segment_speech(cutoff=cutoff,
-                                                       stat = "TP", 
-                                                       data = data[[k]],
-                                                       seg.utts = seg.utts,
-                                                       consider.freq = consider.freq,
-                                                       quiet=quiet)
+      seg_speech_output <- segment_speech(cutoff=cutoff,
+                                          stat = "TP", 
+                                          data = data[[k]],
+                                          seg.utts = seg.utts,
+                                          consider.freq = consider.freq,
+                                          quiet=quiet)
+      data[[k]]$TP85$seg.phon.stream <- seg_speech_output$seg.phon.stream
+      freq.cutoff$TP85 <- seg_speech_output$freq.cutoff
     }
     if(MI){
-      data[[k]]$MI85$seg.phon.stream <- segment_speech(cutoff = cutoff,
-                                                       stat = "MI", 
-                                                       data = data[[k]],
-                                                       seg.utts = seg.utts,
-                                                       consider.freq = consider.freq,
-                                                       quiet=quiet)
+      seg_speech_output <- segment_speech(cutoff = cutoff,
+                                          stat = "MI", 
+                                          data = data[[k]],
+                                          seg.utts = seg.utts,
+                                          consider.freq = consider.freq,
+                                          quiet=quiet)
+      data[[k]]$MI85$seg.phon.stream <- seg_speech_output$seg.phon.stream
+      freq.cutoff$MI85 <- seg_speech_output$freq.cutoff
     }
   } # end of for loop
   
@@ -467,14 +537,24 @@ par_function <- function(x, consider.freq=FALSE, N.types=NULL, N.utts=NULL, by.s
     message(paste0("assessing segmentation for ", names(data)[k], "..."))
     
     if(TP){
-      data[[k]]$TP85$seg.results <- assess_seg(seg.phon.stream=data[[k]]$TP85$seg.phon.stream, words=data[[k]]$streams$words, dict=dict)
-      TPresults <- colMeans(data[[k]]$TP85$seg.results[,3:4], na.rm=T)
+      data[[k]]$TP85$seg.results <- assess_seg(seg.phon.stream=data[[k]]$TP85$seg.phon.stream, 
+                                               streams=data[[k]]$streams, 
+                                               dict=dict, 
+                                               embedding.rule=embedding.rule, 
+                                               trisyl.limit=trisyl.limit, 
+                                               freq.cutoff=freq.cutoff$TP85)
+      TPresults <- colMeans(select(data[[k]]$TP85$seg.results, recall, precision), na.rm=T)
       TPresults <- as.data.frame(t(TPresults)) # make it a data.frame
       TPresults$stat <- "TP"
     }
     if(MI){
-      data[[k]]$MI85$seg.results <- assess_seg(seg.phon.stream=data[[k]]$MI85$seg.phon.stream, words=data[[k]]$streams$words, dict=dict)
-      MIresults <- colMeans(data[[k]]$MI85$seg.results[,3:4], na.rm=T)
+      data[[k]]$MI85$seg.results <- assess_seg(seg.phon.stream=data[[k]]$MI85$seg.phon.stream, 
+                                               streams=data[[k]]$streams, 
+                                               dict=dict, 
+                                               embedding.rule=embedding.rule, 
+                                               trisyl.limit=trisyl.limit, 
+                                               freq.cutoff=freq.cutoff$MI85)
+      MIresults <- colMeans(select(data[[k]]$MI85$seg.results, recall, precision), na.rm=T)
       MIresults <- as.data.frame(t(MIresults)) # make it a data.frame
       MIresults$stat <- "MI"
     }
