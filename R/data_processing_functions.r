@@ -350,8 +350,9 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
                                   ifelse(unique.units$Freq >= freq.cutoff, 0,
                                          ifelse(unique.units$Freq < freq.cutoff, 1, NA)))
     unique.units <- unique.units %>% 
-      filter(remove != 0) %>% 
+      filter(remove != 1) %>% 
       select(-remove)
+    message(paste(nrow(unique.units), "unqiue units segmented"))
   }
   
   if(trisyl.limit){
