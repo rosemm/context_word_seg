@@ -424,6 +424,7 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
       dict <- x[["dict"]]
       if("consider.freq" %in% names(x)) consider.freq <- x[["consider.freq"]]
       if("embedding.rule" %in% names(x)) embedding.rule <- x[["embedding.rule"]] 
+      if("trisyl.limit" %in% names(x)) trisyl.limit <- x[["trisyl.limit"]] 
       if("N.types" %in% names(x)) N.types <- x[["N.types"]]
       if("N.utts" %in% names(x)) N.utts <- x[["N.utts"]]
       if("by.size" %in% names(x)) by.size <- x[["by.size"]]
