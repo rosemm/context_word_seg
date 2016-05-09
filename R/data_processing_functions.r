@@ -328,11 +328,6 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
   # compare extracted units to dictionary words
   this.dict <- dplyr::filter(dict, word %in% words)[,c("word", "phon", "N.syl")] 
   
-  # number of hits and false alarms
-  unique.units$precision <- ifelse(unique.units$phon %in% this.dict$phon, 1, 0) # if this segmented unit is in the dict it's a hit, if it's not in the dictionary it's a false alarm
-  # number of hits and misses
-  this.dict$recall <- ifelse(this.dict$phon %in% unique.units$phon, 1, 0) # if this dictionary entry is in the segmented units, it's a hit. Otherwise it's a miss. 
-  
   # add N.syl for units that aren't in the dictionary
   unique.units$N.syl <- NA
   for(i in 1:nrow(unique.units)){
@@ -349,9 +344,27 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
     unique.units$remove <- ifelse(unique.units$N.syl > 1, 0,
                                   ifelse(unique.units$Freq >= freq.cutoff, 0,
                                          ifelse(unique.units$Freq < freq.cutoff, 1, NA)))
+    message(paste("filtering out", sum(unique.units$remove, na.rm=T), "monosyllabic words because they do not meet frequency cutoff."))
     unique.units <- unique.units %>% 
       filter(remove != 1) %>% 
+      select(-remove, -Freq)
+    
+    # note that bisyllabic units are taken care of during segment_speech()
+    
+    # trisyllabic units need to meet threshold as well
+    units.freq <- as.data.frame(table(units))
+    unique.units <- left_join(unique.units, units.freq, by=c("phon" = "units"))
+    
+    # if it is trisyllabic and less than freq.cutoff, then remove
+    unique.units$remove <- ifelse(unique.units$N.syl < 3, 0, # mono- and bi-syllabic units already taken care of
+                                  ifelse(unique.units$Freq >= freq.cutoff, 0,
+                                         ifelse(unique.units$Freq < freq.cutoff, 1, NA)))
+    message(paste("filtering out", sum(unique.units$remove, na.rm=T), "trisyllabic words because they do not meet frequency cutoff."))
+    unique.units <- unique.units %>% 
+      filter(remove != 1) %>% 
+      rename(unit.freq=Freq) %>% 
       select(-remove)
+    
     message(paste(nrow(unique.units), "unqiue units segmented"))
   }
   
@@ -392,9 +405,13 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
       select(-remove)
   } 
   
+  # number of hits and false alarms
+  unique.units$precision <- ifelse(unique.units$phon %in% this.dict$phon, 1, 0) # if this segmented unit is in the dict it's a hit, if it's not in the dictionary it's a false alarm
+  # number of hits and misses
+  this.dict$recall <- ifelse(this.dict$phon %in% unique.units$phon, 1, 0) # if this dictionary entry is in the segmented units, it's a hit. Otherwise it's a miss. 
+  
   # results <- merge(this.dict, unique.units, by="phon", all=T)
   results <- dplyr::full_join(this.dict, unique.units, by=c("phon", "N.syl"))
-  
   
   # segmentation result
   results$seg.result <- as.factor(ifelse(results$recall==1 & results$precision==1, "hit", 
@@ -402,10 +419,13 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
                                       ifelse(is.na(results$recall) & results$precision==0, "false alarm",
                                         NA))))
 
-  # add number of syllables and frequency for each word
-  results$N.syl <- NA
+  # add frequency for each word
+  word.freq <- as.data.frame(table(streams$orth.stream))
+  results <- left_join(results, word.freq, by=c("word"="Var1"))
+  results$freq <- ifelse(results$seg.result=="miss", results$Freq, results$unit.freq)
+  results <- select(results, word, phon, recall, precision, seg.result, N.syl, freq)
+  
   for(i in 1:nrow(results)){
-    results$N.syl[i] <- length(strsplit(as.character(results$phon[i]), split="-", fixed=TRUE)[[1]])
     results$freq[i] <- length(gregexpr(pattern=as.character(results$phon[i]), text=collapsed.unseg, fixed=TRUE)[[1]])
     results$freq.segd[i] <- length(gregexpr(pattern=paste(",",as.character(results$phon[i]), "-,", sep=""), text=collapsed, fixed=TRUE)[[1]])
   }
@@ -595,17 +615,27 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
     this.result$prop.one.word.utt <- sum(data[[k]]$streams$words.per.utt==1)/length(data[[k]]$streams$words.per.utt)
     this.result$prop.one.syl.utt <- sum(data[[k]]$streams$syls.per.utt==1)/length(data[[k]]$streams$syls.per.utt)
     
-    this.addl.info <- data[[k]]$unique.phon.pairs
-    this.addl.info$context <- names(data)[k]
+    this.unique.phon.pairs <- data[[k]]$unique.phon.pairs
+    this.unique.phon.pairs$context <- names(data)[k]
+    
+    this.TP85.seg.results <- data[[k]]$TP85$seg.results
+    this.TP85.seg.results$context <- names(data)[k]
+    
+    this.MI85.seg.results <- data[[k]]$MI85$seg.results
+    this.MI85.seg.results$context <- names(data)[k]
     
     if(k==1) {
       # on the first run through the for loop
       stat.results <- this.result 
-      addl.info <- this.addl.info
+      unique.phon.pairs <- this.unique.phon.pairs
+      TP85.seg.results <- this.TP85.seg.results
+      MI85.seg.results <- this.MI85.seg.results
     } else {
       # all subsequent runs
       stat.results <- rbind(stat.results, this.result) 
-      addl.info <- rbind(addl.info, this.addl.info)
+      unique.phon.pairs <- rbind(unique.phon.pairs, this.unique.phon.pairs)
+      TP85.seg.results <- rbind(TP85.seg.results, this.TP85.seg.results)
+      MI85.seg.results <- rbind(MI85.seg.results, data[[k]]$MI85$seg.results)
     }
     
   } # end of for loop
@@ -619,7 +649,7 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
   stat.results$SHA1 <- fun.version
   
   if(verbose){
-    return( list(stat.results=stat.results, addl.info=addl.info) )
+    return( list(stat.results=stat.results, unique.phon.pairs=unique.phon.pairs, TP85.seg.results=TP85.seg.results, MI85.seg.results=MI85.seg.results) )
   } else {
     return(stat.results)
   }
