@@ -286,7 +286,7 @@ segment_speech <- function(cutoff, stat, data, consider.freq=FALSE, seg.utts=TRU
   freq.cutoff <- NA
   if(consider.freq){
     # From Swingley2005: "To use a consistent frequency metric, frequency for units of all lengths was relativized to monosyllable frequency; thus, a bisyllable was considered frequent if it was as common as (e.g.) 85% of all monosyllables. This use of a single frequency metric seemed more reasonable than assuming that whether sequence feels frequent to a child depends upon how long it is."
-    syl.freqs <- table(streams$phon.stream[ !grepl(pattern="###", x=streams$phon.stream) ])
+    syl.freqs <- table(phon.stream[ !grepl(pattern="###", x=phon.stream) ])
     freq.cutoff <- quantile(syl.freqs, cutoff)
     message(paste("...frequency cutoff is", round(freq.cutoff, 3)))
     unique.phon.pairs$freqseg <- ifelse(unique.phon.pairs$AB.freq < freq.cutoff, 1,
