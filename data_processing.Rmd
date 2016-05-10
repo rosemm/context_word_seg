@@ -688,16 +688,18 @@ df_WL[df_WL==1.5] <- 1 # replace all 1.5's with 1's, so it doesn't distinguish b
 
 dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
 
-fun.version <- "a84aa0d616281d80" # fun.version refers to the current commit for data_processing_functions.r
+fun.version <- "fcb165771d6fe00d" # fun.version refers to the current commit for data_processing_functions.r
 ```
 
 ```{r on_aciss_params, eval=FALSE}
 par_function_args <- list(dataframe=NULL, 
+                          dict=dict, 
                           consider.freq=FALSE,
+                          embedding.rule=FALSE,
+                          trisyl.limit=FALSE,
                           N.types=NULL, 
                           N.utts=NULL, 
                           by.size=FALSE, 
-                          dict=dict, 
                           expand=FALSE, 
                           seg.utts=TRUE, 
                           TP=FALSE, 
@@ -728,8 +730,14 @@ aciss_function(fun.version, id="nontexts_LDA", starts=1:50, iter=100, par_functi
 
 showStatus(makeRegistry(id = "nontexts_WL")); showStatus(makeRegistry(id = "nontexts_STM")); showStatus(makeRegistry(id = "nontexts_HJ")); showStatus(makeRegistry(id = "nontexts_LDA"))
 
-# Include freq cutoff as well (a la Swingley 2008)
+###################################################
+# Include freq cutoff as well (a la Swingley 2005)
+###################################################
 par_function_args$consider.freq <- TRUE
+par_function_args$embedding.rule <- TRUE
+par_function_args$trisyl.limit <- TRUE
+par_function_args$cutoff <- .75
+
 par_function_args$dataframe <- df_WL
 aciss_function(fun.version, id="nontexts_WL_freq", starts=1:50, iter=100, par_function_args) 
 
@@ -744,14 +752,41 @@ aciss_function(fun.version, id="nontexts_LDA_freq", starts=1:50, iter=100, par_f
 
 showStatus(makeRegistry(id = "nontexts_WL_freq")); showStatus(makeRegistry(id = "nontexts_STM_freq")); showStatus(makeRegistry(id = "nontexts_HJ_freq")); showStatus(makeRegistry(id = "nontexts_LDA_freq"))
 
+###################################################
+# Old expand version of nontexts
+###################################################
+df_WL_old <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_files/contexts_WL.txt") # keep the 1.5's and 1's
+
+par_function_args <- list(dataframe=df_WL_old, 
+                          dict=dict, 
+                          consider.freq=FALSE,
+                          embedding.rule=FALSE,
+                          trisyl.limit=FALSE,
+                          N.types=NULL, 
+                          N.utts=NULL, 
+                          by.size=FALSE, 
+                          expand=TRUE, 
+                          seg.utts=TRUE, 
+                          TP=FALSE, 
+                          MI=TRUE, 
+                          verbose=FALSE, 
+                          prop=FALSE, 
+                          cutoff=.85, 
+                          nontext=TRUE, 
+                          quiet=TRUE,
+                          fun.version=fun.version)
+aciss_function(fun.version, id="nontexts_WL_expand", starts=1:50, iter=100, par_function_args)
+
+showStatus(makeRegistry(id = "nontexts_WL_expand")); showStatus(makeRegistry(id = "nontexts_WL"))
+
 system('qstat -antu rosem') # to show all of my current jobs
 
 # loadResults(makeRegistry(id = "nontexts_WL"))
 
-# killJobs(makeRegistry(id = "nontexts_WL"),findRunning(makeRegistry(id = "nontexts_WL")))
-# killJobs(makeRegistry(id = "nontexts_HJ"),findRunning(makeRegistry(id = "nontexts_HJ")))
-# killJobs(makeRegistry(id = "nontexts_LDA"),findRunning(makeRegistry(id = "nontexts_LDA")))
-# killJobs(makeRegistry(id = "nontexts_STM"),findRunning(makeRegistry(id = "nontexts_STM")))
+# killJobs(makeRegistry(id = "nontexts_WL_freq"),findRunning(makeRegistry(id = "nontexts_WL_freq")))
+# killJobs(makeRegistry(id = "nontexts_HJ_freq"),findRunning(makeRegistry(id = "nontexts_HJ_freq")))
+# killJobs(makeRegistry(id = "nontexts_LDA_freq"),findRunning(makeRegistry(id = "nontexts_LDA_freq")))
+# killJobs(makeRegistry(id = "nontexts_STM_freq"),findRunning(makeRegistry(id = "nontexts_STM_freq")))
 
 # system('sftp rosem@ftn.aciss.uoregon.edu')
 ```
@@ -760,6 +795,10 @@ system('qstat -antu rosem') # to show all of my current jobs
 ###########################################
 # does cutoff affect results?
 ###########################################
+par_function_args$consider.freq <- FALSE
+par_function_args$embedding.rule <- FALSE
+par_function_args$trisyl.limit <- FALSE
+
 starts <- seq(.4, .9, by=.05)
 par_function_args$cutoff <- as.name("start") # doesn't work
 
@@ -921,11 +960,13 @@ df_WL <- read.table("contexts_files/contexts_WL.txt", sep="\t", quote="", commen
 df_WL[df_WL==1.5] <- 1 # replace all 1.5's with 1's, so it doesn't distinguish between utterances originally tagged with key words and ones picked up by the +-2 uterance smoothing
 
 par_function_args <- list(dataframe=NULL, 
+                          dict=dict, 
                           consider.freq=FALSE,
+                          embedding.rule=FALSE,
+                          trisyl.limit=FALSE,
                           N.types=NULL, 
                           N.utts=NULL, 
                           by.size=FALSE, 
-                          dict=dict, 
                           expand=FALSE, 
                           seg.utts=TRUE, 
                           TP=FALSE, 
@@ -957,10 +998,12 @@ context_HJ_results <- par_function(par_function_args)
 context_HJ <- context_HJ_results$stat.results
 context_HJ_detail <- context_HJ_results$addl.info
 
-##########
+####################
 # with freq
-##########
+####################
 par_function_args$consider.freq <- TRUE
+par_function_args$embedding.rule <- TRUE
+par_function_args$trisyl.limit <- TRUE
 
 par_function_args$dataframe <- df_WL
 context_WL_freq_results <- par_function(par_function_args)
@@ -1053,7 +1096,7 @@ context_detail_summary <- context_detail %>%
             freq.syl.B=syl2[which.B],
             most.freq.syl=unique(freq.syl.A,freq.syl.B))
   
-context_all <- left_join(context_all, select(context_detail_summary, method.short, context, most.freq.syl))
+context_all <- left_join(context_all, select(context_detail_summary, method.short, context, most.freq.syl), by=c("context", "method.short"))
 ```
 
 ## nontext results
@@ -1113,12 +1156,14 @@ nontext_results_freq <- nontext_results_freq %>%
 
 ## global results
 ```{r global_results}
-par_function_args <- list(dataframe=NULL, 
+par_function_args <- list(dataframe=NULL,  
+                          dict=dict, 
                           consider.freq=FALSE,
+                          embedding.rule=FALSE,
+                          trisyl.limit=FALSE,
                           N.types=NULL, 
                           N.utts=NULL, 
-                          by.size=FALSE, 
-                          dict=dict, 
+                          by.size=FALSE,
                           expand=FALSE, 
                           seg.utts=TRUE, 
                           TP=FALSE, 
@@ -1130,9 +1175,75 @@ par_function_args <- list(dataframe=NULL,
                           quiet=TRUE,
                           fun.version=fun.version)
 
-par_function_args$dataframe <- df_WL[ , 1:3] # only taking the first three columns
+par_function_args$dataframe <- df[ , 1:3] # only taking the first three columns
 global_data_results <- par_function(par_function_args)
 global_results  <- global_data_results$stat.results
+global_detail  <- global_data_results$addl.info
+
+##################################################
+# consider freq (also applies embedding constraint)
+##################################################
+par_function_args$dataframe <- df[ , 1:3] # only taking the first three columns
+par_function_args$consider.freq <- TRUE
+par_function_args$embedding.rule <- TRUE
+par_function_args$trisyl.limit <- TRUE
+par_function_args$verbose <- TRUE
+
+cutoffs <- seq(from=.6, to=.95, by=.01)
+global_cutoff_results <- data.frame(NULL)
+global_cutoff_pairs <- data.frame(NULL)
+global_cutoff_TPseg <- data.frame(NULL)
+global_cutoff_MIseg <- data.frame(NULL)
+for(i in 1:length(cutoffs)){
+  message(cutoffs[i])
+  par_function_args$cutoff <- cutoffs[i]
+  this.output <- par_function(par_function_args)
+  
+  this.result <- this.output$stat.results
+  
+  this.pairs <- this.output$unique.phon.pairs
+  this.pairs$cutoff <- cutoffs[i]
+  
+  this.TPseg <- this.output$TP85.seg.results
+  this.TPseg$cutoff <- cutoffs[i]
+  
+  this.MIseg <- this.output$MI85.seg.results
+  this.MIseg$cutoff <- cutoffs[i]
+  
+  global_cutoff_results <- rbind(global_cutoff_results, this.result)
+  global_cutoff_pairs <- rbind(global_cutoff_pairs, this.pairs)
+  global_cutoff_TPseg <- rbind(global_cutoff_TPseg, this.TPseg)
+  global_cutoff_MIseg <- rbind(global_cutoff_MIseg, this.MIseg)
+}
+# write.csv(global_cutoff_results, "global_cutoff_results.csv")
+# write.csv(global_cutoff_pairs, "global_cutoff_pairs.csv")
+# write.csv(global_cutoff_MIseg, "global_cutoff_MIseg.csv")
+
+results_by_syl <- global_cutoff_MIseg %>% 
+  filter(N.syl < 4) %>% 
+  group_by(cutoff, N.syl) %>% 
+  summarize(precision=mean(precision, na.rm=TRUE),
+            recall=mean(recall, na.rm=TRUE)) %>% 
+  gather(key="measure", value="value", precision,recall)
+ggplot(results_by_syl, aes(x=cutoff, y=value, group=N.syl, color=as.factor(N.syl))) + 
+  geom_line() +
+  facet_wrap(~measure)
+ggplot(global_cutoff_results, aes(x=cutoff, y=precision)) + 
+  geom_line(size=2, alpha=.5) + 
+  geom_line(data=filter(results_by_syl, measure=="precision"), aes(x=cutoff, y=value, group=N.syl, color=as.factor(N.syl)))
+ggsave("plots/swingley_fig1a_global.png")
+
+fig1b.data <- global_cutoff_MIseg %>% 
+  filter(seg.result=="hit") %>% 
+  count(cutoff, N.syl)
+ggplot(fig1b.data, aes(x=cutoff, y=n, group=N.syl, color=as.factor(N.syl))) +
+  geom_line()
+ggsave("plots/swingley_fig1b_global.png")
+
+global_data_freq_results <- par_function(par_function_args)
+global_results_freq  <- global_data_freq_results$stat.results
+global_detail_freq  <- global_data_freq_results$addl.info
+
 ```
 
 ```{r global_results_data_wrangling}
