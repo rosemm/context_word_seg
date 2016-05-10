@@ -337,6 +337,10 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
   }
   unique.units <- filter(unique.units, N.syl > 0) # this removes a line that's a blank phon 
   
+  units.freq <- as.data.frame(table(units), stringsAsFactors=FALSE)
+  unique.units <- left_join(unique.units, units.freq, by=c("phon" = "units")) %>% 
+    rename(unit.freq=Freq)
+  
   if(!is.na(freq.cutoff)){
     # from Swingley2005: "Monosyllables were considered wordlike if they exceeded the criterial frequency percentile."
     syls.freq <- as.data.frame(table(streams$phon.stream[ !grepl(pattern="###", x=streams$phon.stream) ]), stringsAsFactors=FALSE)
@@ -354,17 +358,14 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
     # note that bisyllabic units are taken care of during segment_speech()
     
     # trisyllabic units need to meet threshold as well
-    units.freq <- as.data.frame(table(units), stringsAsFactors=FALSE)
-    unique.units <- left_join(unique.units, units.freq, by=c("phon" = "units"))
     
     # if it is trisyllabic and less than freq.cutoff, then remove
     unique.units$remove <- ifelse(unique.units$N.syl < 3, 0, # mono- and bi-syllabic units already taken care of
-                                  ifelse(unique.units$Freq >= freq.cutoff, 0,
-                                         ifelse(unique.units$Freq < freq.cutoff, 1, NA)))
+                                  ifelse(unique.units$unit.freq >= freq.cutoff, 0,
+                                         ifelse(unique.units$unit.freq < freq.cutoff, 1, NA)))
     message(paste("filtering out", sum(unique.units$remove, na.rm=T), "trisyllabic words because they do not meet frequency cutoff."))
     unique.units <- unique.units %>% 
       filter(remove != 1) %>% 
-      rename(unit.freq=Freq) %>% 
       select(-remove)
     
     message(paste(nrow(unique.units), "unqiue units segmented"))
@@ -399,7 +400,6 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
         # print(this.phon)
         # print(filter(unique.units, N.syl > s)[remove, ])
       } # end phon unit for loop
-      message("here comes rbind at line 403 (if embedding.rule)")
       temp.unique.units <- rbind(temp.unique.units, this.length)
     } # end syllable for loop
     message(paste0("Removing ", sum(temp.unique.units$remove), " units (", 100*round(sum(temp.unique.units$remove)/nrow(unique.units), 3), "% of all seg'd units) because they occur within larger units (Swingley2005 embedding constraint)."))
@@ -426,15 +426,11 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
   word.freq <- as.data.frame(table(streams$orth.stream), stringsAsFactors=FALSE)
   results <- left_join(results, word.freq, by=c("word"="Var1"))
   results$freq <- ifelse(results$seg.result=="miss", results$Freq, results$unit.freq)
-  results <- select(results, word, phon, recall, precision, seg.result, N.syl, freq)
+  results <- select(results, word, phon, recall, precision, seg.result, N.syl, freq, unit.freq) %>% 
+    rename(freq.segd=unit.freq)
   
   print(summary(results))
-  
-  for(i in 1:nrow(results)){
-    results$freq[i] <- length(gregexpr(pattern=as.character(results$phon[i]), text=collapsed.unseg, fixed=TRUE)[[1]])
-    results$freq.segd[i] <- length(gregexpr(pattern=paste(",",as.character(results$phon[i]), "-,", sep=""), text=collapsed, fixed=TRUE)[[1]])
-  }
-  
+
   results$N.segd.units <- length(units)  # how many "words" were found in this corpus?
   
   message(paste(length(units), "unique units kept after exclusions and everything."))
