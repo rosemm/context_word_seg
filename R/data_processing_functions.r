@@ -286,8 +286,8 @@ segment_speech <- function(cutoff, stat, data, consider.freq=FALSE, seg.utts=TRU
   freq.cutoff <- NA
   if(consider.freq){
     # From Swingley2005: "To use a consistent frequency metric, frequency for units of all lengths was relativized to monosyllable frequency; thus, a bisyllable was considered frequent if it was as common as (e.g.) 85% of all monosyllables. This use of a single frequency metric seemed more reasonable than assuming that whether sequence feels frequent to a child depends upon how long it is."
-    
-    freq.cutoff <- quantile(table(phon.stream), cutoff)
+    syl.freqs <- table(streams$phon.stream[ !grepl(pattern="###", x=streams$phon.stream) ])
+    freq.cutoff <- quantile(syl.freqs, cutoff)
     message(paste("...frequency cutoff is", round(freq.cutoff, 3)))
     unique.phon.pairs$freqseg <- ifelse(unique.phon.pairs$AB.freq < freq.cutoff, 1,
                                     ifelse(unique.phon.pairs$AB.freq >= freq.cutoff, 0, NA))
@@ -339,7 +339,7 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
   
   if(!is.null(freq.cutoff)){
     # from Swingley2005: "Monosyllables were considered wordlike if they exceeded the criterial frequency percentile."
-    syls.freq <- as.data.frame(table(streams$phon.stream))
+    syls.freq <- as.data.frame(table(streams$phon.stream[ !grepl(pattern="###", x=streams$phon.stream) ]))
     unique.units <- left_join(unique.units, syls.freq, by=c("phon" = "Var1"))
     
     # if it is monosyllabic and less than freq.cutoff, then remove
