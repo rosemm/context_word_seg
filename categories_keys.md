@@ -46,6 +46,7 @@
 |soothing                |fussing                  |
 |teething                |fussing                  |
 |hiccups                 |hiccups                  |
+|hiding                  |hiding                   |
 |clean up                |housework                |
 |cleaning                |housework                |
 |cooking                 |housework                |

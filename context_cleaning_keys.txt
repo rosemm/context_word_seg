@@ -145,11 +145,13 @@ going to sleep	bedtime
 grooming	grooming
 grunting	grunting
 guided observation	directing attention
+hair grabbing	pulling hair
 hearing	hearing
 hiccuping	hiccups
 hiccupping	hiccups
 hiccups	hiccups
 hicupping	hiccups
+hiding	hiding
 holding	holding
 holding child	holding child
 house chores	housework
@@ -303,6 +305,7 @@ taking photos	taking pictures
 taking picture	taking pictures
 taking pictures	taking pictures
 takling	talking
+taling	talking
 talkig	talking
 talkign	talking
 talking	talking

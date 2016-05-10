@@ -57,6 +57,7 @@ grooming	touching
 grunting	interaction
 hearing	interaction
 hiccups	hiccups
+hiding	hiding
 holding	touching
 holding child	touching
 housework	housework
