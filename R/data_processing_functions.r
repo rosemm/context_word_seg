@@ -84,8 +84,8 @@ expand_windows <- function(df, context.names){
 
 calc_MI = function(phon.pairs, phon.stream, MI=TRUE, TP=TRUE){
   # mutual information, and transitional probabilty. See Swingley (2005) p97
-  
-  library(tidyr)  
+
+  stopifnot(require(tidyr))
     # calculate the number of times each syllable occurs in first position in a bigram
     A.at1 <- phon.pairs %>%
       group_by(syl1) %>%
@@ -99,7 +99,7 @@ calc_MI = function(phon.pairs, phon.stream, MI=TRUE, TP=TRUE){
     phon.pairs <- left_join(phon.pairs, A.at1, by="syl1")
     phon.pairs <- left_join(phon.pairs, B.at2, by="syl2")
 
-    syls <- data.frame(syl=phon.stream[phon.stream != "###"]) %>%
+    syls <- data.frame(syl=phon.stream[phon.stream != "###"], stringsAsFactors=FALSE) %>%
       count(syl) %>%
       mutate(p=n/length(unique(phon.stream[phon.stream != "###"])))
     # merge in sylable info for syl1
@@ -161,7 +161,7 @@ make_streams = function(df, seg.utts=TRUE){
   phon.stream <- phon.stream[ !grepl(pattern="^[[:space:]]*$", x=phon.stream) ]
   
   # make phon stream into a list of all of the bisyllable pairs that occur
-  phon.pairs <- data.frame(syl1=phon.stream[1:length(phon.stream)-1], syl2=phon.stream[2:length(phon.stream)])
+  phon.pairs <- data.frame(syl1=phon.stream[1:length(phon.stream)-1], syl2=phon.stream[2:length(phon.stream)], stringsAsFactors=FALSE)
   # delete rows that code for utterance boundary (the result is that syllable pairs across utterance boundaries are simply unattested)
   if(seg.utts) phon.pairs <- dplyr::filter(phon.pairs, syl1 !="###" & syl2 !="###")
   
@@ -210,7 +210,7 @@ context_results <- function(df, seg.utts=TRUE){
   
   for(k in 1:length(context.names)){
     
-    message(paste("processing ", context.names[k], "...", sep=""))
+    message(paste0("make_streams and calc_MI on ", context.names[k], "..."))
     
     df.context <- dplyr::filter(df, df[ , which(colnames(df)==context.names[k])] > 0) # select cases that have any value greater than 0 in the column that matches the name of context k
     
@@ -325,7 +325,7 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
   collapsed.unseg <- gsub(",", "", collapsed, fixed=T) # make a version of the collapsed stream with commas removed, for frequency counts
   units.temp <- strsplit(collapsed, ",", fixed=T)[[1]]
   units <- gsub('.{1}$', "", units.temp) # remove the trailing - on each segmented unit
-  unique.units <- data.frame(phon=unique(units) )
+  unique.units <- data.frame(phon=unique(units), stringsAsFactors=FALSE )
   
   # compare extracted units to dictionary words
   this.dict <- dplyr::filter(dict, word %in% words)[,c("word", "phon", "N.syl")] 
@@ -337,9 +337,9 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
   }
   unique.units <- filter(unique.units, N.syl > 0) # this removes a line that's a blank phon 
   
-  if(!is.null(freq.cutoff)){
+  if(!is.na(freq.cutoff)){
     # from Swingley2005: "Monosyllables were considered wordlike if they exceeded the criterial frequency percentile."
-    syls.freq <- as.data.frame(table(streams$phon.stream[ !grepl(pattern="###", x=streams$phon.stream) ]))
+    syls.freq <- as.data.frame(table(streams$phon.stream[ !grepl(pattern="###", x=streams$phon.stream) ]), stringsAsFactors=FALSE)
     unique.units <- left_join(unique.units, syls.freq, by=c("phon" = "Var1"))
     
     # if it is monosyllabic and less than freq.cutoff, then remove
@@ -354,7 +354,7 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
     # note that bisyllabic units are taken care of during segment_speech()
     
     # trisyllabic units need to meet threshold as well
-    units.freq <- as.data.frame(table(units))
+    units.freq <- as.data.frame(table(units), stringsAsFactors=FALSE)
     unique.units <- left_join(unique.units, units.freq, by=c("phon" = "units"))
     
     # if it is trisyllabic and less than freq.cutoff, then remove
@@ -423,7 +423,7 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
                                         NA))))
 
   # add frequency for each word
-  word.freq <- as.data.frame(table(streams$orth.stream))
+  word.freq <- as.data.frame(table(streams$orth.stream), stringsAsFactors=FALSE)
   results <- left_join(results, word.freq, by=c("word"="Var1"))
   results$freq <- ifelse(results$seg.result=="miss", results$Freq, results$unit.freq)
   results <- select(results, word, phon, recall, precision, seg.result, N.syl, freq)
@@ -546,7 +546,7 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
       if(consider.freq) {
         freq.cutoff$TP85 <- seg_speech_output$freq.cutoff}
       else {
-        freq.cutoff$TP85 <- NULL
+        freq.cutoff$TP85 <- NA
       }
     }
     if(MI){
@@ -560,7 +560,7 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
       if(consider.freq) {
         freq.cutoff$MI85 <- seg_speech_output$freq.cutoff}
       else {
-        freq.cutoff$MI85 <- NULL
+        freq.cutoff$MI85 <- NA
       }
     }
   
@@ -776,7 +776,7 @@ make_corpus <- function(dist=c("unif", "skewed"), N.utts=1000, N.types=1800, sma
     words <- base::sample(words, size=length(words), replace=FALSE) # shuffle the order of the words (the first word here will end up being the most frequent in the skewed dist) 
   } 
   
-  dict <- data.frame(word=gsub(x=words, pattern="-", replacement=""), phon=words)
+  dict <- data.frame(word=gsub(x=words, pattern="-", replacement=""), phon=words, stringsAsFactors=FALSE)
   
   size <- N.utts*4 # at an average of 4 words per utterance (as per Kurumada, Meylan & Frank, 2013), there will be size tokens in the corpus
   
@@ -815,7 +815,7 @@ make_corpus <- function(dist=c("unif", "skewed"), N.utts=1000, N.types=1800, sma
   phon <- corpus
   utt <- paste0("utt", seq(from=1, to=length(corpus)))
   
-  df <- data.frame(utt=utt, orth=orth, phon=phon)
+  df <- data.frame(utt=utt, orth=orth, phon=phon, stringsAsFactors=FALSE)
   
   return( list(df, dict) )
 }
