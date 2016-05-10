@@ -413,7 +413,6 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
   # number of hits and misses
   this.dict$recall <- ifelse(this.dict$phon %in% unique.units$phon, 1, 0) # if this dictionary entry is in the segmented units, it's a hit. Otherwise it's a miss. 
   
-  # results <- merge(this.dict, unique.units, by="phon", all=T)
   results <- dplyr::full_join(this.dict, unique.units, by=c("phon", "N.syl"))
   
   # segmentation result
@@ -421,6 +420,7 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
                                ifelse(results$recall==0 & is.na(results$precision), "miss",
                                       ifelse(is.na(results$recall) & results$precision==0, "false alarm",
                                         NA))))
+  print(summary(results$seg.result))
 
   # add frequency for each word
   word.freq <- as.data.frame(table(streams$orth.stream), stringsAsFactors=FALSE)
@@ -428,12 +428,16 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
   results$freq <- ifelse(results$seg.result=="miss", results$Freq, results$unit.freq)
   results <- select(results, word, phon, recall, precision, seg.result, N.syl, freq)
   
+  print(summary(results))
+  
   for(i in 1:nrow(results)){
     results$freq[i] <- length(gregexpr(pattern=as.character(results$phon[i]), text=collapsed.unseg, fixed=TRUE)[[1]])
     results$freq.segd[i] <- length(gregexpr(pattern=paste(",",as.character(results$phon[i]), "-,", sep=""), text=collapsed, fixed=TRUE)[[1]])
   }
   
   results$N.segd.units <- length(units)  # how many "words" were found in this corpus?
+  
+  message(paste(length(units), "unique units kept after exclusions and everything."))
   
   return(results)
 }
