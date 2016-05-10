@@ -527,8 +527,9 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
   
   # calculate MIs and TPs
   data <- context_results(df=df, seg.utts=seg.utts) # calls make_streams() and calc_MI()
+  addl.info <- vector("list", length(names(data))); names(addl.info) <- names(data) # empty storage variable
   
-  # segment speech
+  # segment speech and assess segmentation
   # note that this loop is slow
   freq.cutoff <- list(TP85=NULL, MI85=NULL)
   for(k in 1:length(names(data))){ 
@@ -553,11 +554,9 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
       data[[k]]$MI85$seg.phon.stream <- seg_speech_output$seg.phon.stream
       freq.cutoff$MI85 <- seg_speech_output$freq.cutoff
     }
-  } # end of for loop
   
   # assess segmentation
-  addl.info <- vector("list", length(names(data))); names(addl.info) <- names(data) # empty storage variable
-  for(k in 1:length(names(data))){
+  
     message(paste0("assessing segmentation for ", names(data)[k], "..."))
     
     if(TP){
@@ -639,7 +638,7 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
       TP85.seg.results <- rbind(TP85.seg.results, this.TP85.seg.results)
       MI85.seg.results <- rbind(MI85.seg.results, data[[k]]$MI85$seg.results)
     }
-    
+    if(!quiet) message(paste0("done segmenting speech and assessing segmentation for ", names(data)[k], "..."))
   } # end of for loop
   
   message("saving results...")
@@ -698,7 +697,8 @@ aciss_function <- function(fun.version, id, starts, iter, par_function_args, wal
     registerDoParallel()
     r <- foreach(1:iter, 
                  .inorder=FALSE,
-                 .combine = rbind, 
+                 .combine = rbind,
+                 .verbose=TRUE,
                  .packages=c("dplyr", "tidyr", "devtools", "BBmisc") ) %dopar% par_function(par_function_args)
   }
   
