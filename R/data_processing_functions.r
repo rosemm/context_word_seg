@@ -431,9 +431,9 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
   
   print(summary(results))
 
-  results$N.segd.units <- length(units)  # how many "words" were found in this corpus?
+  results$N.segd.units <- length(unique(unique.units$phon))  # how many "words" were found in this corpus?
   
-  message(paste(length(units), "unique units kept after exclusions and everything."))
+  message(paste(length(unique(unique.units$phon)), "unique units kept after exclusions and everything."))
   
   return(results)
 }
