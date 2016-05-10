@@ -172,10 +172,10 @@ make_streams = function(df, seg.utts=TRUE){
   
   # STATS TO COLLECT
   # how many syllables are there?
-  syllables <- unique(phon.stream)
+  syllables <- unique(phon.stream[ !grepl(pattern="###", x=phon.stream) ])
   # syllables <- sample(syllables, 200) # for testing, just use some random syllables
   N.syl.types <- length(syllables)
-  N.syl.tokens <- length(phon.stream)
+  N.syl.tokens <- length(phon.stream[ !grepl(pattern="###", x=phon.stream) ])
   
   # how many unique words are there?
   words <- unique(orth.stream)
@@ -285,7 +285,9 @@ segment_speech <- function(cutoff, stat, data, consider.freq=FALSE, seg.utts=TRU
   # to consider frequency as well, only segment units that are above freqency threshold as well as above TP/MI threshold
   freq.cutoff <- NA
   if(consider.freq){
-    freq.cutoff <- quantile(unique.phon.pairs$AB.freq, cutoff)
+    # From Swingley2005: "To use a consistent frequency metric, frequency for units of all lengths was relativized to monosyllable frequency; thus, a bisyllable was considered frequent if it was as common as (e.g.) 85% of all monosyllables. This use of a single frequency metric seemed more reasonable than assuming that whether sequence feels frequent to a child depends upon how long it is."
+    
+    freq.cutoff <- quantile(table(phon.stream), cutoff)
     message(paste("...frequency cutoff is", round(freq.cutoff, 3)))
     unique.phon.pairs$freqseg <- ifelse(unique.phon.pairs$AB.freq < freq.cutoff, 1,
                                     ifelse(unique.phon.pairs$AB.freq >= freq.cutoff, 0, NA))
