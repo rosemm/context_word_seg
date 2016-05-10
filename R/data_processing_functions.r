@@ -543,7 +543,11 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
                                           consider.freq = consider.freq,
                                           quiet=quiet)
       data[[k]]$TP85$seg.phon.stream <- seg_speech_output$seg.phon.stream
-      freq.cutoff$TP85 <- seg_speech_output$freq.cutoff
+      if(consider.freq) {
+        freq.cutoff$TP85 <- seg_speech_output$freq.cutoff}
+      else {
+        freq.cutoff$TP85 <- NULL
+      }
     }
     if(MI){
       seg_speech_output <- segment_speech(cutoff = cutoff,
@@ -553,7 +557,11 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
                                           consider.freq = consider.freq,
                                           quiet=quiet)
       data[[k]]$MI85$seg.phon.stream <- seg_speech_output$seg.phon.stream
-      freq.cutoff$MI85 <- seg_speech_output$freq.cutoff
+      if(consider.freq) {
+        freq.cutoff$MI85 <- seg_speech_output$freq.cutoff}
+      else {
+        freq.cutoff$MI85 <- NULL
+      }
     }
   
   # assess segmentation
