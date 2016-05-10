@@ -649,7 +649,7 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
       TP85.seg.results <- rbind(TP85.seg.results, this.TP85.seg.results)
       MI85.seg.results <- rbind(MI85.seg.results, data[[k]]$MI85$seg.results)
     }
-    if(!quiet) message(paste0("done segmenting speech and assessing segmentation for ", names(data)[k], "..."))
+    message(paste0("done segmenting speech and assessing segmentation for ", names(data)[k], "..."))
   } # end of for loop
   
   message("saving results...")
