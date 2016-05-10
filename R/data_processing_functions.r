@@ -399,6 +399,7 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
         # print(this.phon)
         # print(filter(unique.units, N.syl > s)[remove, ])
       } # end phon unit for loop
+      message("here comes rbind at line 403")
       temp.unique.units <- rbind(temp.unique.units, this.length)
     } # end syllable for loop
     message(paste0("Removing ", sum(temp.unique.units$remove), " units (", 100*round(sum(temp.unique.units$remove)/nrow(unique.units), 3), "% of all seg'd units) because they occur within larger units (Swingley2005 embedding constraint)."))
@@ -584,6 +585,7 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
     
     # save these results
     if(MI & TP){
+      message("here comes rbind at line 589")
       this.result <- as.data.frame(rbind(TPresults, MIresults))
       this.result$TPN.segd.units <- median(data[[k]]$TP85$seg.results$N.segd.units)
       this.result$MIN.segd.units <- median(data[[k]]$MI85$seg.results$N.segd.units)
@@ -633,6 +635,7 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
       MI85.seg.results <- this.MI85.seg.results
     } else {
       # all subsequent runs
+      message("here comes rbind at line 638")
       stat.results <- rbind(stat.results, this.result) 
       unique.phon.pairs <- rbind(unique.phon.pairs, this.unique.phon.pairs)
       TP85.seg.results <- rbind(TP85.seg.results, this.TP85.seg.results)
@@ -669,6 +672,7 @@ par_function_test <- function(dataframe, verbose){
                               precision=runif(1), 
                               stat="stat", 
                               nontext=names(data)[k])
+    message("here comes rbind at line 676")
     stat.results <- rbind(stat.results, this.result )
     
     MI <- rnorm(nrow(df))
