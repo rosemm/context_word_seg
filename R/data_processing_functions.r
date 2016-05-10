@@ -641,14 +641,14 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
       unique.phon.pairs <- this.unique.phon.pairs
       TP85.seg.results <- this.TP85.seg.results
       MI85.seg.results <- this.MI85.seg.results
+      message(paste("added results for ", names(data)[k]))
     } else {
       # all subsequent runs
-      message(paste("here comes rbind at line 638, with stat.results", ncol(stat.results), "and this.result", ncol(this.result)))
-      
       stat.results <- rbind(stat.results, this.result) 
       unique.phon.pairs <- rbind(unique.phon.pairs, this.unique.phon.pairs)
       TP85.seg.results <- rbind(TP85.seg.results, this.TP85.seg.results)
-      MI85.seg.results <- rbind(MI85.seg.results, data[[k]]$MI85$seg.results)
+      MI85.seg.results <- rbind(MI85.seg.results, this.MI85.seg.results)
+      message(paste("added results for ", names(data)[k]))
     }
     message(paste0("done segmenting speech and assessing segmentation for ", names(data)[k], "..."))
   } # end of for loop
