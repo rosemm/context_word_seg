@@ -67,6 +67,7 @@
 |listening               |interaction              |
 |looking                 |interaction              |
 |observing               |interaction              |
+|saying bye              |interaction              |
 |shouting                |interaction              |
 |singing                 |interaction              |
 |smiling                 |interaction              |

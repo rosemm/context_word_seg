@@ -114,6 +114,7 @@ putting on the bib	mealtime
 raining	raining
 relieving tummy ache	sick
 rolling	playtime
+saying bye	interaction
 scared	fussing
 shaking hands	touching
 shopping	shopping

@@ -253,6 +253,7 @@ relieving tummy ache	relieving tummy ache
 rolling	rolling
 rolling around	rolling
 rolling over	rolling
+saying bye	saying bye
 scared	scared
 seeing	observing
 shaking hands	shaking hands
@@ -304,6 +305,7 @@ taking photo	taking pictures
 taking photos	taking pictures
 taking picture	taking pictures
 taking pictures	taking pictures
+taking pitcures	taking pictures
 takling	talking
 taling	talking
 talkig	talking
