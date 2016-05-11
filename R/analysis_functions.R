@@ -344,27 +344,28 @@ plot_context_vs_nontext <- function(context_results, nontext_results, global_res
 }
 
 
-test_context_vs_nontext <- function(context_results, nontext_results, outcome){
+test_context_vs_nontext <- function(context, nontext, outcome){
   # for adding to nontext dataframe
-  facet <- length(levels(context_results[, colnames(context_results)==outcome])) > 1 # is there is more than one level for outcome?
+  facet <- length(levels(context[, colnames(context)==outcome])) > 1 # is there is more than one level for outcome?
   if(facet){
-    colnames(context_results)[colnames(context_results)=="value"] <- "outcome"
-    colnames(nontext_results)[colnames(nontext_results)=="value"] <- "outcome"
-    context_ests <- context_results %>% 
+    colnames(context)[colnames(context)=="value"] <- "outcome"
+    colnames(nontext)[colnames(nontext)=="value"] <- "outcome"
+    context_ests <- context %>% 
       select(criterion, method, context, measure, value) %>% 
       rename(context.est=value)
   } else {
-    colnames(context_results)[colnames(context_results)==outcome] <- "outcome"
-    colnames(nontext_results)[colnames(nontext_results)==outcome] <- "outcome"
-    context_ests <- context_results %>% 
+    colnames(context)[colnames(context)==outcome] <- "outcome"
+    colnames(nontext)[colnames(nontext)==outcome] <- "outcome"
+    context_ests <- context %>% 
       select(criterion, method, context, outcome) %>% 
       rename(context.est=outcome)
    }
   
-  full_results <- left_join(nontext_results, context_ests) # add context estimates
+  full_results <- left_join(nontext, context_ests, by=c("criterion", "method", "context")) # add context estimates
   
   # bootstrap p-values
   full_results$above.est <- ifelse(full_results$outcome > full_results$context.est, 1, 0)
+  full_results$below.est <- ifelse(full_results$outcome < full_results$context.est, 1, 0)
   
   if(facet){
     tests.contexts <- full_results %>%
@@ -374,7 +375,8 @@ test_context_vs_nontext <- function(context_results, nontext_results, outcome){
       group_by(method, context, criterion)
   }
   tests.contexts <- tests.contexts %>%
-    summarize(p.val = mean(above.est)) %>% 
+    summarize(nontext.mean=round(mean(outcome), 3), context.est=round(mean(context.est), 3), p.val.high = mean(above.est)/2, p.val.low = mean(below.est)/2, p.val=min(p.val.high, p.val.low)) %>% 
+    select(method, context, nontext.mean, context.est, p.val) %>% 
     add_stars() # from analysis_functions.r
   # 
   # tests.methods <- full_results %>%
