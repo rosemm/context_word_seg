@@ -562,6 +562,7 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
     context.names <- colnames(df[4:ncol(df)])
   } else {
     context.names <- as.vector("global")
+    continuity.measures <- data.frame(context="global", "continuity"=NA) 
   }
   
   if(prop){
