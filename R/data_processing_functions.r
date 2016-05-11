@@ -438,6 +438,64 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
   return(results)
 }
 
+measure_continuity <- function(df, verbose){
+  stopifnot(require(dplyr))
+  if(ncol(df) > 3){
+    message("Measuring continuity using all but the following columns: utt, orth, phon")
+    # retains contexts as they were used for column names, regardless of where they came from (works for any context defining method)
+    context.cols <- select(df, -utt, -orth, -phon)
+    context.names <- colnames(context.cols)
+  } else stop("Cannot calculate continuity without context columns.")
+  
+  continuity.chunks <- vector("list", length(context.names)) # storage variable
+  names(continuity.chunks) <- context.names
+  chunk.lengths <- vector("list", length(context.names)) # storage variable
+  names(chunk.lengths) <- context.names
+  distances <- vector("list", length(context.names)) # storage variable
+  names(distances) <- context.names
+  
+  for(k in context.names){
+    utts <- which(context.cols[[k]] > 0) # the position (row number) of each utterance in this context
+    distances[[k]] <- (utts[-1] - utts[-length(utts)]) # how far each utterance is from the next
+    
+    continuity.chunks[[k]] <- list() # empty storage variable
+    for(u in 1:length(utts)){
+      if(u==1){
+        # at the beginning, start this.chunk
+        this.chunk <- utts[u]
+      } else if(u==length(utts)){
+        # at the end, save this.chunk to the continuity.chunks list
+        continuity.chunks[[k]][[(1+length(continuity.chunks[[k]]))]] <- this.chunk
+        } else if(distances[[k]][u-1] > 1){
+        # if the next distance is greater than 1, save this.chunk and start a new chunk
+        continuity.chunks[[k]][[(1+length(continuity.chunks[[k]]))]] <- this.chunk
+        this.chunk <- utts[u]
+      } else {
+        # otherwise, add this utterance to the existing chunk
+        this.chunk <- c(this.chunk, utts[u])
+      }
+    }
+    chunk.lengths[[k]] <- sapply(continuity.chunks[[k]], length)
+  }
+  # stats to save
+  N.chunks <- sapply(continuity.chunks, length)
+  mean.chunk.lengths <- sapply(chunk.lengths, mean)
+  sd.chunk.lengths <- sapply(chunk.lengths, sd)
+  min.chunk.lengths <- sapply(chunk.lengths, min)
+  med.chunk.lengths <- sapply(chunk.lengths, median)
+  max.chunk.lengths <- sapply(chunk.lengths, max)
+  med.distance <- sapply(distances, median)
+  mean.distance <- sapply(distances, mean)
+  sd.distance <- sapply(distances, sd)
+  
+  continuity.stats <- data.frame(N.chunks, mean.chunk.lengths, sd.chunk.lengths, min.chunk.lengths, med.chunk.lengths, max.chunk.lengths, med.distance, sd.distance)
+  continuity.stats$context <- row.names(continuity.stats)
+  
+  if(verbose) {
+    return( list(continuity.chunks=continuity.chunks, chunk.lengths=chunk.lengths, distances=distances, continuity.stats=continuity.stats) )}
+  else return(continuity.stats)
+}
+
 # for bootstrapping nontexts:
 par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE, trisyl.limit=FALSE, N.types=NULL, N.utts=NULL, by.size=TRUE, expand=FALSE, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version=NULL, quiet=TRUE){ # this is the function that should be done in parallel on the 12 cores of each node
   message("************************\nbeginning par_function\n************************")
@@ -506,7 +564,6 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
     context.names <- as.vector("global")
   }
   
-  
   if(prop){
     # change probabilities into 1 or 0 probabalistically based on their values
     sample <- sample_probs(df=df) 
@@ -524,6 +581,10 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
   if(expand){
     # expand windows to + - 2 utterances before and after
     df <- expand_windows(df, context.names=context.names)
+  }
+  
+  if(ncol(df)>3){
+    continuity.measures <- measure_continuity(df=df, verbose=verbose)
   }
   
   # calculate MIs and TPs
@@ -662,8 +723,10 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
   stat.results$SHA1 <- fun.version
   
   if(verbose){
-    return( list(stat.results=stat.results, unique.phon.pairs=unique.phon.pairs, TP85.seg.results=TP85.seg.results, MI85.seg.results=MI85.seg.results) )
+    return( list(stat.results=stat.results, unique.phon.pairs=unique.phon.pairs, TP85.seg.results=TP85.seg.results, MI85.seg.results=MI85.seg.results, continuity.measures=continuity.measures) )
   } else {
+    message("combine the things")
+    stat.results <- left_join(stat.results, continuity.measures, by=c("nontext"="context"))
     return(stat.results)
   }
 }
