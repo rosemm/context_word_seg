@@ -133,7 +133,7 @@ calc_MI = function(phon.pairs, phon.stream, MI=TRUE, TP=TRUE){
     # get rank order
     TPrank <- unique(phon.pairs)
     TPrank$TP.rank <- 1:nrow(TPrank)
-    phon.pairs <- left_join(phon.pairs, select(TPrank, pair, TP.rank), by="pair")
+    phon.pairs <- left_join(phon.pairs, dplyr::select(TPrank, pair, TP.rank), by="pair")
   } 
   if(MI){
     phon.pairs <- phon.pairs %>% 
@@ -142,7 +142,7 @@ calc_MI = function(phon.pairs, phon.stream, MI=TRUE, TP=TRUE){
     # get rank order for MI 
     MIrank <- unique(phon.pairs)
     MIrank$MI.rank <- 1:nrow(MIrank)
-    phon.pairs <- left_join(phon.pairs, select(MIrank, pair, MI.rank), by="pair") 
+    phon.pairs <- left_join(phon.pairs, dplyr::select(MIrank, pair, MI.rank), by="pair") 
   } 
   
   output <- unique(phon.pairs) # Only keep one instance of each syllable pair
@@ -353,7 +353,7 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
     message(paste("filtering out", sum(unique.units$remove, na.rm=T), "monosyllabic words because they do not meet frequency cutoff."))
     unique.units <- unique.units %>% 
       filter(remove != 1) %>% 
-      select(-remove, -Freq)
+      dplyr::select(-remove, -Freq)
     
     # note that bisyllabic units are taken care of during segment_speech()
     
@@ -366,7 +366,7 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
     message(paste("filtering out", sum(unique.units$remove, na.rm=T), "trisyllabic words because they do not meet frequency cutoff."))
     unique.units <- unique.units %>% 
       filter(remove != 1) %>% 
-      select(-remove)
+      dplyr::select(-remove)
     
     message(paste(nrow(unique.units), "unqiue units segmented"))
   }
@@ -405,7 +405,7 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
     message(paste0("Removing ", sum(temp.unique.units$remove), " units (", 100*round(sum(temp.unique.units$remove)/nrow(unique.units), 3), "% of all seg'd units) because they occur within larger units (Swingley2005 embedding constraint)."))
     unique.units <- temp.unique.units %>% 
       filter(remove != 1) %>% 
-      select(-remove)
+      dplyr::select(-remove)
   } 
   
   # number of hits and false alarms
@@ -426,7 +426,7 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
   word.freq <- as.data.frame(table(streams$orth.stream), stringsAsFactors=FALSE)
   results <- left_join(results, word.freq, by=c("word"="Var1"))
   results$freq <- ifelse(results$seg.result=="miss", results$Freq, results$unit.freq)
-  results <- select(results, word, phon, recall, precision, seg.result, N.syl, freq, unit.freq) %>% 
+  results <- dplyr::select(results, word, phon, recall, precision, seg.result, N.syl, freq, unit.freq) %>% 
     rename(freq.segd=unit.freq)
   
   print(summary(results))
@@ -443,7 +443,7 @@ measure_continuity <- function(df, verbose){
   if(ncol(df) > 3){
     message("Measuring continuity using all but the following columns: utt, orth, phon")
     # retains contexts as they were used for column names, regardless of where they came from (works for any context defining method)
-    context.cols <- select(df, -utt, -orth, -phon)
+    context.cols <- dplyr::select(df, -utt, -orth, -phon)
     context.names <- colnames(context.cols)
   } else stop("Cannot calculate continuity without context columns.")
   
@@ -637,7 +637,7 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
                                                embedding.rule=embedding.rule, 
                                                trisyl.limit=trisyl.limit, 
                                                freq.cutoff=freq.cutoff$TP85)
-      TPresults <- colMeans(select(data[[k]]$TP85$seg.results, recall, precision), na.rm=T)
+      TPresults <- colMeans(dplyr::select(data[[k]]$TP85$seg.results, recall, precision), na.rm=T)
       TPresults <- as.data.frame(t(TPresults)) # make it a data.frame
       TPresults$stat <- "TP"
     }
@@ -648,7 +648,7 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
                                                embedding.rule=embedding.rule, 
                                                trisyl.limit=trisyl.limit, 
                                                freq.cutoff=freq.cutoff$MI85)
-      MIresults <- colMeans(select(data[[k]]$MI85$seg.results, recall, precision), na.rm=T)
+      MIresults <- colMeans(dplyr::select(data[[k]]$MI85$seg.results, recall, precision), na.rm=T)
       MIresults <- as.data.frame(t(MIresults)) # make it a data.frame
       MIresults$stat <- "MI"
     }
@@ -723,10 +723,13 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
   stat.results$precision <- as.numeric(stat.results$precision)
   stat.results$SHA1 <- fun.version
   
+  
   if(verbose){
+    # add continuity measures
+    stat.results <- left_join(stat.results, continuity.measures$continuity.stats, by=c("nontext"="context"))
     return( list(stat.results=stat.results, unique.phon.pairs=unique.phon.pairs, TP85.seg.results=TP85.seg.results, MI85.seg.results=MI85.seg.results, continuity.measures=continuity.measures) )
   } else {
-    message("combine the things")
+    # add continuity measures
     stat.results <- left_join(stat.results, continuity.measures, by=c("nontext"="context"))
     return(stat.results)
   }
