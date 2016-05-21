@@ -87,6 +87,7 @@ ggsave(filename="plots/wordlists/key_word_freq_by_context.png", width=12, height
 ```{r contexts_occuring}
 contexts.list <- as.list(contexts)
 for(i in 1:length(names(contexts.list))){
+  # words.in.utts <- sapply(df$orth, strsplit, split=" ")
   this.context <- contexts.list[[i]][contexts.list[[i]] %in% global.data$streams$orth.stream] # the context words that show up in the corpus
   this.context <- c(as.character(this.context), rep("", nrow(contexts)-length(this.context))) # add empty values at the end to make all of the columns the same length
   contexts.list[[i]] <- this.context
@@ -98,8 +99,22 @@ write.table(contexts.occuring, file="contexts.occuring.csv", sep=",", row.names=
 ############################
 ```
 
-## code contexts in df by word lists
-```{r}
+## tag contexts by family
+```{r family_contexts}
+source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/R/data_processing_functions.r")
+df <- df[ , 1:3] # only keep the first three columns (there should only be three columns anyway, but just to be sure)
+df_fam <- df %>% 
+  extract(col=utt, into="fam", regex="(^[[:alpha:]]{2})", remove=FALSE) %>% 
+  mutate(value=1) %>% 
+  spread(key=fam, value=value, fill=0)
+
+write.table(df_fam, file="contexts_files/contexts_Fam.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+
+```
+
+
+## tag contexts in df by word lists
+```{r WL_contexts}
 source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/R/data_processing_functions.r")
 df <- df[ , 1:3] # only keep the first three columns (there should only be three columns anyway, but just to be sure)
 
@@ -231,8 +246,8 @@ ggplot(size.data, aes(x=reorder(context, desc(n.utts)), y=n.utts)) +
   geom_bar(stat = "identity", show.legend = F) +
   geom_text(aes(label=n.utts), position=position_dodge(width=0.9), vjust=-0.25) +
   labs(x=NULL, y="Number of utterances in sub-corpus") +
-  theme(axis.text.x = element_text(angle=330, vjust=1, hjust=0))
-ggsave("plots/HJ/uttsper_context_corpora.png", width=12, height=5, units="in")
+  theme(axis.text.x = element_text(angle=330, vjust=1, hjust=0, size=20))
+ggsave("plots/HJ/uttsper_context_corpora.png", width=16, height=5, units="in")
 
 ```
 
@@ -686,17 +701,22 @@ df_HJ <- df_HJ[ ,c(TRUE, TRUE, TRUE, colSums(df_HJ[,4:ncol(df_HJ)], na.rm=T) > 1
 df_WL <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_files/contexts_WL.txt") 
 df_WL[df_WL==1.5] <- 1 # replace all 1.5's with 1's, so it doesn't distinguish between utterances originally tagged with key words and ones picked up by the +-2 uterance smoothing
 
+df_WL_bare <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_files/contexts_WL.txt") 
+df_WL_bare[df_WL_bare==1.5] <- 0 # erase the effects of the +-2 uterance smoothing
+
+df_Fam <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_files/contexts_Fam.txt") 
+
 dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
 
-fun.version <- "fcb165771d6fe00d" # fun.version refers to the current commit for data_processing_functions.r
+fun.version <- "d866eaee5e1850" # fun.version refers to the current commit for data_processing_functions.r
 ```
 
 ```{r on_aciss_params, eval=FALSE}
 par_function_args <- list(dataframe=NULL, 
                           dict=dict, 
-                          consider.freq=FALSE,
-                          embedding.rule=FALSE,
-                          trisyl.limit=FALSE,
+                          consider.freq=TRUE,
+                          embedding.rule=TRUE,
+                          trisyl.limit=TRUE,
                           N.types=NULL, 
                           N.utts=NULL, 
                           by.size=FALSE, 
@@ -715,18 +735,21 @@ par_function_args <- list(dataframe=NULL,
 
 ```{r on_aciss_nontexts, eval=FALSE}
 
-# 20 starts and 100 iter gives 2000 samples for each nontext (takes about 60min per 1000 samples)
+# 100 starts and 20 iter gives 2000 samples for each nontext (takes about 60min per 1000 samples)
 par_function_args$dataframe <- df_WL
-aciss_function(fun.version, id="nontexts_WL", starts=1:50, iter=100, par_function_args) 
+aciss_function(fun.version, id="nontexts_WL", starts=1:50, iter=200, par_function_args) 
+
+par_function_args$dataframe <- df_Fam
+aciss_function(fun.version, id="nontexts_Fam", starts=1:50, iter=200, par_function_args) 
 
 par_function_args$dataframe <- df_STM
-aciss_function(fun.version, id="nontexts_STM", starts=1:50, iter=100, par_function_args) 
+aciss_function(fun.version, id="nontexts_STM", starts=1:50, iter=200, par_function_args) 
 
 par_function_args$dataframe <- df_HJ
-aciss_function(fun.version, id="nontexts_HJ", starts=1:50, iter=100, par_function_args)
+aciss_function(fun.version, id="nontexts_HJ", starts=1:50, iter=200, par_function_args)
 
 par_function_args$dataframe <- df_LDA
-aciss_function(fun.version, id="nontexts_LDA", starts=1:50, iter=100, par_function_args)
+aciss_function(fun.version, id="nontexts_LDA", starts=1:50, iter=200, par_function_args)
 
 showStatus(makeRegistry(id = "nontexts_WL")); showStatus(makeRegistry(id = "nontexts_STM")); showStatus(makeRegistry(id = "nontexts_HJ")); showStatus(makeRegistry(id = "nontexts_LDA"))
 
@@ -739,7 +762,13 @@ par_function_args$trisyl.limit <- TRUE
 par_function_args$cutoff <- .75
 
 par_function_args$dataframe <- df_WL
-aciss_function(fun.version, id="nontexts_WL_freq", starts=1:50, iter=100, par_function_args) 
+aciss_function(fun.version, id="nontexts_WL_freq", starts=1:50, iter=200, par_function_args) 
+
+par_function_args$dataframe <- df_WL_bare
+aciss_function(fun.version, id="nontexts_WL_bare_freq", starts=1:50, iter=200, par_function_args) 
+
+par_function_args$dataframe <- df_Fam
+aciss_function(fun.version, id="nontexts_Fam_freq", starts=1:50, iter=200, par_function_args) 
 
 par_function_args$dataframe <- df_STM
 aciss_function(fun.version, id="nontexts_STM_freq", starts=1:50, iter=100, par_function_args) 
@@ -748,9 +777,9 @@ par_function_args$dataframe <- df_HJ
 aciss_function(fun.version, id="nontexts_HJ_freq", starts=1:50, iter=100, par_function_args)
 
 par_function_args$dataframe <- df_LDA
-aciss_function(fun.version, id="nontexts_LDA_freq", starts=1:50, iter=100, par_function_args)
+aciss_function(fun.version, id="nontexts_LDA_freq", starts=1:50, iter=200, par_function_args)
 
-showStatus(makeRegistry(id = "nontexts_WL_freq")); showStatus(makeRegistry(id = "nontexts_STM_freq")); showStatus(makeRegistry(id = "nontexts_HJ_freq")); showStatus(makeRegistry(id = "nontexts_LDA_freq"))
+showStatus(makeRegistry(id = "nontexts_WL_freq")); showStatus(makeRegistry(id = "nontexts_WL_bare_freq")); showStatus(makeRegistry(id = "nontexts_Fam_freq")); showStatus(makeRegistry(id = "nontexts_STM_freq")); showStatus(makeRegistry(id = "nontexts_HJ_freq")); showStatus(makeRegistry(id = "nontexts_LDA_freq"))
 
 ###################################################
 # Old expand version of nontexts
@@ -783,10 +812,10 @@ system('qstat -antu rosem') # to show all of my current jobs
 
 # loadResults(makeRegistry(id = "nontexts_WL"))
 
-# killJobs(makeRegistry(id = "nontexts_WL_freq"),findRunning(makeRegistry(id = "nontexts_WL_freq")))
-# killJobs(makeRegistry(id = "nontexts_HJ_freq"),findRunning(makeRegistry(id = "nontexts_HJ_freq")))
-# killJobs(makeRegistry(id = "nontexts_LDA_freq"),findRunning(makeRegistry(id = "nontexts_LDA_freq")))
-# killJobs(makeRegistry(id = "nontexts_STM_freq"),findRunning(makeRegistry(id = "nontexts_STM_freq")))
+# killJobs(makeRegistry(id = "nontexts_WL"),findRunning(makeRegistry(id = "nontexts_WL")))
+# killJobs(makeRegistry(id = "nontexts_HJ"),findRunning(makeRegistry(id = "nontexts_HJ")))
+# killJobs(makeRegistry(id = "nontexts_LDA"),findRunning(makeRegistry(id = "nontexts_LDA")))
+# killJobs(makeRegistry(id = "nontexts_STM"),findRunning(makeRegistry(id = "nontexts_STM")))
 
 # system('sftp rosem@ftn.aciss.uoregon.edu')
 ```
@@ -958,6 +987,9 @@ df_HJ <- read.table("contexts_files/contexts_HJ_bin.txt", sep="\t", quote="", co
 df_HJ <- df_HJ[ ,c(TRUE, TRUE, TRUE, colSums(df_HJ[,4:ncol(df_HJ)], na.rm=T) > 100)] # only keep contexts with at least 100 utterances, otherwise it's hard to estimate
 df_WL <- read.table("contexts_files/contexts_WL.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
 df_WL[df_WL==1.5] <- 1 # replace all 1.5's with 1's, so it doesn't distinguish between utterances originally tagged with key words and ones picked up by the +-2 uterance smoothing
+df_WL_bare <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_files/contexts_WL.txt") 
+df_WL_bare[df_WL_bare==1.5] <- 0 # erase the effects of the +-2 uterance smoothing
+df_Fam <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_files/contexts_Fam.txt") 
 
 par_function_args <- list(dataframe=NULL, 
                           dict=dict, 
@@ -980,23 +1012,27 @@ par_function_args <- list(dataframe=NULL,
 
 par_function_args$dataframe <- df_WL
 context_WL_results <- par_function(par_function_args)
-context_WL <- context_WL_results$stat.results
-context_WL_detail <- context_WL_results$addl.info
+# context_WL <- context_WL_results$stat.results
+# context_WL_detail <- context_WL_results$addl.info
+
+par_function_args$dataframe <- df_Fam
+context_Fam_results <- par_function(par_function_args)
+context_Fam <- left_join(context_Fam_results$stat.results, context_Fam_results$continuity.measures$continuity.stats, by=c("nontext"="context"))
 
 par_function_args$dataframe <- df_STM
 context_STM_results <- par_function(par_function_args)
-context_STM <- context_STM_results$stat.results
-context_STM_detail <- context_STM_results$addl.info
+# context_STM <- context_STM_results$stat.results
+# context_STM_detail <- context_STM_results$addl.info
 
 par_function_args$dataframe <- df_LDA
 context_LDA_results <- par_function(par_function_args)
-context_LDA <- context_LDA_results$stat.results
-context_LDA_detail <- context_LDA_results$addl.info
+# context_LDA <- context_LDA_results$stat.results
+# context_LDA_detail <- context_LDA_results$addl.info
 
 par_function_args$dataframe <- df_HJ
 context_HJ_results <- par_function(par_function_args)
-context_HJ <- context_HJ_results$stat.results
-context_HJ_detail <- context_HJ_results$addl.info
+# context_HJ <- context_HJ_results$stat.results
+# context_HJ_detail <- context_HJ_results$addl.info
 
 ####################
 # with freq
@@ -1004,32 +1040,48 @@ context_HJ_detail <- context_HJ_results$addl.info
 par_function_args$consider.freq <- TRUE
 par_function_args$embedding.rule <- TRUE
 par_function_args$trisyl.limit <- TRUE
+par_function_args$cutoff <- .75
 
 par_function_args$dataframe <- df_WL
 context_WL_freq_results <- par_function(par_function_args)
 context_WL_freq <- context_WL_freq_results$stat.results
-context_WL_freq_detail <- context_WL_freq_results$addl.info
+context_WL_freq_seg <- context_WL_freq_results$MI85.seg.results
+# context_WL_freq_detail <- context_WL_freq_results$addl.info
+
+par_function_args$dataframe <- df_WL_bare
+context_WL_bare_freq_results <- par_function(par_function_args)
+context_WL_bare_freq <- context_WL_bare_freq_results$stat.results
+context_WL_bare_freq_seg <- context_WL_bare_freq_results$MI85.seg.results
+
+par_function_args$dataframe <- df_Fam
+context_Fam_freq_results <- par_function(par_function_args)
+context_Fam_freq <- context_Fam_freq_results$stat.results
+context_Fam_freq_seg <- context_Fam_freq_results$MI85.seg.results
 
 par_function_args$dataframe <- df_STM
 context_STM_freq_results <- par_function(par_function_args)
 context_STM_freq <- context_STM_freq_results$stat.results
-context_STM_freq_detail <- context_STM_freq_results$addl.info
+context_STM_freq_seg <- context_STM_freq_results$MI85.seg.results
+# context_STM_freq_detail <- context_STM_freq_results$addl.info
 
 par_function_args$dataframe <- df_LDA
 context_LDA_freq_results <- par_function(par_function_args)
 context_LDA_freq <- context_LDA_freq_results$stat.results
-context_LDA_freq_detail <- context_LDA_freq_results$addl.info
+context_LDA_freq_seg <- context_LDA_freq_results$MI85.seg.results
+# context_LDA_freq_detail <- context_LDA_freq_results$addl.info
 
 par_function_args$dataframe <- df_HJ
 context_HJ_freq_results <- par_function(par_function_args)
 context_HJ_freq <- context_HJ_freq_results$stat.results
-context_HJ_freq_detail <- context_HJ_freq_results$addl.info
-```
+context_HJ_freq_seg <- context_HJ_freq_results$MI85.seg.results
+# context_HJ_freq_detail <- context_HJ_freq_results$addl.info
 
+```
 
 ```{r context_results_data_wrangling}
 # combine all the context results into one data frame
 context_WL$method <- "WL"
+context_Fam$method <- "Fam"
 context_STM$method <- "STM"
 context_LDA$method <- "LDA"
 context_HJ$method <- "HJ"
@@ -1038,8 +1090,8 @@ context_all <- rbind(context_WL, context_STM, context_LDA, context_HJ)
 
 context_all$method.short <- factor(context_all$method)
 context_all$method <- factor(context_all$method, 
-                                 levels=c("WL", "STM", "LDA", "HJ"), 
-                                 labels = c("word lists", "topic modeling (STM)", "topic modeling (LDA)", "subjective judgments")) 
+                                 levels=c("WL", "WL_bare", "Fam", "STM", "LDA", "HJ"), 
+                                 labels = c("word lists", "word lists_no smoothing", "family", "topic modeling (STM)", "topic modeling (LDA)", "subjective judgments"))
 
 
 # gather for plotting
@@ -1055,24 +1107,24 @@ context_all$measure <- as.factor(context_all$measure)
 #############
 # combine all the context results into one data frame
 context_WL_freq$method <- "WL"
+context_WL_bare_freq$method <- "WL_bare"
+context_Fam_freq$method <- "Fam"
 context_STM_freq$method <- "STM"
 context_LDA_freq$method <- "LDA"
 context_HJ_freq$method <- "HJ"
 
-context_all_freq <- rbind(context_WL_freq, context_STM_freq, context_LDA_freq, context_HJ_freq)
+context_all_freq <- rbind(context_WL_freq, context_WL_bare_freq, context_Fam_freq, context_STM_freq, context_LDA_freq, context_HJ_freq)
 
 context_all_freq$method.short <- factor(context_all_freq$method)
 context_all_freq$method <- factor(context_all_freq$method, 
-                                 levels=c("WL", "STM", "LDA", "HJ"), 
-                                 labels = c("word lists", "topic modeling (STM)", "topic modeling (LDA)", "subjective judgments")) 
+                                 levels=c("WL", "WL_bare", "Fam", "STM", "LDA", "HJ"), 
+                                 labels = c("word lists", "word lists_no smoothing", "family", "topic modeling (STM)", "topic modeling (LDA)", "subjective judgments"))
 
 
 # gather for plotting
 context_all_freq <- context_all_freq %>% 
   unite(col="criterion", stat, cutoff, sep="_", remove=FALSE) %>% 
   rename(context=nontext) 
-
-
 ```
 
 ```{r context_detail_data_wrangling}
@@ -1086,8 +1138,8 @@ context_detail <- rbind(context_WL_detail, context_STM_detail, context_LDA_detai
 
 context_detail$method.short <- factor(context_detail$method)
 context_detail$method <- factor(context_detail$method, 
-                                 levels=c("WL", "STM", "LDA", "HJ"), 
-                                 labels = c("word lists", "topic modeling (STM)", "topic modeling (LDA)", "subjective judgments")) 
+                                 levels=c("WL", "Fam", "STM", "LDA", "HJ"), 
+                                 labels = c("word lists", "family", "topic modeling (STM)", "topic modeling (LDA)", "subjective judgments")) 
 context_detail_summary <- context_detail %>% 
   group_by(method.short, context) %>% 
   summarise(which.A=which.max(A.freq.tot), 
@@ -1095,8 +1147,33 @@ context_detail_summary <- context_detail %>%
             freq.syl.A=syl1[which.A], 
             freq.syl.B=syl2[which.B],
             most.freq.syl=unique(freq.syl.A,freq.syl.B))
-  
+    
 context_all <- left_join(context_all, select(context_detail_summary, method.short, context, most.freq.syl), by=c("context", "method.short"))
+
+##############################
+# segmentation details
+##############################
+context_WL_freq_seg$method <- "WL"
+context_Fam_freq_seg$method <- "Fam"
+context_STM_freq_seg$method <- "STM"
+context_LDA_freq_seg$method <- "LDA"
+context_HJ_freq_seg$method <- "HJ"
+
+context_seg <- rbind(context_WL_freq_seg, context_Fam_freq_seg, context_STM_freq_seg, context_LDA_freq_seg, context_HJ_freq_seg)
+
+context_seg$method.short <- factor(context_seg$method)
+context_seg$method <- factor(context_seg$method, 
+                                 levels=c("WL", "Fam", "STM", "LDA", "HJ"), 
+                                 labels = c("word lists", "family", "topic modeling (STM)", "topic modeling (LDA)", "subjective judgments")) 
+
+context_seg_summary <- context_seg %>% 
+  group_by(method, context, seg.result, N.syl) %>% 
+  summarise(count=n(), freq=sum(freq)) %>% 
+  gather(key="measure", value="value", count, freq) %>% 
+  unite(col="key", measure, N.syl) %>% 
+  spread(key=key, value=value) %>% 
+  mutate(freq.tot=sum(freq_1, freq_2, freq_3, freq_4, freq_5, na.rm=TRUE))
+
 ```
 
 ## nontext results
@@ -1115,9 +1192,9 @@ nontext_HJ$method <- "HJ"
 nontext_results <- rbind(nontext_WL, nontext_STM, nontext_LDA, nontext_HJ)
 
 nontext_results$method.short <- factor(nontext_results$method)
-nontext_results$method <- factor(nontext_results$method, 
-                                 levels=c("WL", "STM", "LDA", "HJ"), 
-                                 labels = c("word lists", "topic modeling (STM)", "topic modeling (LDA)", "subjective judgments")) 
+nontext_results$method <- factor(nontext_results_freq$method, 
+                                 levels=c("WL", "WL_bare", "Fam", "STM", "LDA", "HJ"), 
+                                 labels = c("word lists", "word lists_no smoothing", "family", "topic modeling (STM)", "topic modeling (LDA)", "subjective judgments"))
 
 # gather for plotting
 nontext_results <- nontext_results %>% 
@@ -1132,27 +1209,53 @@ full_results <- left_join(nontext_results, context_ests, by=c("criterion", "meth
 # with freq
 ################# 
 nontext_WL <- read_batch(dir="nontexts_WL_freq-files")
+nontext_WL_bare <- read_batch(dir="nontexts_WL_bare_freq-files")
+nontext_Fam <- read_batch(dir="nontexts_Fam_freq-files")
 nontext_STM <- read_batch(dir="nontexts_STM_freq-files")
 nontext_LDA <- read_batch(dir="nontexts_LDA_freq-files")
 nontext_HJ <- read_batch(dir="nontexts_HJ_freq-files")
 
 # combine all the context results into one data frame
 nontext_WL$method <- "WL"
+nontext_WL_bare$method <- "WL_bare"
+nontext_Fam$method <- "Fam"
 nontext_STM$method <- "STM"
 nontext_LDA$method <- "LDA"
 nontext_HJ$method <- "HJ"
 
-nontext_results_freq <- rbind(nontext_WL, nontext_STM, nontext_LDA, nontext_HJ)
+nontext_results_freq <- rbind(nontext_WL, nontext_WL_bare, nontext_Fam, nontext_STM, nontext_LDA, nontext_HJ)
 
 nontext_results_freq$method.short <- factor(nontext_results_freq$method)
 nontext_results_freq$method <- factor(nontext_results_freq$method, 
-                                 levels=c("WL", "STM", "LDA", "HJ"), 
-                                 labels = c("word lists", "topic modeling (STM)", "topic modeling (LDA)", "subjective judgments")) 
+                                 levels=c("WL", "WL_bare", "Fam", "STM", "LDA", "HJ"), 
+                                 labels = c("word lists", "word lists_no smoothing", "family", "topic modeling (STM)", "topic modeling (LDA)", "subjective judgments")) 
 
 nontext_results_freq <- nontext_results_freq %>% 
   unite(col="criterion", stat, cutoff, sep="_", remove=FALSE) %>% 
   rename(context=nontext) 
 ```
+
+```{r nontext_WL_expand}
+
+nontext_WL_expand <- read_batch(dir="nontexts_WL_expand-files")
+check.N.utts <- nontext_WL_expand %>% 
+  group_by(nontext) %>% 
+  summarize(mean=mean(N.utts), sd=sd(N.utts))
+  
+context.N.utts <- context_WL %>%
+  rename(context=nontext) %>% 
+  group_by(context) %>% 
+  summarize(mean=mean(N.utts), sd=sd(N.utts))
+
+plot.data <- nontext_WL_expand %>% 
+  select(context=nontext, N.utts) 
+ggplot(plot.data, aes(y=N.utts, x=context)) +
+  geom_boxplot() +
+  geom_point(data=context.N.utts, aes(y=mean, x=context, color=context), size=2,show.legend = F) + 
+  facet_wrap(~context, scales = "free")
+ggsave("plots/expand_windows_effect_facet.png")
+```
+
 
 ## global results
 ```{r global_results}
@@ -1175,6 +1278,9 @@ par_function_args <- list(dataframe=NULL,
                           quiet=TRUE,
                           fun.version=fun.version)
 
+par_function_args$dataframe <- df[1:100,] # only taking the first three columns, and 100 rows, for speed
+quick_check <- par_function(par_function_args)
+
 par_function_args$dataframe <- df[ , 1:3] # only taking the first three columns
 global_data_results <- par_function(par_function_args)
 global_results  <- global_data_results$stat.results
@@ -1188,8 +1294,9 @@ par_function_args$consider.freq <- TRUE
 par_function_args$embedding.rule <- TRUE
 par_function_args$trisyl.limit <- TRUE
 par_function_args$verbose <- TRUE
+par_function_args$cutoff <- .75
 
-cutoffs <- seq(from=.6, to=.95, by=.01)
+cutoffs <- seq(from=.1, to=.99, by=.01)
 global_cutoff_results <- data.frame(NULL)
 global_cutoff_pairs <- data.frame(NULL)
 global_cutoff_TPseg <- data.frame(NULL)
@@ -1215,9 +1322,9 @@ for(i in 1:length(cutoffs)){
   global_cutoff_TPseg <- rbind(global_cutoff_TPseg, this.TPseg)
   global_cutoff_MIseg <- rbind(global_cutoff_MIseg, this.MIseg)
 }
-# write.csv(global_cutoff_results, "global_cutoff_results.csv")
-# write.csv(global_cutoff_pairs, "global_cutoff_pairs.csv")
-# write.csv(global_cutoff_MIseg, "global_cutoff_MIseg.csv")
+write.csv(global_cutoff_results, "global_cutoff_results.csv")
+write.csv(global_cutoff_pairs, "global_cutoff_pairs.csv")
+write.csv(global_cutoff_MIseg, "global_cutoff_MIseg.csv")
 
 results_by_syl <- global_cutoff_MIseg %>% 
   filter(N.syl < 4) %>% 
@@ -1229,19 +1336,20 @@ ggplot(results_by_syl, aes(x=cutoff, y=value, group=N.syl, color=as.factor(N.syl
   geom_line() +
   facet_wrap(~measure)
 ggplot(global_cutoff_results, aes(x=cutoff, y=precision)) + 
-  geom_line(size=2, alpha=.5) + 
+  geom_line(size=2) + 
   geom_line(data=filter(results_by_syl, measure=="precision"), aes(x=cutoff, y=value, group=N.syl, color=as.factor(N.syl)))
-ggsave("plots/swingley_fig1a_global.png")
+ggsave("plots/swingley_fig1a_global.png", height=8, width=8, units="in")
 
 fig1b.data <- global_cutoff_MIseg %>% 
   filter(seg.result=="hit") %>% 
   count(cutoff, N.syl)
 ggplot(fig1b.data, aes(x=cutoff, y=n, group=N.syl, color=as.factor(N.syl))) +
   geom_line()
-ggsave("plots/swingley_fig1b_global.png")
+ggsave("plots/swingley_fig1b_global.png", height=8, width=8, units="in")
 
 global_data_freq_results <- par_function(par_function_args)
 global_results_freq  <- global_data_freq_results$stat.results
+# NOTE: no continuity measures for global
 global_detail_freq  <- global_data_freq_results$addl.info
 
 ```
@@ -1256,24 +1364,187 @@ global_results <- global_results %>%
 ## THE PLOT (all methods)
 ```{r the_plot}
 # any additional values to be saved in the plot name can be included as extra arguments
+
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global_results_freq, 
+                        outcome="precision", 
+                        xlabs=TRUE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE)
+# what predicts how well the seg works for different contexts? more multisyllabic words (because of the embedding constraint). in english, do we actually have a lot of words that are made up of other words (and the smaller ones would get eliminated woth the embedding constraint)?
+# is it a super bathtime utt if it's in th emiddle of a bunch of bathtime utteracnes? calculate loading for each utt for each context based on the contexts of all of the utterances around it (maybe +-2 utts again). Can we run WL method with 30-utt window, and what would that do?
+# what does the embeddedness constrain drop out? are the things that get eliminated actually words, or not?
+# temporal
+# are the words that repeat monosyllabic or multi? implications for connecting TTR effect to (lack of) segmentation effect? also, do repeating words occur at utt boundaries? 
+# What does TTR difference look like for MI dists (plot MI dists for context vs. nontext)
+# plots of the chunk lengths for all the contexts (histograms)
+# some organzing ideas: 
+# how are the methods similar and different? Then pick a thing they do the same (TTR) and something they do differently (prop monosyllabic utts)
+# family method? define context by family, nontext are size-matched samples from the whole corpus. it's one end of the context spectrum --- it is unambiguously a defensible subcorpus. 
+# come up with a couple 
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global=NULL, 
+                        outcome="N.syl.tokens", 
+                        xlabs=TRUE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE)
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global=NULL, 
+                        outcome="MIN.segd.units", 
+                        xlabs=TRUE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE)
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global=NULL, 
+                        outcome="N.chunks", 
+                        xlabs=TRUE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE)
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global=NULL, 
+                        outcome="mean.chunk.lengths", 
+                        xlabs=TRUE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE)
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global=NULL, 
+                        outcome="min.chunk.lengths", 
+                        xlabs=TRUE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE)
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global=NULL, 
+                        outcome="med.chunk.lengths", 
+                        xlabs=TRUE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE)
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global=NULL, 
+                        outcome="max.chunk.lengths", 
+                        xlabs=TRUE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE)
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global=NULL, 
+                        outcome="med.distance", 
+                        xlabs=TRUE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE)
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global=global_results_freq, 
+                        outcome="TTR", 
+                        xlabs=TRUE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE)
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global=global_results_freq, 
+                        outcome="prop.most.freq", 
+                        xlabs=TRUE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE)
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global=global_results_freq, 
+                        outcome="mean.words.per.utt", 
+                        xlabs=TRUE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE)
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global=global_results_freq, 
+                        outcome="mean.syls.per.utt", 
+                        xlabs=TRUE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE)
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global=global_results_freq, 
+                        outcome="prop.one.word.utt", 
+                        xlabs=TRUE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE)
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global=global_results_freq, 
+                        outcome="prop.one.syl.utt", 
+                        xlabs=TRUE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE)
+context_all_freq$chunks.per.utts <- context_all_freq$N.chunks/context_all_freq$N.utts
+nontext_results_freq$chunks.per.utts <- nontext_results_freq$N.chunks/nontext_results_freq$N.utts
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global=global_results_freq, 
+                        outcome="chunks.per.utts", 
+                        xlabs=TRUE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE)
+# z-scored
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global=NULL, 
+                        outcome="TTR", 
+                        Z.score=TRUE,
+                        print.tests=FALSE,
+                        xlabs=FALSE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE,
+                        Z=TRUE)
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global=NULL, 
+                        outcome="precision", 
+                        Z.score=TRUE,
+                        print.tests=FALSE,
+                        xlabs=FALSE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE,
+                        Z=TRUE)
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global=NULL, 
+                        outcome="prop.one.word.utt", 
+                        Z.score=TRUE,
+                        print.tests=FALSE,
+                        xlabs=FALSE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE,
+                        Z=TRUE)
+plot_context_vs_nontext(context_all_freq, 
+                        nontext_results_freq, 
+                        global=NULL, 
+                        outcome="prop.most.freq", 
+                        Z.score=TRUE,
+                        print.tests=FALSE,
+                        xlabs=FALSE,
+                        save.to="plots/context_vs_nontext",
+                        consider.freq=TRUE,
+                        Z=TRUE)
+
+
+# without freq
 plot_context_vs_nontext(context_all, 
                         nontext_results, 
                         global_results, 
                         outcome="measure", 
                         xlabs=TRUE,
                         save.to="plots/context_vs_nontext")
-plot_context_vs_nontext(context_all_freq, 
-                        nontext_results_freq, 
-                        global_results=NULL, 
-                        outcome="precision", 
-                        xlabs=TRUE,
-                        save.to="plots/context_vs_nontext",
-                        consider.freq=TRUE)
 plot_context_vs_nontext(context_all, 
                         nontext_results, 
                         global_results, 
                         outcome="TTR", 
-                        xlabs=TRUE,, 
+                        xlabs=TRUE, 
                         save.to="plots/context_vs_nontext")
 plot_context_vs_nontext(context_all, 
                         nontext_results, 
@@ -1350,7 +1621,15 @@ p <- ggplot(filter(full_results, method==this.method), aes(x=value))+
 ```{r bootstrap_pvals}
 
 tests.contexts.measure <- test_context_vs_nontext(context_all, nontext_results, outcome="measure")
-tests.contexts.TTR <- test_context_vs_nontext(context_all, nontext_results, outcome="TTR")
+
+tests.contexts.freq.pre <- test_context_vs_nontext(context_all_freq, nontext_results_freq,
+                                                   outcome="precision")
+tests.contexts.freq.TTR <- test_context_vs_nontext(context_all_freq, nontext_results_freq, 
+                                                   outcome="TTR")
+tests.contexts.freq.pos <- test_context_vs_nontext(context_all_freq, nontext_results_freq, 
+                                                   outcome="prop.one.syl.utt")
+tests.contexts.freq.chu <- test_context_vs_nontext(context_all_freq, nontext_results_freq, 
+                                                   outcome="N.chunks")
 
 kable(filter(tests.contexts, criterion=="MI_0.85")[,-3], digits=3)
 ```
@@ -1376,7 +1655,82 @@ understand <- filter(understand, context !="routines")
 u <- lm(p.val ~ N.utts + MIN.segd.units + N.words + TTR, data=understand)
 summary(u)
 
+# get the Z scores for each context estimate in its nontext distribution
+test <- test_context_vs_nontext(context_all_freq, nontext_results_freq, "precision")
+
+context_seg_summary_avail <- context_seg_summary %>% 
+  filter(seg.result != "false alarm") %>% 
+  ungroup() %>% 
+  select(-seg.result) %>% 
+  group_by(method, context) %>% 
+  summarise_each(funs(sum=sum(., na.rm=TRUE))) %>% 
+  transmute(context=context, 
+            prop.1syl.av=freq_1/freq.tot,
+            prop.2syl.av=freq_2/freq.tot,
+            prop.3syl.av=freq_3/freq.tot)
+
+context_seg_summary_segd <- context_seg_summary %>% 
+  filter(seg.result != "miss") %>% 
+  ungroup() %>% 
+  select(-seg.result) %>% 
+  group_by(method, context) %>% 
+  summarise_each(funs(sum=sum(., na.rm=TRUE))) %>% 
+  transmute(context=context,
+            prop.1syl.sg=freq_1/freq.tot,
+            prop.2syl.sg=freq_2/freq.tot,
+            prop.3syl.sg=freq_3/freq.tot)
+
+summary.data <- context_all_freq %>% 
+  dplyr::select(context, MIN.segd.units, N.utts:prop.one.syl.utt, N.chunks:method) %>% 
+  left_join(test, by=c("context", "method")) %>% 
+  left_join(context_seg_summary_avail, by=c("context", "method")) %>% 
+  left_join(context_seg_summary_segd, by=c("context", "method")) %>% 
+  filter(method!="family") %>% 
+  unite(col=methcon, method, context) %>% 
+  dplyr::select(-nontext.mean, -context.est, -p.val, -stars, -mean.TP, -med.distance ) 
+
+# what variables are related to those Z scores? 
+cor <- cor(summary.data[,-1], use="pairwise.complete.obs")
+round(sort(cor[, which(colnames(cor)=="Z")]), 2) # what is strongly associated with the Z scores?
+
+lm <- lm(Z ~ ., data=summary.data[,-1]) # tons of multicolinear predictors...
+# library(lars)
+# lasso <- lars(x=as.matrix(select(summary.data, -methcon, -Z)), y=summary.data$Z, type="lasso")
+library(MASS)
+lm.r <- lm.ridge(Z ~ ., data=as.data.frame(scale(summary.data[,-1])), lambda=seq(0,15,0.001), model=TRUE)
+lmb <- lm.r$lambda[which.min(lm.r$GCV)]
+lmr.co <- lm.r$coef[ ,which.min(lm.r$GCV)]
+
+t <- data.frame(pred=names(lmr.co), coef=lmr.co)
+t$coef.mag <- abs(t$coef)
+
+ggplot(filter(t, coef.mag > median(t$coef.mag)), aes(x=reorder(pred, coef.mag), y=coef)) +
+  geom_bar(stat = "identity") +
+  labs(x=NULL) +
+  theme(axis.text.x = element_text(angle=45, vjust=1, hjust=1)) 
+
+lm <- lm(Z ~ prop.2syl.av + prop.2syl.sg + N.chunks + prop.one.syl.utt, data=summary.data[,-1])
+summary(lm)
+
+# pabiku TTR
+pabiku <- c("pabiku", "golabi", "tupiro")
+loTTR <- paste(sample(rep(pabiku[1:2], 12), 24), collapse="")
+hiTTR <- paste(sample(rep(pabiku[1:3], 8), 24), collapse="")
 ```
+
+```{r explore_utts}
+df <- df[,1:3] # just in case
+# how long are the utterances?
+# orth.stats <- gsub(x=df$orth, pattern="_", replacement=" ", fixed=TRUE) # removing underscores
+words.in.utts <- sapply(df$orth, strsplit, split=" ")
+df$words.per.utt <- sapply(words.in.utts, length)
+orth <- unlist(words.in.utts)  
+  
+mono.utts <- unique(filter(df, words.per.utt==1)$orth)
+mono.utts.freqs <- table(filter(df, words.per.utt==1)$orth)
+
+```
+
 
 ```{r explore_MI_dists}
 rs <- list(context_WL_results=context_WL_results, 
@@ -1410,6 +1764,15 @@ for(i in 1:length(rs)){
   message("...truncating freq otput...")
 }
 
+```
+
+```{r syllable_dists}
+syls_global <- syllable_dist(df, dict, save.to="syl_dists")
+syls_WL <- syllable_dist(df_WL, dict, method="WordLists", save.to="syl_dists")
+syls_Fam <- syllable_dist(df_Fam, dict, method="Family", save.to="syl_dists")
+syls_HJ <- syllable_dist(df_HJ, dict, method="HumanCoders", save.to="syl_dists")
+syls_STM <- syllable_dist(df_STM, dict, method="STM", save.to="syl_dists")
+syls_LDA <- syllable_dist(df_LDA, dict, method="LDA", save.to="syl_dists")
 ```
 
 
