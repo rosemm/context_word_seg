@@ -352,7 +352,7 @@ plot_context_vs_nontext <- function(context, nontext, global, outcome, Z.score=F
         p <- ggplot(non.data, aes(x=outcome)) + 
           geom_histogram() +
           geom_vline(data=con.data, aes(xintercept=outcome), color=colors[[as.character(m)]], size=4, show.legend=FALSE) + 
-          theme(axis.text = element_blank())
+          theme(axis.text.y = element_blank())
       } else{
         p <- ggplot(non.data, aes(x=reorder(context, N.utts), y=outcome)) + 
           geom_boxplot() +
