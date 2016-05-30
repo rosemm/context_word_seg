@@ -358,6 +358,7 @@ plot_context_vs_nontext <- function(context, nontext, global, outcome, Z.score=F
           geom_boxplot() +
           geom_point(data=con.data, color=colors[[as.character(m)]], size=4, show.legend=FALSE) + 
           theme(axis.text.x = element_blank())
+        if(xlabs) p <- p + theme(axis.text.x = element_text(angle=330, vjust=1, hjust=0))
         if(!is.null(global)) p <- p +  geom_hline(data=global, aes(yintercept=outcome), linetype = 2, size=1.5) 
       }
       
@@ -365,7 +366,7 @@ plot_context_vs_nontext <- function(context, nontext, global, outcome, Z.score=F
         labs(x=NULL, y=NULL, title=paste(m, outcome)) 
       if(facet) p <- p + facet_wrap(~measure)
       if(!is.null(annotate)) p <- p + geom_text(data=lab.data, aes(label=annotate,x=reorder(context, N.utts), y=outcome), size=4)
-      if(xlabs) p <- p + theme(axis.text.x = element_text(angle=330, vjust=1, hjust=0))
+      
       
       print(p)
       
