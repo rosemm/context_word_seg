@@ -194,41 +194,6 @@ make_streams = function(df, seg.utts=TRUE){
   return(output)
 }
 
-context_results <- function(df, seg.utts=TRUE){
-  if(ncol(df) > 3){
-    message(paste("\ncontext_results using all but the following columns:", paste(colnames(df)[1:3], collapse=", ")))
-    # retains contexts as they were used for column names, regardless of where they came from (works for any context defining method)
-    context.names <- colnames(df)[4:ncol(df)]
-  } else {
-    message("\nNo context columns in df, so analyzing as global.")
-    df$global <- 1 # add a column of 1's, to include everything
-    # if there are no context columns, analyze as global
-    context.names <- as.vector("global")
-  }
-  context.data <- vector("list", length(context.names)) # storage variable
-  names(context.data) <- context.names
-  
-  for(k in 1:length(context.names)){
-    
-    message(paste0("make_streams and calc_MI on ", context.names[k], "..."))
-    
-    df.context <- dplyr::filter(df, df[ , which(colnames(df)==context.names[k])] > 0) # select cases that have any value greater than 0 in the column that matches the name of context k
-    
-    context.data[[k]]$N.hits <- nrow(filter(df, df[ , which(colnames(df)==context.names[k])] == 1)) # the number of utterances that contained a key word (does not include utterances before and after)
-    
-    context.data[[k]]$N.utterances <- nrow(df.context)
-    
-    context.data[[k]]$streams <- make_streams(df.context, seg.utts=seg.utts)
-    context.data[[k]]$unique.phon.pairs <- calc_MI(phon.pairs=context.data[[k]]$streams$phon.pairs, phon.stream=context.data[[k]]$streams$phon.stream)
-    
-    context.data[[k]]$freq.bigrams <- dplyr::summarise(group_by(context.data[[k]]$streams$phon.pairs, syl1, syl2), count=n()) # frequency of bigrams
-    context.data[[k]]$freq.words <- table(context.data[[k]]$streams$orth.stream) # frequency of words
-    phon.stream <- context.data[[k]]$streams$phon.stream[context.data[[k]]$streams$phon.stream != "###"]
-    context.data[[k]]$freq.syl <- table(phon.stream) # frequency of syllables
-  }
-  return(context.data)
-}
-
 seg <- function(phon.stream, unique.phon.pairs, seg.utts=TRUE, quiet=TRUE){
   if(!quiet) message("leave utterance boundaries? ", seg.utts)
   
@@ -589,7 +554,38 @@ par_function <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
   }
   
   # calculate MIs and TPs
-  data <- context_results(df=df, seg.utts=seg.utts) # calls make_streams() and calc_MI()
+  if(ncol(df) > 3){
+    message(paste("\ncontext results using all but the following columns:", paste(colnames(df)[1:3], collapse=", ")))
+    # retains contexts as they were used for column names, regardless of where they came from (works for any context defining method)
+    context.names <- colnames(df)[4:ncol(df)]
+  } else {
+    message("\nNo context columns in df, so analyzing as global.")
+    df$global <- 1 # add a column of 1's, to include everything
+    # if there are no context columns, analyze as global
+    context.names <- as.vector("global")
+  }
+  data <- vector("list", length(context.names)) # storage variable
+  names(data) <- context.names
+  
+  for(k in 1:length(names(data))){
+    
+    message(paste0("make_streams and calc_MI on ", context.names[k], "..."))
+    
+    df.context <- dplyr::filter(df, df[ , which(colnames(df)==context.names[k])] > 0) # select cases that have any value greater than 0 in the column that matches the name of context k
+    
+    data[[k]]$N.hits <- nrow(filter(df, df[ , which(colnames(df)==context.names[k])] == 1)) # the number of utterances that contained a key word (does not include utterances before and after)
+    
+    data[[k]]$N.utterances <- nrow(df.context)
+    
+    data[[k]]$streams <- make_streams(df.context, seg.utts=seg.utts)
+    data[[k]]$unique.phon.pairs <- calc_MI(phon.pairs=data[[k]]$streams$phon.pairs, phon.stream=data[[k]]$streams$phon.stream)
+    
+    data[[k]]$freq.bigrams <- dplyr::summarise(group_by(data[[k]]$streams$phon.pairs, syl1, syl2), count=n()) # frequency of bigrams
+    data[[k]]$freq.words <- table(data[[k]]$streams$orth.stream) # frequency of words
+    phon.stream <- data[[k]]$streams$phon.stream[data[[k]]$streams$phon.stream != "###"]
+    data[[k]]$freq.syl <- table(phon.stream) # frequency of syllables
+  }
+  
   addl.info <- vector("list", length(names(data))); names(addl.info) <- names(data) # empty storage variable
   
   # segment speech and assess segmentation
