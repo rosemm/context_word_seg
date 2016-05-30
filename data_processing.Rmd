@@ -99,20 +99,6 @@ write.table(contexts.occuring, file="contexts.occuring.csv", sep=",", row.names=
 ############################
 ```
 
-## tag contexts by family
-```{r family_contexts}
-source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/R/data_processing_functions.r")
-df <- df[ , 1:3] # only keep the first three columns (there should only be three columns anyway, but just to be sure)
-df_fam <- df %>% 
-  extract(col=utt, into="fam", regex="(^[[:alpha:]]{2})", remove=FALSE) %>% 
-  mutate(value=1) %>% 
-  spread(key=fam, value=value, fill=0)
-
-write.table(df_fam, file="contexts_files/contexts_Fam.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
-
-```
-
-
 ## tag contexts in df by word lists
 ```{r WL_contexts}
 source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/R/data_processing_functions.r")
@@ -701,18 +687,13 @@ df_HJ <- df_HJ[ ,c(TRUE, TRUE, TRUE, colSums(df_HJ[,4:ncol(df_HJ)], na.rm=T) > 1
 df_WL <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_files/contexts_WL.txt") 
 df_WL[df_WL==1.5] <- 1 # replace all 1.5's with 1's, so it doesn't distinguish between utterances originally tagged with key words and ones picked up by the +-2 uterance smoothing
 
-df_WL_bare <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_files/contexts_WL.txt") 
-df_WL_bare[df_WL_bare==1.5] <- 0 # erase the effects of the +-2 uterance smoothing
-
-df_Fam <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_files/contexts_Fam.txt") 
-
 dict <- read.table("dict_all3_updated.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
 
 fun.version <- "d866eaee5e1850" # fun.version refers to the current commit for data_processing_functions.r
 ```
 
 ```{r on_aciss_params, eval=FALSE}
-par_function_args <- list(dataframe=NULL, 
+run_analysis_args <- list(dataframe=NULL, 
                           dict=dict, 
                           consider.freq=TRUE,
                           embedding.rule=TRUE,
@@ -736,57 +717,48 @@ par_function_args <- list(dataframe=NULL,
 ```{r on_aciss_nontexts, eval=FALSE}
 
 # 100 starts and 20 iter gives 2000 samples for each nontext (takes about 60min per 1000 samples)
-par_function_args$dataframe <- df_WL
-aciss_function(fun.version, id="nontexts_WL", starts=1:50, iter=200, par_function_args) 
+run_analysis_args$dataframe <- df_WL
+aciss_function(fun.version, id="nontexts_WL", starts=1:50, iter=200, run_analysis_args) 
 
-par_function_args$dataframe <- df_Fam
-aciss_function(fun.version, id="nontexts_Fam", starts=1:50, iter=200, par_function_args) 
+run_analysis_args$dataframe <- df_STM
+aciss_function(fun.version, id="nontexts_STM", starts=1:50, iter=200, run_analysis_args) 
 
-par_function_args$dataframe <- df_STM
-aciss_function(fun.version, id="nontexts_STM", starts=1:50, iter=200, par_function_args) 
+run_analysis_args$dataframe <- df_HJ
+aciss_function(fun.version, id="nontexts_HJ", starts=1:50, iter=200, run_analysis_args)
 
-par_function_args$dataframe <- df_HJ
-aciss_function(fun.version, id="nontexts_HJ", starts=1:50, iter=200, par_function_args)
-
-par_function_args$dataframe <- df_LDA
-aciss_function(fun.version, id="nontexts_LDA", starts=1:50, iter=200, par_function_args)
+run_analysis_args$dataframe <- df_LDA
+aciss_function(fun.version, id="nontexts_LDA", starts=1:50, iter=200, run_analysis_args)
 
 showStatus(makeRegistry(id = "nontexts_WL")); showStatus(makeRegistry(id = "nontexts_STM")); showStatus(makeRegistry(id = "nontexts_HJ")); showStatus(makeRegistry(id = "nontexts_LDA"))
 
 ###################################################
 # Include freq cutoff as well (a la Swingley 2005)
 ###################################################
-par_function_args$consider.freq <- TRUE
-par_function_args$embedding.rule <- TRUE
-par_function_args$trisyl.limit <- TRUE
-par_function_args$cutoff <- .75
+run_analysis_args$consider.freq <- TRUE
+run_analysis_args$embedding.rule <- TRUE
+run_analysis_args$trisyl.limit <- TRUE
+run_analysis_args$cutoff <- .75
 
-par_function_args$dataframe <- df_WL
-aciss_function(fun.version, id="nontexts_WL_freq", starts=1:50, iter=200, par_function_args) 
+run_analysis_args$dataframe <- df_WL
+aciss_function(fun.version, id="nontexts_WL_freq", starts=1:50, iter=200, run_analysis_args) 
 
-par_function_args$dataframe <- df_WL_bare
-aciss_function(fun.version, id="nontexts_WL_bare_freq", starts=1:50, iter=200, par_function_args) 
+run_analysis_args$dataframe <- df_STM
+aciss_function(fun.version, id="nontexts_STM_freq", starts=1:50, iter=100, run_analysis_args) 
 
-par_function_args$dataframe <- df_Fam
-aciss_function(fun.version, id="nontexts_Fam_freq", starts=1:50, iter=200, par_function_args) 
+run_analysis_args$dataframe <- df_HJ
+aciss_function(fun.version, id="nontexts_HJ_freq", starts=1:50, iter=100, run_analysis_args)
 
-par_function_args$dataframe <- df_STM
-aciss_function(fun.version, id="nontexts_STM_freq", starts=1:50, iter=100, par_function_args) 
+run_analysis_args$dataframe <- df_LDA
+aciss_function(fun.version, id="nontexts_LDA_freq", starts=1:50, iter=200, run_analysis_args)
 
-par_function_args$dataframe <- df_HJ
-aciss_function(fun.version, id="nontexts_HJ_freq", starts=1:50, iter=100, par_function_args)
-
-par_function_args$dataframe <- df_LDA
-aciss_function(fun.version, id="nontexts_LDA_freq", starts=1:50, iter=200, par_function_args)
-
-showStatus(makeRegistry(id = "nontexts_WL_freq")); showStatus(makeRegistry(id = "nontexts_WL_bare_freq")); showStatus(makeRegistry(id = "nontexts_Fam_freq")); showStatus(makeRegistry(id = "nontexts_STM_freq")); showStatus(makeRegistry(id = "nontexts_HJ_freq")); showStatus(makeRegistry(id = "nontexts_LDA_freq"))
+showStatus(makeRegistry(id = "nontexts_WL_freq")); showStatus(makeRegistry(id = "nontexts_STM_freq")); showStatus(makeRegistry(id = "nontexts_HJ_freq")); showStatus(makeRegistry(id = "nontexts_LDA_freq"))
 
 ###################################################
 # Old expand version of nontexts
 ###################################################
 df_WL_old <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_files/contexts_WL.txt") # keep the 1.5's and 1's
 
-par_function_args <- list(dataframe=df_WL_old, 
+run_analysis_args <- list(dataframe=df_WL_old, 
                           dict=dict, 
                           consider.freq=FALSE,
                           embedding.rule=FALSE,
@@ -804,7 +776,7 @@ par_function_args <- list(dataframe=df_WL_old,
                           nontext=TRUE, 
                           quiet=TRUE,
                           fun.version=fun.version)
-aciss_function(fun.version, id="nontexts_WL_expand", starts=1:50, iter=100, par_function_args)
+aciss_function(fun.version, id="nontexts_WL_expand", starts=1:50, iter=100, run_analysis_args)
 
 showStatus(makeRegistry(id = "nontexts_WL_expand")); showStatus(makeRegistry(id = "nontexts_WL"))
 
@@ -824,46 +796,46 @@ system('qstat -antu rosem') # to show all of my current jobs
 ###########################################
 # does cutoff affect results?
 ###########################################
-par_function_args$consider.freq <- FALSE
-par_function_args$embedding.rule <- FALSE
-par_function_args$trisyl.limit <- FALSE
+run_analysis_args$consider.freq <- FALSE
+run_analysis_args$embedding.rule <- FALSE
+run_analysis_args$trisyl.limit <- FALSE
 
 starts <- seq(.4, .9, by=.05)
-par_function_args$cutoff <- as.name("start") # doesn't work
+run_analysis_args$cutoff <- as.name("start") # doesn't work
 
-par_function_args$dataframe <- df_WL
-aciss_function(fun.version, id="Sim_cutoff_WL", starts=starts, iter=12, par_function_args) 
+run_analysis_args$dataframe <- df_WL
+aciss_function(fun.version, id="Sim_cutoff_WL", starts=starts, iter=12, run_analysis_args) 
 
-par_function_args$dataframe <- df_STM
-aciss_function(fun.version, id="Sim_cutoff_STM", starts=starts, iter=12, par_function_args) 
+run_analysis_args$dataframe <- df_STM
+aciss_function(fun.version, id="Sim_cutoff_STM", starts=starts, iter=12, run_analysis_args) 
 
-par_function_args$dataframe <- df_HJ
-aciss_function(fun.version, id="Sim_cutoff_HJ", starts=starts, iter=12, par_function_args)
+run_analysis_args$dataframe <- df_HJ
+aciss_function(fun.version, id="Sim_cutoff_HJ", starts=starts, iter=12, run_analysis_args)
 
-par_function_args$dataframe <- df_LDA
-aciss_function(fun.version, id="Sim_cutoff_LDA", starts=starts, iter=12, par_function_args)
+run_analysis_args$dataframe <- df_LDA
+aciss_function(fun.version, id="Sim_cutoff_LDA", starts=starts, iter=12, run_analysis_args)
 
 showStatus(makeRegistry(id = "Sim_cutoff_WL")); showStatus(makeRegistry(id = "Sim_cutoff_STM")); showStatus(makeRegistry(id = "Sim_cutoff_HJ")); showStatus(makeRegistry(id = "Sim_cutoff_LDA"))
 
 ###########################################
 # does corpus size affect results?
 ###########################################
-par_function_args$cutoff <- .85 # reset from previous
-par_function_args$by.size <- TRUE
-par_function_args$N.types <- NULL
-par_function_args$N.utts <- NULL
+run_analysis_args$cutoff <- .85 # reset from previous
+run_analysis_args$by.size <- TRUE
+run_analysis_args$N.types <- NULL
+run_analysis_args$N.utts <- NULL
   
-par_function_args$dataframe <- df_WL[ ,1:3]
-aciss_function(fun.version, id="Sim_size_Korman", starts=1:100, iter=12, par_function_args) # this takes much longer to run, so need to use fewer iterations so ACISS doesn't kill the job
+run_analysis_args$dataframe <- df_WL[ ,1:3]
+aciss_function(fun.version, id="Sim_size_Korman", starts=1:100, iter=12, run_analysis_args) # this takes much longer to run, so need to use fewer iterations so ACISS doesn't kill the job
 
-par_function_args$N.types <- 1000
-par_function_args$N.utts <- 1000
+run_analysis_args$N.types <- 1000
+run_analysis_args$N.utts <- 1000
 
-par_function_args$dataframe <- "skewed"
-aciss_function(fun.version, id="Sim_size_skew", starts=1:50, iter=100, par_function_args)
+run_analysis_args$dataframe <- "skewed"
+aciss_function(fun.version, id="Sim_size_skew", starts=1:50, iter=100, run_analysis_args)
 
-par_function_args$dataframe <- "unif"
-aciss_function(fun.version, id="Sim_size_unif", starts=1:50, iter=100, par_function_args)
+run_analysis_args$dataframe <- "unif"
+aciss_function(fun.version, id="Sim_size_unif", starts=1:50, iter=100, run_analysis_args)
 
 showStatus(makeRegistry(id = "Sim_size_Korman")); showStatus(makeRegistry(id = "Sim_size_skew")); showStatus(makeRegistry(id = "Sim_size_unif"))
 
@@ -987,11 +959,8 @@ df_HJ <- read.table("contexts_files/contexts_HJ_bin.txt", sep="\t", quote="", co
 df_HJ <- df_HJ[ ,c(TRUE, TRUE, TRUE, colSums(df_HJ[,4:ncol(df_HJ)], na.rm=T) > 100)] # only keep contexts with at least 100 utterances, otherwise it's hard to estimate
 df_WL <- read.table("contexts_files/contexts_WL.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)
 df_WL[df_WL==1.5] <- 1 # replace all 1.5's with 1's, so it doesn't distinguish between utterances originally tagged with key words and ones picked up by the +-2 uterance smoothing
-df_WL_bare <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_files/contexts_WL.txt") 
-df_WL_bare[df_WL_bare==1.5] <- 0 # erase the effects of the +-2 uterance smoothing
-df_Fam <- get_from_https("https://raw.githubusercontent.com/rosemm/context_word_seg/master/contexts_files/contexts_Fam.txt") 
 
-par_function_args <- list(dataframe=NULL, 
+run_analysis_args <- list(dataframe=NULL, 
                           dict=dict, 
                           consider.freq=FALSE,
                           embedding.rule=FALSE,
@@ -1010,68 +979,54 @@ par_function_args <- list(dataframe=NULL,
                           quiet=TRUE,
                           fun.version=fun.version)
 
-par_function_args$dataframe <- df_WL
-context_WL_results <- par_function(par_function_args)
+run_analysis_args$dataframe <- df_WL
+context_WL_results <- run_analysis(run_analysis_args)
 # context_WL <- context_WL_results$stat.results
 # context_WL_detail <- context_WL_results$addl.info
 
-par_function_args$dataframe <- df_Fam
-context_Fam_results <- par_function(par_function_args)
-context_Fam <- left_join(context_Fam_results$stat.results, context_Fam_results$continuity.measures$continuity.stats, by=c("nontext"="context"))
-
-par_function_args$dataframe <- df_STM
-context_STM_results <- par_function(par_function_args)
+run_analysis_args$dataframe <- df_STM
+context_STM_results <- run_analysis(run_analysis_args)
 # context_STM <- context_STM_results$stat.results
 # context_STM_detail <- context_STM_results$addl.info
 
-par_function_args$dataframe <- df_LDA
-context_LDA_results <- par_function(par_function_args)
+run_analysis_args$dataframe <- df_LDA
+context_LDA_results <- run_analysis(run_analysis_args)
 # context_LDA <- context_LDA_results$stat.results
 # context_LDA_detail <- context_LDA_results$addl.info
 
-par_function_args$dataframe <- df_HJ
-context_HJ_results <- par_function(par_function_args)
+run_analysis_args$dataframe <- df_HJ
+context_HJ_results <- run_analysis(run_analysis_args)
 # context_HJ <- context_HJ_results$stat.results
 # context_HJ_detail <- context_HJ_results$addl.info
 
 ####################
 # with freq
 ####################
-par_function_args$consider.freq <- TRUE
-par_function_args$embedding.rule <- TRUE
-par_function_args$trisyl.limit <- TRUE
-par_function_args$cutoff <- .75
+run_analysis_args$consider.freq <- TRUE
+run_analysis_args$embedding.rule <- TRUE
+run_analysis_args$trisyl.limit <- TRUE
+run_analysis_args$cutoff <- .75
 
-par_function_args$dataframe <- df_WL
-context_WL_freq_results <- par_function(par_function_args)
+run_analysis_args$dataframe <- df_WL
+context_WL_freq_results <- run_analysis(run_analysis_args)
 context_WL_freq <- context_WL_freq_results$stat.results
 context_WL_freq_seg <- context_WL_freq_results$MI85.seg.results
 # context_WL_freq_detail <- context_WL_freq_results$addl.info
 
-par_function_args$dataframe <- df_WL_bare
-context_WL_bare_freq_results <- par_function(par_function_args)
-context_WL_bare_freq <- context_WL_bare_freq_results$stat.results
-context_WL_bare_freq_seg <- context_WL_bare_freq_results$MI85.seg.results
-
-par_function_args$dataframe <- df_Fam
-context_Fam_freq_results <- par_function(par_function_args)
-context_Fam_freq <- context_Fam_freq_results$stat.results
-context_Fam_freq_seg <- context_Fam_freq_results$MI85.seg.results
-
-par_function_args$dataframe <- df_STM
-context_STM_freq_results <- par_function(par_function_args)
+run_analysis_args$dataframe <- df_STM
+context_STM_freq_results <- run_analysis(run_analysis_args)
 context_STM_freq <- context_STM_freq_results$stat.results
 context_STM_freq_seg <- context_STM_freq_results$MI85.seg.results
 # context_STM_freq_detail <- context_STM_freq_results$addl.info
 
-par_function_args$dataframe <- df_LDA
-context_LDA_freq_results <- par_function(par_function_args)
+run_analysis_args$dataframe <- df_LDA
+context_LDA_freq_results <- run_analysis(run_analysis_args)
 context_LDA_freq <- context_LDA_freq_results$stat.results
 context_LDA_freq_seg <- context_LDA_freq_results$MI85.seg.results
 # context_LDA_freq_detail <- context_LDA_freq_results$addl.info
 
-par_function_args$dataframe <- df_HJ
-context_HJ_freq_results <- par_function(par_function_args)
+run_analysis_args$dataframe <- df_HJ
+context_HJ_freq_results <- run_analysis(run_analysis_args)
 context_HJ_freq <- context_HJ_freq_results$stat.results
 context_HJ_freq_seg <- context_HJ_freq_results$MI85.seg.results
 # context_HJ_freq_detail <- context_HJ_freq_results$addl.info
@@ -1081,7 +1036,6 @@ context_HJ_freq_seg <- context_HJ_freq_results$MI85.seg.results
 ```{r context_results_data_wrangling}
 # combine all the context results into one data frame
 context_WL$method <- "WL"
-context_Fam$method <- "Fam"
 context_STM$method <- "STM"
 context_LDA$method <- "LDA"
 context_HJ$method <- "HJ"
@@ -1107,13 +1061,11 @@ context_all$measure <- as.factor(context_all$measure)
 #############
 # combine all the context results into one data frame
 context_WL_freq$method <- "WL"
-context_WL_bare_freq$method <- "WL_bare"
-context_Fam_freq$method <- "Fam"
 context_STM_freq$method <- "STM"
 context_LDA_freq$method <- "LDA"
 context_HJ_freq$method <- "HJ"
 
-context_all_freq <- rbind(context_WL_freq, context_WL_bare_freq, context_Fam_freq, context_STM_freq, context_LDA_freq, context_HJ_freq)
+context_all_freq <- rbind(context_WL_freq, context_STM_freq, context_LDA_freq, context_HJ_freq)
 
 context_all_freq$method.short <- factor(context_all_freq$method)
 context_all_freq$method <- factor(context_all_freq$method, 
@@ -1154,12 +1106,11 @@ context_all <- left_join(context_all, select(context_detail_summary, method.shor
 # segmentation details
 ##############################
 context_WL_freq_seg$method <- "WL"
-context_Fam_freq_seg$method <- "Fam"
 context_STM_freq_seg$method <- "STM"
 context_LDA_freq_seg$method <- "LDA"
 context_HJ_freq_seg$method <- "HJ"
 
-context_seg <- rbind(context_WL_freq_seg, context_Fam_freq_seg, context_STM_freq_seg, context_LDA_freq_seg, context_HJ_freq_seg)
+context_seg <- rbind(context_WL_freq_seg, context_STM_freq_seg, context_LDA_freq_seg, context_HJ_freq_seg)
 
 context_seg$method.short <- factor(context_seg$method)
 context_seg$method <- factor(context_seg$method, 
@@ -1209,21 +1160,17 @@ full_results <- left_join(nontext_results, context_ests, by=c("criterion", "meth
 # with freq
 ################# 
 nontext_WL <- read_batch(dir="nontexts_WL_freq-files")
-nontext_WL_bare <- read_batch(dir="nontexts_WL_bare_freq-files")
-nontext_Fam <- read_batch(dir="nontexts_Fam_freq-files")
 nontext_STM <- read_batch(dir="nontexts_STM_freq-files")
 nontext_LDA <- read_batch(dir="nontexts_LDA_freq-files")
 nontext_HJ <- read_batch(dir="nontexts_HJ_freq-files")
 
 # combine all the context results into one data frame
 nontext_WL$method <- "WL"
-nontext_WL_bare$method <- "WL_bare"
-nontext_Fam$method <- "Fam"
 nontext_STM$method <- "STM"
 nontext_LDA$method <- "LDA"
 nontext_HJ$method <- "HJ"
 
-nontext_results_freq <- rbind(nontext_WL, nontext_WL_bare, nontext_Fam, nontext_STM, nontext_LDA, nontext_HJ)
+nontext_results_freq <- rbind(nontext_WL, nontext_STM, nontext_LDA, nontext_HJ)
 
 nontext_results_freq$method.short <- factor(nontext_results_freq$method)
 nontext_results_freq$method <- factor(nontext_results_freq$method, 
@@ -1259,7 +1206,7 @@ ggsave("plots/expand_windows_effect_facet.png")
 
 ## global results
 ```{r global_results}
-par_function_args <- list(dataframe=NULL,  
+run_analysis_args <- list(dataframe=NULL,  
                           dict=dict, 
                           consider.freq=FALSE,
                           embedding.rule=FALSE,
@@ -1278,23 +1225,23 @@ par_function_args <- list(dataframe=NULL,
                           quiet=TRUE,
                           fun.version=fun.version)
 
-par_function_args$dataframe <- df[1:100,] # only taking the first three columns, and 100 rows, for speed
-quick_check <- par_function(par_function_args)
+run_analysis_args$dataframe <- df[1:100,] # only taking the first three columns, and 100 rows, for speed
+quick_check <- run_analysis(run_analysis_args)
 
-par_function_args$dataframe <- df[ , 1:3] # only taking the first three columns
-global_data_results <- par_function(par_function_args)
+run_analysis_args$dataframe <- df[ , 1:3] # only taking the first three columns
+global_data_results <- run_analysis(run_analysis_args)
 global_results  <- global_data_results$stat.results
 global_detail  <- global_data_results$addl.info
 
 ##################################################
 # consider freq (also applies embedding constraint)
 ##################################################
-par_function_args$dataframe <- df[ , 1:3] # only taking the first three columns
-par_function_args$consider.freq <- TRUE
-par_function_args$embedding.rule <- TRUE
-par_function_args$trisyl.limit <- TRUE
-par_function_args$verbose <- TRUE
-par_function_args$cutoff <- .75
+run_analysis_args$dataframe <- df[ , 1:3] # only taking the first three columns
+run_analysis_args$consider.freq <- TRUE
+run_analysis_args$embedding.rule <- TRUE
+run_analysis_args$trisyl.limit <- TRUE
+run_analysis_args$verbose <- TRUE
+run_analysis_args$cutoff <- .75
 
 cutoffs <- seq(from=.1, to=.99, by=.01)
 global_cutoff_results <- data.frame(NULL)
@@ -1303,8 +1250,8 @@ global_cutoff_TPseg <- data.frame(NULL)
 global_cutoff_MIseg <- data.frame(NULL)
 for(i in 1:length(cutoffs)){
   message(cutoffs[i])
-  par_function_args$cutoff <- cutoffs[i]
-  this.output <- par_function(par_function_args)
+  run_analysis_args$cutoff <- cutoffs[i]
+  this.output <- run_analysis(run_analysis_args)
   
   this.result <- this.output$stat.results
   
@@ -1347,7 +1294,7 @@ ggplot(fig1b.data, aes(x=cutoff, y=n, group=N.syl, color=as.factor(N.syl))) +
   geom_line()
 ggsave("plots/swingley_fig1b_global.png", height=8, width=8, units="in")
 
-global_data_freq_results <- par_function(par_function_args)
+global_data_freq_results <- run_analysis(run_analysis_args)
 global_results_freq  <- global_data_freq_results$stat.results
 # NOTE: no continuity measures for global
 global_detail_freq  <- global_data_freq_results$addl.info
@@ -1689,7 +1636,6 @@ summary.data <- context_all_freq %>%
   left_join(test, by=c("context", "method")) %>% 
   left_join(context_seg_summary_avail, by=c("context", "method")) %>% 
   left_join(context_seg_summary_segd, by=c("context", "method")) %>% 
-  filter(method!="family") %>% 
   unite(col=methcon, method, context) %>% 
   dplyr::select(-nontext.mean, -context.est, -p.val, -stars, -mean.TP, -med.distance ) 
 
@@ -1773,7 +1719,6 @@ for(i in 1:length(rs)){
 ```{r syllable_dists}
 syls_global <- syllable_dist(df, dict, save.to="syl_dists")
 syls_WL <- syllable_dist(df_WL, dict, method="WordLists", save.to="syl_dists")
-syls_Fam <- syllable_dist(df_Fam, dict, method="Family", save.to="syl_dists")
 syls_HJ <- syllable_dist(df_HJ, dict, method="HumanCoders", save.to="syl_dists")
 syls_STM <- syllable_dist(df_STM, dict, method="STM", save.to="syl_dists")
 syls_LDA <- syllable_dist(df_LDA, dict, method="LDA", save.to="syl_dists")
