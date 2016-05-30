@@ -1497,7 +1497,7 @@ plot_context_vs_nontext(context_all_freq,
                         outcome="TTR", 
                         Z.score=TRUE,
                         print.tests=FALSE,
-                        xlabs=FALSE,
+                        xlabs=TRUE,
                         save.to="plots/context_vs_nontext",
                         consider.freq=TRUE,
                         Z=TRUE)
@@ -1507,7 +1507,7 @@ plot_context_vs_nontext(context_all_freq,
                         outcome="precision", 
                         Z.score=TRUE,
                         print.tests=FALSE,
-                        xlabs=FALSE,
+                        xlabs=TRUE,
                         save.to="plots/context_vs_nontext",
                         consider.freq=TRUE,
                         Z=TRUE)
@@ -1517,7 +1517,7 @@ plot_context_vs_nontext(context_all_freq,
                         outcome="prop.one.word.utt", 
                         Z.score=TRUE,
                         print.tests=FALSE,
-                        xlabs=FALSE,
+                        xlabs=TRUE,
                         save.to="plots/context_vs_nontext",
                         consider.freq=TRUE,
                         Z=TRUE)
@@ -1527,7 +1527,7 @@ plot_context_vs_nontext(context_all_freq,
                         outcome="prop.most.freq", 
                         Z.score=TRUE,
                         print.tests=FALSE,
-                        xlabs=FALSE,
+                        xlabs=TRUE,
                         save.to="plots/context_vs_nontext",
                         consider.freq=TRUE,
                         Z=TRUE)
@@ -1626,8 +1626,12 @@ tests.contexts.freq.pre <- test_context_vs_nontext(context_all_freq, nontext_res
                                                    outcome="precision")
 tests.contexts.freq.TTR <- test_context_vs_nontext(context_all_freq, nontext_results_freq, 
                                                    outcome="TTR")
+tests.contexts.freq.pmf <- test_context_vs_nontext(context_all_freq, nontext_results_freq, 
+                                                   outcome="prop.most.freq")
 tests.contexts.freq.pos <- test_context_vs_nontext(context_all_freq, nontext_results_freq, 
                                                    outcome="prop.one.syl.utt")
+tests.contexts.freq.pow <- test_context_vs_nontext(context_all_freq, nontext_results_freq, 
+                                                   outcome="prop.one.word.utt")
 tests.contexts.freq.chu <- test_context_vs_nontext(context_all_freq, nontext_results_freq, 
                                                    outcome="N.chunks")
 
