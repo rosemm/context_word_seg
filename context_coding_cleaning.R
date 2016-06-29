@@ -1,7 +1,8 @@
 library(devtools)
-source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/coding_scripts.R")
+source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/R/coding_functions.R")
 # set working directory to transcript coding folder on server
 # setwd("/Volumes/cas-fs2/baldwinlab/Maier/Transcript Coding")
+# setwd("/Volumes/cas-fs2/Learninglab/6_ContextCoding_Maier")
 doc_doctor()
 
 master_doc <- collect_codes()
@@ -10,21 +11,25 @@ setwd("/Users/TARDIS/Documents/STUDIES/context_word_seg")
 write.table(master_doc, file="master_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 # master_doc <- read.table("master_doc.txt", header=1, sep="\t", stringsAsFactors=F)
 
+# to update coding doc leaving only utterances that are below criterion on number of codes, to fill in the thin places
+update_doc <- UpdateDoc(master_doc, criterion = 10)
+write.table(update_doc, file="coding_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+
 master_doc_contexts <- process_codes(master_doc, key_file="context_cleaning_keys.txt")
 
-master_doc_keep <- process_categories(master_doc_contexts, key_file="categories_cleaning_keys.txt")
+master_doc_clean <- process_categories(master_doc_contexts, key_file="categories_cleaning_keys.txt")
 
 ####################################
-summary(as.factor(master_doc_keep$category) ) # how many utterances per category
-hist(summary(as.factor(master_doc_keep$category)), breaks=1000) # how many utterances per category
-hist(summary(as.factor(master_doc_keep$category)), breaks=1000, xlim=c(0,1000)) # how many utterances per category
-barplot(sort(summary(as.factor(master_doc_keep$category)), decreasing=T))
+summary(as.factor(master_doc_clean$category) ) # how many utterances per category
+hist(summary(as.factor(master_doc_clean$category)), breaks=1000) # how many utterances per category
+hist(summary(as.factor(master_doc_clean$category)), breaks=1000, xlim=c(0,1000)) # how many utterances per category
+barplot(sort(summary(as.factor(master_doc_clean$category)), decreasing=T))
 
 
 ###################################
 
 # calculate the number of times each context category is coded for each utterance
-master_doc_calc <- master_doc_keep %>%
+master_doc_calc <- master_doc_clean %>%
   select(utt, category) %>%
   mutate(hit=1) %>%
   group_by(utt, category ) %>%
@@ -69,11 +74,11 @@ nrow(main_cats) + nrow(misc_cats) == nrow(cats)
 
 barplot(main_cats$hits, names.arg=main_cats$category, las=2)
 
-summary(as.factor(master_doc_keep$category))
+summary(as.factor(master_doc_clean$category))
 for(i in 1:nrow(misc_cats)){
-  master_doc_keep$category <- gsub(pattern=paste0("^", as.character(misc_cats[i,]$category), "$"), x=master_doc_keep$category, replacement="misc")
+  master_doc_clean$category <- gsub(pattern=paste0("^", as.character(misc_cats[i,]$category), "$"), x=master_doc_clean$category, replacement="misc")
 }
-summary(as.factor(master_doc_keep$category))
+summary(as.factor(master_doc_clean$category))
 #########################################################################
 # THEN RE-RUN CODE TO GENERATE master_doc_calc AND master_doc_prop
 
@@ -86,7 +91,7 @@ master_doc_seq <- gather(master_doc_prop, key=context, value=value, -total, -fil
 #########################################################################
 #################################################
 # calc contexts by voting threshold
-include <- master_doc_keep %>%
+include <- master_doc_clean %>%
   group_by(utt, category) %>%
   summarize(votes=n()) %>%
   separate(utt, into=c("file", "UttNum"), sep="_", remove=F) %>%
