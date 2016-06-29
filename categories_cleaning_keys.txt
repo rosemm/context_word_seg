@@ -37,17 +37,21 @@ dancing	playtime
 diaper change	diaper change
 dinner	mealtime
 directing attention	interaction
+doctors appointment	doctors visit
 dressing	dressing
 drinking	mealtime
+drinking juice	mealtime
 drinking milk	mealtime
 drooling	drooling
 drying	bathtime
 eating fingers	eating fingers
 eating something wrong	being naughty
 entertaining	playtime
+excited	playtime
 exercising	playtime
 filming	taking pictures
 friends	friends
+funny faces	playtime
 fussing	fussing
 gas	fussing
 getting ready	dressing
@@ -58,12 +62,16 @@ grunting	interaction
 hearing	interaction
 hiccups	hiccups
 hiding	hiding
+hitting	being naughty
 holding	touching
 holding child	touching
+holding hands	touching
+home	inside
 housework	housework
 in crib	sleep
 in the kitchen	housework
 inactive	none
+inside	inside
 ironing	housework
 joint attention	interaction
 kicking	playtime
@@ -72,6 +80,7 @@ laughing	interaction
 learning words	interaction
 leaving	outside
 listening	interaction
+listening to radio	music
 looking	interaction
 lunch	mealtime
 lying down	sleep
@@ -85,6 +94,7 @@ nap time	sleep
 newspaper	newspaper
 none	none
 observing	interaction
+opening window	opening window
 outside	outside
 peeing	diaper change
 peek-a-boo	playtime
@@ -116,6 +126,7 @@ relieving tummy ache	sick
 rolling	playtime
 saying bye	interaction
 scared	fussing
+sewing	housework
 shaking hands	touching
 shopping	shopping
 shouting	interaction
@@ -124,6 +135,7 @@ sighing	sighing
 singing	interaction
 sitting	sitting
 smiling	interaction
+snacktime	mealtime
 sneezing	sneezing
 soothing	fussing
 spitting up	mealtime
@@ -156,4 +168,5 @@ washing hair	bathtime
 washing up	housework
 watch tennis	interaction
 watching	interaction
+wriggling	playtime
 yawning	sleep

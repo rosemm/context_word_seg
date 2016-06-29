@@ -19,6 +19,7 @@ baptism	baptism
 batg	bathtime
 bath	bathtime
 BATH	bathtime
+bath thime	bathtime
 bath time	bathtime
 bathing	bathtime
 bathroom	bathroom
@@ -39,7 +40,7 @@ before mealtime	pre-mealtime
 before nap	pre-nap
 before napping	pre-bedtime
 before swimming	pre-swimming
-beforing snacks	pre-mealtime
+beforing snacks	pre-snacktime
 being hungry	being hungry
 being sick	sick
 being sleepy	being tired
@@ -75,6 +76,7 @@ clean up	clean up
 cleaning	cleaning
 cleaning the child	cleaning the child
 cleaning up	cleaning
+cleanup	clean up
 coaxing words from baby	talking
 comforting	soothing
 coming back	coming home
@@ -99,33 +101,42 @@ diapering	diaper change
 dinner time	dinner
 dinnertime	dinner
 directing attention	directing attention
+doctors appointment	doctors appointment
 doing chores	housework
 doing housework	housework
 drawing attention	directing attention
 dressing	dressing
 drinking	drinking
+drinking juice	drinking juice
 drinking milk	drinking milk
 driving	car
 drooling	drooling
+dryin goff	drying
 drying	drying
 drying after bath	drying
 drying off	drying
 eating	mealtime
 eating fingers	eating fingers
+eating finges	eating fingers
+eating snack	snacktime
 eating something wrong	eating something wrong
 end of mealtime	post-mealtime
 entertaining	entertaining
+excited	excited
 excreting waste	pooping
 exercising	exercising
 feeding	mealtime
 Feeding	mealtime
 feeding bottle	bottle feeding
 feeding time	mealtime
+feeling excited	excited
 feeling scared	scared
+feeling tired	being tired
 fighting	fussing
 filming	filming
 finishing bath	post-bath
 friends	friends
+funny faces	funny faces
 fussibg	fussing
 fussing	fussing
 gas	gas
@@ -152,13 +163,18 @@ hiccupping	hiccups
 hiccups	hiccups
 hicupping	hiccups
 hiding	hiding
+hitting	hitting
 holding	holding
 holding child	holding child
+holding hands	holding hands
+home	home
 house chores	housework
 housework	housework
+hungry baby	being hungry
 in crib	in crib
 in the kitchen	in the kitchen
 inactive	inactive
+inside	inside
 interaction	talking
 ironing	ironing
 joint attention	joint attention
@@ -170,12 +186,15 @@ learning words	learning words
 leaving	leaving
 listening	listening
 listening to music	music
+listening to radio	listening to radio
 looking	looking
+looking around	looking
 lunc time	lunch
 lunch time	lunch
 lunchtime	lunch
 lying	lying down
 lying down	lying down
+making a mess	making mess
 making bubbles	blowing bubbles
 making mess	making mess
 meal	mealtime
@@ -186,6 +205,7 @@ mom eating	mealtime
 morning time	morning time
 moving	moving
 music	music
+music time	music
 nap time	nap time
 napping	nap time
 naptime	nap time
@@ -195,6 +215,7 @@ nine	none
 none	none
 observing	observing
 on a walk	walking
+opening window	opening window
 outside	outside
 palying	playing
 peeing	peeing
@@ -255,7 +276,10 @@ rolling around	rolling
 rolling over	rolling
 saying bye	saying bye
 scared	scared
+scared baby	scared
+screaming	shouting
 seeing	observing
+sewing	sewing
 shaking hands	shaking hands
 shopping	shopping
 shouting	shouting
@@ -264,14 +288,15 @@ sick baby	sick
 sighing	sighing
 singing	singing
 sitting	sitting
+sitting outside	outside
 sleep time	bedtime
 sleeping	bedtime
 sleeptime	bedtime
 sleepy	being tired
 sleepy baby	being tired
 smiling	smiling
-snack	mealtime
-snacktime	mealtime
+snack	snacktime
+snacktime	snacktime
 sneezing	sneezing
 snuggling	cuddling
 soething	soothing
@@ -310,6 +335,8 @@ takling	talking
 taling	talking
 talkig	talking
 talkign	talking
+talkikng	talking
+talkin	talking
 talking	talking
 talking photos	taking pictures
 talking to child	talking
@@ -323,12 +350,15 @@ thumb sucking	sucking thumb
 thumb-sucking	sucking thumb
 ticking	tickling
 tickling	tickling
+tired baby	being tired
 toilet	going potty
 touching	touching
 toweling off	drying
+ttalking	talking
 undressing	undressing
 videotaping	taping
 visiting friend	friends
+visitors	friends
 waiting for food	pre-mealtime
 waking	waking up
 waking up	waking up
@@ -342,7 +372,10 @@ watch tennis	watch tennis
 watching	watching
 watching t.v.	TV
 watching television	TV
+watching tennis	watch tennis
 watching tv	TV
 watching TV	TV
+wriggling	wriggling
 yawning	yawning
 yelling	shouting
+ytalking	talking

@@ -16,6 +16,7 @@
 |biting                  |being naughty            |
 |chiding                 |being naughty            |
 |eating something wrong  |being naughty            |
+|hitting                 |being naughty            |
 |making mess             |being naughty            |
 |messing up              |being naughty            |
 |pulling hair            |being naughty            |
@@ -29,6 +30,7 @@
 |post-diaper             |diaper change            |
 |pre-change              |diaper change            |
 |pre-diaper              |diaper change            |
+|doctors appointment     |doctors visit            |
 |brushing hair           |dressing                 |
 |changing clothes        |dressing                 |
 |dressing                |dressing                 |
@@ -53,8 +55,11 @@
 |housework               |housework                |
 |in the kitchen          |housework                |
 |ironing                 |housework                |
+|sewing                  |housework                |
 |washing dishes          |housework                |
 |washing up              |housework                |
+|home                    |inside                   |
+|inside                  |inside                   |
 |babbling                |interaction              |
 |clapping                |interaction              |
 |cooing                  |interaction              |
@@ -83,6 +88,7 @@
 |chewing                 |mealtime                 |
 |dinner                  |mealtime                 |
 |drinking                |mealtime                 |
+|drinking juice          |mealtime                 |
 |drinking milk           |mealtime                 |
 |lunch                   |mealtime                 |
 |mealtime                |mealtime                 |
@@ -91,12 +97,15 @@
 |pre-feeding             |mealtime                 |
 |pre-mealtime            |mealtime                 |
 |putting on the bib      |mealtime                 |
+|snacktime               |mealtime                 |
 |spitting up             |mealtime                 |
 |morning time            |morning time             |
+|listening to radio      |music                    |
 |music                   |music                    |
 |newspaper               |newspaper                |
 |inactive                |none                     |
 |none                    |none                     |
+|opening window          |opening window           |
 |before leaving          |outside                  |
 |car                     |outside                  |
 |coming home             |outside                  |
@@ -107,7 +116,9 @@
 |crawling                |playtime                 |
 |dancing                 |playtime                 |
 |entertaining            |playtime                 |
+|excited                 |playtime                 |
 |exercising              |playtime                 |
+|funny faces             |playtime                 |
 |kicking                 |playtime                 |
 |moving                  |playtime                 |
 |peek-a-boo              |playtime                 |
@@ -116,6 +127,7 @@
 |rolling                 |playtime                 |
 |swinging                |playtime                 |
 |walking                 |playtime                 |
+|wriggling               |playtime                 |
 |pre-doctors visit       |pre-doctors visit        |
 |raining                 |raining                  |
 |shopping                |shopping                 |
@@ -150,6 +162,7 @@
 |grooming                |touching                 |
 |holding                 |touching                 |
 |holding child           |touching                 |
+|holding hands           |touching                 |
 |kissing                 |touching                 |
 |shaking hands           |touching                 |
 |sucking                 |touching                 |
