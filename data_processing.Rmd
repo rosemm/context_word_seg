@@ -1,14 +1,22 @@
 ```{r set-up}
 rm(list = ls()) # clear the environment
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(reshape2)
-library(knitr)
-library(devtools)
-library(stm)
-library(vcd)
-library(car)
+
+list.of.packages <- c("dplyr", 
+                      "tidyr", 
+                      "ggplot2", 
+                      "reshape2", 
+                      "knitr", 
+                      "stm", 
+                      "lda", 
+                      "tm", 
+                      "SnowballC", 
+                      "LDAvis",
+                      "vcd", 
+                      "car")
+require(devtools)
+source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/R/utils.R")
+
+check_packages(list.of.packages) # checks to make sure packages are installed (and installs them if they aren't), then calls library() on each
 
 setwd("/Users/TARDIS/Documents/STUDIES/context_word_seg")
 ```
@@ -34,6 +42,7 @@ for(i in 1:nrow(dict)){
   search_for <- paste("^",dict$word[i],"$", sep="") # look for the ith word in the dictionary
   dict$freq.orth[i] <- length(grep(pattern=search_for, x=search_in)) # how many times does it find the ith dict word in the orth stream?
 }
+rm(i, search_for, search_in) # cleaning up the workspace
 ```
   
 ## read in context word list
@@ -47,6 +56,7 @@ for(b in 1:length(bigrams)){
   replace_with <- bigrams[[b]] # replace it with the bigram
   df$orth <- gsub(pattern=search_for, x=df$orth, replacement=replace_with)
 }
+rm(b, search_for, replace_with) # cleaning up the workspace
 ```
 
 
@@ -64,6 +74,7 @@ for(i in 1:nrow(c.missed)){
   count <-  length(grep(x=search_in, pattern=search_for)) 
   c.missed[i, ]$freq.orth <- ifelse(count==0, NA, count)
 }
+rm(i, search_for, search_in) # cleaning up the workspace
 c <- rbind(c, c.missed)
 c <- filter(c, !is.na(freq.orth) & freq.orth > 0) %>% 
   select(context, word, freq=freq.orth) %>%
@@ -84,7 +95,7 @@ ggsave(filename="plots/wordlists/key_word_freq_by_context.png", width=12, height
 
 ## only keep context words that actually occur in the corpus
 (this is only relevant for presenting the list, e.g. in a talk - the code works fine with extra words in there)
-```{r contexts_occuring}
+```{r contexts_occuring, eval=FALSE}
 contexts.list <- as.list(contexts)
 for(i in 1:length(names(contexts.list))){
   # words.in.utts <- sapply(df$orth, strsplit, split=" ")
@@ -232,7 +243,7 @@ ggplot(size.data, aes(x=reorder(context, desc(n.utts)), y=n.utts)) +
   geom_bar(stat = "identity", show.legend = F) +
   geom_text(aes(label=n.utts), position=position_dodge(width=0.9), vjust=-0.25) +
   labs(x=NULL, y="Number of utterances in sub-corpus") +
-  theme(axis.text.x = element_text(angle=330, vjust=1, hjust=0, size=20))
+  theme(axis.text.x = element_text(angle=30, vjust=1, hjust=1, size=20))
 ggsave("plots/HJ/uttsper_context_corpora.png", width=16, height=5, units="in")
 
 ```
@@ -240,6 +251,8 @@ ggsave("plots/HJ/uttsper_context_corpora.png", width=16, height=5, units="in")
 
 ## tag contexts by topic modeling
 ![](stm_comparison.png)
+
+[http://cpsievert.github.io/LDAvis/reviews/reviews.html](http://cpsievert.github.io/LDAvis/reviews/reviews.html)
 
 ```{r topic_modeling_data_wrangling}
 library(stm)
@@ -263,7 +276,8 @@ df.wn.count <- group_by(df.wn.count, file) %>%
                            utt.num=seq(from=(max.utt.num+1), to=(max.utt.num+wn)),
                            child=NA,
                            age_weeks=NA,
-                           orth=NA)
+                           orth=NA,
+                           stringsAsFactors=FALSE)
     file.data <- rbind(., new.rows)
     n <- ceiling(nrow(file.data)/wn) # how many levels will be needed in the counter?
     file.data$wn.count <- gl(n=n, k=wn, labels=paste0(paste(sample(letters, 20, replace=T), collapse=""), 1:n))[1:nrow(file.data)] 
@@ -281,7 +295,8 @@ doc.data <- group_by(df.wn.count, wn.count) %>%
   do({
     doc.data <- data.frame(child=.$child[1],
                       age_weeks=.$age_weeks[1],
-                      documents=paste(.$orth, collapse=" "))
+                      documents=paste(.$orth, collapse=" "),
+                      stringsAsFactors=FALSE)
   }) 
 doc.data$child <- as.factor(doc.data$child)
 
