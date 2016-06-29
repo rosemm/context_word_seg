@@ -573,33 +573,6 @@ contexts_by_size <- function(df, N.sizes, min.utt=100){
   return(df)
 }
 
-get_from_https <- function (url, ..., sha1 = NULL) {
-  # based on code for devtools::source_url
-  stopifnot(is.character(url), length(url) == 1)
-  temp_file <- tempfile()
-  on.exit(unlink(temp_file))
-  request <- httr::GET(url)
-  httr::stop_for_status(request)
-  writeBin(httr::content(request, type = "raw"), temp_file)
-  file_sha1 <- digest::digest(file = temp_file, algo = "sha1")
-  if (is.null(sha1)) {
-    message("SHA-1 hash of file is ", file_sha1)
-  }
-  else {
-    if (nchar(sha1) < 6) {
-      stop("Supplied SHA-1 hash is too short (must be at least 6 characters)")
-    }
-    file_sha1 <- substr(file_sha1, 1, nchar(sha1))
-    if (!identical(file_sha1, sha1)) {
-      stop("SHA-1 hash of downloaded file (", file_sha1, 
-           ")\n  does not match expected value (", sha1, 
-           ")", call. = FALSE)
-    }
-  }
-  read.table(temp_file, header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
-  # return(temp_file)
-}
-
 # for bootstrapping nontexts:
 run_analysis <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE, trisyl.limit=FALSE, N.types=NULL, N.utts=NULL, by.size=TRUE, expand=FALSE, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version=NULL, quiet=TRUE){ # this is the function that should be done in parallel on the 12 cores of each node
   message("************************\nbeginning run_analysis\n************************")
