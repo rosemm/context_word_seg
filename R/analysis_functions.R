@@ -48,7 +48,7 @@ threshold_plots <- function(df.model, thresholds, method, save.to, ...){
     labs(y=NULL) +
     ggtitle(paste0(method, ": mean number of contexts per utterance")) + 
     theme(text = element_text(size=20))
-  ggsave(filename=paste0(save.to, "/thresholds_", method, "_means_", additional_args ,".png"), width=8, height=8, units="in")
+  ggsave(filename=paste0(save.to, "/thresholds_", method, "_means_", additional_args ,".png"), width=12, height=8, units="in")
   
   ggplot(dplyr::filter(plot.data, measure!="mean_num_topics"), aes(x=threshold, y=value, color=measure)) + 
     geom_line() + 
@@ -56,7 +56,7 @@ threshold_plots <- function(df.model, thresholds, method, save.to, ...){
     labs(y="Percent of total utterances") +
     ggtitle(paste0(method, ": number of contexts per utterance")) + 
     theme(text = element_text(size=20))
-  ggsave(filename=paste0(save.to, "/thresholds_", method, "_perc_", additional_args ,".png"), width=8, height=8, units="in")
+  ggsave(filename=paste0(save.to, "/thresholds_", method, "_perc_", additional_args ,".png"), width=12, height=8, units="in")
 }
 
 apply_threshold <- function(df.model, threshold, plots=FALSE, method=NULL, save.to=NULL){
