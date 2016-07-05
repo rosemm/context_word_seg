@@ -5,6 +5,7 @@ list.of.packages <- c("dplyr",
                       "tidyr", 
                       "ggplot2", 
                       "reshape2", 
+                      "stringr",
                       "knitr", 
                       "stm", 
                       "lda", 
@@ -23,27 +24,31 @@ setwd("/Users/TARDIS/Documents/STUDIES/context_word_seg")
 
 
 ## translate orth to phon (this also reads in the dict file):
-```{r}
+```{r read_df}
 # to translate CHILDES transcripts to phon approximations using Swingley's dictionary:
 # source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/data_processing_orth_to_phon.R")
 
 # after the first time, we can just read in the saved results from the above code
-dict <- read.table("dict_all3_updated.txt", header=1, sep="\t", quote="", comment.char ="")
 df <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="") # this gets used for word-lists contexts, it will get over-written for other contexts
 
-if( length(df$orth[grepl(x=df$orth, pattern="[[:upper:]]")]) > 0 )  df$orth <- tolower(df$orth) # make sure the orth stream is all lower case
-if( length(df$phon[grepl(x=df$phon, pattern="-", fixed=T)])  > 0 )  df$phon <- gsub(x=df$phon, pattern="-", replacement=" ", fixed=T) # make sure all word-internal syllable boundaries "-" are represnted just the same as between-word syllable boundaries (space)
+df$orth <- tolower(df$orth) # make sure the orth stream is all lower case
+df$phon <- gsub(x=df$phon, pattern="-", replacement=" ", fixed=T) # make sure all word-internal syllable boundaries "-" are represnted just the same as between-word syllable boundaries (space)
+```
 
+```{r read_dict}
+dict <- read.table("dict_all3_updated.txt", header=1, sep="\t", quote="", comment.char ="", stringsAsFactors = FALSE)
 
 # add frequency for each word to dictionary
-dict$freq.orth <- NA
-search_in <- strsplit(paste(df$orth, collapse=" "), split=" ", fixed=T)[[1]] # look for it in the vector of words (df$orth, collapsed into one paste, and then split into a unit for each word)
-for(i in 1:nrow(dict)){
-  search_for <- paste("^",dict$word[i],"$", sep="") # look for the ith word in the dictionary
-  dict$freq.orth[i] <- length(grep(pattern=search_for, x=search_in)) # how many times does it find the ith dict word in the orth stream?
-}
-rm(i, search_for, search_in) # cleaning up the workspace
+orth_words <- strsplit(paste(df$orth, collapse=" "), split=" ", fixed=T)[[1]] # the vector of words (df$orth, collapsed into one paste, and then split into a unit for each word)
+
+# drop empty elements
+freq_orth <- data.frame(word=orth_words[orth_words != ""], stringsAsFactors = FALSE) %>% 
+  count(word) # get count of each word
+
+dict <- left_join(dict, freq_orth, by="word") %>% 
+  rename(freq.orth = n)
 ```
+
   
 ## read in context word list
 ```{r}
