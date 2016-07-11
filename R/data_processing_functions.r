@@ -204,6 +204,12 @@ seg <- function(phon.stream, unique.phon.pairs, seg.utts=TRUE, quiet=TRUE){
   
   message("...segmenting phon stream...")
   seg.phon.stream <- phon.stream
+  
+  # # trying a vectorized version of below for loop...
+  # boundaries <- unique.phon.pairs %>% 
+  #   filter(seg == 1) 
+  # str_detect(phon.stream %in% boundaries$syl1) # returns TRUE or FALSE for each position
+  
   if( length(phon.stream) > 1 ){
     for(i in 2:length(phon.stream)){
       
