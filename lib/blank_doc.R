@@ -1,10 +1,10 @@
 blank_doc <- function(wd="./transcripts/", for.coding=TRUE){
   # write blank coding_doc.txt for coders to code from
-  if(!require(dplyr)) install.packages("dplyr")
+  stopifnot(require(dplyr))
   
   coding_doc <- data.frame(LineNum=NULL, UttNum=NULL, file=NULL, utterance=NULL)
   
-  transcripts <- CleanTranscripts()
+  transcripts <- clean_transcripts(wd)
   
   files <- list.files(path=wd)
   Nfiles <- length(files)
