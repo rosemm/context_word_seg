@@ -1,3 +1,6 @@
+# to translate CHILDES transcripts to phon approximations using Swingley's dictionary
+# generates utt_orth_phon_KEY.txt
+
 source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/R/coding_functions.R")
 
 # use BlankDoc to turn all of the transcripts into one neat dataframe (but omit the coder columns)
@@ -10,34 +13,6 @@ coding_doc <- coding_doc %>%
 
 write.table(coding_doc, file="utt_orth_KEY.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 # coding_doc <- read.table("utt_orth_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
-
-#################################
-# read in dict
-#################################
-
-dict <- read.table("CORPUS_korman_from_swingley2005/dict_all3.txt", sep=" ", quote="", comment.char ="")
-colnames(dict) <- c("word", "phon")
-
-# add some entries to the dict file
-dict.add <- data.frame(word=    c("shh", "ssh", "mummie", "mummie's", "mummmy's", "mummie'll", "tellie", "handie", "pottie", "bathie", "ruskie", "headie", "chinnie", "hankie", "nappie", "drinkie", "rolly", "rollie", "polly", "pollie", "deary",  "hiccough", "hiccoughs", "poo",  "lew", "&hmm", "&er", "&eh", "&ha", "&mm", "&ah", "&uh", "&hah", "whee", "treas",  "hee", "oo"), 
-                       old.word=c("sh",  "sh",  "mummy",  "mummy's",  "mummy's",  "mummy'll",  "telly",  "handy",  "potty",  "bathy",  "rusky",  "heady",  "chinny",  "hanky",  "nappy",  "drinkee", "roley", "roley",  "poley", "poley",  "dearie", "hiccup",   "hiccups",   "pooh", "lu",  "hmm",  "er",  "eh",  "ha",  "mm",  "aah", "uh",  "ha",   "wee",  "treazh", "he",  "ooh"),
-                       phon=NA)
-for(d in 1:nrow(dict.add)){
-  # for each new entry, use the phon for its homophone's entry
- dict.add[d,]$phon <- as.character(dict[as.character(dict$word)==dict.add[d,]$old.word , ]$phon) 
-}
-dict.add$old.word <- NULL # drop the old word column, so this is just orth and phon, like the rest of the dict entries
-dict <- rbind(dict, dict.add) # add it to the dict
-
-
-# add number of syllables for each word to dictionary
-dict$N.syl <- NA
-for(i in 1:nrow(dict)){
-  dict$N.syl[i] <- length(strsplit(as.character(dict$phon[i]), split="-", fixed=TRUE)[[1]])
-}
-
-
-write.table(dict, file="dict_all3_updated.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
 
 ####################################################################
@@ -113,6 +88,7 @@ while(nrow(missed.dict) > 0){
   missed.word <- missed.phon[missed.phon %in% dict$word] 
   missed.dict <- dplyr::filter(dict, word %in% missed.word)
 }
+
 # which words didn't translate? (there was no phon available for that word)
 table(missed.phon.counts) # how many utterances are affected by each missed phon?
 
@@ -130,4 +106,3 @@ message("\n...now ", nrow(df), " utterances in df. ", 100*round(nrow(df)/nrow(co
 if( length(df$orth[grepl(x=df$orth, pattern="[[:upper:]]")]) > 0 )  df$orth <- tolower(df$orth) # make sure the orth stream is all lower case
 
 write.table(df, file="utt_orth_phon_KEY.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
-# key <- read.table("utt_orth_phon_KEY.txt", header=1, sep="\t", stringsAsFactors=F, quote="", comment.char ="")
