@@ -1999,6 +1999,7 @@ cr16.cha_324	out she comes 	'6t 'Si 'kVmz
 cr16.cha_325	there 	'D8R 
 cr16.cha_326	there 	'D8R 
 cr16.cha_327	there we go 	'D8R 'wi 'g5 
+cr16.cha_328	cor blimey 	'k$R 'bl2-mI 
 cr16.cha_329	is that better then 	'Iz 'D{t 'bE-t@R 'DEn 
 cr16.cha_330	oh oh 	'5 '5 
 cr16.cha_331	oh dear 	'5 'd7R 
@@ -3069,6 +3070,7 @@ gi11.cha_233	oh dear 	'5 'd7R
 gi11.cha_234	oops 	'Ups 
 gi11.cha_235	your going to have blisters all over your hands you are 	'j$R 'g5-IN t@ 'h{v 'blI-st@z '$l '5-v@R 'j$R 'h{ndz 'ju '#R 
 gi11.cha_236	you are you're going to have big  	'ju '#R 'j9R 'g5-IN t@ 'h{v 'bIg  
+gi11.cha_237	arsies 	'#-siz 
 gi11.cha_238	oh don't go to sleep 	'5 'd5nt 'g5 t@ 'slip 
 gi11.cha_239	suck on this 	'sVk 'Qn 'DIs 
 gi11.cha_240	you're supposed to be a big star 	'j9R s@-'p5zd t@ 'bi @ 'bIg 'st#R 
@@ -3088,7 +3090,7 @@ gi11.cha_253	i'm not christopher 	'2m 'nQt 'krIs-t@-f@r
 gi11.cha_254	well 	'wEl 
 gi11.cha_255	well then 	'wEl 'DEn 
 gi11.cha_256	who's that 	'huz 'D{t 
-gi11.cha_257	&ah wa^wa^wa^wawoo@o 	'# wa^wa^wa^wawoo@o 
+gi11.cha_257	&ah wa^wa^wa^wawoo 	'# wa^wa^wa^wawoo 
 gi11.cha_258	oh dear 	'5 'd7R 
 gi11.cha_259	dear me 	'd7R 'mi 
 gi11.cha_260	all this sucking 	'$l 'DIs 'sV-kIN 
@@ -3318,7 +3320,7 @@ gi15.cha_137	hello christopher 	h@-'l5 'krIs-t@-f@r
 gi15.cha_138	now you shouldn't grab things 	'n6 'ju 'SU-dHt 'gr{b 'TINz 
 gi15.cha_139	there 	'D8R 
 gi15.cha_140	oh kick 	'5 'kIk 
-gi15.cha_141	brrr^voom^vooom^vooom^va^va^vooom@o 	brrr^voom^vooom^vooom^va^va^vooom@o 
+gi15.cha_141	brrr^voom^vooom^vooom^va^va^vooom 	brrr^voom^vooom^vooom^va^va^vooom 
 gi15.cha_144	what chou  saying to him come here 	'wQt 'J6  's1-IN t@ hIm 'kVm 'h7R 
 gi15.cha_145	can you tickle him 	k@n 'ju 'tI-kP hIm 
 gi15.cha_146	give him a tickle 	'gIv hIm @ 'tI-kP 
@@ -3385,14 +3387,14 @@ gi15.cha_206	poor parrot deserves a certain warning 	'p$R 'p{-r@t dI-'z3vz @ 's3
 gi15.cha_207	it's enough 	'Its I-'nVf 
 gi15.cha_208	i think you don't like him 	'2 'TINk 'ju 'd5nt 'l2k hIm 
 gi15.cha_209	do we care 	'du 'wi 'k8R 
-gi15.cha_210	phrooo^hey@wp 	phrooo^hey@wp 
+gi15.cha_210	phrooo^hey 	phrooo^hey 
 gi15.cha_213	go on 	'g5 'Qn 
 gi15.cha_214	that's it 	'D{ts It 
-gi15.cha_215	ahh^phroooo@wp 	ahh^phroooo@wp 
+gi15.cha_215	ahh^phroooo 	ahh^phroooo 
 gi15.cha_216	parrots can't do that 	'p{-r@ts 'k#nt 'du 'D{t 
 gi15.cha_217	oops 	'Ups 
 gi15.cha_218	oops a daisy 	'Ups @ 'd1-zI 
-gi15.cha_219	ahh^phroooo@wp 	ahh^phroooo@wp 
+gi15.cha_219	ahh^phroooo 	ahh^phroooo 
 gi15.cha_221	hick 	'hIk 
 gi15.cha_222	have you got hiccoughs 	'h{v 'ju 'gQt 'hI-kVps 
 gi15.cha_223	there 	'D8R 
@@ -4818,6 +4820,7 @@ gl06.cha_523	i have got to wash all the soapy suds off 	'2 'h{v 'gQt t@ 'wQS '$l
 gl06.cha_524	all the little soapy suds 	'$l D@ 'lI-tP 's5-pI 'sVdz 
 gl06.cha_525	yes we have 	'jEs 'wi 'h{v 
 gl06.cha_526	we have got to wash all the soapy suds away 	'wi 'h{v 'gQt t@ 'wQS '$l D@ 's5-pI 'sVdz @-'w1 
+gl06.cha_527	oh dearier dear 	'5 'd7-r7R 'd7R 
 gl06.cha_528	oh dearie dear dear 	'5 'd7-rI 'd7R 'd7R 
 gl06.cha_529	oh 	'5 
 gl06.cha_530	oh 	'5 
@@ -5755,6 +5758,9 @@ gl11.cha_215	she's telling a story yes 	'Siz 'tE-lIN @ 'st$-rI 'jEs
 gl11.cha_216	yes 	'jEs 
 gl11.cha_217	yes 	'jEs 
 gl11.cha_218	yes 	'jEs 
+gl11.cha_219	to  	t@  
+gl11.cha_220	to  	t@  
+gl11.cha_221	to  	t@  
 gl11.cha_222	yes 	'jEs 
 gl11.cha_223	i see you 	'2 'si 'ju 
 gl11.cha_224	i do so 	'2 'du 's5 
@@ -5902,6 +5908,8 @@ gl11.cha_370	yes 	'jEs
 gl11.cha_371	no i can't find any of your tickly bits i can not 	'n5 '2 'k#nt 'f2nd 'E-nI @v 'j$R 'tIk-lI 'bIts '2 k@n 'nQt 
 gl11.cha_372	can't find any tickly bits 	'k#nt 'f2nd 'E-nI 'tIk-lI 'bIts 
 gl11.cha_373	no 	'n5 
+gl11.cha_374	no gam yet 	'n5 'g{m 'jEt 
+gl11.cha_375	no no not a gam 	'n5 'n5 'nQt @ 'g{m 
 gl11.cha_376	not even in your knees 	'nQt 'i-vH 'In 'j$R 'niz 
 gl11.cha_377	no 	'n5 
 gl11.cha_378	come on 	'kVm 'Qn 
@@ -6506,6 +6514,7 @@ gl16.cha_52	what's wrong 	'wQts 'rQN
 gl16.cha_53	what's wrong now 	'wQts 'rQN 'n6 
 gl16.cha_54	hey 	'h1 
 gl16.cha_55	here what's wrong 	'h7R 'wQts 'rQN 
+gl16.cha_56	what is it trai 	'wQt 'Iz It 'tr1 
 gl16.cha_57	what is it hey 	'wQt 'Iz It 'h1 
 gl16.cha_58	have you got any windies 	'h{v 'ju 'gQt 'E-nI 'wIn-dIz 
 gl16.cha_59	strong ones 	'strQN 'wVnz 
@@ -7338,6 +7347,7 @@ hi07.cha_72	oh dear 	'5 'd7R
 hi07.cha_73	you're going to start to cry now aren't ya 	'j9R 'g5-IN t@ 'st#t t@ 'kr2 'n6 '#nt j@ 
 hi07.cha_74	&ah keith 	'# 'kiT 
 hi07.cha_75	you're a blooming nuisance 	'j9R @ 'blu-mIN 'nju-sHs 
+hi07.cha_76	hoi 	'b4 
 hi07.cha_77	come on pull some funny faces 	'kVm 'Qn 'pUl s@m 'fV-nI 'f1-sIz 
 hi07.cha_79	shut up 	'SVt 'Vp 
 hi07.cha_80	look at some toys 	'lUk @t s@m 't4z 
@@ -7538,6 +7548,7 @@ hi15.cha_25	hey 	'h1
 hi15.cha_26	you like your poo don't ya 	'ju 'l2k 'j$R 'phu 'd5nt j@ 
 hi15.cha_27	here ya are watch him 	'h7R j@ '#R 'wQJ hIm 
 hi15.cha_28	he'll go boo 	'hil 'g5 'bu 
+hi15.cha_29	beebo 	'bi-b5 
 hi15.cha_30	not interested 	'nQt 'In-tr@-stId 
 hi15.cha_31	boo boo boo 	'bu 'bu 'bu 
 hi15.cha_32	hey 	'h1 
@@ -7896,6 +7907,7 @@ la06.cha_145	oh 	'5
 la06.cha_146	oh 	'5 
 la06.cha_147	oh 	'5 
 la06.cha_148	oh 	'5 
+la06.cha_149	beebo 	'bi-b5 
 la06.cha_150	lifty up 	'lIf-tI 'Vp 
 la06.cha_151	kiss mumma 	'kIs 'mV-m@ 
 la06.cha_152	smile at mumma 	'sm2l @t 'mV-m@ 
@@ -7912,6 +7924,7 @@ la06.cha_162	oh 	'5
 la06.cha_163	oh 	'5 
 la06.cha_164	one armie 	'wVn '#-mI 
 la06.cha_165	one armie 	'wVn '#-mI 
+la06.cha_167	beebo 	'bi-b5 
 la06.cha_168	hannah 	'h{-n@ 
 la06.cha_169	good girl 	'gUd 'g3l 
 la06.cha_170	there's a good girl 	'D8z @ 'gUd 'g3l 
@@ -8057,6 +8070,7 @@ la06.cha_309	alright 	$l-'r2t
 la06.cha_310	alright 	$l-'r2t 
 la06.cha_311	&mm 	'm 
 la06.cha_312	let's put ya vesty on 	'lEts 'pUt j@ 'vE-stI 'Qn 
+la06.cha_313	beebo 	'bi-b5 
 la06.cha_314	there's a good girl 	'D8z @ 'gUd 'g3l 
 la06.cha_315	ssh 	S 
 la06.cha_316	hey 	'h1 
@@ -9962,6 +9976,7 @@ la16.cha_374	alright darling 	$l-'r2t 'd#-lIN
 la16.cha_375	are we working on something 	'#R 'wi 'w3-kIN 'Qn 'sVm-TIN 
 la16.cha_376	mummie be back in a minute 	'mV-mI 'bi 'b{k 'In @ 'mI-nIt 
 la16.cha_377	mummie be back in a minute 	'mV-mI 'bi 'b{k 'In @ 'mI-nIt 
+la16.cha_378	beebo 	'bi-b5 
 la16.cha_379	hello 	h@-'l5 
 la16.cha_380	hello 	h@-'l5 
 la16.cha_381	are you trying to kick mummy out the way 	'#R 'ju 'tr2-IN t@ 'kIk 'mV-mI '6t D@ 'w1 
@@ -10434,6 +10449,7 @@ la16.cha_849	who's a beautiful girlie 	'huz @ 'bju-t@-fUl 'g3-lI
 la16.cha_850	who's a beautiful girlie 	'huz @ 'bju-t@-fUl 'g3-lI 
 la16.cha_851	daddy's gone to work he has 	'd{-dIz 'gQn t@ 'w3k 'hi 'h{z 
 la16.cha_852	yes he has 	'jEs 'hi 'h{z 
+la16.cha_853	came and gave you a kiss goodbye but you was asleepies 	'k1m @nd 'g1v 'ju @ 'kIs "gUd-'b2 'bVt 'ju w@z @-'sli-piz 
 la16.cha_854	you were sleeping in the garden 	'ju 'w3R 'sli-pIN 'In D@ 'g#-dH 
 la16.cha_855	yes you were 	'jEs 'ju 'w3R 
 la16.cha_856	i don't think you liked it out there cause you were on your own	'2 'd5nt 'TINk 'ju 'l2kt It '6t 'D8R k@z 'ju 'w3R 'Qn 'j$R '5n
@@ -11027,6 +11043,11 @@ la16.cha_1448	so big hannah 	's5 'bIg 'h{-n@
 la16.cha_1449	there 	'D8R 
 la16.cha_1450	oh oh oh oh 	'5 '5 '5 '5 
 la16.cha_1451	&ah &ah 	'# '# 
+la16.cha_1452	beebo 	'bi-b5 
+la16.cha_1453	beebo 	'bi-b5 
+la16.cha_1454	beebo 	'bi-b5 
+la16.cha_1456	beebo 	'bi-b5 
+la16.cha_1457	beebo 	'bi-b5 
 la16.cha_1458	&mm 	'm 
 la16.cha_1459	&mm 	'm 
 la16.cha_1460	who's getting excited 	'huz 'gE-tIN Ik-'s2-tId 
@@ -11634,6 +11655,7 @@ st06.cha_122	try this 	'tr2 'DIs
 st06.cha_123	oh so that's what you wanted after all 	'5 's5 'D{ts 'wQt 'ju 'wQn-tId '#f-t@R '$l 
 st06.cha_124	you nearly finished it haven't ya 	'ju 'n7-lI 'fI-nISt It 'h{-vHt j@ 
 st06.cha_125	you've not got much more to go 	'juv 'nQt 'gQt 'mVJ 'm$R t@ 'g5 
+st06.cha_126	that sounds like measy 	'D{t 's6ndz 'l2k 'mi-zI 
 st06.cha_127	come on 	'kVm 'Qn 
 st06.cha_128	he's a naughty boy 	'hiz @ 'n$-tI 'b4 
 st06.cha_129	no you don't want the last little drop 	'n5 'ju 'd5nt 'wQnt D@ 'l#st 'lI-tP 'drQp 
@@ -12913,6 +12935,7 @@ st16.cha_576	it look as though it's going to rain 	It 'lUk @z 'D5 'Its 'g5-IN t@
 st16.cha_577	looks as though it's going to pour down doesn't it babe 	'lUks @z 'D5 'Its 'g5-IN t@ 'p$R 'd6n 'dV-zHt It 'b1b 
 st16.cha_578	going to pour with rain isn't it 	'g5-IN t@ 'p$R 'wID 'r1n 'I-zHt It 
 st16.cha_579	we've got to bring your chair in 	'wiv 'gQt t@ 'brIN 'j$R 'J8R 'In 
+st16.cha_580	beebo 	'bi-b5 
 st16.cha_581	going to rain quite hard isn't it 	'g5-IN t@ 'r1n 'kw2t 'h#d 'I-zHt It 
 st16.cha_582	and what ya doing down there 	@nd 'wQt j@ 'du-IN 'd6n 'D8R 
 st16.cha_583	watch the tellie 	'wQJ D@ 'tE-lI 
