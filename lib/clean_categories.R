@@ -1,7 +1,7 @@
 
-clean_categories <- function(doc, key_file="categories_cleaning_keys.txt" ){
+clean_categories <- function(doc, key_file="categories_cleaning_keys.txt", interactive = TRUE ){
   # check if any context codes are missing from the categories key, and if so add them
-  new_codes(raw_codes=unique(doc$context), cols=c("context_clean", "category"), key_file)
+  new_codes(raw_codes=unique(doc$context), cols=c("context_clean", "category"), key_file, interactive)
   # read in the key again, to get any updates
   categories_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
   
