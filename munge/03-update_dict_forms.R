@@ -1,5 +1,5 @@
 #################################
-# read in dict and update it
+# read in dict and add some alternate forms
 #################################
 
 dict <- read.table("corpora/dict_all3.txt", sep=" ", quote="", comment.char ="", stringsAsFactors = FALSE)

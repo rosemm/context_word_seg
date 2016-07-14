@@ -1,3 +1,6 @@
+###############################################
+# add stats (freq and N.syl) for dictionary words
+###############################################
 
 # add number of syllables for each word to dictionary
 dict$N.syl <-sapply(X = strsplit(as.character(dict$phon), split="-", fixed=TRUE), length)
