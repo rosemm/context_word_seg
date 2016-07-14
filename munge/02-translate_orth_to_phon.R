@@ -60,3 +60,9 @@ message("Deleting utterances with untranscribable material.\n...now ", nrow(df),
 if( length(df$orth[grepl(x=df$orth, pattern="[[:upper:]]")]) > 0 )  df$orth <- tolower(df$orth) # make sure the orth stream is all lower case
 
 write.table(df, file="utt_orth_phon_KEY.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+
+# Finalize df for anlaysis
+df$orth <- tolower(df$orth) # make sure the orth stream is all lower case
+df$phon <- gsub(x=df$phon, pattern="-", replacement=" ", fixed=TRUE) # make sure all word-internal syllable boundaries "-" are represnted just the same as between-word syllable boundaries (space)
+
+cache('df')
