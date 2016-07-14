@@ -14,7 +14,4 @@ dict.add <- left_join(dict.add, dict, by=c("old.word"="word")) %>%
 
 dict <- full_join(dict, dict.add, by = c("word", "phon"))
 
-# add number of syllables for each word to dictionary
-dict$N.syl <-sapply(X = strsplit(as.character(dict$phon), split="-", fixed=TRUE), length)
-
 write.table(dict, file="corpora/dict_all3_updated.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
