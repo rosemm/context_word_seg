@@ -1,15 +1,15 @@
 
-clean_categories <- function(doc, key_file="categories_cleaning_keys.txt", interactive = TRUE ){
+clean_categories <- function(doc, dir, key_file="categories_cleaning_keys.txt", interactive = TRUE ){
   # check if any context codes are missing from the categories key, and if so add them
-  new_codes(raw_codes=unique(doc$context), cols=c("context_clean", "category"), key_file, interactive)
+  new_codes(raw_codes=unique(doc$context), cols=c("context_clean", "category"), file.path(dir, key_file), interactive)
   # read in the key again, to get any updates
-  categories_keys <- read.table(key_file, header=1, sep="\t", stringsAsFactors=F)
+  categories_keys <- read.table(file.path(dir, key_file), header=1, sep="\t", stringsAsFactors=F)
   
   # print a nice (.md) version of the categories_cleaning_keys.txt, to link to online
   tb <- arrange(categories_keys, category)
   colnames(tb) <- c("context (raw)", "context category (clean)")
   tb <- knitr::kable(tb)
-  writeLines(tb, "categories_keys.md")
+  writeLines(tb, file.path(dir, "categories_keys.md") )
   
   # add categories to doc
   doc <- left_join(doc, categories_keys, by=c("context" = "context_clean"))
