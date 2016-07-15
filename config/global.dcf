@@ -2,7 +2,7 @@ version: 0.6
 data_loading: TRUE
 cache_loading: TRUE
 recursive_loading: FALSE
-munging: TRUE
+munging: FALSE
 logging: FALSE
 load_libraries: TRUE
 libraries: dplyr, tidyr, ggplot2, reshape2, stringr, knitr, stm, lda, tm, SnowballC, LDAvis, vcd, car
