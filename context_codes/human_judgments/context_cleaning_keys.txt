@@ -110,6 +110,7 @@ dressing	dressing
 drinking	drinking
 drinking juice	drinking juice
 drinking milk	drinking milk
+drinking tea	drinking tea
 driving	car
 drooling	drooling
 dryin goff	drying
@@ -117,6 +118,7 @@ drying	drying
 drying after bath	drying
 drying off	drying
 eating	mealtime
+eating figners	eating fingers
 eating fingers	eating fingers
 eating finges	eating fingers
 eating snack	snacktime

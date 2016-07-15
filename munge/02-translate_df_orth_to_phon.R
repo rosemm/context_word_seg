@@ -24,7 +24,7 @@ translate_phon <- function(dict, orth, verbose = FALSE){ # translate orth to pho
   return( phon )
 }
 
-df$phon <- translate_phon(dict, df$orth, verbose = TRUE)
+df$phon <- translate_phon(dict, df$orth, verbose = FALSE)
 
 # note that words repeated immediately (e.g. "dear dear") will get missed by the gsub commands for some reason. Running it twice fixes it.
 missed.dict <- dict

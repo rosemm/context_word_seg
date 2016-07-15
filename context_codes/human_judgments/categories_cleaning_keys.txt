@@ -42,6 +42,7 @@ dressing	dressing
 drinking	mealtime
 drinking juice	mealtime
 drinking milk	mealtime
+drinking tea	mealtime
 drooling	drooling
 drying	bathtime
 eating fingers	eating fingers

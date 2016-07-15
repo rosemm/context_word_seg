@@ -1,5 +1,5 @@
 
-master_doc_count <- context_cats %>%
+master_doc_count <- HJ_contexts %>%
   select(utt, category) %>%
   count(utt, category ) %>%
   spread(key=category, value=n, fill = 0) %>%
@@ -13,7 +13,7 @@ cache('df_HJ_raw')
 
 master_doc_prop <- master_doc_count %>% 
   ungroup() %>%
-  dplyr::select(-utt, -file, -UttNum) %>%
+  dplyr::select(-utt) %>%
   mutate(total=rowSums(., na.rm=FALSE)) %>% 
   mutate_each(funs(./total)) 
 master_doc_prop$utt <- master_doc_count$utt  # to add back in the non-numeric utt column

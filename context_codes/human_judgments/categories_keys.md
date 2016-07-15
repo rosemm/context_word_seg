@@ -91,6 +91,7 @@
 |drinking                |mealtime                 |
 |drinking juice          |mealtime                 |
 |drinking milk           |mealtime                 |
+|drinking tea            |mealtime                 |
 |lunch                   |mealtime                 |
 |mealtime                |mealtime                 |
 |post-feeding            |mealtime                 |
