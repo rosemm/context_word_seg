@@ -2,11 +2,15 @@
 logistic_regressions <- function(all.methods, outcome_method, predictor_method, save.to, ...){
   stopifnot(require(dplyr), require(tidyr))
   
-  dvs <- all.methods %>% 
+  vars <- all.methods %>% 
+    dplyr::select(starts_with(outcome_method), starts_with(predictor_method)) %>% 
+    na.omit() # listwise deletion
+  
+  dvs <- vars %>% 
     dplyr::select(starts_with(outcome_method)) %>% 
     as.list()
   
-  predictors <- all.methods %>% 
+  predictors <- vars %>% 
     dplyr::select(starts_with(predictor_method)) %>% 
     as.matrix()
   
