@@ -57,4 +57,13 @@ threshold_plots <- function(df_prop, thresholds, method, save.to, ...){
     ggtitle(paste0(method, ": number of contexts per utterance")) + 
     theme(text = element_text(size=20))
   ggsave(filename=paste0(save.to, "/thresholds_", method, "_perc_", additional_args ,".png"), width=12, height=8, units="in")
+  
+  # best threshold to maximize one or two topics per utt?
+ 
+  best.threshold <- filter(plot.data, measure == "one or two contexts")$threshold[which.max(filter(plot.data, measure == "one or two contexts")$value)]
+  if( length(best.threshold) > 1 ) {
+    message(paste("More than one optimal threshold:", best.threshold, "\nUsing lowest."))
+    best.threshold <- min(best.threshold)
+  }  
+  return(best.threshold)
 }
