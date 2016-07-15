@@ -8,7 +8,7 @@ master_doc_count <- context_cats %>%
   select(-file, -UttNum)
 
 df_HJ_raw <- left_join(df, master_doc_count, by="utt" ) 
-write.table(df_HJ_raw, file="context_codes/human_judgments/contexts_HJ_raw.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+write.table(df_HJ_raw, file=file.path("context_codes", "human_judgments", "contexts_HJ_raw.txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")
 cache('df_HJ_raw')
 
 master_doc_prop <- master_doc_count %>% 
