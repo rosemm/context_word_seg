@@ -1,9 +1,9 @@
-apply_threshold <- function(df.model, threshold, plots=FALSE, method=NULL, save.to=NULL){
+apply_threshold <- function(df_prop, threshold, plots=FALSE, method=NULL, save.to=NULL){
   
   stopifnot(require(dplyr), require(tidyr))
   if(plots) stopifnot(require(ggplot2), !is.null(method), !is.null(save.to))
   
-  df.long <- df.model %>% 
+  df.long <- df_prop %>% 
     gather(key="topic", value="loading", -utt, -orth, -phon)
   df.long$include <- ifelse(df.long$loading > threshold, 1, 0)
   df_bin <- df.long %>% 

@@ -1,13 +1,13 @@
 
-threshold_plots <- function(df.model, thresholds, method, save.to, ...){
+threshold_plots <- function(df_prop, thresholds, method, save.to, ...){
   
   stopifnot(require(ggplot2), require(dplyr), require(tidyr))
   
   if(toupper(method) == "HJ"){
-    colnames(df.model)[4:ncol(df.model)] <- paste0("topic_", colnames(df.model)[4:ncol(df.model)])
+    colnames(df_prop)[4:ncol(df_prop)] <- paste0("topic_", colnames(df_prop)[4:ncol(df_prop)])
   }
   
-  df.threshold <- gather(df.model, key="topic", value="loading", starts_with("topic_")) %>% 
+  df.threshold <- gather(df_prop, key="topic", value="loading", starts_with("topic_")) %>% 
     na.omit() %>% 
     as.tbl() # for speed
   
@@ -21,7 +21,7 @@ threshold_plots <- function(df.model, thresholds, method, save.to, ...){
     spread(key=topic, value=include) %>% 
     extract(col=threshold, into="threshold", regex="_(0*[.]*[[:digit:]]+)", convert=TRUE) 
   
-  df.threshold$num_topics <- rowSums(dplyr::select(df.threshold, starts_with("topic_")), na.rm=T)
+  df.threshold$num_topics <- rowSums(dplyr::select(df.threshold, starts_with("topic_")), na.rm=TRUE)
   
   plot.data <- df.threshold %>% 
     group_by(threshold) %>% 
