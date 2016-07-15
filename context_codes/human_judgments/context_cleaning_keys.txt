@@ -100,6 +100,7 @@ diaper changing	diaper change
 diapering	diaper change
 dinner time	dinner
 dinnertime	dinner
+dipaer change	diaper change
 directing attention	directing attention
 doctors appointment	doctors appointment
 doing chores	housework
@@ -192,10 +193,12 @@ looking around	looking
 lunc time	lunch
 lunch time	lunch
 lunchtime	lunch
+lyign down	lying down
 lying	lying down
 lying down	lying down
 making a mess	making mess
 making bubbles	blowing bubbles
+making faces	funny faces
 making mess	making mess
 meal	mealtime
 meal time	mealtime
@@ -271,6 +274,7 @@ raining	raining
 reading	storytime
 relieving hiccups	hiccups
 relieving tummy ache	relieving tummy ache
+restless baby	restless baby
 rolling	rolling
 rolling around	rolling
 rolling over	rolling
@@ -345,6 +349,7 @@ tea time	mealtime
 teasing	teasing
 teething	teething
 television	TV
+telling stories	storytime
 thinking	thinking
 thumb sucking	sucking thumb
 thumb-sucking	sucking thumb

@@ -118,11 +118,13 @@ pre-dressing	dressing
 pre-feeding	mealtime
 pre-mealtime	mealtime
 pre-nap	sleep
+pre-snacktime	mealtime
 pre-swimming	swimming
 pulling hair	being naughty
 putting on the bib	mealtime
 raining	raining
 relieving tummy ache	sick
+restless baby	fussing
 rolling	playtime
 saying bye	interaction
 scared	fussing

@@ -44,6 +44,7 @@
 |crying                  |fussing                  |
 |fussing                 |fussing                  |
 |gas                     |fussing                  |
+|restless baby           |fussing                  |
 |scared                  |fussing                  |
 |soothing                |fussing                  |
 |teething                |fussing                  |
@@ -96,6 +97,7 @@
 |post-mealtime           |mealtime                 |
 |pre-feeding             |mealtime                 |
 |pre-mealtime            |mealtime                 |
+|pre-snacktime           |mealtime                 |
 |putting on the bib      |mealtime                 |
 |snacktime               |mealtime                 |
 |spitting up             |mealtime                 |
