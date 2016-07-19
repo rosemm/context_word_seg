@@ -1,0 +1,42 @@
+WL <- df_WL %>% 
+  mutate_each(funs(y=ifelse(. > 0, 1, 0)), -utt, -orth, -phon) # for word list analysis only, make all contexts either 1 or 0 (smoothing over 1.5's from expand_windows)
+
+colSums(dplyr::select(WL, -utt, -orth, -phon))
+
+WL$N.contexts <- rowSums(dplyr::select(WL, -utt, -orth, -phon))
+summary(WL$N.contexts)
+
+length(which(WL$N.contexts > 2)) / length(WL$N.contexts) # percent of corpus with > 2 contexts
+length(which(WL$N.contexts == 0)) / length(WL$N.contexts) # percent of corpus with 0 contexts
+
+###########################
+# frequency of WL key words
+###########################
+contexts <- names(WL_contexts)
+WL_context_data <- data.frame(NULL)
+for(k in contexts){
+  WL_context_data <- rbind(WL_context_data, data.frame(word=WL_contexts[[k]], context=k, stringsAsFactors = FALSE))
+}
+
+orth_stream <- paste(df$orth, collapse = " ")
+# flag bigrams from WL keywords in orth stream, so they don't get separated
+for(w_bar in grep(x = WL_context_data$word, pattern = "_", value=TRUE)){
+  w_space <- gsub(x=w_bar, pattern="_", replacement=" ")
+  orth_stream <- gsub(x=orth_stream, pattern = w_space, replacement = w_bar)
+}
+
+orth_stream <- strsplit(orth_stream, split=" ")[[1]]
+orth_stream <- orth_stream[orth_stream != ""]
+
+orth_data <- data.frame(word=orth_stream, stringsAsFactors = FALSE) %>% 
+  count(word)
+
+WL_context_data <- left_join(WL_context_data, orth_data, by="word") %>% 
+  arrange(context, n)
+
+WL_context_data %>% 
+  group_by(context) %>% 
+  summarise(total=sum(n, na.rm=TRUE), 
+            mean.freq=mean(n, na.rm=TRUE), 
+            highest=max(n, na.rm=TRUE),
+            which.highest=word[which.max(n)])
