@@ -1,17 +1,130 @@
+---
+output: html_document
+---
+
+
+```{r load_project, message=FALSE}
+setwd("/Users/TARDIS/Documents/STUDIES/context_word_seg")
+library(ProjectTemplate)
+load.project()
+```
+
+# General descriptives
+
+## How many utterances in each context?
+
+```{r utt_per_context}
+######
+# WL #
+######
 WL <- df_WL %>% 
-  mutate_each(funs(y=ifelse(. > 0, 1, 0)), -utt, -orth, -phon) # for word list analysis only, make all contexts either 1 or 0 (smoothing over 1.5's from expand_windows)
+  mutate_each(funs(ifelse(. > 0, 1, 0)), -utt, -orth, -phon)  # for word list analysis only, make all contexts either 1 or 0 (smoothing over 1.5's from expand_windows)
 
-colSums(dplyr::select(WL, -utt, -orth, -phon))
+data.frame(context = names(colSums(dplyr::select(WL, -utt, -orth, -phon))), n=colSums(dplyr::select(WL, -utt, -orth, -phon))) %>% 
+  arrange(desc(n)) %>% 
+  kable()
 
+######
+# HJ #
+######
+data.frame(context=names(colSums(dplyr::select(df_HJ_bin, -utt, -orth, -phon), na.rm=TRUE)), n=colSums(dplyr::select(df_HJ_bin, -utt, -orth, -phon), na.rm=TRUE)) %>% 
+  arrange(desc(n)) %>% 
+  kable()
+
+######
+# TM #
+######
+data.frame(context=names(colSums(dplyr::select(df_LDA_bin, -utt, -orth, -phon), na.rm=TRUE)), n=colSums(dplyr::select(df_LDA_bin, -utt, -orth, -phon), na.rm=TRUE)) %>% 
+  arrange(desc(n)) %>% 
+  kable()
+
+data.frame(context=names(colSums(dplyr::select(df_STM_bin, -utt, -orth, -phon), na.rm=TRUE)), n=colSums(dplyr::select(df_STM_bin, -utt, -orth, -phon), na.rm=TRUE)) %>% 
+  arrange(desc(n)) %>% 
+  kable()
+```
+
+## How many contexts per utterance?
+
+```{r context_per_utt}
+######
+# WL #
+######
 WL$N.contexts <- rowSums(dplyr::select(WL, -utt, -orth, -phon))
 summary(WL$N.contexts)
 
 length(which(WL$N.contexts > 2)) / length(WL$N.contexts) # percent of corpus with > 2 contexts
 length(which(WL$N.contexts == 0)) / length(WL$N.contexts) # percent of corpus with 0 contexts
+length(which(WL$N.contexts > 2)) / length(which(WL$N.contexts > 0)) 
+length(which(WL$N.contexts > 1)) / length(which(WL$N.contexts > 0)) 
 
-###########################
-# frequency of WL key words
-###########################
+
+######
+# HJ #
+######
+df_HJ_bin$N.contexts <- rowSums(dplyr::select(df_HJ_bin, -utt, -orth, -phon), na.rm = TRUE)
+summary(df_HJ_bin$N.contexts)
+
+length(which(df_HJ_bin$N.contexts > 2)) / length(df_HJ_bin$N.contexts) # percent of corpus with > 2 contexts
+length(which(df_HJ_bin$N.contexts == 0)) / length(df_HJ_bin$N.contexts) # percent of corpus with 0 contexts
+
+######
+# TM #
+######
+df_LDA_bin$N.contexts <- rowSums(dplyr::select(df_LDA_bin, -utt, -orth, -phon), na.rm = TRUE)
+summary(df_LDA_bin$N.contexts)
+
+length(which(df_LDA_bin$N.contexts > 2)) / length(df_LDA_bin$N.contexts) # percent of corpus with > 2 contexts
+length(which(df_LDA_bin$N.contexts == 0)) / length(df_LDA_bin$N.contexts) # percent of corpus with 0 contexts
+
+df_STM_bin$N.contexts <- rowSums(dplyr::select(df_STM_bin, -utt, -orth, -phon), na.rm = TRUE)
+summary(df_STM_bin$N.contexts)
+
+length(which(df_STM_bin$N.contexts > 2)) / length(df_STM_bin$N.contexts) # percent of corpus with > 2 contexts
+length(which(df_STM_bin$N.contexts == 0)) / length(df_STM_bin$N.contexts) # percent of corpus with 0 contexts
+
+###########
+# OVERALL #
+###########
+wl <- dplyr::select(WL, utt, N.contexts) %>% 
+  mutate(method = "word list")
+hj <- dplyr::select(df_HJ_bin, utt, N.contexts) %>% 
+  mutate(method = "coder judgments")
+lda <- dplyr::select(df_LDA_bin, utt, N.contexts) %>% 
+  mutate(method = "LDA")
+stm <- dplyr::select(df_STM_bin, utt, N.contexts) %>% 
+  mutate(method = "STM")
+
+all_methods_counts <- rbind(wl, hj, lda, stm) %>% 
+  count(method, N.contexts) 
+
+ggplot(all_methods_counts, aes(y=n, x=method, fill=as.factor(N.contexts))) + 
+  geom_bar(stat = "identity") + 
+  labs(title = "Number of contexts tagged per utterance", y="Number of utterances", x = "Context defined by") + 
+  scale_fill_discrete(name="Number of contexts")
+
+hj_no_none <- dplyr::select(df_HJ_bin, -none, -N.contexts) 
+hj_no_none$N.contexts <- rowSums(dplyr::select(hj_no_none, -utt, -orth, -phon), na.rm = TRUE)
+  
+hj_no_none <- dplyr::select(hj_no_none, utt, N.contexts) %>% 
+  mutate(method = "coder judgments")
+
+all_methods_counts <- rbind(wl, hj_no_none, lda, stm) %>% 
+  count(method, N.contexts) 
+
+ggplot(all_methods_counts, aes(y=n, x=method, fill=as.factor(N.contexts))) + 
+  geom_bar(stat = "identity") + 
+  labs(title = "Number of contexts tagged per utterance,\nnot including 'none' for coder judgments", y="Number of utterances", x = "Context defined by") + 
+  scale_fill_discrete(name="Number of contexts")
+table(hj$N.contexts)
+table(hj_no_none$N.contexts)
+```
+
+
+# Word list descriptives
+
+## Frequency of WL key words?
+
+```{r}
 contexts <- names(WL_contexts)
 WL_context_data <- data.frame(NULL)
 for(k in contexts){
@@ -39,4 +152,47 @@ WL_context_data %>%
   summarise(total=sum(n, na.rm=TRUE), 
             mean.freq=mean(n, na.rm=TRUE), 
             highest=max(n, na.rm=TRUE),
-            which.highest=word[which.max(n)])
+            which.highest=word[which.max(n)]) %>% 
+  kable()
+```
+
+```{r none_and_0context, out.width='50%', out.height='50%'}
+df_HJ_none <- df_HJ_bin
+df_HJ_none$HJ_none <- ifelse(df_HJ_none$none==1, 1,
+                             ifelse(df_HJ_none$none==0, 0, NA))
+df_HJ_none <- dplyr::select(df_HJ_none, utt, HJ_none) 
+
+df_WL_0 <- WL
+df_WL_0$WL_0 <- ifelse(df_WL_0$N.contexts == 0, 1,
+                             ifelse(df_WL_0$N.contexts > 0, 0, NA))
+df_WL_0 <- dplyr::select(df_WL_0, utt, WL_0) 
+
+match <- full_join(df_HJ_none, df_WL_0, by="utt") %>% 
+  mutate(match = HJ_none + WL_0)
+match$match <- ifelse(match$match == 2, 1, 
+                      ifelse(match$match < 2, 0, NA))
+nrow(df_WL_0); nrow(df_HJ_none); nrow(match)
+tab <- xtabs( ~ WL_0 + HJ_none, data = match)
+
+addmargins(tab)
+summary(tab)
+mosaic(tab)
+assocplot(tab)
+assocstats(tab)
+
+# what percent of the "none" context utterances in HJ method are 0 context in WL?
+sum(match$match, na.rm=TRUE) / sum(match$HJ_none, na.rm=TRUE)
+# what percent of the 0 context utterances in WL method are "none" context in HJ?
+sum(match$match, na.rm=TRUE) / sum(match$WL_0, na.rm=TRUE)
+
+```
+
+
+# HJ
+
+
+# Topic modeling: LDA
+
+
+# Topic modeling: STM
+
