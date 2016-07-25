@@ -14,8 +14,8 @@ lda <- lda.collapsed.gibbs.sampler(docs.lda,
                                    K=nK,
                                    vocab=vocab,
                                    num.iterations = 500, # 25 is the number used in the lda demo
-                                   0.1, # from demo
-                                   0.1, # from demo
+                                   alpha = 0.1, # from demo
+                                   eta = 0.1, # from demo
                                    burnin = 5,
                                    compute.log.likelihood=TRUE)
 cache('lda')
