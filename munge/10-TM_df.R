@@ -18,6 +18,7 @@ lda <- lda.collapsed.gibbs.sampler(docs.lda,
                                    0.1, # from demo
                                    burnin = 5,
                                    compute.log.likelihood=TRUE)
+cache('lda')
 df_LDA_prop <- doc_loadings(method="lda", 
                        model=lda, 
                        meta=TM_doc_prep_out$meta, 
@@ -34,6 +35,7 @@ stm <- stm(TM_doc_prep_out$documents, # the documents
                 max.em.its = 75, 
                 data = TM_doc_prep_out$meta, 
                 init.type = "Spectral")
+cache('stm')
 
 df_STM_prop <- doc_loadings(method="stm", 
                             model=stm, 

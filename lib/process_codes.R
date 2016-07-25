@@ -23,13 +23,15 @@ process_codes <- function(doc, min.codes=10, max.codes=10, unique.coders){
     # for utterances with more than 1 coding event from the same coder, randonly select 1 of them
     doc.unique <- doc %>% 
       group_by(utt, coder) %>% 
-      sample_n(1) # group_by() and then sample_n() takes random samples from each group (utt, coder)
+      sample_n(1) %>% # group_by() and then sample_n() takes random samples from each group (utt, coder)
+      ungroup()
+    
     message("Removing ", nrow(doc) - nrow(doc.unique), " coding events (", 100*round(nrow(doc.unique)/nrow(doc), 2) ,"%) because the same utterance has been coded more than one time by the same coder.\n")   
     doc <- doc.unique
   }
   
   counts <- doc %>%
-    filter(!is.na(context)) %>% 
+    dplyr::filter(!is.na(context)) %>% 
     count(utt)
   
   message("NOTE: Only allow each coder to code each utterance once? ", unique.coders)
@@ -39,16 +41,18 @@ process_codes <- function(doc, min.codes=10, max.codes=10, unique.coders){
   in.range <- counts %>% 
     dplyr::filter(n >= min.codes) %>% 
     dplyr::filter(n <= max.codes) %>% 
-    select(utt) %>% # drop the n column
-    left_join(doc, by="utt")
+    dplyr::select(utt) %>% # drop the n column
+    left_join(doc, by="utt") %>% 
+    ungroup()
   
   # for utterances with more than [max.codes], randomly select [max.codes] of them
   above.max.sample <- counts %>% 
     dplyr::filter(n > max.codes) %>% # only keep utterances with more than [max.codes]
-    select(utt) %>% # drop the n column
+    dplyr::select(utt) %>% # drop the n column
     left_join(doc, by="utt") %>% # re-expand it back to doc, but only for the selected utts
     group_by(utt) %>% 
-    sample_n(max.codes) # group_by() and then sample_n() takes random samples from each group (utt)
+    sample_n(max.codes) %>% # group_by() and then sample_n() takes random samples from each group (utt)
+    ungroup()
   
   doc_keep <- rbind(in.range, above.max.sample)  
   

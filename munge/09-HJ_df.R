@@ -1,11 +1,12 @@
 
 master_doc_count <- HJ_contexts %>%
-  select(utt, category) %>%
-  count(utt, category ) %>%
+  ungroup() %>% 
+  dplyr::select(utt, category) %>%
+  count(utt, category) %>%
   spread(key=category, value=n, fill = 0) %>%
-  separate(col=utt, into=c("file", "UttNum"), sep="_" , remove=F) %>%
+  separate(col=utt, into=c("file", "UttNum"), sep="_" , remove=FALSE) %>%
   arrange(file, as.numeric(UttNum) ) %>% 
-  select(-file, -UttNum)
+  dplyr::select(-file, -UttNum)
 
 df_HJ_raw <- left_join(df, master_doc_count, by="utt" ) 
 write.table(df_HJ_raw, file=file.path("context_codes", "human_judgments", "contexts_HJ_raw.txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")
