@@ -141,7 +141,7 @@ df_HJ_bin_no_none <- dplyr::select(df_HJ_bin, -none, -N.contexts, -context)
 df_HJ_bin_no_none$N.contexts <- rowSums(dplyr::select(df_HJ_bin_no_none, -utt, -orth, -phon), na.rm = TRUE)
 df_HJ_bin_no_none <- extract_contexts(df_HJ_bin_no_none)
   
-hj_no_none <- dplyr::select(hj_no_none, utt, N.contexts, context) %>%
+hj_no_none <- dplyr::select(df_HJ_bin_no_none, utt, N.contexts, context) %>%
   mutate(method = "coder judgments")
 
 all_methods_counts_no_none <- rbind(wl, hj_no_none, lda, stm) %>% 
