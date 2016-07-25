@@ -1,4 +1,4 @@
-cloud_from_df <- function(df, which.context, min.freq=1){
+cloud_from_df <- function(df, which.context, min.freq=2){
   this.df <- df %>% 
     dplyr::select(orth, context=which(colnames(df)==which.context)) %>% 
     dplyr::filter(context == 1)

@@ -303,7 +303,8 @@ sum(match$match, na.rm=TRUE) / sum(match$WL_0, na.rm=TRUE)
 ```
 
 # Topic modeling: LDA
-What words are associated with each LDA topic?
+What words are associated with each LDA topic? 
+LDAvis: [http://bl.ocks.org/rosemm/raw/a7b1ac43ffe3b49229ed5e866762613f/](http://bl.ocks.org/rosemm/raw/a7b1ac43ffe3b49229ed5e866762613f/)
 ```{r lda_LDAvis, eval=FALSE}
 # http://cpsievert.github.io/LDAvis/reviews/reviews.html
 alpha <-  0.1 # from lda package demo
