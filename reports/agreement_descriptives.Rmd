@@ -120,16 +120,16 @@ length(which(df_STM_bin$N.contexts == 0)) / length(df_STM_bin$N.contexts) # perc
 ###########
 # OVERALL #
 ###########
-wl <- dplyr::select(WL, utt, N.contexts, context) %>% 
+wl_contexts <- dplyr::select(WL, utt, N.contexts, context) %>% 
   mutate(method = "word list")
-hj <- dplyr::select(df_HJ_bin, utt, N.contexts, context) %>% 
+hj_contexts <- dplyr::select(df_HJ_bin, utt, N.contexts, context) %>% 
   mutate(method = "coder judgments")
-lda <- dplyr::select(df_LDA_bin, utt, N.contexts, context) %>% 
+lda_contexts <- dplyr::select(df_LDA_bin, utt, N.contexts, context) %>% 
   mutate(method = "LDA")
-stm <- dplyr::select(df_STM_bin, utt, N.contexts, context) %>% 
+stm_contexts <- dplyr::select(df_STM_bin, utt, N.contexts, context) %>% 
   mutate(method = "STM")
 
-all_methods_counts <- rbind(wl, hj, lda, stm) %>% 
+all_methods_counts <- rbind(wl_contexts, hj_contexts, lda_contexts, stm_contexts) %>% 
   count(method, N.contexts) 
 
 ggplot(all_methods_counts, aes(y=n, x=method, fill=as.factor(N.contexts))) + 
@@ -144,21 +144,21 @@ df_HJ_bin_no_none <- extract_contexts(df_HJ_bin_no_none)
 hj_no_none <- dplyr::select(df_HJ_bin_no_none, utt, N.contexts, context) %>%
   mutate(method = "coder judgments")
 
-all_methods_counts_no_none <- rbind(wl, hj_no_none, lda, stm) %>% 
+all_methods_counts_no_none <- rbind(wl_contexts, hj_no_none, lda_contexts, stm_contexts) %>% 
   count(method, N.contexts) 
 
 ggplot(all_methods_counts_no_none, aes(y=n, x=method, fill=as.factor(N.contexts))) + 
   geom_bar(stat = "identity") + 
   labs(title = "Number of contexts tagged per utterance,\nnot including 'none' for coder judgments", y="Number of utterances", x = "Context defined by") + 
   scale_fill_discrete(name="Number of contexts")
-table(hj$N.contexts)
+table(hj_contexts$N.contexts)
 table(hj_no_none$N.contexts)
 
 ```
 
 
 ```{r}
-all_methods_context_count <- rbind(wl, hj, lda, stm) %>% 
+all_methods_context_count <- rbind(wl_contexts, hj_contexts, lda_contexts, stm_contexts) %>% 
   count(method, context)
 all_methods_context_count$context <- relevel(all_methods_context_count$context, "none" )
 all_methods_context_count$context <- relevel(all_methods_context_count$context, "no context tag" )
@@ -172,7 +172,7 @@ ggplot(all_methods_context_count, aes(y=n, x=method, fill=context)) +
 Printing context files for sharing with CF:
 
 ```{r print_context_files}
-all <- rbind(wl, hj_no_none, lda, stm) %>% 
+all <- rbind(wl_contexts, hj_no_none, lda_contexts, stm_contexts) %>% 
   dplyr::select(utt, context, method) %>% 
   tidyr::extract(utt, into = c("child", "age", "utt.num"), regex = "^([[:alpha:]]{2})([[:digit:]]{2})[.]cha_([[:digit:]]+)$")
 
@@ -210,6 +210,9 @@ LDA <- df_LDA_bin
 STM <- df_STM_bin 
 ```
 
+## General thoughts
+The word list and coder definitions of context naturally produce a skewed distribution of activities, whereas the topic modeling approaches discover a more uniform distribution of activities.
+To the extent that the distritbution of activities is naturally skewed (e.g. that a few activities happen very often, and many others happen rarely), topic modeling approaches to identifying activity context may distort reality.
 
 # Word list descriptives
 
@@ -245,6 +248,21 @@ WL_context_data %>%
             highest=max(n, na.rm=TRUE),
             which.highest=word[which.max(n)]) %>% 
   kable()
+```
+
+
+# HJ
+
+## What raw coder tags make up each category?
+
+```{r hj_wordle_codes}
+
+```
+
+## What words are associated with each category?
+
+```{r hj_wordle_orth}
+
 ```
 
 ## Do "none" contexts from HJ match utterances with 0 context codes from WL?
@@ -284,12 +302,23 @@ What percent of the 0 context utterances in WL method are "none" context in HJ?
 sum(match$match, na.rm=TRUE) / sum(match$WL_0, na.rm=TRUE)
 ```
 
-
-# HJ
-test
-
 # Topic modeling: LDA
-test
+What words are associated with each LDA topic?
+```{r lda_topics}
+lda$topics
+```
+
+```{r lda_wordles}
+
+```
+
 
 # Topic modeling: STM
-test
+What words are associated with each STM topic?
+```{r stm_topics}
+summary(stm)
+```
+
+```{r stm_wordles}
+
+```
