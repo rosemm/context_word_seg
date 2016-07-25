@@ -1,5 +1,5 @@
 WL <- df_WL %>% 
-  mutate_each(funs(y=ifelse(. > 0, 1, 0)), -utt, -orth, -phon) # for word list analysis only, make all contexts either 1 or 0 (smoothing over 1.5's from expand_windows)
+  mutate_each(funs(ifelse(. > 0, 1, 0)), -utt, -orth, -phon) # for word list analysis only, make all contexts either 1 or 0 (smoothing over 1.5's from expand_windows)
 # remove underscores from WL orth column
 WL$orth <- gsub(x=WL$orth, pattern="_", replacement=" ")
 
@@ -90,7 +90,8 @@ nrow(cont_data)
 
 # shows model fit (BIC) on y-axis and number of latent classes on x-axis
 BIC = mclustBIC(cont_data, 
-                G=seq(from=4, to=80, by=2)) # G tells it how many latent classes to try 
+                G=seq(from=4, to=80, by=2)) # G tells it how many latent classes to try
+cache("BIC")
 plot(BIC) # different lines represent different assumptions about the covariance structure
 mclustModelNames("EII")
 mclustModelNames("VII")
