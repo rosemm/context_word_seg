@@ -56,3 +56,4 @@ simple.tmpl
 syl_dists
 topicmodeling_example.R
 simulations.R
+.httr-oauth
