@@ -79,3 +79,47 @@ unique(plot.data$outcome)
 # WL_concols <- as.matrix(select(all.methods, starts_with("WL_")))
 # STM.con_concols <- as.matrix(select(all.methods, starts_with("STM.con_")))
 # WL_multivariate <- MCMCglmm(WL_concols ~ STM.con_concols, data=all.methods, family="categorical")
+
+############################
+# finite mixture modeling
+############################
+cont_data <- all.methods %>% 
+  dplyr::select(contains("WL_"), contains("con_")) %>%  # continuous variables only
+  na.omit()
+nrow(cont_data)
+
+# shows model fit (BIC) on y-axis and number of latent classes on x-axis
+BIC = mclustBIC(cont_data, 
+                G=seq(from=4, to=80, by=2)) # G tells it how many latent classes to try 
+plot(BIC) # different lines represent different assumptions about the covariance structure
+mclustModelNames("EII")
+mclustModelNames("VII")
+
+library(depmixS4)
+use.vars <- all.methods %>% 
+  dplyr::select(contains("WL_")) %>%
+  na.omit()
+
+colnames(use.vars) <- gsub(x = colnames(use.vars), pattern = " ", replacement = "_")
+
+families <- list()
+gaus <- gaussian()
+bin <- multinomial()
+for(i in 1:ncol(use.vars)){
+  families[[i]] <- ifelse(grepl(x = colnames(use.vars)[i], pattern = "WL_"), bin,
+                                ifelse(grepl(x = colnames(use.vars)[i], pattern = "con_"), gaus, NA))
+}
+responses <- list()
+for(i in 1:ncol(use.vars)){
+  responses[[i]] <- as.formula(paste0(colnames(use.vars)[i], " ~ 1"))
+}
+
+mod2 <- depmix(responses, 
+            data=use.vars, # the dataset to use
+            nstates=2, # the number of latent classes
+            family=list(multinomial(),multinomial(),multinomial(),multinomial(),multinomial(),multinomial(),multinomial(),multinomial()),
+            respstart=runif(32))
+
+fit.mod2 <- fit(mod2)
+posterior.states <- depmixS4::posterior(fit.mod2)
+posterior.states$state <- as.factor(posterior.states$state)
