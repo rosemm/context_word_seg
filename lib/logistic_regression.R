@@ -1,10 +1,14 @@
 
-logistic_regressions <- function(all.methods, outcome_method, predictor_method, save.to, ...){
+logistic_regressions <- function(all.methods, outcome_method, predictor_method, min.N.utt=0, save.to, ...){
   stopifnot(require(dplyr), require(tidyr))
   
   vars <- all.methods %>% 
     dplyr::select(starts_with(outcome_method), starts_with(predictor_method)) %>% 
     na.omit() # listwise deletion
+  
+  # only keep contexts (for dv or preodictors) that have at least min.N.utt utterances
+  keep_vars <- colnames(vars)[colSums(vars, na.rm = TRUE) > min.N.utt]
+  vars <- dplyr::select(vars, one_of(keep_vars))
   
   dvs <- vars %>% 
     dplyr::select(starts_with(outcome_method)) %>% 
@@ -20,9 +24,10 @@ logistic_regressions <- function(all.methods, outcome_method, predictor_method, 
   
   models <- list()
   summaries <- list()
-  plot.data <- data.frame(est=NULL, se=NULL, method=NULL, context=NULL, sig=NULL, outcome=NULL)
+  plot.data <- data.frame(est=NULL, se=NULL, pval=NULL, method=NULL, context=NULL, sig=NULL, outcome=NULL, N.outcome=NULL)
   for(i in 1:length(dvs)){
     dv <- dvs[[i]]
+    N.outcome <- sum(dvs[[i]], na.rm = TRUE)
     message(names(dvs)[i])
     model <- glm(dv ~ 0 + predictors,  # not estimating an intercept, so we get the expected value for each predictor
                  family=binomial(link = "logit"))
@@ -46,16 +51,15 @@ logistic_regressions <- function(all.methods, outcome_method, predictor_method, 
     p$sig <- ifelse(p$pval < .05, "sig", "not sig")
     p$pval <- NULL
     p$outcome <- names(dvs)[i]
-    p$outcome.N <- sum(dvs[[i]], na.rm = TRUE)
+    p$N.outcome <- N.outcome
     plot.data <- rbind(plot.data, p)
     
     plot <- ggplot(p, aes(x=est, y=reorder(context, est), color=sig)) +
       geom_point(show.legend = F) +
       scale_color_manual(values=c("sig"="black", "not sig"="grey")) +
-      geom_errorbarh(data=dplyr::filter(p, sig=="sig"), aes(xmin = est-(2*se), xmax = est+(2*se)), height = .2, show.legend = F) +
+      geom_errorbarh(aes(xmin = est-(2*se), xmax = est+(2*se)), height = .2, show.legend = FALSE) +
       labs(y=NULL, x="Logistic regression coefficients (2SE error bars)", title=names(dvs)[i])
     ggsave(plot, filename=paste0(save.to, "/logisticreg_", names(dvs)[i],"_from_", predictor_method, additional_args ,".png"), width=8, height=8, units="in")
-    
   } # end for loop
   
   output <- list(models=models, summaries=summaries, plot.data=plot.data)

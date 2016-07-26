@@ -30,13 +30,13 @@ cat_agreement(cat.codes=list(LDA.bin=LDA.bin,
 nrow(WL); nrow(STM.con); nrow(STM.bin); nrow(HJ.con); nrow(HJ.bin)
 
 # drop orth and phon in case there are superficial issues matching them with the join() below
-WL <- select(WL, -orth, -phon)
-STM.con <- select(STM.con, -orth, -phon)
-STM.bin <- select(STM.bin, -orth, -phon)
-LDA.con <- select(LDA.con, -orth, -phon)
-LDA.bin <- select(LDA.bin, -orth, -phon)
-HJ.con <- select(HJ.con, -orth, -phon)
-HJ.bin <- select(HJ.bin, -orth, -phon)
+WL <- dplyr::select(WL, -orth, -phon)
+STM.con <- dplyr::select(STM.con, -orth, -phon)
+STM.bin <- dplyr::select(STM.bin, -orth, -phon)
+LDA.con <- dplyr::select(LDA.con, -orth, -phon)
+LDA.bin <- dplyr::select(LDA.bin, -orth, -phon)
+HJ.con <- dplyr::select(HJ.con, -orth, -phon)
+HJ.bin <- dplyr::select(HJ.bin, -orth, -phon)
 colnames(WL)[-1] <- paste0("WL_", colnames(WL)[-1])
 colnames(STM.con)[-1] <- paste0("STM.con_", colnames(STM.con)[-1])
 colnames(STM.bin)[-1] <- paste0("STM.bin_", colnames(STM.bin)[-1])
@@ -54,13 +54,13 @@ all.methods <- full_join(WL, STM.con, by="utt") %>%
 nrow(all.methods)  
 
 # univariate logistic regressions
-WL_STM.con <- logistic_regressions(all.methods, outcome_method="WL", predictor_method="STM.con", save.to="graphs/agreement")
-WL_LDA.con <- logistic_regressions(all.methods, outcome_method="WL", predictor_method="LDA.con", save.to="graphs/agreement")
-WL_HJ.con  <- logistic_regressions(all.methods, outcome_method="WL", predictor_method="HJ.con", save.to="graphs/agreement")
-HJ.bin_STM.con  <- logistic_regressions(all.methods, outcome_method="HJ.bin", predictor_method="STM.con", save.to="graphs/agreement")
-STM.bin_HJ.con  <- logistic_regressions(all.methods, outcome_method="STM.bin", predictor_method="HJ.con", save.to="graphs/agreement")
-HJ.bin_LDA.con  <- logistic_regressions(all.methods, outcome_method="HJ.bin", predictor_method="LDA.con", save.to="graphs/agreement")
-LDA.bin_HJ.con  <- logistic_regressions(all.methods, outcome_method="LDA.bin", predictor_method="HJ.con", save.to="graphs/agreement")
+WL_STM.con <- logistic_regressions(all.methods, outcome_method="WL", predictor_method="STM.con", min.N.utt=200, save.to="graphs/agreement")
+WL_LDA.con <- logistic_regressions(all.methods, outcome_method="WL", predictor_method="LDA.con", min.N.utt=200, save.to="graphs/agreement")
+WL_HJ.con  <- logistic_regressions(all.methods, outcome_method="WL", predictor_method="HJ.con", min.N.utt=200, save.to="graphs/agreement")
+HJ.bin_STM.con  <- logistic_regressions(all.methods, outcome_method="HJ.bin", predictor_method="STM.con", min.N.utt=200, save.to="graphs/agreement")
+STM.bin_HJ.con  <- logistic_regressions(all.methods, outcome_method="STM.bin", predictor_method="HJ.con", min.N.utt=200, save.to="graphs/agreement")
+HJ.bin_LDA.con  <- logistic_regressions(all.methods, outcome_method="HJ.bin", predictor_method="LDA.con", min.N.utt=200, save.to="graphs/agreement")
+LDA.bin_HJ.con  <- logistic_regressions(all.methods, outcome_method="LDA.bin", predictor_method="HJ.con", min.N.utt=200, save.to="graphs/agreement")
 
 all.log.estimates <- rbind(WL_STM.con$plot.data,
                            WL_LDA.con$plot.data,
@@ -71,13 +71,11 @@ all.log.estimates <- rbind(WL_STM.con$plot.data,
                            LDA.bin_HJ.con$plot.data)
 cache('all.log.estimates')
 
-plot.data <- all.log.estimates %>% 
-  filter(outcome.N > 200)  # only keep contexts with at least 200 utterances
-unique(plot.data$outcome)
+unique(all.log.estimates$outcome)
 
 # # multivariate logistic regression
-# WL_concols <- as.matrix(select(all.methods, starts_with("WL_")))
-# STM.con_concols <- as.matrix(select(all.methods, starts_with("STM.con_")))
+# WL_concols <- as.matrix(dplyr::select(all.methods, starts_with("WL_")))
+# STM.con_concols <- as.matrix(dplyr::select(all.methods, starts_with("STM.con_")))
 # WL_multivariate <- MCMCglmm(WL_concols ~ STM.con_concols, data=all.methods, family="categorical")
 
 ############################
