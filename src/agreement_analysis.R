@@ -1,3 +1,6 @@
+library(ProjectTemplate)
+load.project()
+
 WL <- df_WL %>% 
   mutate_each(funs(ifelse(. > 0, 1, 0)), -utt, -orth, -phon) # for word list analysis only, make all contexts either 1 or 0 (smoothing over 1.5's from expand_windows)
 # remove underscores from WL orth column
@@ -54,13 +57,13 @@ all.methods <- full_join(WL, STM.con, by="utt") %>%
 nrow(all.methods)  
 
 # univariate logistic regressions
-WL_STM.con <- logistic_regressions(all.methods, outcome_method="WL", predictor_method="STM.con", min.N.utt=200, save.to="graphs/agreement")
-WL_LDA.con <- logistic_regressions(all.methods, outcome_method="WL", predictor_method="LDA.con", min.N.utt=200, save.to="graphs/agreement")
-WL_HJ.con  <- logistic_regressions(all.methods, outcome_method="WL", predictor_method="HJ.con", min.N.utt=200, save.to="graphs/agreement")
-HJ.bin_STM.con  <- logistic_regressions(all.methods, outcome_method="HJ.bin", predictor_method="STM.con", min.N.utt=200, save.to="graphs/agreement")
-STM.bin_HJ.con  <- logistic_regressions(all.methods, outcome_method="STM.bin", predictor_method="HJ.con", min.N.utt=200, save.to="graphs/agreement")
-HJ.bin_LDA.con  <- logistic_regressions(all.methods, outcome_method="HJ.bin", predictor_method="LDA.con", min.N.utt=200, save.to="graphs/agreement")
-LDA.bin_HJ.con  <- logistic_regressions(all.methods, outcome_method="LDA.bin", predictor_method="HJ.con", min.N.utt=200, save.to="graphs/agreement")
+WL_STM.con <- logistic_regressions(all.methods, outcome_method="WL", predictor_method="STM.con", min.N.utt=300, save.to="graphs/agreement")
+WL_LDA.con <- logistic_regressions(all.methods, outcome_method="WL", predictor_method="LDA.con", min.N.utt=300, save.to="graphs/agreement")
+WL_HJ.con  <- logistic_regressions(all.methods, outcome_method="WL", predictor_method="HJ.con", min.N.utt=300, save.to="graphs/agreement")
+HJ.bin_STM.con  <- logistic_regressions(all.methods, outcome_method="HJ.bin", predictor_method="STM.con", min.N.utt=300, save.to="graphs/agreement")
+STM.bin_HJ.con  <- logistic_regressions(all.methods, outcome_method="STM.bin", predictor_method="HJ.con", min.N.utt=300, save.to="graphs/agreement")
+HJ.bin_LDA.con  <- logistic_regressions(all.methods, outcome_method="HJ.bin", predictor_method="LDA.con", min.N.utt=300, save.to="graphs/agreement")
+LDA.bin_HJ.con  <- logistic_regressions(all.methods, outcome_method="LDA.bin", predictor_method="HJ.con", min.N.utt=300, save.to="graphs/agreement")
 
 all.log.estimates <- rbind(WL_STM.con$plot.data,
                            WL_LDA.con$plot.data,
