@@ -6,16 +6,25 @@ logistic_regressions <- function(all.methods, outcome_method, predictor_method, 
     dplyr::select(starts_with(outcome_method), starts_with(predictor_method)) %>% 
     na.omit() # listwise deletion
   
-  # only keep contexts (for dv or preodictors) that have at least min.N.utt utterances
-  keep_vars <- colnames(vars)[colSums(vars, na.rm = TRUE) > min.N.utt]
-  vars <- dplyr::select(vars, one_of(keep_vars))
-  
   dvs <- vars %>% 
-    dplyr::select(starts_with(outcome_method)) %>% 
+    dplyr::select(starts_with(outcome_method))
+  
+  # only keep contexts for dv that have at least min.N.utt utterances
+  keep_dvs <- colnames(dvs)[colSums(dvs, na.rm = TRUE) > min.N.utt]
+  
+  dvs <- dvs %>% 
+    dplyr::select(one_of(keep_dvs)) %>% 
     as.list()
   
+  # only keep contexts for predictrs that have at least min.N.utt utterances in bin method
+  predictor_bin <- gsub(x=predictor_method, pattern = "[.]con", replacement = ".bin")
+  preds_bin <- all.methods %>% 
+    dplyr::select(starts_with(predictor_bin))
+  keep_predictors <- colnames(preds_bin)[colSums(preds_bin, na.rm = TRUE) > min.N.utt] # extract the column names with greater than min.N.utt 
+  keep_predictors <- gsub(x=keep_predictors, pattern = "[.]bin", replacement = ".con") # switch them back to continuous column names
+  
   predictors <- vars %>% 
-    dplyr::select(starts_with(predictor_method)) %>% 
+    dplyr::select(one_of(keep_predictors)) %>% 
     as.matrix()
   
   # for naming the plots  
@@ -29,7 +38,8 @@ logistic_regressions <- function(all.methods, outcome_method, predictor_method, 
     dv <- dvs[[i]]
     N.outcome <- sum(dvs[[i]], na.rm = TRUE)
     message(names(dvs)[i])
-    model <- glm(dv ~ 0 + predictors,  # not estimating an intercept, so we get the expected value for each predictor
+    # http://stats.stackexchange.com/questions/131456/confused-about-0-intercept-in-logistic-regression-in-r
+    model <- glm(dv ~ predictors, 
                  family=binomial(link = "logit"))
     # save the models
     models[[names(dvs)[i]]] <- model
@@ -41,6 +51,7 @@ logistic_regressions <- function(all.methods, outcome_method, predictor_method, 
       dplyr::select(1,2,4)
     colnames(p) <- c("est", "se", "pval")
     p$context <- row.names(p)
+    p$context[1] <- "Intercept"
     row.names(p) <- NULL
     if( grepl(x=predictor_method, pattern="STM|LDA") ) { # for topic modeling results
       p <- extract(p, context, into=c("method", "context"), regex="predictors(.*)[_](topic.*)")
