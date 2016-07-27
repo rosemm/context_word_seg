@@ -1,3 +1,6 @@
+library(ProjectTemplate)
+load.project()
+
 WL <- df_WL %>% 
   mutate_each(funs(ifelse(. > 0, 1, 0)), -utt, -orth, -phon) # for word list analysis only, make all contexts either 1 or 0 (smoothing over 1.5's from expand_windows)
 # remove underscores from WL orth column
