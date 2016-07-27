@@ -23,5 +23,3 @@ master_doc_prop$total <- NULL  # delete column
 df_HJ_prop <- left_join(df, master_doc_prop, by="utt" ) 
 write.table(df_HJ_prop, file=file.path("context_codes", "human_judgments", "contexts_HJ_prop.txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")
 cache('df_HJ_prop')
-
-

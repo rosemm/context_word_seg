@@ -13,14 +13,16 @@
 
 master_doc <- read.table("context_codes/human_judgments/master_doc.txt", header=1, sep="\t", stringsAsFactors=F)
 
-HJ_processedcodes <- master_doc %>% 
+processedcodes <- master_doc %>% 
   process_codes(min.codes=5, max.codes=5, unique.coders=TRUE) %>% 
   clean_contexts(dir="context_codes/human_judgments", key_file="context_cleaning_keys.txt", interactive = TRUE)
 
-cache('HJ_processedcodes')
-
-HJ_contexts <- HJ_processedcodes %>% 
+cleanedcategories <- processedcodes %>% 
   clean_categories(dir="context_codes/human_judgments", key_file="categories_cleaning_keys.txt", interactive = TRUE) 
 # note that running clean_categories also updates the .md file, which pushes to here https://github.com/rosemm/context_word_seg/blob/master/categories_keys.md
 
+HJ_processedcodes <- cleanedcategories[[1]]
+cache('HJ_processedcodes')
+
+HJ_contexts <- cleanedcategories[[2]]
 cache('HJ_contexts')

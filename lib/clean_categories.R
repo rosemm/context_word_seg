@@ -12,6 +12,7 @@ clean_categories <- function(doc, dir, key_file="categories_cleaning_keys.txt", 
   writeLines(tb, file.path(dir, "categories_keys.md") )
   
   # add categories to doc
+  doc$context <- as.character(doc$context)
   doc <- left_join(doc, categories_keys, by=c("context" = "context_clean"))
 
   # stopifnot( length(unique(doc$category)) == length(unique(categories_keys$category)) )
@@ -28,5 +29,5 @@ clean_categories <- function(doc, dir, key_file="categories_cleaning_keys.txt", 
   clean_doc <- cat.check %>% 
     select( utt, coder, date, category ) # drop the extra columns
   
-  return(clean_doc)
+  return(list(doc=doc, clean_doc=clean_doc))
 }
