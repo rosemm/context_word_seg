@@ -89,13 +89,13 @@ cont_data <- all.methods %>%
   na.omit()
 nrow(cont_data)
 
-# shows model fit (BIC) on y-axis and number of latent classes on x-axis
-BIC = mclustBIC(cont_data, 
-                G=seq(from=4, to=80, by=2)) # G tells it how many latent classes to try
-cache("BIC")
-plot(BIC) # different lines represent different assumptions about the covariance structure
-mclustModelNames("EII")
-mclustModelNames("VII")
+# # shows model fit (BIC) on y-axis and number of latent classes on x-axis
+# BIC = mclustBIC(cont_data, 
+#                 G=seq(from=4, to=80, by=2)) # G tells it how many latent classes to try
+# cache("BIC")
+# plot(BIC) # different lines represent different assumptions about the covariance structure
+# mclustModelNames("EII")
+# mclustModelNames("VII")
 
 library(depmixS4)
 use.vars <- all.methods %>% 

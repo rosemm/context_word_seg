@@ -25,7 +25,8 @@ logistic_regressions <- function(all.methods, outcome_method, predictor_method, 
   
   predictors <- vars %>% 
     dplyr::select(one_of(keep_predictors)) %>% 
-    as.matrix()
+    as.matrix() %>% 
+    scale() # centering and scaling predictors
   
   # for naming the plots  
   additional_args <- as.data.frame(list(...), stringsAsFactors=FALSE)
@@ -39,6 +40,13 @@ logistic_regressions <- function(all.methods, outcome_method, predictor_method, 
     N.outcome <- sum(dvs[[i]], na.rm = TRUE)
     message(names(dvs)[i])
     # http://stats.stackexchange.com/questions/131456/confused-about-0-intercept-in-logistic-regression-in-r
+    # http://stats.stackexchange.com/questions/35071/what-is-rank-deficiency-and-how-to-deal-with-it
+    if( grepl(x=predictor_method, pattern = "STM|LDA") ){
+      # topic modeling contexts are constrained to be related (sum across all topics = 1 for each utterance), so can't estimate an intercept and all topics
+      # design matrix is not full rank; columns are not linearly independent
+      # drop first topic
+      predictors <- predictors[,-1]
+    } 
     model <- glm(dv ~ predictors, 
                  family=binomial(link = "logit"))
     # save the models
@@ -51,13 +59,16 @@ logistic_regressions <- function(all.methods, outcome_method, predictor_method, 
       dplyr::select(1,2,4)
     colnames(p) <- c("est", "se", "pval")
     p$context <- row.names(p)
-    p$context[1] <- "Intercept"
     row.names(p) <- NULL
-    if( grepl(x=predictor_method, pattern="STM|LDA") ) { # for topic modeling results
-      p <- extract(p, context, into=c("method", "context"), regex="predictors(.*)[_](topic.*)")
+    
+    if( grepl(x=predictor_method, pattern = "STM|LDA") ){
+      p$context[1] <- "predictors_topic_Intercept"
+      p <- extract(p, context, into=c("method", "context"), regex="predictors(.*)[_](topic_.*)")
     } else {
+      p$context[1] <- "predictors_Intercept"
       p <- extract(p, context, into=c("method", "context"), regex="predictors(.*)[_](.*)")
     }
+    
     p$context <- factor(p$context, levels=unique(p$context))
     p$sig <- ifelse(p$pval < .05, "sig", "not sig")
     p$pval <- NULL
