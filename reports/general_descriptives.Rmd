@@ -52,9 +52,9 @@ Utterance number is a rough proxy for time of day since time stamps are not avai
 
 There are several general methodological points of interest visible in these plots. 
 When defining 'activity context' using the word list approach, there can be (and often are) sections of the corpus that receive no context tag at all (vertical sections in the plot where there are no darkened context bars).
-This is less common with the other appraoches to defining context, giving the word list plots a relatively sparse appearance.
+This is less common with the other approaches to defining context, giving the word list plots a relatively sparse appearance.
 In the coder judgment plots, there are some vertical bars with no data at all --- those represent the few parts of the corpus that are not fully coded (there are not 5 independent coders for each utterance).
-In order to determine context using topic modeling, I binned the transcripts into documents of 30 utterances each (necessary to allow large enough samples of speech to estimate the word co-occurrence rates on which topic modeling algprithms are based). 
+In order to determine context using topic modeling, I binned the transcripts into documents of 30 utterances each (necessary to allow large enough samples of speech to estimate the word co-occurrence rates on which topic modeling algorithms are based). 
 This means the topic modeling approach tags the corpus in bins of 30 utterances, resulting in chunks of each context that are at least 30 utterances long.
 The word list method identifies chunks of at least 5 utterances due to the smoothing procedure that picks up 2 utterances before and after each tagged utterance. 
 The coder judgments are based on sections of the corpus that were 30 utterances long, but because each utterance is often coded by more than the required 5 coders a random sample of 5 coders for each utterance results in a more natural gradient at the edges of context chunks. 
@@ -73,8 +73,8 @@ Defining context using topics from LDA topic modeling:
 Defining context using topics from STM topic modeling (allows for variability family to family when discovering topics):
 ![](/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/STM/seqplot-STMla16.cha.png "Sequence plot for child la at 16 weeks, STM topic modeling definition of context")
 
-It is also possible to see hints of agreement across methods by examing the plots. 
-For example, there is a section around utterance 1300 that appears to be identified as "bathtime" by human coders, includes words from the "bath" word list, and is mostly topic 8 by the STM topic modeling (that episode is not as clearly picked out by the LDA topic modeling, although perhaps topics 10 and/or 1 correspond). 
+It is also possible to see hints of agreement across methods by examining the plots. 
+For example, there is a section around utterance 1300 that appears to be identified as "bath time" by human coders, includes words from the "bath" word list, and is mostly topic 8 by the STM topic modeling (that episode is not as clearly picked out by the LDA topic modeling, although perhaps topics 10 and/or 1 correspond). 
 Note that the LDA topic modeling identifies mostly one context for the duration of the transcript (topic 11), possibly getting caught on family-specific words like the child's name.
 
 ## Example 2: gl06
@@ -133,39 +133,50 @@ for(m in unique(contexts_by_transcript$method)){
     facet_wrap(~ child , scales = "free") + 
     scale_fill_manual(values=colors) +
     labs(y = "Number of utterances", x="Age (weeks)", title= paste0("Context distribution across transcripts\n", m))  
-  ggsave(plot = p1, filename = paste0("contexts_by_transcripts_", m, ".png"), path = "graphs/descriptives", width = 14, height = 10, units="in")
+  ggsave(plot = p1, filename = paste0("contexts_by_transcripts_", m, ".png"), path = "graphs/descriptives", width = 8, height = 5, units="in")
   
   p2 <- ggplot(plot.data, aes(y = N.utts, x = as.factor(age), fill = context)) + 
     geom_bar(stat = "identity", position = "fill") +  
     facet_wrap(~ child , scales = "free") + 
     scale_fill_manual(values=colors) + 
   labs(y = "Proportion of utterance codes", x="Age (weeks)", title= paste0("Context distribution across transcripts\n", m))  
-  ggsave(plot = p2, filename = paste0("contexts_by_transcripts_", m, "_prop.png"), path = "graphs/descriptives", width = 14, height = 10, units="in")
+  ggsave(plot = p2, filename = paste0("contexts_by_transcripts_", m, "_prop.png"), path = "graphs/descriptives", width = 8, height = 5, units="in")
 }
 ```
 
-These plots show how many utterances fall in each context for each transcript (each child at each age), for each of the appraoches to defining context.
+These plots show how many utterances fall in each context for each transcript (each child at each age), for each of the approaches to defining context.
 For each approach, there is one plot showing raw number of utterances in each transcript and a second plot presenting the same information in terms of proportion of total context codes for each transcript.    
 
 One of the most important things to note in these plots is which contexts tend to be distributed more or less evenly across families and ages, and which contexts appear to be family- or age-specific. 
-There is a particularly striking difference between the two topic modeling methods, LDA and STM, with the latter showing rather even distribution of contexts whereas the former appears to have a strong tendency to pick one or two dominant topics for each family.
-This may be due to the fact that STM (unlike LDA) allows for variability family to family in the prevalence and characteristics of each topic during estimation.
+There is a particularly striking difference between the two topic modeling methods, LDA and STM, with the latter showing rather even distribution of contexts whereas the former appears to have a strong tendency to pick one or two dominant topics for each family. 
+When contexts are defined according to LDA topic modeling, most of the transcripts are dominated by one context (and that same context often repeats across recordings for that family); since these are day-long, natural recordings of infants at home with their caregivers, it is surprising to see a single context characterizing an entire transcript.
+The fact that this homogeneity appears in the LDA method only suggests it may be an artifact of that analysis procedure. 
+This difference may be due to the fact that STM (unlike LDA) allows for variability family to family in the prevalence and characteristics of each topic during estimation.
 Because LDA lacks this flexibility, it may get caught up on common words that are family-specific and miss patterns of words that vary *within* families as a consequence.
 The most obvious example of family-specific words are the children's names, but there are several other words that, for one reason or another, appear often only in one family and not the others.
 
+### Defining context using key words from the word lists:
 
-Defining context using key words from the word lists:
-![](/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_WL.png)
-![](/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_WL_prop.png)
-Defining context using coder judgments:
-![](/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_HJ.png)
-![](/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_HJ_prop.png)
-Defining context using topics from LDA topic modeling:
-![](/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_LDA.png)
-![](/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_LDA_prop.png)
-Defining context using topics from STM topic modeling (allows for variability family to family when discovering topics):
-![](/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_STM.png)
-![](/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_STM_prop.png)
+<img src="/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_WL.png" width="600" height="400" />
+<img src="/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_WL_prop.png" width="600" height="400" />
+
+### Defining context using coder judgments:
+
+<img src="/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_HJ.png" width="600" height="400" />
+<img src="/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_HJ_prop.png" width="600" height="400" />
+
+### Defining context using topics from LDA topic modeling:
+
+<img src="/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_LDA.png" width="600" height="400" />
+<img src="/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_LDA_prop.png" width="600" height="400" />
+
+### Defining context using topics from STM topic modeling:
+
+<img src="/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_STM.png" width="600" height="400" />
+<img src="/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_STM_prop.png" width="600" height="400" />
+
+Note that both STM and LDA topic models we run after removing [stop words](http://www.lextek.com/manuals/onix/stopwords2.html).
+Many stop words are very high frequency in samples of natural speech, so they may show up as very probably under a given topic not because of their specificity to that topic but because of their general high probability of occurring regardless of topic.
 
 ```{r top_words_lda}
 top_words_lda <- top.topic.words(lda$topics, num.words=20) %>% 
