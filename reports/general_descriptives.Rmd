@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
 knitr::opts_knit$set(root.dir = "/Users/TARDIS/Documents/STUDIES/context_word_seg")
 ```
 
