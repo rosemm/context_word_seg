@@ -10,7 +10,7 @@ STM.bin <- df_STM_bin
 LDA.bin <- df_LDA_bin
 HJ.bin <- df_HJ_bin
 
-seq_plots(WL, "WL")
-seq_plots(HJ.bin, "HJ")
-seq_plots(LDA.bin, "LDA")
-seq_plots(STM.bin, "STM")
+seq_plots(WL, "WL", min.utts=100)
+seq_plots(HJ.bin, "HJ", min.utts=100)
+seq_plots(LDA.bin, "LDA", min.utts=100)
+seq_plots(STM.bin, "STM", min.utts=100)
