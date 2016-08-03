@@ -21,8 +21,10 @@ cleanedcategories <- processedcodes %>%
   clean_categories(dir="context_codes/human_judgments", key_file="categories_cleaning_keys.txt", interactive = TRUE) 
 # note that running clean_categories also updates the .md file, which pushes to here https://github.com/rosemm/context_word_seg/blob/master/categories_keys.md
 
-HJ_processedcodes <- cleanedcategories[[1]]
+HJ_processedcodes <- cleanedcategories[[1]] %>% 
+  ungroup()
 cache('HJ_processedcodes')
 
-HJ_contexts <- cleanedcategories[[2]]
+HJ_contexts <- cleanedcategories[[2]] %>% 
+  ungroup()
 cache('HJ_contexts')

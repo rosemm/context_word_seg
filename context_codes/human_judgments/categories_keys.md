@@ -3,7 +3,6 @@
 |answering the telephone |answering the telephone  |
 |baptism                 |baptism                  |
 |bathroom                |bathroom                 |
-|potty training          |bathroom                 |
 |bathtime                |bathtime                 |
 |drying                  |bathtime                 |
 |post-bath               |bathtime                 |
@@ -22,6 +21,7 @@
 |pulling hair            |being naughty            |
 |being tired             |being tired              |
 |blowing bubbles         |blowing bubbles          |
+|blowing raspberries     |blowing bubbles          |
 |coughing                |coughing                 |
 |diaper change           |diaper change            |
 |going potty             |diaper change            |
@@ -41,15 +41,21 @@
 |eating fingers          |eating fingers           |
 |friends                 |friends                  |
 |applying teething gel   |fussing                  |
+|being uncomfortable     |fussing                  |
 |crying                  |fussing                  |
+|fighting                |fussing                  |
 |fussing                 |fussing                  |
 |gas                     |fussing                  |
 |restless baby           |fussing                  |
 |scared                  |fussing                  |
+|screaming               |fussing                  |
+|shouting                |fussing                  |
 |soothing                |fussing                  |
 |teething                |fussing                  |
 |hiccups                 |hiccups                  |
 |hiding                  |hiding                   |
+|baking                  |housework                |
+|boiling water           |housework                |
 |clean up                |housework                |
 |cleaning                |housework                |
 |cooking                 |housework                |
@@ -57,6 +63,7 @@
 |in the kitchen          |housework                |
 |ironing                 |housework                |
 |sewing                  |housework                |
+|shopping                |housework                |
 |washing dishes          |housework                |
 |washing up              |housework                |
 |home                    |inside                   |
@@ -73,14 +80,13 @@
 |listening               |interaction              |
 |looking                 |interaction              |
 |observing               |interaction              |
+|reading                 |interaction              |
 |saying bye              |interaction              |
-|shouting                |interaction              |
-|singing                 |interaction              |
 |smiling                 |interaction              |
 |storytime               |interaction              |
 |talking                 |interaction              |
 |teasing                 |interaction              |
-|watch tennis            |interaction              |
+|thinking                |interaction              |
 |watching                |interaction              |
 |bottle feeding          |mealtime                 |
 |breakfast               |mealtime                 |
@@ -94,6 +100,8 @@
 |drinking tea            |mealtime                 |
 |lunch                   |mealtime                 |
 |mealtime                |mealtime                 |
+|mom eating              |mealtime                 |
+|nibbling                |mealtime                 |
 |post-feeding            |mealtime                 |
 |post-mealtime           |mealtime                 |
 |pre-feeding             |mealtime                 |
@@ -105,16 +113,22 @@
 |morning time            |morning time             |
 |listening to radio      |music                    |
 |music                   |music                    |
+|radio                   |music                    |
+|singing                 |music                    |
 |newspaper               |newspaper                |
-|inactive                |none                     |
 |none                    |none                     |
 |opening window          |opening window           |
 |before leaving          |outside                  |
 |car                     |outside                  |
 |coming home             |outside                  |
 |leaving                 |outside                  |
+|on a walk               |outside                  |
 |outside                 |outside                  |
+|pre-leaving             |outside                  |
 |sunbathing              |outside                  |
+|cleaning the child      |personal care            |
+|grooming                |personal care            |
+|potty training          |personal care            |
 |bouncing                |playtime                 |
 |crawling                |playtime                 |
 |dancing                 |playtime                 |
@@ -128,12 +142,12 @@
 |playing                 |playtime                 |
 |playtime                |playtime                 |
 |rolling                 |playtime                 |
+|standing                |playtime                 |
 |swinging                |playtime                 |
 |walking                 |playtime                 |
 |wriggling               |playtime                 |
 |pre-doctors visit       |pre-doctors visit        |
 |raining                 |raining                  |
-|shopping                |shopping                 |
 |post-sick               |sick                     |
 |relieving tummy ache    |sick                     |
 |sick                    |sick                     |
@@ -142,6 +156,7 @@
 |bedtime                 |sleep                    |
 |getting up              |sleep                    |
 |in crib                 |sleep                    |
+|inactive                |sleep                    |
 |lying down              |sleep                    |
 |nap time                |sleep                    |
 |post-bedtime            |sleep                    |
@@ -151,18 +166,13 @@
 |waking up               |sleep                    |
 |yawning                 |sleep                    |
 |sneezing                |sneezing                 |
-|standing                |standing                 |
 |stretching              |stretching               |
 |pre-swimming            |swimming                 |
 |swimming                |swimming                 |
 |filming                 |taking pictures          |
 |taking pictures         |taking pictures          |
 |taping                  |taking pictures          |
-|thinking                |thinking                 |
-|blowing raspberries     |touching                 |
-|cleaning the child      |touching                 |
 |cuddling                |touching                 |
-|grooming                |touching                 |
 |holding                 |touching                 |
 |holding child           |touching                 |
 |holding hands           |touching                 |
@@ -174,3 +184,4 @@
 |tickling                |touching                 |
 |touching                |touching                 |
 |TV                      |TV                       |
+|watch tennis            |TV                       |
