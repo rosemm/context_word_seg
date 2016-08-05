@@ -17,17 +17,23 @@ HJ.bin <- df_HJ_bin
 # V may be viewed as the association between two variables as a percentage of their maximum possible variation.V2 is the mean square canonical correlation between the variables. For 2-by-2 tables, V = phi (hence some packages like Systat print V only for larger tables).
 cat_WL_STM <- cat_agreement(cat.codes=list(WL=WL, 
                              STM.bin=STM.bin))
+cache('cat_WL_STM')
 cat_WL_LDA <- cat_agreement(cat.codes=list(WL=WL, 
                              LDA.bin=LDA.bin))
+cache('cat_WL_LDA')
 cat_WL_HJ <- cat_agreement(cat.codes=list(WL=WL, 
                              HJ.bin=HJ.bin))
+cache('cat_WL_HJ')
 cat_HJ_STM <- cat_agreement(cat.codes=list(HJ.bin=HJ.bin, 
                              STM.bin=STM.bin))
+cache('cat_HJ_STM')
 cat_HJ_LDA <- cat_agreement(cat.codes=list(HJ.bin=HJ.bin, 
                              LDA.bin=LDA.bin))
+cache('cat_HJ_LDA')
 # just out of curiosity...
-cat_agreement(cat.codes=list(LDA.bin=LDA.bin, 
+cat_STM_LDA <- cat_agreement(cat.codes=list(LDA.bin=LDA.bin, 
                              STM.bin=STM.bin))
+cache('cat_STM_LDA')
 
 nrow(WL); nrow(STM.con); nrow(STM.bin); nrow(HJ.con); nrow(HJ.bin)
 
