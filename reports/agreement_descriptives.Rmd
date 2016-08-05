@@ -1,5 +1,5 @@
 ---
-output: html_document
+output: pdf_document
 ---
 
 
@@ -12,176 +12,18 @@ library(ProjectTemplate)
 load.project()
 ```
 
-# General descriptives
-
-## How many utterances in each context?
-
-```{r utt_per_context}
-######
-# WL #
-######
-WL <- df_WL_bin
-WL_sum <- data.frame(context = names(colSums(dplyr::select(WL, -utt, -orth, -phon))), n=colSums(dplyr::select(WL, -utt, -orth, -phon))) %>% 
-  mutate(method="word lists")
-WL_sum %>% 
-  select(-method) %>% 
-  arrange(desc(n)) %>% 
-  kable()
-
-######
-# HJ #
-######
-HJ <- df_HJ_bin
-HJ_sum <- data.frame(context=names(colSums(dplyr::select(HJ, -utt, -orth, -phon), na.rm=TRUE)), n=colSums(dplyr::select(df_HJ_bin, -utt, -orth, -phon), na.rm=TRUE)) %>% 
-  mutate(method="coder judgments")
-HJ_sum %>% 
-  select(-method) %>% 
-  arrange(desc(n)) %>% 
-  kable()
-
-######
-# TM #
-######
-LDA <- df_LDA_bin
-LDA_sum <- data.frame(context=names(colSums(dplyr::select(LDA, -utt, -orth, -phon), na.rm=TRUE)), n=colSums(dplyr::select(LDA, -utt, -orth, -phon), na.rm=TRUE)) %>% 
-  mutate(method="LDA")
-LDA_sum %>% 
-  select(-method) %>% 
-  arrange(desc(n)) %>% 
-  kable()
-
-STM <- df_STM_bin
-STM_sum <- data.frame(context=names(colSums(dplyr::select(STM, -utt, -orth, -phon), na.rm=TRUE)), n=colSums(dplyr::select(STM, -utt, -orth, -phon), na.rm=TRUE)) %>% 
-  mutate(method="STM")
-STM_sum %>% 
-  select(-method) %>% 
-  arrange(desc(n)) %>% 
-  kable()
-```
-
-```{r, fig.height=12}
-all_sum <- rbind(WL_sum, HJ_sum, LDA_sum, STM_sum)
-
-ggplot(all_sum, aes(y=n, x=reorder(as.factor(context), n))) + 
-  geom_bar(stat = 'identity', show.legend = FALSE) + 
-  geom_hline(aes(yintercept=nrow(df)), lty=2) + 
-  facet_wrap(~method, scales = "free_x", ncol=1) + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-  ggtitle("Number of utterances in each context\ndashed line shows total corpus size")
-ggsave(filename ="utts_per_context.png" , path = "graphs/descriptives", width = 5, height = 14, units="in")
-
-```
-
-## How many contexts per utterance?
-
-```{r context_per_utt}
-######
-# WL #
-######
-WL$N.contexts <- rowSums(dplyr::select(WL, -utt, -orth, -phon))
-table(WL$N.contexts)
-
-WL <- extract_contexts(WL)
-summary(WL$context) # the number of utterances in each context
-
-length(which(WL$N.contexts > 2)) / length(WL$N.contexts) # percent of corpus with > 2 contexts
-length(which(WL$N.contexts == 0)) / length(WL$N.contexts) # percent of corpus with 0 contexts
-length(which(WL$N.contexts > 2)) / length(which(WL$N.contexts > 0)) 
-length(which(WL$N.contexts > 1)) / length(which(WL$N.contexts > 0)) 
-
-
-######
-# HJ #
-######
-HJ$N.contexts <- rowSums(dplyr::select(HJ, -utt, -orth, -phon), na.rm = TRUE)
-table(HJ$N.contexts)
-
-HJ <- extract_contexts(HJ)
-summary(HJ$context) # the number of utterances in each context
-
-length(which(HJ$N.contexts > 2)) / length(HJ$N.contexts) # percent of corpus with > 2 contexts
-length(which(HJ$N.contexts == 0)) / length(HJ$N.contexts) # percent of corpus with 0 contexts
-
-######
-# TM #
-######
-LDA$N.contexts <- rowSums(dplyr::select(LDA, -utt, -orth, -phon), na.rm = TRUE)
-table(LDA$N.contexts)
-
-LDA <- extract_contexts(LDA)
-summary(LDA$context) # the number of utterances in each context
-
-length(which(LDA$N.contexts > 2)) / length(LDA$N.contexts) # percent of corpus with > 2 contexts
-length(which(LDA$N.contexts == 0)) / length(LDA$N.contexts) # percent of corpus with 0 contexts
-
-STM$N.contexts <- rowSums(dplyr::select(STM, -utt, -orth, -phon), na.rm = TRUE)
-table(STM$N.contexts)
-
-STM <- extract_contexts(STM)
-summary(STM$context) # the number of utterances in each context
-
-length(which(STM$N.contexts > 2)) / length(STM$N.contexts) # percent of corpus with > 2 contexts
-length(which(STM$N.contexts == 0)) / length(STM$N.contexts) # percent of corpus with 0 contexts
-
-###########
-# OVERALL #
-###########
-wl_contexts <- dplyr::select(WL, utt, N.contexts, context) %>% 
-  mutate(method = "word list")
-hj_contexts <- dplyr::select(HJ, utt, N.contexts, context) %>% 
-  mutate(method = "coder judgments")
-lda_contexts <- dplyr::select(LDA, utt, N.contexts, context) %>% 
-  mutate(method = "LDA")
-stm_contexts <- dplyr::select(STM, utt, N.contexts, context) %>% 
-  mutate(method = "STM")
-
-all_methods_counts <- rbind(wl_contexts, hj_contexts, lda_contexts, stm_contexts) %>% 
-  count(method, N.contexts) 
-
-ggplot(all_methods_counts, aes(y=n, x=method, fill=as.factor(N.contexts))) + 
-  geom_bar(stat = "identity") + 
-  labs(title = "Number of contexts tagged per utterance", y="Number of utterances", x = "Context defined by") + 
-  scale_fill_discrete(name="Number of contexts")
-ggsave(filename ="contexts_per_utt_1.png" , path = "graphs/descriptives", width = 5, height = 4, units="in")
-
-HJ_no_none <- dplyr::select(HJ, -none, -N.contexts, -context) 
-HJ_no_none$N.contexts <- rowSums(dplyr::select(HJ_no_none, -utt, -orth, -phon), na.rm = TRUE)
-HJ_no_none <- extract_contexts(HJ_no_none)
-  
-hj_no_none <- dplyr::select(HJ_no_none, utt, N.contexts, context) %>%
-  mutate(method = "coder judgments")
-
-all_methods_counts_no_none <- rbind(wl_contexts, hj_no_none, lda_contexts, stm_contexts) %>% 
-  count(method, N.contexts) 
-
-ggplot(all_methods_counts_no_none, aes(y=n, x=method, fill=as.factor(N.contexts))) + 
-  geom_bar(stat = "identity") + 
-  labs(title = "Number of contexts tagged per utterance,\nnot including 'none' for coder judgments", y="Number of utterances", x = "Context defined by") + 
-  scale_fill_discrete(name="Number of contexts")
-ggsave(filename ="contexts_per_utt_2.png" , path = "graphs/descriptives", width = 5, height = 4, units="in")
-
-table(hj_contexts$N.contexts)
-table(hj_no_none$N.contexts)
-
-```
-
-
 ```{r}
-all_methods_context_count <- rbind(wl_contexts, hj_contexts, lda_contexts, stm_contexts) %>% 
-  count(method, context)
-all_methods_context_count$context <- relevel(all_methods_context_count$context, "none" )
-all_methods_context_count$context <- relevel(all_methods_context_count$context, "no context tag" )
-all_methods_context_count$context <- relevel(all_methods_context_count$context, "ambiguous" )
-
-ggplot(all_methods_context_count, aes(y=n, x=method, fill=context)) + 
-  geom_bar(stat= "identity") + 
-  scale_fill_manual(values = c("#0072B2", "#D55E00", "#E69F00", rep("#999999", length(levels(all_methods_context_count$context)) - 3)))
-
+WL <- df_WL_bin
+HJ <- df_HJ_bin
+HJ_no_none <- select(df_HJ_bin, -none)
+LDA <- df_LDA_bin
+STM <- df_STM_bin
 ```
+
 
 Printing context files for sharing with CF:
 
-```{r print_context_files}
+```{r print_context_files, eval = FALSE}
 all <- rbind(wl_contexts, hj_no_none, lda_contexts, stm_contexts) %>% 
   dplyr::select(utt, context, method) %>% 
   tidyr::extract(utt, into = c("child", "age", "utt.num"), regex = "^([[:alpha:]]{2})([[:digit:]]{2})[.]cha_([[:digit:]]+)$")
@@ -219,15 +61,6 @@ HJ <- HJ_no_none
 LDA <- LDA 
 STM <- STM 
 ```
-
-## General thoughts
-The word list method can (and does) leave large portions of the corpus uncoded, unlike the coder judgment or topic modeling definitions of context. 
-Coders were instructed to respond with "none" if they encountered a section of the corpus where they could not identify any activity context; 
-there are `r sum(df_HJ_bin$none, na.rm=TRUE)` utterances in the corpus that are above threshold for the "none" code, indicating agreement across coders that those utterances do not have an identifiable activity context. 
-This is a much smaller portion of the corpus (`r 100*round(sum(df_HJ_bin$none, na.rm=TRUE)/nrow(df), 3)`%) than the uncoded section left by the word list method (`r 100*round(length(which(WL$N.contexts == 0)) / nrow(df), 3)`%), however. 
-
-The word list and coder definitions of context naturally produce a skewed distribution of activities, whereas the topic modeling approaches discover a more uniform distribution of activities.
-To the extent that the distritbution of activities is naturally skewed (e.g. that a few activities happen very often, and many others happen rarely), topic modeling approaches to identifying activity context may distort reality.
 
 # Word list descriptives
 
@@ -268,6 +101,8 @@ WL_context_data %>%
 
 # HJ
 
+
+
 ## What raw coder tags make up each category?
 
 ```{r hj_wordle_codes, cache=TRUE}
@@ -296,7 +131,7 @@ for(k in HJ_contexts_list){
 
 ## Do "none" contexts from HJ match utterances with 0 context codes from WL?
 
-```{r none_and_0context, out.width='50%', out.height='50%'}
+```{r none_and_0context, out.width='50%', out.height='50%', eval=FALSE}
 df_HJ_none <- df_HJ_bin
 df_HJ_none$HJ_none <- ifelse(df_HJ_none$none==1, 1,
                              ifelse(df_HJ_none$none==0, 0, NA))
@@ -322,12 +157,12 @@ assocstats(tab)
 ```
 
 What percent of the "none" context utterances in HJ method are 0 context in WL?
-```{r}
+```{r, eval=F}
 sum(match$match, na.rm=TRUE) / sum(match$HJ_none, na.rm=TRUE)
 ```
 
 What percent of the 0 context utterances in WL method are "none" context in HJ?
-```{r}
+```{r, eval=F}
 sum(match$match, na.rm=TRUE) / sum(match$WL_0, na.rm=TRUE)
 ```
 
@@ -338,7 +173,7 @@ top_words_lda <- top.topic.words(lda$topics, num.words=10) %>%
   as.data.frame(stringsAsFactors = FALSE)
 colnames(top_words_lda) <- paste0("topic_", 1:ncol(top_words_lda)) 
 top_words_lda %>% 
-  kable(caption="Top words for each topic, in order")
+  kable(caption="Top words for each LDA topic, in order")
 ```
 
 
@@ -373,6 +208,9 @@ serVis(json, as.gist = TRUE)
 ```
 
 Wordles, showing the frequencies of words in the utterances assigned to each topic.
+
+
+NOTE: set font size to proportion of total codes, so it's comparable across wordles (not just biggest font for plurality)
 
 ```{r lda_wordles_count, cache=TRUE}
 cloud_from_df(df_LDA_bin, "topic_1")
