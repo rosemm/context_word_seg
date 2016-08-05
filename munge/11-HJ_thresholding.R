@@ -1,7 +1,7 @@
 
 # any additional values to be saved in the plot name can be included as extra arguments
 hj.threshold <- threshold_plots(df_HJ_prop, 
-                thresholds=seq(0,.75,.05), # what thresholds to try, 
+                thresholds=seq(0,.85,.1), # what thresholds to try, 
                 method="HJ",
                 save.to=file.path("graphs", "HJ"),
                 misc.cutoff="none") 
