@@ -7,7 +7,7 @@ hj.threshold <- threshold_plots(df_HJ_prop,
                 misc.cutoff="none") 
 
 # apply threshold
-df_HJ_bin <- apply_threshold(df_HJ_prop, hj.threshold, 
+df_HJ_bin <- apply_threshold(df_HJ_prop, .6, 
                              plot=T, method="HJ", save.to=file.path("graphs", "HJ"))
 
 write.table(df_HJ_bin, file=file.path("context_codes", "human_judgments", "contexts_HJ_bin.txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")

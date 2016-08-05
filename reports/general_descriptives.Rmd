@@ -2,23 +2,23 @@
 title: "General descriptives"
 author: "Rose Hartman"
 date: "July 31, 2016"
-output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, cache = TRUE)
 knitr::opts_knit$set(root.dir = "/Users/TARDIS/Documents/STUDIES/context_word_seg")
 ```
 
-```{r}
-getwd()
+```{r, cache=FALSE}
+# getwd()
 library(ProjectTemplate)
 load.project()
 ```
 
 # How many utterances per recording?
 
-```{r transcript_length}
+```{r transcript_length, fig.width=3.5, fig.height=3}
 transcript_lengths <- df %>% 
   as.tbl() %>% 
   extract(col=utt, into=c("child", "age", "utt"), regex="([[:alpha:]]{2})([[:digit:]]+).*_([[:digit:]]+)$", convert = TRUE) %>% 
@@ -40,7 +40,7 @@ ggsave(filename = "transcript_lengths_2.png", path = "graphs/descriptives", widt
 
 # What is the rhythm of activities like over each transcript?    
 
-Sequence plots: Show the sequence of coded contexts over time for each transcript.
+## Sequence plots: Show the sequence of coded contexts over time for each transcript.
 
 ```{r seq_plots, eval=FALSE}
 source("src/sequence_plots.R")
@@ -62,20 +62,36 @@ The coder judgments are based on sections of the corpus that were 30 utterances 
 Note that contexts with fewer than 100 total utterances across the entire corpus (less than 1% of the corpus) are not shown. This omits 1 context using the word list definition of context and 13 contexts using the coder judgments. 
 
 ## Example 1: la16
-The following are four sequence plots from one transcript (child la at 16 weeks, the longest transcript in the corpus). 
-
-Defining context using key words from the word lists:
-![](/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/WL/seqplot-WLla16.cha.png "Sequence plot for child la at 16 weeks, word list definition of context")
-Defining context using coder judgments:
-![](/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/HJ/seqplot-HJla16.cha.png "Sequence plot for child la at 16 weeks, coder judgment definition of context")
-Defining context using topics from LDA topic modeling:
-![](/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/LDA/seqplot-LDAla16.cha.png "Sequence plot for child la at 16 weeks, LDA topic modeling definition of context")
-Defining context using topics from STM topic modeling (allows for variability family to family when discovering topics):
-![](/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/STM/seqplot-STMla16.cha.png "Sequence plot for child la at 16 weeks, STM topic modeling definition of context")
-
-It is also possible to see hints of agreement across methods by examining the plots. 
+The following are four sequence plots from one transcript (child la at 16 weeks, the longest transcript in the corpus).    
+It is already possible to see hints of agreement across methods by examining the plots. 
 For example, there is a section around utterance 1300 that appears to be identified as "bath time" by human coders, includes words from the "bath" word list, and is mostly topic 8 by the STM topic modeling (that episode is not as clearly picked out by the LDA topic modeling, although perhaps topics 10 and/or 1 correspond). 
 Note that the LDA topic modeling identifies mostly one context for the duration of the transcript (topic 11), possibly getting caught on family-specific words like the child's name.
+
+### Defining context using key words from the word lists:
+```{r, echo=FALSE, out.width='\\textwidth'}
+library(png)
+library(grid)
+img <- readPNG("/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/WL/seqplot-WLla16.cha.png")
+ grid.raster(img)
+```
+
+### Defining context using coder judgments:
+```{r, echo=FALSE, out.width='\\textwidth'}
+img <- readPNG("/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/HJ/seqplot-HJla16.cha.png")
+ grid.raster(img)
+```
+
+### Defining context using topics from LDA topic modeling:
+```{r, echo=FALSE, out.width='\\textwidth'}
+img <- readPNG("/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/LDA/seqplot-LDAla16.cha.png")
+ grid.raster(img)
+```
+
+### Defining context using topics from STM topic modeling:
+```{r, echo=FALSE, out.width='\\textwidth'}
+img <- readPNG("/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/STM/seqplot-STMla16.cha.png")
+ grid.raster(img)
+```
 
 ## Example 2: gl06
 The following are four sequence plots from one transcript (child gl at 6 weeks). 
@@ -83,18 +99,35 @@ There appear to be a couple naps during this transcript: one around utterance 15
 There also appears to be a bath around utterance 550, according to the word list and coder judgment plots, although it is not marked with topic 8 in the STM plot, unlike with the previous example. 
 Again, the LDA topic modeling uses one topic heavily throughout the transcript (topic 7).
 
-Defining context using key words from the word lists:
-![](/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/WL/seqplot-WLgl06.cha.png "Sequence plot for child gl at 6 weeks, word list definition of context")
-Defining context using coder judgments:
-![](/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/HJ/seqplot-HJgl06.cha.png "Sequence plot for child gl at6 weeks, coder judgment definition of context")
-Defining context using topics from LDA topic modeling:
-![](/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/LDA/seqplot-LDAgl06.cha.png "Sequence plot for child gl at 6 weeks, LDA topic modeling definition of context")
-Defining context using topics from STM topic modeling (allows for variability family to family when discovering topics):
-![](/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/STM/seqplot-STMgl06.cha.png "Sequence plot for child gl at 6 weeks, STM topic modeling definition of context")
+### Defining context using key words from the word lists:
+```{r, echo=FALSE, out.width='\\textwidth'}
+img <- readPNG("/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/WL/seqplot-WLgl06.cha.png")
+grid.raster(img)
+```
 
-#How are the contexts distributed across families and transcripts?
+### Defining context using coder judgments:
+```{r, echo=FALSE, out.width='\\textwidth'}
+img <- readPNG("/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/HJ/seqplot-HJgl06.cha.png")
+grid.raster(img)
+```
 
-```{r contexts_by_transcript, eval=FALSE}
+### Defining context using topics from LDA topic modeling:
+```{r, echo=FALSE, out.width='\\textwidth'}
+img <- readPNG("/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/LDA/seqplot-LDAgl06.cha.png")
+grid.raster(img)
+```
+
+### Defining context using topics from STM topic modeling:
+```{r, echo=FALSE, out.width='\\textwidth'}
+img <- readPNG("/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/STM/seqplot-STMgl06.cha.png")
+grid.raster(img)
+```
+
+# How are the contexts distributed across families and transcripts?
+
+Note that all of these plots show coded utterances, so the plots that show proportion of all 
+
+```{r contexts_by_transcript}
 df_all_long <- df_all %>% 
   gather(key = "key", value = "value", -utt, -orth, -phon) %>% 
   extract(col = key, into = c("method", "context"), regex = "(^[[:upper:]]{2,3})_(.*)$", remove = FALSE) %>% 
@@ -114,7 +147,9 @@ df_keep_long <- df_all_long %>%
 contexts_by_transcript <- df_keep_long %>% 
   group_by(child, age, method, context) %>% 
   summarize(N.utts = sum(value, na.rm = TRUE))
+```
 
+```{r contexts_by_transcript_plots, eval = FALSE}
 for(m in unique(contexts_by_transcript$method)){
   plot.data <- contexts_by_transcript %>% 
     dplyr::filter(method == m) %>% 
@@ -144,7 +179,7 @@ for(m in unique(contexts_by_transcript$method)){
 }
 ```
 
-These plots show how many utterances fall in each context for each transcript (each child at each age), for each of the approaches to defining context.
+The following plots show how many utterances fall in each context for each transcript (each child at each age), for each of the approaches to defining context.
 For each approach, there is one plot showing raw number of utterances in each transcript and a second plot presenting the same information in terms of proportion of total context codes for each transcript.    
 
 One of the most important things to note in these plots is which contexts tend to be distributed more or less evenly across families and ages, and which contexts appear to be family- or age-specific. 
@@ -156,33 +191,291 @@ Because LDA lacks this flexibility, it may get caught up on common words that ar
 The most obvious example of family-specific words are the children's names, but there are several other words that, for one reason or another, appear often only in one family and not the others.
 
 ### Defining context using key words from the word lists:
-
-<img src="/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_WL.png" width="600" height="400" />
-<img src="/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_WL_prop.png" width="600" height="400" />
+```{r, echo=FALSE, fig.width=6, fig.height=4}
+img1 <- readPNG("/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_WL.png")
+grid.raster(img1)
+```
+```{r, echo=FALSE, fig.width=6, fig.height=4}
+img2 <- readPNG("/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_WL_prop.png")
+grid.raster(img2)
+```
 
 ### Defining context using coder judgments:
-
-<img src="/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_HJ.png" width="600" height="400" />
-<img src="/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_HJ_prop.png" width="600" height="400" />
+```{r, echo=FALSE, fig.width=6, fig.height=4}
+img1 <- readPNG("/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_HJ.png")
+grid.raster(img1)
+```
+```{r, echo=FALSE, fig.width=6, fig.height=4}
+img2 <- readPNG("/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_HJ_prop.png")
+grid.raster(img2)
+```
 
 ### Defining context using topics from LDA topic modeling:
-
-<img src="/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_LDA.png" width="600" height="400" />
-<img src="/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_LDA_prop.png" width="600" height="400" />
+```{r, echo = FALSE, fig.width=6, fig.height=4}
+img1 <- readPNG("/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_LDA.png")
+grid.raster(img1)
+```
+```{r, echo=FALSE, fig.width=6, fig.height=4}
+img2 <- readPNG("/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_LDA_prop.png")
+grid.raster(img2)
+```
 
 ### Defining context using topics from STM topic modeling:
+```{r, echo = FALSE, fig.width=6, fig.height=4}
+img1 <- readPNG("/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_STM.png")
+ grid.raster(img1)
+```
+```{r, echo=FALSE, fig.width=6, fig.height=4}
+ img2 <- readPNG("/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_STM_prop.png")
+ grid.raster(img2)
+```
 
-<img src="/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_STM.png" width="600" height="400" />
-<img src="/Users/TARDIS/Documents/STUDIES/context_word_seg/graphs/descriptives/contexts_by_transcripts_STM_prop.png" width="600" height="400" />
+Note that both STM and LDA topic models were run after removing [stop words](http://www.lextek.com/manuals/onix/stopwords2.html).
+Many stop words are very high frequency in samples of natural speech, so they may show up as very probably under a given topic not because of their specificity to that topic but because of their general high probability of occurring regardless of topic.   
 
-Note that both STM and LDA topic models we run after removing [stop words](http://www.lextek.com/manuals/onix/stopwords2.html).
-Many stop words are very high frequency in samples of natural speech, so they may show up as very probably under a given topic not because of their specificity to that topic but because of their general high probability of occurring regardless of topic.
+One important thing to note about the top words in LDA vs. STM topics is that family-specific words like children's names show up in the top words for LDA topics but much less for the STM topics.
 
 ```{r top_words_lda}
-top_words_lda <- top.topic.words(lda$topics, num.words=20) %>% 
+top_words_lda <- top.topic.words(lda$topics, num.words=10) %>% 
+  t() %>% 
   as.data.frame(stringsAsFactors = FALSE)
-colnames(top_words_lda) <- paste0("topic_", 1:ncol(top_words_lda)) 
+top_words_lda$Topic <- paste0("topic_", 1:nrow(top_words_lda)) 
+colnames(top_words_lda) <- c(paste("word", 2:ncol(top_words_lda)-1, sep = "_"), "Topic")
 top_words_lda %>% 
-  kable(caption="Top words for each topic, in order")
+  select(Topic, starts_with("word_")) %>% 
+  kable(caption="LDA: Top words for each topic, in order", padding = 0)
+```
+
+```{r top_words_stm}
+top_words_stm <- labelTopics(stm, n=10)$topics %>% 
+  as.data.frame(stringsAsFactors = FALSE)
+top_words_stm$Topic <- paste0("topic_", 1:nrow(top_words_stm)) 
+colnames(top_words_stm) <- c(paste("word", 2:ncol(top_words_stm)-1, sep = "_"), "Topic")
+top_words_stm %>% 
+  select(Topic, starts_with("word_")) %>% 
+  kable(caption="STM: Top words for each topic, in order", padding = 0)
+```
+
+# What is the coverage of the corpus for each approach?
+
+
+## How many utterances in each context?
+
+```{r utt_per_context}
+######
+# WL #
+######
+WL <- df_WL_bin
+WL_sum <- data.frame(context = names(colSums(dplyr::select(WL, -utt, -orth, -phon))), n=colSums(dplyr::select(WL, -utt, -orth, -phon))) %>% 
+  mutate(method="word lists") 
+WL_sum %>% 
+  select(-method) %>% 
+  arrange(desc(n)) %>% 
+  t_df() %>% 
+  kable(caption = "Number of utterances in each context: Word list approach")
+
+######
+# HJ #
+######
+HJ <- df_HJ_bin
+HJ_sum <- data.frame(context=names(colSums(dplyr::select(HJ, -utt, -orth, -phon), na.rm=TRUE)), n=colSums(dplyr::select(df_HJ_bin, -utt, -orth, -phon), na.rm=TRUE)) %>% 
+  mutate(method="coder judgments")
+HJ_sum %>% 
+  select(-method) %>% 
+  arrange(desc(n)) %>% 
+  t_df() %>% 
+  kable(caption = "Number of utterances in each context: Coder judgments approach")
+
+######
+# TM #
+######
+LDA <- df_LDA_bin
+LDA_sum <- data.frame(context=names(colSums(dplyr::select(LDA, -utt, -orth, -phon), na.rm=TRUE)), n=colSums(dplyr::select(LDA, -utt, -orth, -phon), na.rm=TRUE)) %>% 
+  mutate(method="LDA")
+LDA_sum %>% 
+  select(-method) %>% 
+  arrange(desc(n)) %>% 
+  t_df() %>% 
+  kable(caption = "Number of utterances in each context: LDA topic modeling approach")
+
+STM <- df_STM_bin
+STM_sum <- data.frame(context=names(colSums(dplyr::select(STM, -utt, -orth, -phon), na.rm=TRUE)), n=colSums(dplyr::select(STM, -utt, -orth, -phon), na.rm=TRUE)) %>% 
+  mutate(method="STM")
+STM_sum %>% 
+  select(-method) %>% 
+  arrange(desc(n)) %>% 
+  t_df() %>% 
+  kable(caption = "Number of utterances in each context: STM topic modeling approach")
+```
+
+```{r, fig.height=10}
+all_sum <- rbind(WL_sum, HJ_sum, LDA_sum, STM_sum)
+
+ggplot(all_sum, aes(y=n, x=reorder(as.factor(context), n))) + 
+  geom_bar(stat = 'identity', show.legend = FALSE) + 
+  geom_hline(aes(yintercept=nrow(df)), lty=2) + 
+  facet_wrap(~method, scales = "free_x", ncol=1) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  ggtitle("Number of utterances in each context\ndashed line shows total corpus size")
+ggsave(filename ="utts_per_context.png" , path = "graphs/descriptives", width = 5, height = 14, units="in")
+
+```
+
+## How many contexts per utterance?
+
+```{r}
+votes_per_utterance <- rowSums(select(df_HJ_raw, -utt, -orth, -phon), na.rm = TRUE)
+summary(votes_per_utterance)
+hist(votes_per_utterance, breaks = 20)
+```
+
+
+```{r context_per_utt, message = TRUE, fig.width=4, fig.height=3}
+######
+# WL #
+######
+message("WORD LISTS")
+WL$N.contexts <- rowSums(dplyr::select(WL, -utt, -orth, -phon))
+barplot(table(WL$N.contexts), main = "Word list\ncontexts per utterance")
+
+WL <- extract_contexts(WL)
+summary(WL$context) # the number of utterances in each context
+
+message("percent of corpus with > 2 contexts:")
+length(which(WL$N.contexts > 2)) / length(WL$N.contexts) # percent of corpus with > 2 contexts
+message("percent of corpus with 0 contexts:")
+length(which(WL$N.contexts == 0)) / length(WL$N.contexts) # percent of corpus with 0 contexts
+message("of the utterances tagged with some context, how many have more than 2:")
+length(which(WL$N.contexts > 2)) / length(which(WL$N.contexts > 0)) 
+message("of the utterances tagged with some context, how many have more than 1:")
+length(which(WL$N.contexts > 1)) / length(which(WL$N.contexts > 0)) 
+
+
+######
+# HJ #
+######
+message("CODER JUDGMENTS")
+HJ$N.contexts <- rowSums(dplyr::select(HJ, -utt, -orth, -phon), na.rm = TRUE)
+barplot(table(HJ$N.contexts), main = "Coder judgments\ncontexts per utterance")
+
+HJ <- extract_contexts(HJ)
+summary(HJ$context) # the number of utterances in each context
+
+message("percent of corpus with > 2 contexts:")
+length(which(HJ$N.contexts > 2)) / length(HJ$N.contexts) # percent of corpus with > 2 contexts
+message("percent of corpus with 0 contexts:")
+length(which(HJ$N.contexts == 0)) / length(HJ$N.contexts) # percent of corpus with 0 contexts
+
+######
+# TM #
+######
+message("TOPIC MODELING: LDA")
+LDA$N.contexts <- rowSums(dplyr::select(LDA, -utt, -orth, -phon), na.rm = TRUE)
+barplot(table(LDA$N.contexts), main = "LDA\ncontexts per utterance")
+
+LDA <- extract_contexts(LDA)
+summary(LDA$context) # the number of utterances in each context
+
+message("percent of corpus with > 2 contexts:")
+length(which(LDA$N.contexts > 2)) / length(LDA$N.contexts) # percent of corpus with > 2 contexts
+message("percent of corpus with 0 contexts:")
+length(which(LDA$N.contexts == 0)) / length(LDA$N.contexts) # percent of corpus with 0 contexts
+
+message("TOPIC MODELING: STM")
+STM$N.contexts <- rowSums(dplyr::select(STM, -utt, -orth, -phon), na.rm = TRUE)
+barplot(table(STM$N.contexts), main = "STM\ncontexts per utterance")
+
+STM <- extract_contexts(STM)
+summary(STM$context) # the number of utterances in each context
+
+message("percent of corpus with > 2 contexts:")
+length(which(STM$N.contexts > 2)) / length(STM$N.contexts) # percent of corpus with > 2 contexts
+message("percent of corpus with 0 contexts:")
+length(which(STM$N.contexts == 0)) / length(STM$N.contexts) # percent of corpus with 0 contexts
+```
+
+```{r contexts_per_utt_overall}
+###########
+# OVERALL #
+###########
+wl_contexts <- dplyr::select(WL, utt, N.contexts, context) %>% 
+  mutate(method = "word list")
+hj_contexts <- dplyr::select(HJ, utt, N.contexts, context) %>% 
+  mutate(method = "coder judgments")
+lda_contexts <- dplyr::select(LDA, utt, N.contexts, context) %>% 
+  mutate(method = "LDA")
+stm_contexts <- dplyr::select(STM, utt, N.contexts, context) %>% 
+  mutate(method = "STM")
+
+all_methods_counts <- rbind(wl_contexts, hj_contexts, lda_contexts, stm_contexts) %>% 
+  count(method, N.contexts) 
+
+ggplot(all_methods_counts, aes(y=n, x=method, fill=as.factor(N.contexts))) + 
+  geom_bar(stat = "identity") + 
+  labs(title = "Number of contexts tagged per utterance", y="Number of utterances", x = "Context defined by") + 
+  scale_fill_discrete(name="Number of contexts")
+ggsave(filename ="contexts_per_utt_1.png" , path = "graphs/descriptives", width = 5, height = 4, units="in")
+
+HJ_no_none <- dplyr::select(df_HJ_bin, -none) 
+HJ_no_none$N.contexts <- rowSums(dplyr::select(HJ_no_none, -utt, -orth, -phon), na.rm = TRUE)
+HJ_no_none <- extract_contexts(HJ_no_none)
+  
+hj_no_none <- dplyr::select(HJ_no_none, utt, N.contexts, context) %>%
+  mutate(method = "coder judgments")
+
+all_methods_counts_no_none <- rbind(wl_contexts, hj_no_none, lda_contexts, stm_contexts) %>% 
+  count(method, N.contexts) 
+
+ggplot(all_methods_counts_no_none, aes(y=n, x=method, fill=as.factor(N.contexts))) + 
+  geom_bar(stat = "identity") + 
+  labs(title = "Number of contexts tagged per utterance,\nnot including 'none' for coder judgments", y="Number of utterances", x = "Context defined by") + 
+  scale_fill_discrete(name="Number of contexts")
+ggsave(filename ="contexts_per_utt_2.png" , path = "graphs/descriptives", width = 5, height = 4, units="in")
+
+kable(as.data.frame(table(hj_contexts$N.contexts)), caption = "Number of contexts tagged per utterance: Coder judgment")
+kable(as.data.frame(table(hj_no_none$N.contexts)), caption = "Number of contexts tagged per utterance: Coder judgment, excluding none code")
+
+```
+
+
+```{r, eval = FALSE}
+all_methods_context_count <- rbind(wl_contexts, hj_contexts, lda_contexts, stm_contexts) %>% 
+  count(method, context)
+all_methods_context_count$context <- relevel(all_methods_context_count$context, "none" )
+all_methods_context_count$context <- relevel(all_methods_context_count$context, "no context tag" )
+all_methods_context_count$context <- relevel(all_methods_context_count$context, "ambiguous" )
+
+ggplot(all_methods_context_count, aes(y=n, x=method, fill=context)) + 
+  geom_bar(stat= "identity") + 
+  scale_fill_manual(values = c("#0072B2", "#D55E00", "#E69F00", rep("#999999", length(levels(all_methods_context_count$context)) - 3)))
+
+```
+
+The word list approach to defining context can (and does) leave large portions of the corpus uncoded, unlike the coder judgment or topic modeling definitions of context. 
+Coders were instructed to respond with "none" if they encountered a section of the corpus where they could not identify any activity context; 
+there are `r sum(df_HJ_bin$none, na.rm=TRUE)` utterances in the corpus that are above threshold for the "none" code, indicating agreement across coders that those utterances do not have an identifiable activity context. 
+This is a much smaller portion of the corpus (`r 100*round(sum(df_HJ_bin$none, na.rm=TRUE)/nrow(df), 3)`%) than the uncoded section left by the word list method (`r 100*round(length(which(WL$N.contexts == 0)) / nrow(df), 3)`%), however. 
+
+The word list and coder definitions of context naturally produce a skewed distribution of activities, whereas the topic modeling approaches discover a more uniform distribution of activities.
+To the extent that the distritbution of activities is naturally skewed (e.g. that a few activities happen very often, and many others happen rarely), topic modeling approaches to identifying activity context may distort reality.
+
+
+# Agreement across approaches of defining context
+
+```{r agreement}
+# source("src/agreement_analysis.R")
+cat_WL_HJ[[3]]
+cat_WL_LDA[[3]]
+cat_WL_STM[[3]]
+cat_HJ_STM[[3]]
+cat_HJ_LDA[[3]]
+cat_STM_LDA[[3]]
+
+v_table <- data.frame(method=c("WL","HJ", "LDA", "STM"), 
+                      WL=c(NA, cat_WL_HJ[[3]]$cramer, cat_WL_LDA[[3]]$cramer, cat_WL_STM[[3]]$cramer), 
+                      HJ=c(NA, NA, cat_HJ_LDA[[3]]$cramer, cat_HJ_STM[[3]]$cramer), 
+                      LDA=c(NA, NA, NA, cat_STM_LDA[[3]]$cramer), 
+                      STM=c(NA, NA, NA, NA))
+kable(v_table, caption = "Measure of agreement across methods (Cramer's V)")
 ```
 
