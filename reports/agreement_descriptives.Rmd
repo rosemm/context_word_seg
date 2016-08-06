@@ -99,34 +99,145 @@ WL_context_data %>%
 ```
 
 
+## What words are associated with each context?
+
+```{r wl_wordles}
+
+wordle_WL <- df_WL_bin %>% 
+  as.tbl() %>% 
+  gather(key="context", value="value", -utt, -orth, -phon) %>% 
+  dplyr::filter(value==1) %>% 
+  group_by(context)
+
+freqs_wordle_WL <- wordle_WL %>% 
+  do({
+    word.stream <- base::strsplit(paste(.$orth, collapse = " "), split = " ")[[1]]
+    word.stream <- word.stream[word.stream!=""]
+    freq <- table(word.stream)
+    data.frame(min=min(freq), Q25=quantile(freq, .25), Q50=quantile(freq, .5), Q75=quantile(freq, .75), Q90=quantile(freq, .9), Q95=quantile(freq, .95), Q99=quantile(freq, .99), max=max(freq))
+  })
+
+min.freq <- 2
+
+size.breaks <- freqs_wordle_WL %>% 
+  ungroup() %>% 
+  dplyr::select(-context) %>% 
+  summarize_all(max) %>% 
+  as.integer() %>% 
+  sort() %>% 
+  unique()
+
+if( min(size.breaks) < min.freq ){
+  i <- 1
+  while( min(size.breaks) < min.freq ) {
+    size.breaks[i] <- min.freq
+    i <- i + 1
+  }
+  size.breaks <- unique(size.breaks)
+}
+
+wordle_WL %>% 
+  do({
+    cloud_from_df(., which.context=unique(.$context), min.freq=min.freq, size.breaks=size.breaks, save.to = file.path("graphs", "WL"), note="utts", title=TRUE)
+    data.frame(NULL)
+  })
+```
+
+
 # HJ
-
-
 
 ## What raw coder tags make up each category?
 
 ```{r hj_wordle_codes, cache=TRUE}
-HJ_contexts_list <- colnames(dplyr::select(df_HJ_bin, - utt, -orth, -phon))
-
 HJ_codes_df <- HJ_processedcodes %>% 
   dplyr::mutate(value=1) %>% 
   tidyr::spread(key=category, value=value, fill=0) %>% 
   dplyr::rename(orth=context)
 
-for(k in HJ_contexts_list){
-  message(k)
-  cloud_from_df(HJ_codes_df, which.context = k, min.freq = 0)
+wordle_HJ_codes <- HJ_codes_df %>% 
+  as.tbl() %>% 
+  dplyr::select(one_of(colnames(df_HJ_bin)[colnames(df_HJ_bin) %in% colnames(HJ_codes_df)])) %>% 
+  gather(key="context", value="value", -utt, -orth) %>% 
+  dplyr::filter(context != "none") %>% # excluding "none" codes
+  dplyr::filter(value==1) %>% 
+  group_by(context)
+
+freqs_wordle_HJ_codes <- wordle_HJ_codes %>% 
+  do({
+    freq <- table(.$orth)
+    data.frame(min=min(freq), Q25=quantile(freq, .25), Q50=quantile(freq, .5), Q75=quantile(freq, .75), Q90=quantile(freq, .9), Q95=quantile(freq, .95), Q99=quantile(freq, .99), max=max(freq))
+  })
+
+min.freq <- 2
+
+size.breaks <- freqs_wordle_HJ_codes %>% 
+  ungroup() %>% 
+  dplyr::select(-context) %>% 
+  summarize_all(max) %>% 
+  as.integer() %>% 
+  unique()
+size.breaks <- sort(unique(c(min(freqs_wordle_HJ_codes$min), median(freqs_wordle_HJ_codes$min), size.breaks)))
+if( min(size.breaks) < min.freq ){
+  i <- 1
+  while( min(size.breaks) < min.freq ) {
+    size.breaks[i] <- min.freq
+    i <- i + 1
+  }
+  size.breaks <- unique(size.breaks)
 }
+
+
+wordle_HJ_codes %>% 
+  do({
+    cloud_from_df(., which.context=unique(.$context), min.freq=min.freq, size.breaks=size.breaks, save.to = file.path("graphs", "HJ"), note="codes", standardize.font=FALSE)
+    data.frame(NULL)
+  })
+  
 ```
 
 ## What words are associated with each category?
 
-```{r hj_wordle_orth, cache=TRUE}
+```{r hj_wordle_orth}
 
-for(k in HJ_contexts_list){
-  message(k)
-  cloud_from_df(df_HJ_bin, k)
+wordle_HJ <- df_HJ_bin %>% 
+  as.tbl() %>% 
+  gather(key="context", value="value", -utt, -orth, -phon) %>% 
+  dplyr::filter(value==1) %>% 
+  group_by(context)
+
+freqs_wordle_HJ <- wordle_HJ %>% 
+  do({
+    word.stream <- base::strsplit(paste(.$orth, collapse = " "), split = " ")[[1]]
+    word.stream <- word.stream[word.stream!=""]
+    freq <- table(word.stream)
+    data.frame(min=min(freq), Q25=quantile(freq, .25), Q50=quantile(freq, .5), Q75=quantile(freq, .75), Q90=quantile(freq, .9), Q95=quantile(freq, .95), Q99=quantile(freq, .99), max=max(freq))
+  })
+
+min.freq <- 2
+
+size.breaks <- freqs_wordle_HJ %>% 
+  ungroup() %>% 
+  dplyr::select(-context) %>% 
+  summarize_all(max) %>% 
+  as.integer() %>% 
+  sort() %>% 
+  unique()
+
+if( min(size.breaks) < min.freq ){
+  i <- 1
+  while( min(size.breaks) < min.freq ) {
+    size.breaks[i] <- min.freq
+    i <- i + 1
+  }
+  size.breaks <- unique(size.breaks)
 }
+
+wordle_HJ %>% 
+  do({
+    cloud_from_df(., which.context=unique(.$context), min.freq=min.freq, size.breaks=size.breaks, save.to = file.path("graphs", "HJ"), note="utts", title=TRUE)
+    data.frame(NULL)
+  })
+  
 ```
 
 ## Do "none" contexts from HJ match utterances with 0 context codes from WL?
@@ -213,18 +324,44 @@ Wordles, showing the frequencies of words in the utterances assigned to each top
 NOTE: set font size to proportion of total codes, so it's comparable across wordles (not just biggest font for plurality)
 
 ```{r lda_wordles_count, cache=TRUE}
-cloud_from_df(df_LDA_bin, "topic_1")
-cloud_from_df(df_LDA_bin, "topic_2")
-cloud_from_df(df_LDA_bin, "topic_3")
-cloud_from_df(df_LDA_bin, "topic_4")
-cloud_from_df(df_LDA_bin, "topic_5")
-cloud_from_df(df_LDA_bin, "topic_6")
-cloud_from_df(df_LDA_bin, "topic_7")
-cloud_from_df(df_LDA_bin, "topic_8")
-cloud_from_df(df_LDA_bin, "topic_9")
-cloud_from_df(df_LDA_bin, "topic_10")
-cloud_from_df(df_LDA_bin, "topic_11")
-cloud_from_df(df_LDA_bin, "topic_12")
+
+wordle_LDA <- df_LDA_bin %>% 
+  as.tbl() %>% 
+  gather(key="context", value="value", -utt, -orth, -phon) %>% 
+  dplyr::filter(value==1) %>% 
+  group_by(context)
+
+freqs_wordle_LDA <- wordle_LDA %>% 
+  do({
+    word.stream <- base::strsplit(paste(.$orth, collapse = " "), split = " ")[[1]]
+    word.stream <- word.stream[word.stream!=""]
+    freq <- table(word.stream)
+    data.frame(min=min(freq), Q25=quantile(freq, .25), Q50=quantile(freq, .5), Q75=quantile(freq, .75), Q90=quantile(freq, .9), Q95=quantile(freq, .95), Q99=quantile(freq, .99), max=max(freq))
+  })
+
+min.freq <- 2
+
+size.breaks <- freqs_wordle_LDA %>% 
+  ungroup() %>% 
+  dplyr::select(-context) %>% 
+  summarize_all(max) %>% 
+  as.integer() %>% 
+  sort() %>% 
+  unique()
+
+if( min(size.breaks) < min.freq ){
+  i <- 1
+  while( min(size.breaks) < min.freq ) {
+    size.breaks[i] <- min.freq
+    i <- i + 1
+  }
+  size.breaks <- unique(size.breaks)
+}
+wordle_LDA %>% 
+  do({
+    cloud_from_df(., which.context=unique(.$context), min.freq=min.freq, size.breaks=size.breaks, save.to = file.path("graphs", "LDA"), note="utts", standardize.font=TRUE, title=TRUE)
+    data.frame(NULL)
+  })
 ```
 
 # Topic modeling: STM
@@ -239,34 +376,53 @@ toLDAvis(stm, TM_doc_prep_out$documents, as.gist = TRUE) # This function does no
 ```
 
 Wordles, showing the probability of each word given the topic.
-```{r stm_wordles_prob, cache=TRUE}
-cloud(stm, topic=1)
-cloud(stm, topic=2)
-cloud(stm, topic=3)
-cloud(stm, topic=4)
-cloud(stm, topic=5)
-cloud(stm, topic=6)
-cloud(stm, topic=7)
-cloud(stm, topic=8)
-cloud(stm, topic=9)
-cloud(stm, topic=10)
-cloud(stm, topic=11)
-cloud(stm, topic=12)
+```{r stm_wordles_prob, eval=FALSE}
+for(k in 1:stm$settings$dim$K){
+  cloud(stm, topic=k)
+  dev.copy2pdf(file=file.path("graphs","STM", paste0("wordcloud_probs_topic_", k, ".pdf")), width=5, height=4)
+  dev.off()
+}
 ```
 
 Wordles, showing the frequencies of words in the utterances assigned to each topic.
 
 ```{r stm_wordles_count, cache=TRUE}
-cloud_from_df(df_STM_bin, "topic_1")
-cloud_from_df(df_STM_bin, "topic_2")
-cloud_from_df(df_STM_bin, "topic_3")
-cloud_from_df(df_STM_bin, "topic_4")
-cloud_from_df(df_STM_bin, "topic_5")
-cloud_from_df(df_STM_bin, "topic_6")
-cloud_from_df(df_STM_bin, "topic_7")
-cloud_from_df(df_STM_bin, "topic_8")
-cloud_from_df(df_STM_bin, "topic_9")
-cloud_from_df(df_STM_bin, "topic_10")
-cloud_from_df(df_STM_bin, "topic_11")
-cloud_from_df(df_STM_bin, "topic_12")
+wordle_STM <- df_STM_bin %>% 
+  as.tbl() %>% 
+  gather(key="context", value="value", -utt, -orth, -phon) %>% 
+  dplyr::filter(value==1) %>% 
+  group_by(context)
+
+freqs_wordle_STM <- wordle_STM %>% 
+  do({
+    word.stream <- base::strsplit(paste(.$orth, collapse = " "), split = " ")[[1]]
+    word.stream <- word.stream[word.stream!=""]
+    freq <- table(word.stream)
+    data.frame(min=min(freq), Q25=quantile(freq, .25), Q50=quantile(freq, .5), Q75=quantile(freq, .75), Q90=quantile(freq, .9), Q95=quantile(freq, .95), Q99=quantile(freq, .99), max=max(freq))
+  })
+
+min.freq <- 2
+
+size.breaks <- freqs_wordle_STM %>% 
+  ungroup() %>% 
+  dplyr::select(-context) %>% 
+  summarize_all(max) %>% 
+  as.integer() %>% 
+  sort() %>% 
+  unique()
+
+if( min(size.breaks) < min.freq ){
+  i <- 1
+  while( min(size.breaks) < min.freq ) {
+    size.breaks[i] <- min.freq
+    i <- i + 1
+  }
+  size.breaks <- unique(size.breaks)
+}
+wordle_STM %>% 
+  do({
+    cloud_from_df(., which.context=unique(.$context), min.freq=min.freq, size.breaks=size.breaks, save.to = file.path("graphs", "STM"), note="utts", standardize.font=TRUE, title=TRUE)
+    data.frame(NULL)
+  })
+
 ```
