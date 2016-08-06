@@ -15,52 +15,10 @@ load.project()
 ```{r}
 WL <- df_WL_bin
 HJ <- df_HJ_bin
-HJ_no_none <- select(df_HJ_bin, -none)
 LDA <- df_LDA_bin
 STM <- df_STM_bin
 ```
 
-
-Printing context files for sharing with CF:
-
-```{r print_context_files, eval = FALSE}
-all <- rbind(wl_contexts, hj_no_none, lda_contexts, stm_contexts) %>% 
-  dplyr::select(utt, context, method) %>% 
-  tidyr::extract(utt, into = c("child", "age", "utt.num"), regex = "^([[:alpha:]]{2})([[:digit:]]{2})[.]cha_([[:digit:]]+)$")
-
-all$utt.num <- as.numeric(all$utt.num)
-  
-all %>% 
-  dplyr::filter(method=="word list") %>% 
-  tidyr::spread(key=utt.num, value=context) %>% 
-  dplyr::select(-method) %>% 
-  write.csv("/Users/TARDIS/Dropbox/2_RoseM_TP/context_files/contexts_file_WL.csv", row.names=FALSE)
-all %>% 
-  dplyr::filter(method=="coder judgments") %>% 
-  tidyr::spread(key=utt.num, value=context) %>% 
-  dplyr::select(-method) %>% 
-  write.csv("/Users/TARDIS/Dropbox/2_RoseM_TP/context_files/contexts_file_HJ.csv", row.names=FALSE)  
-all %>% 
-  dplyr::filter(method=="LDA") %>% 
-  tidyr::spread(key=utt.num, value=context) %>% 
-  dplyr::select(-method) %>% 
-  write.csv("/Users/TARDIS/Dropbox/2_RoseM_TP/context_files/contexts_file_LDA.csv", row.names=FALSE)
-all %>% 
-  dplyr::filter(method=="STM") %>% 
-  tidyr::spread(key=utt.num, value=context) %>% 
-  dplyr::select(-method) %>% 
-  write.csv("/Users/TARDIS/Dropbox/2_RoseM_TP/context_files/contexts_file_STM.csv", row.names=FALSE)  
-```
-
-## Select context files to use
-
-Dropping "none" codes from HJ.
-```{r rop_none_codes}
-WL <- WL
-HJ <- HJ_no_none
-LDA <- LDA 
-STM <- STM 
-```
 
 # Word list descriptives
 
@@ -136,7 +94,7 @@ if( min(size.breaks) < min.freq ){
   size.breaks <- unique(size.breaks)
 }
 
-wordle_WL %>% 
+temp <- wordle_WL %>% 
   do({
     cloud_from_df(., which.context=unique(.$context), min.freq=min.freq, size.breaks=size.breaks, save.to = file.path("graphs", "WL"), note="utts", title=TRUE)
     data.frame(NULL)
@@ -187,7 +145,7 @@ if( min(size.breaks) < min.freq ){
 }
 
 
-wordle_HJ_codes %>% 
+temp <- wordle_HJ_codes %>% 
   do({
     cloud_from_df(., which.context=unique(.$context), min.freq=min.freq, size.breaks=size.breaks, save.to = file.path("graphs", "HJ"), note="codes", standardize.font=FALSE)
     data.frame(NULL)
@@ -232,7 +190,7 @@ if( min(size.breaks) < min.freq ){
   size.breaks <- unique(size.breaks)
 }
 
-wordle_HJ %>% 
+temp <- wordle_HJ %>% 
   do({
     cloud_from_df(., which.context=unique(.$context), min.freq=min.freq, size.breaks=size.breaks, save.to = file.path("graphs", "HJ"), note="utts", title=TRUE)
     data.frame(NULL)
@@ -357,7 +315,7 @@ if( min(size.breaks) < min.freq ){
   }
   size.breaks <- unique(size.breaks)
 }
-wordle_LDA %>% 
+temp <- wordle_LDA %>% 
   do({
     cloud_from_df(., which.context=unique(.$context), min.freq=min.freq, size.breaks=size.breaks, save.to = file.path("graphs", "LDA"), note="utts", standardize.font=TRUE, title=TRUE)
     data.frame(NULL)
@@ -419,7 +377,7 @@ if( min(size.breaks) < min.freq ){
   }
   size.breaks <- unique(size.breaks)
 }
-wordle_STM %>% 
+temp <- wordle_STM %>% 
   do({
     cloud_from_df(., which.context=unique(.$context), min.freq=min.freq, size.breaks=size.breaks, save.to = file.path("graphs", "STM"), note="utts", standardize.font=TRUE, title=TRUE)
     data.frame(NULL)
