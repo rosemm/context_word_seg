@@ -15,7 +15,7 @@ cat_agreement <- function(cat.codes){
     dplyr::filter(include==1) %>% 
     dplyr::select(-include)
   
-  freqs <- full_join(cat1.long, cat2.long, by="utt")
+  freqs <- full_join(cat1.long, cat2.long, by=c("utt", "orth", "phon"))
   
   freqs <- freqs %>% 
     count(cat1, cat2)
