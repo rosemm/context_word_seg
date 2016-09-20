@@ -16,6 +16,7 @@ paper.tex
 paper.ttt
 library.bib
 add.cites.bib
+graphs/
 transcripts/
 .DS_Store
 coding_doc.txt
@@ -57,3 +58,5 @@ syl_dists
 topicmodeling_example.R
 simulations.R
 .httr-oauth
+reports/*_cache
+reports/*_files
