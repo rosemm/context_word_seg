@@ -150,13 +150,11 @@ temp <- wordle_HJ_codes %>%
     cloud_from_df(., which.context=unique(.$context), min.freq=min.freq, size.breaks=size.breaks, save.to = file.path("graphs", "HJ"), note="codes", standardize.font=FALSE)
     data.frame(NULL)
   })
-  
 ```
 
 ## What words are associated with each category?
 
 ```{r hj_wordle_orth}
-
 wordle_HJ <- df_HJ_bin %>% 
   as.tbl() %>% 
   gather(key="context", value="value", -utt, -orth, -phon) %>% 
@@ -384,3 +382,34 @@ temp <- wordle_STM %>%
   })
 
 ```
+
+Initial plan was to undertake continuous version of these analyses as well, but that isn't possible. 
+Note that one would not expect the continuous and categorical versions of the anlayses to diverge very much, for a variety of reasons [...]. 
+
+# Assessing overlap across all three methods: LCA
+```{r}
+cat_WL_HJ[[3]]
+cat_WL_LDA[[3]]
+cat_WL_STM[[3]]
+cat_HJ_STM[[3]]
+cat_HJ_LDA[[3]]
+cat_STM_LDA[[3]]
+
+v_table <- data.frame(method=c("WL","HJ", "LDA", "STM"), 
+                      WL=c(NA, cat_WL_HJ[[3]]$cramer, cat_WL_LDA[[3]]$cramer, cat_WL_STM[[3]]$cramer), 
+                      HJ=c(NA, NA, cat_HJ_LDA[[3]]$cramer, cat_HJ_STM[[3]]$cramer), 
+                      LDA=c(NA, NA, NA, cat_STM_LDA[[3]]$cramer), 
+                      STM=c(NA, NA, NA, NA))
+kable(v_table, caption = "Measure of agreement across methods (Cramer's V)")
+
+
+# including LCA
+v_table <- data.frame(method=c("WL","HJ", "STM", "LCA"), 
+                      WL=c(NA, cat_WL_HJ[[3]]$cramer, cat_WL_STM[[3]]$cramer, cat_LCA_WL[[3]]$cramer), 
+                      HJ=c(NA, NA, cat_HJ_STM[[3]]$cramer, cat_LCA_HJ[[3]]$cramer), 
+                      STM=c(NA, NA, NA, cat_LCA_STM[[3]]$cramer), 
+                      LCA=c(NA, NA, NA, NA))
+kable(v_table, caption = "Measure of agreement across methods (Cramer's V)")
+```
+
+
