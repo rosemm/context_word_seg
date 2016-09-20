@@ -5,7 +5,7 @@
 # use blank_doc to turn all of the transcripts into one neat dataframe (but omit the coder columns)
 df <- blank_doc(wd = "corpora/transcripts/", for.coding = FALSE) %>%
   unite(utt, file, UttNum) %>%
-  select(utt, orth=utterance)
+  dplyr::select(utt, orth=utterance)
 
 # delete the 7 utterances with "unintelligible" content
 # (note that that this corpus does not adhere to all modern CHAT guidelines for indicating, for example, untranscribable speech)
