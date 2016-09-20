@@ -15,7 +15,8 @@ for(k in names(WL_contexts) ){
 }
 df_WL <- left_join(df, temp.codes, by="orth") # join temp.codes back to full df
 
-df_WL <- expand_windows(df_WL, context.names=names(WL_contexts)) # extend context codes 2 utterances before and after each hit
+df_WL <- expand_windows(df_WL, context.names=names(WL_contexts)) %>%  # extend context codes 2 utterances before and after each hit
+  filter( !grepl(x=utt, pattern="hi.*") ) # remove this child, since the transcripts are so short
 
 write.table(df_WL, file="context_codes/word_lists/df_WL.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 cache('df_WL')
