@@ -10,7 +10,7 @@ dict.add <- data.frame(word=    c("shh", "ssh", "mummie", "mummie's", "mummmy's"
                        old.word=c("sh",  "sh",  "mummy",  "mummy's",  "mummy's",  "mummy'll",  "telly",  "handy",  "potty",  "bathy",  "rusky",  "heady",  "chinny",  "hanky",  "nappy",  "drinkee", "roley", "roley",  "poley", "poley",  "dearie", "hiccup",   "hiccups",   "pooh", "lu",  "hmm",  "er",  "eh",  "ha",  "mm",  "aah", "uh",  "ha",   "wee",  "treazh", "he",  "ooh"),
                        stringsAsFactors = FALSE)
 dict.add <- left_join(dict.add, dict, by=c("old.word"="word")) %>% 
-  select(- old.word)
+  dplyr::select(- old.word)
 
 dict <- full_join(dict, dict.add, by = c("word", "phon"))
 

@@ -7,6 +7,7 @@ hj.threshold <- threshold_plots(df_HJ_prop,
                 misc.cutoff="none") 
 
 # apply threshold
+# .6 means 3/5 coders must agree
 df_HJ_bin <- apply_threshold(df_HJ_prop, .6, 
                              plot=T, method="HJ", save.to=file.path("graphs", "HJ"))
 

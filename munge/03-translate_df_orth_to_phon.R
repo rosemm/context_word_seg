@@ -65,4 +65,6 @@ write.table(df, file="utt_orth_phon_KEY.txt", quote=F, col.names=T, row.names=F,
 df$orth <- tolower(df$orth) # make sure the orth stream is all lower case
 df$phon <- gsub(x=df$phon, pattern="-", replacement=" ", fixed=TRUE) # make sure all word-internal syllable boundaries "-" are represnted just the same as between-word syllable boundaries (space)
 
+df <- filter(df, !grepl(x=utt, pattern= "hi.*")) # remove this child, since the transcripts are so short
+
 cache('df')
