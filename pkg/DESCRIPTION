@@ -1,6 +1,6 @@
-Package:	context_word_seg
+Package:	contextwordseg
 Version:	0.1
-Date:	Tue Sep 20 12:53:50 2016
+Date:	Tue Sep 20 12:58:16 2016
 Title:	Functions for dissertation on context and word segmentation
 Description:	
 Author:	Rose M Hartman <rosem@uoregon.edu>
