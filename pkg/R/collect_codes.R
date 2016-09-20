@@ -1,3 +1,4 @@
+#' @export
 collect_codes <- function(){
   
   docs <- dir(pattern="coding_doc.txt", recursive=TRUE)

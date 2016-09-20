@@ -1,4 +1,4 @@
-
+#' @export
 clean_categories <- function(doc, dir, key_file="categories_cleaning_keys.txt", interactive = TRUE ){
   # check if any context codes are missing from the categories key, and if so add them
   new_codes(raw_codes=unique(doc$context), cols=c("context_clean", "category"), file.path(dir, key_file), interactive)
@@ -27,7 +27,7 @@ clean_categories <- function(doc, dir, key_file="categories_cleaning_keys.txt", 
   
   # only keep one of the same category code per coder per day (i.e. if there's more than one hit from the same coder on the same day for the same category, collapse it)
   clean_doc <- cat.check %>% 
-    select( utt, coder, date, category ) # drop the extra columns
+    dplyr::select( utt, coder, date, category ) # drop the extra columns
   
   return(list(doc=doc, clean_doc=clean_doc))
 }

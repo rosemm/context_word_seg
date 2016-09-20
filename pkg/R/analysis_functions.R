@@ -1,6 +1,4 @@
-
-
-
+#' @export
 read_batch <- function(dir, quiet=TRUE){
   # dir="nontexts_WL-files"
   jobs <- list.files(paste0(dir, "/jobs"))
@@ -16,6 +14,7 @@ read_batch <- function(dir, quiet=TRUE){
   return(results)
 }
 
+#' @export
 process_batch_results <- function(id, dir, combine=c("rbind", "list")){
   # only works in the original working directory where BatchJobs was run (i.e. on ACISS)
   results <- data.frame(V1=NULL)
@@ -39,6 +38,7 @@ process_batch_results <- function(id, dir, combine=c("rbind", "list")){
   # saveRDS(results, file=paste0("batchresults_WL.rds") )
 }
 
+#' @export
 clean_batch_results <- function(results){
   # combine and organize results
   
@@ -105,6 +105,7 @@ clean_batch_results <- function(results){
   return(list(sim.results=sim.results, MIs=MIs, TPs=TPs))
 }
 
+#' @export
 plot_context_vs_nontext <- function(context, nontext, global, outcome, Z.score=FALSE, methods.to.use=c("WL", "LDA", "HJ"), print.tests=FALSE, annotate=NULL, xlabs=FALSE, save.to, ...){
   stopifnot(sort(unique(context$cutoff)) == sort(unique(nontext$cutoff)))
   if(!is.null(global)) stopifnot(sort(unique(context$cutoff)) == sort(unique(global$cutoff)))
@@ -193,7 +194,7 @@ plot_context_vs_nontext <- function(context, nontext, global, outcome, Z.score=F
   }
 }
 
-
+#' @export
 test_context_vs_nontext <- function(context, nontext, outcome){
   # rename the outcome variable as "outcome"
   facet <- length(levels(context[, colnames(context)==outcome])) > 1 # is there is more than one level for outcome?
@@ -242,6 +243,7 @@ test_context_vs_nontext <- function(context, nontext, outcome){
   return(tests.contexts)
 }
 
+#' @export
 plot_seg_results <- function(seg.results, title=NULL, boxplot=TRUE, scatterplot=FALSE, by=c("syl", "contexts")){
   # add break by N.syl option (check whether 1, 2, + syllable words are getting segmented correctly)
   plot <- ggplot(seg.results, aes(x=seg.result, y=freq.segd)) 
@@ -256,6 +258,7 @@ plot_seg_results <- function(seg.results, title=NULL, boxplot=TRUE, scatterplot=
   return(plot)
 }
 
+#' @export
 results_descriptives <- function(data, criterion=c("MI85", "TP85"), context="global"){
   N.syl <- data$streams$N.syl
   words.tokens <- length(data$streams$orth.stream)
@@ -291,6 +294,7 @@ results_descriptives <- function(data, criterion=c("MI85", "TP85"), context="glo
   return(descriptives)
 }
 
+#' @export
 corpus_decriptives <- function(corpus, data, contexts, dict){
   ##############################
   # what's the frequency of each word, and is it a seed word?
@@ -371,6 +375,7 @@ corpus_decriptives <- function(corpus, data, contexts, dict){
   return(list(word.freq=freqs, syls.per.utt=syls.per.utt, syl.summary=summary)) 
 }
 
+#' @export
 network_plot <- function(data=NULL, context=NULL, title=""){
   if(!is.null(data)){
     unique.phon.pairs <- data$unique.phon.pairs
@@ -437,6 +442,7 @@ network_plot <- function(data=NULL, context=NULL, title=""){
   return(plot.igraph(bsk.network, vertex.label="", main=title))
 }
 
+#' @export
 add_stars <- function(tests){
   # add stars for significance to a table with p values
   tests$stars <- ifelse(tests$p.val < .001, "***",
@@ -446,6 +452,7 @@ add_stars <- function(tests){
   return(tests)
 }
 
+#' @export
 syllable_dist <- function(df, dict, method="global", save.to=NULL, global=FALSE){
   stopifnot(require(dplyr), require(tidyr))
   

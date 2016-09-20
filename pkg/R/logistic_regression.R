@@ -1,4 +1,4 @@
-
+#' @export
 logistic_regressions <- function(all.methods, outcome_method, predictor_method, min.N.utt=0, save.to, ...){
   stopifnot(require(dplyr), require(tidyr))
   

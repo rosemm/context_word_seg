@@ -1,3 +1,4 @@
+#' @export
 # agreement analysis functions
 cat_agreement <- function(cat.codes, adj=TRUE){
   

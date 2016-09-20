@@ -1,3 +1,4 @@
+#' @export
 new_codes <- function( raw_codes, cols=c("raw", "clean"), key_file, interactive ){
   message(paste0("Checking to see if we need to update the cleaning key ", key_file, "...")) 
   

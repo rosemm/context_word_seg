@@ -1,3 +1,4 @@
+#' @export
 doc_doctor <- function(recursive=T){
   if(!require(dplyr) ) install.packages("dplyr")
   docs <- dir(pattern="coding_doc.txt", recursive=recursive)

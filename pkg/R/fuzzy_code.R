@@ -1,3 +1,4 @@
+#' @export
 fuzzy_code <- function(df_bin){
   # fuzzy coding a la Greenacre, 1984
   

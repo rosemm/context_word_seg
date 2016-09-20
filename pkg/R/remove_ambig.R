@@ -1,3 +1,4 @@
+#' @export
 remove_ambig <- function(df){
   # remove cases that have ambiguous codes within context approach (more than 1 context tagged)
   df$tot <- df %>% 

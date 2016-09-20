@@ -1,3 +1,4 @@
+#' @export
 extract_contexts <- function(df){
   df$context <- ifelse(df$N.contexts > 1, "ambiguous", 
                        ifelse(df$N.contexts == 0, "no context tag", 
@@ -21,4 +22,3 @@ extract_contexts <- function(df){
   
   return(df)
 }
-

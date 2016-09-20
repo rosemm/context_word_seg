@@ -1,4 +1,5 @@
-seq_plots <- function(df, method=c("WL", "HJ", "LDA", "STM"), min.utts=0){
+#' @export
+seq_plots <- function(df, method=c("WL", "HJ", "LDA", "STM", "LCA"), min.utts=0){
   
   df_seq <- gather(df, key=context, value=value, -orth, -phon, -utt) %>%
     separate(col=utt, into=c("file", "UttNum"), sep="_", remove=FALSE)
@@ -18,13 +19,13 @@ seq_plots <- function(df, method=c("WL", "HJ", "LDA", "STM"), min.utts=0){
   # sequence plots for each file separately
   files <- unique(df_seq$file)
   for (f in files){
-    data <- dplyr::filter(df_seq, file == f, context != "misc", context !="none") %>% 
+    data <- dplyr::filter(df_seq, file == f & context != "misc" & context !="none") %>% 
       dplyr::filter(!is.na(value))
     
     ggplot(data) +
       geom_point(aes(x=UttNum, y=context, color=context, alpha=value), size=4, shape="|", show.legend=F) + 
       scale_shape_identity() +
-      labs(y=NULL, x="Utterance number")
+      labs(y=NULL, x="Utterance number") 
     ggsave( file.path("graphs", method, paste0("seqplot-", method, f, ".png")), width=9, height=3, units="in" )
   }
 }

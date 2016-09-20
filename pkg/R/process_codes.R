@@ -1,4 +1,4 @@
-
+#' @export
 process_codes <- function(doc, min.codes=10, max.codes=10, unique.coders){
   if(!require(tidyr)) install.packages("tidyr"); library(tidyr)
   if(!require(dplyr)) install.packages("dplyr"); library(dplyr)

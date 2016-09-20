@@ -1,3 +1,4 @@
+#' @export
 searchK <- function(documents, vocab, K, init.type = "Spectral", 
                     N=floor(.1*length(documents)), proportion=.5, 
                     heldout.seed=NULL,

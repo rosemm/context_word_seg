@@ -1,3 +1,4 @@
+#' @export
 apply_threshold <- function(df_prop, threshold, plots=FALSE, method=NULL, save.to=NULL){
   
   stopifnot(require(dplyr), require(tidyr))

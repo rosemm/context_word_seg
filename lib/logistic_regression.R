@@ -1,4 +1,4 @@
-
+#' @export
 logistic_regressions <- function(all.methods, outcome_method, predictor_method, min.N.utt=0, save.to, ...){
   stopifnot(require(dplyr), require(tidyr))
   
@@ -21,7 +21,9 @@ logistic_regressions <- function(all.methods, outcome_method, predictor_method, 
   preds_bin <- all.methods %>% 
     dplyr::select(starts_with(predictor_bin))
   keep_predictors <- colnames(preds_bin)[colSums(preds_bin, na.rm = TRUE) > min.N.utt] # extract the column names with greater than min.N.utt 
-  keep_predictors <- gsub(x=keep_predictors, pattern = "[.]bin", replacement = ".con") # switch them back to continuous column names
+  if( grepl(x=predictor_method, pattern = "[.]con") ){
+    keep_predictors <- gsub(x=keep_predictors, pattern = "[.]bin", replacement = ".con") # switch them back to continuous column names
+  }
   
   predictors <- vars %>% 
     dplyr::select(one_of(keep_predictors)) %>% 

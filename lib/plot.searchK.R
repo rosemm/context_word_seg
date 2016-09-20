@@ -1,3 +1,4 @@
+#' @export
 plot.searchK<-function(x, ...){
   oldpar <- par(no.readonly=TRUE)
   g <- x$results

@@ -1,4 +1,4 @@
-
+#' @export
 update_doc <- function(doc, criterion, unique.coders){
   # update an existing, partially coded document, to focus coders on the thin parts
   

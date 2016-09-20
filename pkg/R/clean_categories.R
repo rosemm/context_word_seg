@@ -1,4 +1,4 @@
-
+#' @export
 clean_categories <- function(doc, dir, key_file="categories_cleaning_keys.txt", interactive = TRUE ){
   # check if any context codes are missing from the categories key, and if so add them
   new_codes(raw_codes=unique(doc$context), cols=c("context_clean", "category"), file.path(dir, key_file), interactive)

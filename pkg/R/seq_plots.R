@@ -1,3 +1,4 @@
+#' @export
 seq_plots <- function(df, method=c("WL", "HJ", "LDA", "STM", "LCA"), min.utts=0){
   
   df_seq <- gather(df, key=context, value=value, -orth, -phon, -utt) %>%

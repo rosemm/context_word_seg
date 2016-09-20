@@ -1,4 +1,4 @@
-
+#' @export
 nontext_cols <- function(df){
   non <- dplyr::select(df, -utt, -orth, -phon)
   message(paste("nontext_cols using all but the following columns:", paste(colnames(df)[!colnames(df) %in% colnames(non)], collapse=", ")))
@@ -14,6 +14,7 @@ nontext_cols <- function(df){
   return(non)
 }  
 
+#' @export
 sample_probs <- function(df){
   sample <- dplyr::select(df, -utt, -orth, -phon)
   # change probabilities into 1 or 0 probabalistically based on their values
@@ -28,7 +29,8 @@ sample_probs <- function(df){
   }
   return(sample)
 }
-  
+
+#' @export  
 expand_windows <- function(df, context.names){
   contextcols <- which(colnames(df) %in% context.names)
   stopifnot(require(dplyr), require(tidyr))
@@ -82,7 +84,8 @@ expand_windows <- function(df, context.names){
   return(df)
 }
 
-calc_MI = function(phon.pairs, phon.stream, MI=TRUE, TP=TRUE){
+#' @export
+calc_MI <- function(phon.pairs, phon.stream, MI=TRUE, TP=TRUE){
   # mutual information, and transitional probabilty. See Swingley (2005) p97
 
   stopifnot(require(tidyr))
@@ -149,7 +152,8 @@ calc_MI = function(phon.pairs, phon.stream, MI=TRUE, TP=TRUE){
   return(output)
 }
 
-make_streams = function(df, seg.utts=TRUE){
+#' @export
+make_streams <- function(df, seg.utts=TRUE){
   if(seg.utts) phon.utts <- paste(df$phon, "###") # add utterance boundary marker to the end of every utterance
   if(!seg.utts)  phon.utts <- df$phon
   
@@ -194,6 +198,7 @@ make_streams = function(df, seg.utts=TRUE){
   return(output)
 }
 
+#' @export
 seg <- function(phon.stream, unique.phon.pairs, seg.utts=TRUE, quiet=TRUE){
   if(!quiet) message("leave utterance boundaries? ", seg.utts)
   
@@ -237,6 +242,7 @@ seg <- function(phon.stream, unique.phon.pairs, seg.utts=TRUE, quiet=TRUE){
   return(seg.phon.stream)
 }
 
+#' @export
 segment_speech <- function(cutoff, stat, data, consider.freq=FALSE, seg.utts=TRUE, quiet=TRUE){
   unique.phon.pairs <- as.tbl(data$unique.phon.pairs) # making it a tbl for speed
   phon.stream <- data$streams$phon.stream
@@ -288,6 +294,7 @@ segment_speech <- function(cutoff, stat, data, consider.freq=FALSE, seg.utts=TRU
   return(list(seg.phon.stream=seg.phon.stream, freq.cutoff=freq.cutoff))
 }
 
+#' @export
 assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embedding.rule=FALSE, trisyl.limit=FALSE){
   words <- streams$words
   # extract units from segmented stream
@@ -409,6 +416,7 @@ assess_seg <- function(seg.phon.stream, streams, dict, freq.cutoff=NULL, embeddi
   return(results)
 }
 
+#' @export
 measure_continuity <- function(df, verbose){
   stopifnot(require(dplyr))
   if(ncol(df) > 3){
@@ -467,6 +475,7 @@ measure_continuity <- function(df, verbose){
   else return(continuity.stats)
 }
 
+#' @export
 # make an artificial language
 make_corpus <- function(dist=c("unif", "skewed"), N.utts=1000, N.types=1800, smallest.most.freq=FALSE, monosyl=FALSE){ 
   N.type <- round(N.types/3, 0)
@@ -564,6 +573,7 @@ make_corpus <- function(dist=c("unif", "skewed"), N.utts=1000, N.types=1800, sma
   return( list(df, dict) )
 }
 
+#' @export
 contexts_by_size <- function(df, N.sizes, min.utt=100){
   start.columns <- ncol(df)
   
@@ -579,6 +589,7 @@ contexts_by_size <- function(df, N.sizes, min.utt=100){
   return(df)
 }
 
+#' @export
 # for bootstrapping nontexts:
 run_analysis <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE, trisyl.limit=FALSE, N.types=NULL, N.utts=NULL, by.size=TRUE, expand=FALSE, seg.utts=TRUE, TP=TRUE, MI=TRUE, verbose=FALSE, prop=FALSE, cutoff=.85, nontext=TRUE, fun.version=NULL, quiet=TRUE){ # this is the function that should be done in parallel on the 12 cores of each node
   message("************************\nbeginning run_analysis\n************************")
@@ -849,7 +860,7 @@ run_analysis <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
   }
 }
 
-
+#' @export
 aciss_function <- function(fun.version, id, starts, iter, run_analysis_args, walltime=9600){
   # fun.version refers to the current commit for data_processing_functions.r
   
@@ -875,5 +886,3 @@ aciss_function <- function(fun.version, id, starts, iter, run_analysis_args, wal
   ids  <- batchMap(reg, batch_function, starts, more.args=list(run_analysis_args=run_analysis_args))
   done <- submitJobs(reg, resources = list(nodes = 1, ppn=1)) 
 }
-
-

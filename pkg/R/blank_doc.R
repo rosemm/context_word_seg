@@ -1,3 +1,4 @@
+#' @export
 blank_doc <- function(wd="./transcripts/", for.coding=TRUE){
   # write blank coding_doc.txt for coders to code from
   stopifnot(require(dplyr))

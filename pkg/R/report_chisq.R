@@ -1,3 +1,4 @@
+#' @export
 report_chisq <- function(cat){
   df <- cat[[2]]$parameter
   N <- cat[[2]]$n.cases

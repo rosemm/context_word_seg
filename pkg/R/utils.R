@@ -1,3 +1,6 @@
+#' @import dplyr
+#' @import tidyr
+#' @export
 check_packages <- function(list.of.packages){
   # check whether packages need to be installed
   new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
@@ -7,7 +10,7 @@ check_packages <- function(list.of.packages){
   }
 }
 
-
+#' @export
 get_from_https <- function (url, ..., sha1 = NULL) {
   # based on code for devtools::source_url
   stopifnot(is.character(url), length(url) == 1)

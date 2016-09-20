@@ -1,3 +1,4 @@
+#' @export
 doc_loadings <- function(method=c("lda", "stm"), model, meta, df.wn.count){
   
   stopifnot(require(dplyr))

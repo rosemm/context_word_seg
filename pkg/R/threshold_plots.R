@@ -1,4 +1,4 @@
-
+#' @export
 threshold_plots <- function(df_prop, thresholds, method, save.to, ...){
   
   stopifnot(require(ggplot2), require(dplyr), require(tidyr))

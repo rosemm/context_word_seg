@@ -1,4 +1,4 @@
-
+#' @export
 clean_transcripts <- function(wd="./transcripts/"){
   
   files <- list.files(path=wd)

@@ -1,4 +1,4 @@
-
+#' @export
 code_contexts <- function(this_pass=1, window_size=30, slide_by=3){
   stopifnot(require(devtools))
   source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/R/utils.R")

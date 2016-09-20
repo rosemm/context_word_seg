@@ -1,3 +1,4 @@
+#' @export
 # Copy functions to the pkg directory, so they're available as an R package on github
 update_R_package <- function(code.dir = "lib", pkg = "pkg", ver = NULL, notes = NULL){
   stopifnot(require(dplyr), require(tidyr))
@@ -9,7 +10,10 @@ update_R_package <- function(code.dir = "lib", pkg = "pkg", ver = NULL, notes = 
               to=file.path(pkg, "R"), 
               overwrite=TRUE, recursive=FALSE, copy.mode=FALSE, copy.date=TRUE)
   }
-  
+  if( !any(grepl(pattern="NAMESPACE", x=list.files(pkg))) ) {
+    # If there's no NAMESPACE file, create one
+    
+  }
   # update DESCRIPTION
   if( any(grepl(pattern="DESCRIPTION", x=list.files(pkg))) ) {
     DESC <- read.table(file.path(pkg, "DESCRIPTION"), sep = "\t", stringsAsFactors = FALSE) %>% 
@@ -18,17 +22,21 @@ update_R_package <- function(code.dir = "lib", pkg = "pkg", ver = NULL, notes = 
       mutate_all(as.character)
     
   } else {
-    DESC <- data.frame(Package = "context_word_seg",
+    DESC <- data.frame(Package = "contextwordseg",
                        Version = "0.1",
                        Date = date(),
                        Title = "Functions for dissertation on context and word segmentation",
                        Description = "",
                        Author = "Rose M Hartman <rosem@uoregon.edu>",
-                       License = "")
+                       License = "",
+                       Imports = "")
   }
   if( !is.null(ver) ) DESC$Version <- ver; DESC$Date <- date()
   if( !is.null(notes) ) DESC$Description <- paste(DESC$Description, notes, sep = "\n")
   
+  DESC$Imports <- as.character(read.table(file.path("config", "global.dcf"), sep = ":", stringsAsFactors = FALSE)$V2[8])
+
+        
   # prep for printing
   DESC <- t(DESC)
   DESC <- cbind(row.names(DESC), DESC)

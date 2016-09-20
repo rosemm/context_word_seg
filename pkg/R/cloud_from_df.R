@@ -1,3 +1,4 @@
+#' @export
 cloud_from_df <- function(df, which.context, min.freq=0, size.breaks, save.to, note=NULL, standardize.font=TRUE, color=FALSE, title=FALSE){
 
   word.stream <- strsplit(paste(df$orth, collapse = " "), split = "[[:space:]]+")[[1]]
