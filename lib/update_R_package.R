@@ -10,10 +10,10 @@ update_R_package <- function(code.dir = "lib", pkg = "pkg", ver = NULL, notes = 
               to=file.path(pkg, "R"), 
               overwrite=TRUE, recursive=FALSE, copy.mode=FALSE, copy.date=TRUE)
   }
-  if( !any(grepl(pattern="NAMESPACE", x=list.files(pkg))) ) {
-    # If there's no NAMESPACE file, create one
-    
-  }
+
+  # Update NAMSPACE, or, if there's no NAMESPACE file, create one.
+  roxygen2::roxygenize(package.dir = pkg)
+  
   # update DESCRIPTION
   if( any(grepl(pattern="DESCRIPTION", x=list.files(pkg))) ) {
     DESC <- read.table(file.path(pkg, "DESCRIPTION"), sep = "\t", stringsAsFactors = FALSE) %>% 
