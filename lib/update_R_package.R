@@ -1,27 +1,21 @@
 #' @export
 # Copy functions to the pkg directory, so they're available as an R package on github
-update_R_package <- function(code.dir = "lib", pkg = "pkg", ver = NULL, notes = NULL){
+update_R_package <- function(dir = getwd(), code = "lib", pkg = "pkg", ver = NULL, notes = NULL){
   stopifnot(require(dplyr), require(tidyr))
   
-  # copy over all files from code.dir
-  files <- list.files(code.dir)
+  # copy over all files from code
+  files <- list.files(file.path(dir, code))
   for (file in files){
-    file.copy(from=file.path(code.dir, file), 
+    file.copy(from=file.path(dir, code, file), 
               to=file.path(pkg, "R"), 
               overwrite=TRUE, recursive=FALSE, copy.mode=FALSE, copy.date=TRUE)
   }
 
   # Update NAMSPACE, or, if there's no NAMESPACE file, create one.
-  roxygen2::roxygenize(package.dir = pkg)
-  
   # update DESCRIPTION
-  if( any(grepl(pattern="DESCRIPTION", x=list.files(pkg))) ) {
-    DESC <- read.table(file.path(pkg, "DESCRIPTION"), sep = "\t", stringsAsFactors = FALSE) %>% 
-      tidyr::extract(col = V1, into = "V1", regex = "([[:alpha:]]+):") %>% 
-      t_df() %>% 
-      mutate_all(as.character)
-    
-  } else {
+  roxygen2::roxygenize(package.dir = file.path(dir, pkg))
+  
+  if( !any(grepl(pattern="DESCRIPTION", x=list.files(file.path(dir, pkg)))) ) {
     DESC <- data.frame(Package = "contextwordseg",
                        Version = "0.1",
                        Date = date(),
@@ -30,24 +24,22 @@ update_R_package <- function(code.dir = "lib", pkg = "pkg", ver = NULL, notes = 
                        Author = "Rose M Hartman <rosem@uoregon.edu>",
                        License = "",
                        Imports = "")
-  }
+  
   if( !is.null(ver) ) DESC$Version <- ver; DESC$Date <- date()
   if( !is.null(notes) ) DESC$Description <- paste(DESC$Description, notes, sep = "\n")
   
-  DESC$Imports <- as.character(read.table(file.path("config", "global.dcf"), sep = ":", stringsAsFactors = FALSE)$V2[8])
-
-        
+  DESC$Imports <- as.character(read.table(file.path(dir, "config", "global.dcf"), sep = ":", stringsAsFactors = FALSE)$V2[8])
+  
   # prep for printing
   DESC <- t(DESC)
   DESC <- cbind(row.names(DESC), DESC)
   row.names(DESC) <- NULL
   DESC[,1] <- paste0(DESC[,1], ":")
   
-  write.table(DESC, file.path(pkg, "DESCRIPTION"), 
+  write.table(DESC, file.path(dir, pkg, "DESCRIPTION"), 
               sep = "\t",
               col.names = FALSE,
               row.names = FALSE,
               quote = FALSE)
+  }
 }
-
-
