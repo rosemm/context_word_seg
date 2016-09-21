@@ -7,7 +7,8 @@ Author: Rose M Hartman <rosem@uoregon.edu>
 License: 
 Imports:
     dplyr,
-    tidyr,
+    tidyr
+Suggests:    
     ggplot2,
     reshape2,
     stringr,
