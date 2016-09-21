@@ -4,7 +4,6 @@ aciss_function <- function(date, id, starts, iter, run_analysis_args, walltime=9
   batch_function <- function(start, run_analysis_args){
     # devtools::install_github(repo = "rosemm/context_word_seg", subdir = "pkg")
     # library(contextwordseg)
-    devtools::source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/lib/aciss_function.R")
     devtools::source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/lib/nontexts_descriptives.R")
     devtools::source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/lib/data_processing_functions.R")
     devtools::source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/master/lib/utils.R")

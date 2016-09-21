@@ -189,7 +189,6 @@ run_analysis <- function(x, dict=NULL, consider.freq=FALSE, embedding.rule=FALSE
     
     # save these results
     if(MI & TP){
-      message("here comes rbind at line 589 (if MI & TP)")
       this.result <- as.data.frame(rbind(TPresults, MIresults))
       this.result$TPN.segd.units <- median(data[[k]]$TP85$seg.results$N.segd.units)
       this.result$MIN.segd.units <- median(data[[k]]$MI85$seg.results$N.segd.units)
