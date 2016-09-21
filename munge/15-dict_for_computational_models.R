@@ -40,15 +40,14 @@ for(p in 1:nrow(coling_dict)){
 phon_cm <- gsub(x=phon_cm, pattern = "xx ", replacement = "") # drop stress markers
 
 df_all_cm <- df_all %>% 
-  mutate(phon_cm = phon_cm) %>% 
-  dplyr::select(utt, orth, phon, phon_cm, starts_with("WL"), starts_with("STM"), starts_with("HJ")) %>% 
-  mutate_if(is.factor, funs(as.numeric(as.character(.))))
+  dplyr::mutate(phon_cm = phon_cm) %>% 
+  dplyr::select(utt, orth, phon, phon_cm, dplyr::starts_with("WL"), dplyr::starts_with("STM"), dplyr::starts_with("HJ")) 
 # make the variable names easy to parse later for the cm scripts
 # first 2-3 characters are uppercase letters indicating method, after that is lowercase letters and digits indicating context
-cols <- str_split_fixed(string = colnames(df_all_cm), pattern = "_", n = 2) %>% 
+cols <- stringr::str_split_fixed(string = colnames(df_all_cm), pattern = "_", n = 2) %>% 
   as.data.frame() %>% 
-  mutate(V2=tolower(V2)) %>% 
-  unite(col="cols", V1, V2, sep = "") %>% 
-  mutate(cols=gsub(x = cols, pattern = "_", replacement = "")) 
+  dplyr::mutate(V2=tolower(V2)) %>% 
+  tidyr::unite(col="cols", V1, V2, sep = "") %>% 
+  dplyr::mutate(cols=gsub(x = cols, pattern = "_", replacement = "")) 
 colnames(df_all_cm) <- c("utt", "orth", "phon", "phon_cm", cols$cols[5:length(cols$cols)])
 cache('df_all_cm')
