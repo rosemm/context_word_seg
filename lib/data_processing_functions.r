@@ -422,7 +422,7 @@ measure_continuity <- function(df, verbose){
   if(ncol(df) > 3){
     message("Measuring continuity using all but the following columns: utt, orth, phon")
     # retains contexts as they were used for column names, regardless of where they came from (works for any context defining method)
-    context.cols <- dplyr::select(df, -utt, -orth, -phon)
+    context.cols <- dplyr::select(df, -utt, -orth, -phon) 
     context.names <- colnames(context.cols)
   } else stop("Cannot calculate continuity without context columns.")
   
