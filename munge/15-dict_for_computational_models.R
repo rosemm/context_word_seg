@@ -28,7 +28,9 @@ cache('coling_dict')
 # Word boundaries marked by tab in phon_cm, phones separated by space
 
 # in this file, phon has words separated by space and syllables within words separated by -
-phon_cm <- read.table("utt_orth_phon_KEY.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)$phon
+phon_cm_d <- read.table("utt_orth_phon_KEY.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F)%>% 
+  dplyr::filter(!grepl(x=.$utt, pattern = "hi"))
+phon_cm <- phon_cm_d$phon
 phon_cm <- gsub(x=phon_cm, pattern = " ", replacement = "\t") # mark word boundaries with \t
 phon_cm <- gsub(x=phon_cm, pattern = "-", replacement = "") # remove syllable markers (will separate by phone)
 # Translate phon from df into cm_phon using coling dict
@@ -36,14 +38,11 @@ for(p in 1:nrow(coling_dict)){
   phon_cm <- gsub(x=phon_cm, pattern = coling_dict$input[p], replacement = paste0(coling_dict$output[p], " "), fixed = TRUE)
 }
 phon_cm <- gsub(x=phon_cm, pattern = "xx ", replacement = "") # drop stress markers
-df_cm <- read.table("utt_orth_phon_KEY.txt", sep="\t", quote="", comment.char ="", header=1, stringsAsFactors=F) %>% 
-  select(utt, orth) %>% 
-  mutate(phon_cm = phon_cm)
 
 df_all_cm <- df_all %>% 
-  select(-phon) %>% 
-  left_join(df_cm, by = c("utt", "orth")) %>% 
-  select(utt, orth, phon_cm, starts_with("WL"), starts_with("STM"), starts_with("HJ"))
+  mutate(phon_cm = phon_cm) %>% 
+  dplyr::select(utt, orth, phon_cm, starts_with("WL"), starts_with("STM"), starts_with("HJ")) %>% 
+  mutate_if(is.factor, funs(as.numeric(as.character(.))))
 # make the variable names easy to parse later for the cm scripts
 # first 2-3 characters are uppercase letters indicating method, after that is lowercase letters and digits indicating context
 cols <- str_split_fixed(string = colnames(df_all_cm), pattern = "_", n = 2) %>% 
