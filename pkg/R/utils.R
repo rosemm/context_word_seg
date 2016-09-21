@@ -61,6 +61,5 @@ load_url <- function (url, ..., sha1 = NULL) {
            ")", call. = FALSE)
     }
   }
-  message(temp_file)
   load(temp_file, envir = .GlobalEnv)
 }
