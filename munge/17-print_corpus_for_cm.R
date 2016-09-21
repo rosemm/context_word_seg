@@ -1,11 +1,5 @@
 # prep files for computational models
 
-# WORD LIST
-
-
-# STM
-
-# CODER JUDGMENTS
 methods <- c("WL", "STM", "HJ")
 for(m in methods){
   contexts <- dplyr::select(df_all_cm, starts_with(m))
