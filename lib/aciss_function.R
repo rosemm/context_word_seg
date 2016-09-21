@@ -11,7 +11,7 @@ aciss_function <- function(date, id, starts, iter, run_analysis_args, walltime=9
                  .inorder=FALSE,
                  .combine = rbind,
                  .verbose=TRUE,
-                 .packages=c("dplyr", "tidyr", "devtools", "BBmisc") ) %dopar% run_analysis(run_analysis_args)
+                 .packages=c("dplyr", "tidyr", "devtools", "BBmisc") ) %dopar% nontexts_descriptives(run_analysis_args)
   }
   
   # create a registry
