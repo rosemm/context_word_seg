@@ -2,7 +2,6 @@ nontexts_descriptives <- function(x){
   if (all(c("dataframe", "dict") %in% names(x))) {
     df <- x[["dataframe"]]
     dict <- x[["dict"]]
-    if("expand" %in% names(x)) expand <- x[["expand"]]
     if("seg.utts" %in% names(x)) seg.utts <- x[["seg.utts"]]
     if("verbose" %in% names(x)) verbose <- x[["verbose"]]
     if("nontext" %in% names(x)) nontext <- x[["nontext"]]

@@ -3,6 +3,7 @@ aciss_function <- function(date, id, starts, iter, run_analysis_args, walltime=9
   
   batch_function <- function(start, run_analysis_args){
     devtools::install_github(repo = "rosemm/context_word_seg", subdir = "pkg")
+    library(contextwordseg)
     iter <- iter # the number of times to generate random samples
     
     library(doParallel)
