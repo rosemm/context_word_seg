@@ -1,7 +1,7 @@
 #' @export
-nontext_cols <- function(df){
+nontext_cols <- function(df, quiet){
   non <- dplyr::select(df, -utt, -orth, -phon)
-  message(paste("nontext_cols using all but the following columns:", paste(colnames(df)[!colnames(df) %in% colnames(non)], collapse=", ")))
+  if( !quiet ) message(paste("nontext_cols using all but the following columns:", paste(colnames(df)[!colnames(df) %in% colnames(non)], collapse=", ")))
   context.names <- colnames(non)
   
   # shuffle the context columns

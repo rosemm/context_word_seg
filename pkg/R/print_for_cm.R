@@ -1,11 +1,11 @@
 #' @export
 # prep files for computational models
-print_for_cm <- function(df, nontext, dir = getwd(), save.to="computational_models", r=0){
+print_for_cm <- function(df, nontext, dir = getwd(), save.to="computational_models", r=0, quiet = TRUE){
   methods <- c("WL", "STM", "HJ")
   
   if(nontext){
     # pick nontext utterances
-    non <- nontext_cols(df=df) 
+    non <- nontext_cols(df=df, quiet) 
     # add nontext columns to dataframe
     df <- cbind(dplyr::select(df, utt, orth, phon), non)
   }
