@@ -19,7 +19,7 @@ print_for_cm <- function(df, nontext, dir = getwd(), save.to="computational_mode
         dplyr::filter(context == 1) %>% 
         dplyr::select(phon)
       write.table(phon, 
-                  file = file.path(dir, save.to, paste0(colnames(contexts)[k], "_0to1m.phon")),
+                  file = file.path(dir, save.to, paste0(colnames(contexts)[k], r, "_0to1m.phon")),
                   quote = FALSE,
                   row.names = FALSE,
                   col.names = FALSE)
@@ -27,6 +27,6 @@ print_for_cm <- function(df, nontext, dir = getwd(), save.to="computational_mode
   }
   
   # MAKE shell script to run Makefiles
-  commands <- paste0("make NAME=", colnames(df)[4:ncol(df)], " OUTPUTPREFIX=r", r)
+  commands <- paste0("make NAME=", colnames(df)[4:ncol(df)], r, " OUTPUTPREFIX=r", r)
   write(c("cd colingFinal", commands, "cd .."), file = file.path(dir, "cm_contexts.sh"))
 }
