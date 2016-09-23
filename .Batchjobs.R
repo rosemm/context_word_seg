@@ -1,9 +1,7 @@
 cluster.functions = makeClusterFunctionsTorque('simple.tmpl')
 mail.start = "none"
-mail.done = 'first+last'
+mail.done = "none"
 mail.error = "none"
 db.driver = "SQLite"
 db.options = list()
 debug = FALSE
-mail.to = '<rosem@uoregon.edu>'
-mail.from = '<rosem@uoregon.edu>'
