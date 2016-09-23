@@ -25,7 +25,7 @@ nontexts_descriptives <- function(x){
     # pick nontext utterances
     non <- nontext_cols(df=df) 
     # add nontext columns to dataframe
-    df <- cbind(df[ , 1:3], non)
+    df <- cbind(dplyr::select(df, utt, orth, phon), non)
   }
   
   if( ncol(df) > 3 ){
