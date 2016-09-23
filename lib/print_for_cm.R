@@ -1,6 +1,6 @@
 #' @export
 # prep files for computational models
-print_for_cm <- function(df, nontext, dir = getwd(), save.to="computational_models"){
+print_for_cm <- function(df, nontext, dir = getwd(), save.to="computational_models", r=0){
   methods <- c("WL", "STM", "HJ")
   
   if(nontext){
@@ -9,7 +9,7 @@ print_for_cm <- function(df, nontext, dir = getwd(), save.to="computational_mode
     # add nontext columns to dataframe
     df <- cbind(dplyr::select(df, utt, orth, phon), non)
   }
-  if( !"computational_models" %in% list.files(dir) ){
+  if( !save.to %in% list.files(dir) ){
     dir.create(file.path(dir, save.to))
   }
   for(m in methods){
@@ -27,6 +27,6 @@ print_for_cm <- function(df, nontext, dir = getwd(), save.to="computational_mode
   }
   
   # MAKE shell script to run Makefiles
-  commands <- paste0("make NAME=", colnames(df)[4:ncol(df)])
+  commands <- paste0("make NAME=", colnames(df)[4:ncol(df)], " OUTPUTPREFIX=r", r)
   write(commands, file = file.path(dir, "cm_contexts.sh"))
 }
