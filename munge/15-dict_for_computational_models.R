@@ -49,6 +49,7 @@ cols <- stringr::str_split_fixed(string = colnames(df_all_cm), pattern = "_", n 
   dplyr::mutate(V2=tolower(V2)) %>% 
   tidyr::unite(col="cols", V1, V2, sep = "") %>% 
   dplyr::mutate(cols=gsub(x = cols, pattern = "_", replacement = "")) %>% 
-  dplyr::mutate(cols=gsub(x = cols, pattern = " ", replacement = ""))
+  dplyr::mutate(cols=gsub(x = cols, pattern = " ", replacement = "")) %>% 
+  dplyr::mutate(cols=gsub(x = cols, pattern = "(STMtopic[[:digit:]]+)", replacement = "\\1t"))
 colnames(df_all_cm) <- c("utt", "orth", "phon", "phon_cm", cols$cols[5:length(cols$cols)])
 cache('df_all_cm')
