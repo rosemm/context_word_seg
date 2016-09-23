@@ -28,5 +28,5 @@ print_for_cm <- function(df, nontext, dir = getwd(), save.to="computational_mode
   
   # MAKE shell script to run Makefiles
   commands <- paste0("make NAME=", colnames(df)[4:ncol(df)])
-  write(commands, file = file.path(dir, save.to, "cm_contexts.sh"))
+  write(commands, file = file.path(dir, "cm_contexts.sh"))
 }
