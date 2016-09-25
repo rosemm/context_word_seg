@@ -1,4 +1,4 @@
-#' @export
+# formatted for use with ACISS / BatchJobs output
 read_batch <- function(dir, quiet=TRUE){
   # dir="nontexts_WL-files"
   jobs <- list.files(paste0(dir, "/jobs"))
@@ -14,7 +14,7 @@ read_batch <- function(dir, quiet=TRUE){
   return(results)
 }
 
-#' @export
+# formatted for use with ACISS / BatchJobs output
 process_batch_results <- function(id, dir, combine=c("rbind", "list")){
   # only works in the original working directory where BatchJobs was run (i.e. on ACISS)
   results <- data.frame(V1=NULL)
@@ -38,7 +38,7 @@ process_batch_results <- function(id, dir, combine=c("rbind", "list")){
   # saveRDS(results, file=paste0("batchresults_WL.rds") )
 }
 
-#' @export
+# formatted for use with ACISS / BatchJobs output
 clean_batch_results <- function(results){
   # combine and organize results
   
@@ -442,86 +442,3 @@ network_plot <- function(data=NULL, context=NULL, title=""){
   return(plot.igraph(bsk.network, vertex.label="", main=title))
 }
 
-#' @export
-add_stars <- function(tests){
-  # add stars for significance to a table with p values
-  tests$stars <- ifelse(tests$p.val < .001, "***",
-                  ifelse(tests$p.val < .01, "**",
-                         ifelse(tests$p.val < .05, "*", 
-                                ifelse(tests$p.val < .1, "+", ""))))
-  return(tests)
-}
-
-#' @export
-syllable_dist <- function(df, dict, method="global", save.to=NULL, global=FALSE){
-  stopifnot(require(dplyr), require(tidyr))
-  
-  if(ncol(df) == 3) {
-    df$global <- 1
-    global=TRUE
-    message("analyzing as global")
-  }
-  
-  dists <- vector("list", (ncol(df)-3))
-  names(dists) <- colnames(df)[4:ncol(df)]
-  
-  for(k in 4:ncol(df)){
-    this.df <- df[df[,k] > 0, ] # only use rows that have > 0 for this context column
-    
-    phon.utts <- this.df$phon
-    
-    # replace word-internal syllable boundaries "-" with space, the same as between-word boundaries
-    phon.utts <- gsub(pattern="-", replacement=" ", x=phon.utts, fixed=T) 
-    # collapse phonological utterances into one continuous stream
-    phon.stream <- unlist(strsplit(phon.utts, " "))
-    # delete "syllables" that are just empty space
-    phon.stream <- phon.stream[ !grepl(pattern="^[[:space:]]*$", x=phon.stream) ]
-    
-    dist <- as.data.frame(table(phon.stream), stringsAsFactors=FALSE)
-    colnames(dist) <- c("syllable", "frequency")
-    
-    examples <- dplyr::select(dict, word=word, example.phon=phon)
-    dist <- left_join(dist, examples, by=c("syllable"="example.phon"))
-    
-    fill.in <- dplyr::filter(dist, is.na(word))
-    fill.in$example.word <- NA
-    fill.in$example.phon <- NA
-    fill.in$word <- NULL
-    for(i in 1:nrow(fill.in)){
-      this.syl <- paste(paste0("[", strsplit(fill.in$syllable[i], split="")[[1]], "]"), collapse = "")
-      example.b <- examples[grep(pattern=paste0("^", this.syl, "-"), x=examples$example.phon) , ]
-      example.m <- examples[grep(pattern=paste0("-", this.syl, "-"), x=examples$example.phon) , ]
-      example.e <- examples[grep(pattern=paste0("-", this.syl, "$"), x=examples$example.phon) , ]
-      e <- rbind(example.b, example.m, example.e)
-      if(nrow(e) > 0){
-        # if there's more than one, select the shortest
-        e$len <- nchar(e$example.phon)
-        e <- e[which.min(e$len),] 
-        
-        fill.in$example.word[i] <- e$word
-        fill.in$example.phon[i] <- e$example.phon 
-      } else {
-        fill.in$example.word[i] <- NA
-        fill.in$example.phon[i] <- NA
-      }
-    } # end of i for loop
-    dist <- left_join(dist, fill.in, by=c("syllable", "frequency"))
-    
-    dist <- arrange(dist, desc(frequency))
-    
-    dist[is.na(dist)] <- ""
-    dist <- unite(dist, col=example.word, word, example.word, sep="" )
-    
-    context <- paste0("_", colnames(df)[k])
-    if(global) context <- ""
-    
-    if(!is.null(save.to)){
-      write.csv(dist, paste0(save.to, "/", method, context, ".csv"), row.names=FALSE)
-    }
-    dists[[(k-3)]] <- dist
-  } # end of k for loop
-  
-  if(global) dists <- dists[[1]]
-  
-  return(dists)
-}
