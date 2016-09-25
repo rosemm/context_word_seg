@@ -23,5 +23,5 @@ aciss_function <- function(date, id, starts, iter, run_analysis_args, walltime=9
   
   # map function and data to jobs and submit
   ids  <- batchMap(reg, batch_function, starts, more.args=list(run_analysis_args=run_analysis_args))
-  done <- submitJobs(reg, resources = list(nodes = 1, ppn=1)) 
+  done <- submitJobs(reg, resources = list(nodes = 1, ppn=12)) 
 }
