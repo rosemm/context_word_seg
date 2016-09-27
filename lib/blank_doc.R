@@ -3,6 +3,7 @@ blank_doc <- function(wd="./transcripts/", for.coding=TRUE){
   # write blank coding_doc.txt for coders to code from
   stopifnot(require(dplyr))
   
+  # make an empty coding_doc dataframe, which will be filled in by the for loop below
   coding_doc <- data.frame(LineNum=NULL, UttNum=NULL, file=NULL, utterance=NULL)
   
   transcripts <- clean_transcripts(wd)
@@ -11,7 +12,11 @@ blank_doc <- function(wd="./transcripts/", for.coding=TRUE){
   Nfiles <- length(files)
   
   for(f in 1:Nfiles){
-    this_coding_doc <- data.frame(dplyr::filter(dplyr::select(transcripts[[f]], LineNum, UttNum, utterance), !is.na(UttNum) ) )
+    this_coding_doc <- transcripts[[f]] %>% 
+      # take just the LineNum, UttNum, and utterance from each transcript row
+      dplyr::select(LineNum, UttNum, utterance) %>% 
+      # only keep utterances (not comments, etc. which will have NA UttNum)
+      dplyr::filter(!is.na(UttNum)) 
     this_coding_doc$file <- files[f]
     coding_doc <- rbind(coding_doc, this_coding_doc)
   }
