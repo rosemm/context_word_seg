@@ -1,37 +1,23 @@
 # The Role of Context in Syllable Co-Occurence Patterns for Word Segmentation
 
 ## Defining contexts by coder judgment
-coding_scripts.R has the functions research assistants use to code the transcripts. Instructions given to RAs working on this are saved in instructions_for_RAs.txt
-    
+ 
 _OPEN_ME.r has instrutcions for RAs, including the code to access the coding_scripts.r file 
-
-context_coding_cleaning.R has the functions for cleaning the RAs' context coding, and for compiling them all into one document.
 
 context_cleaning_keys.txt and categories_cleaning_keys.txt are files for standardizing RA codes and combining codes into groups, respectively. For example, the first file standardizes spelling differences and synonyms (eating, meal, and eatting all get changed one code). The second file groups similar codes together into categories (changing clothes, brushing hair, undressing, and dressing all get changed to dressing). 
     
 ## Defining context by key words    
-data_processing.r has the analysis code.
-
-data_processing_functions.r has a list of specialized functions called by data_processing.r and  simulations.r.
-
-data_processing_orth_to_phon.r is a procedure for translating utterances from the .cha files from CHILDES to phon via Swingley's (2005) dictionary
-
-words_by_contexts.csv is the list of key words (seed words) for each context. These lists are based on MCDI words supplemented with some especially frequent content words from the corpus that we expected would be associated with particular contexts – for example, milk was on the list for mealtime words, and wipe was on the list for diaper change words. 
 
 ## Defining context with topic modeling
 
-## Using ACISS for boostrapping nontext distributions
-[ACISS](http://aciss-computing.uoregon.edu/) is the high performance cluster at UO. 
-I'm using two R packages to parallelize the code and run it on ACISS: [BatchJobs](https://cran.r-project.org/web/packages/BatchJobs/index.html) and [doParallel](https://cran.fhcrc.org/web/packages/doParallel/index.html). 
-The default nodes on ACISS have 12 processors each, so I'm using doParallel to write a function that can run independently at the same time on each of the X processors, called par_function(). 
-I then send this function to Y different nodes at once using BatchJobs, so I'm running X*Y independent version of the analysis simultaneously. 
-The code for BatchJobs (including additional notes about how to set things up on ACISS) is in batchjobs_script.r     
-The code for the simulations themselves is in simulations.r. This also includes code for cleaning the simulations output and plotting results.
+## Computational models to segment speech using statistical regularities
+
+## Boostrapping nontext distributions
+I am using [AWS](http://aws.amazon.com). 
 
 ## Code tools
-Organize the functions as a personal R package.
-```{r}
-library(devtools)
-create("functions")
-```
-
+This project is organized with [Project Template](http://projecttemplate.net/). 
+The datasets are cached in the cache folder, or they can be recreated from the raw corpus material using the scripts in the munge folder. 
+All R packages needed are listed in the global.dcf file in the config directory. 
+All of the functions written by me for this project are saved in the lib directory. 
+When you run ProjectTemplate::load.project() in the directory for this project, it will load the libraries, scripts, and cached data, as directed in the global.cdf config file.
