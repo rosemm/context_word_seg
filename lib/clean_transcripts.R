@@ -10,21 +10,23 @@ clean_transcripts <- function(wd="./transcripts/"){
   for(f in 1:Nfiles){
     this.file <- files[f]
     if(is.na(this.file)) stop(paste(this.file, "not found."))
-    this.transcript <- readLines(paste(wd, this.file, sep=""))
+    this.transcript <- readLines(file.path(wd, this.file))
     
-    # The split between speaker id and utterance is :\t (colon, then tab), but somtimes that pattern also occurs later in the utterance, especially on the %pho tier where : is used for vowel length.
-    # To restrict the :\t split to only the one that divides speaker ID and utterance, only look for it within the first 7 characters of each line.
-    # @Comment:\t is used occassionally to indicate activity happening (Korman corpus). To make sure the reocrded comment is correctly retained, substitue "@Comment" with "@Com" throughout, so the :\t will fall within the first 7 characters of the line.
+    # The split between speaker id and utterance is :\t (colon, then tab), 
+    # but somtimes that pattern also occurs later in the utterance, 
+    # especially on the %pho tier where : is used for vowel length.
+    # To restrict the :\t split to only the one that divides speaker ID and utterance, 
+    # only look for the first time it happens.
+    # @Comment:\t is used occassionally to indicate activity happening (Korman corpus). 
+    # For length consistency, substitue "@Comment" with "@Com" throughout.
     this.transcript <- gsub(pattern="@Comment", replacement="@Com", x=this.transcript)
     this.transcript <- gsub(pattern="@Participants", replacement="@Par", x=this.transcript)
     this.transcript <- gsub(pattern="@Situation", replacement="@Sit", x=this.transcript)
     this.transcript <- gsub(pattern="@Activities", replacement="@Act", x=this.transcript)
     
-    speaker.str <- substr(this.transcript, start=1, stop=7) # take the first 7 characters of each row
-    split <- strsplit(speaker.str, ":\t", fixed=T)
-    speaker <- sapply(split, FUN='[', 1) # takes the first item in each split
-    
-    utterance <- substr(this.transcript, start=7, stop=100000000) # take characters 7 through the end of each row 
+    transcript.split <- stringr::str_split_fixed(this.transcript, pattern = ":\t", n=2)
+    speaker <- transcript.split[, 1]
+    utterance <- transcript.split[, 2]
     
     data <- data.frame(speaker=speaker, utterance=utterance)
     data$LineNum <- as.numeric(row.names(data))
