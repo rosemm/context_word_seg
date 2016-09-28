@@ -441,4 +441,3 @@ network_plot <- function(data=NULL, context=NULL, title=""){
   plot(bsk.network, vertex.label=ifelse(V(bsk.network)$name=="'tV", "'tV", ""))
   return(plot.igraph(bsk.network, vertex.label="", main=title))
 }
-
