@@ -12,8 +12,8 @@ clean_transcripts <- function(wd="./transcripts/"){
     if(is.na(this.file)) stop(paste(this.file, "not found."))
     this.transcript <- readLines(file.path(wd, this.file))
     
-    # The split between speaker id and utterance is :\t (colon, then tab), 
-    # but somtimes that pattern also occurs later in the utterance, 
+    # The split between speaker id and utterance is :\t (colon, then tab), e.g. *MOT: Is that your train?
+    # But somtimes that pattern also occurs later in the utterance, 
     # especially on the %pho tier where : is used for vowel length.
     # To restrict the :\t split to only the one that divides speaker ID and utterance, 
     # only look for the first time it happens.
@@ -25,17 +25,20 @@ clean_transcripts <- function(wd="./transcripts/"){
     this.transcript <- gsub(pattern="@Activities", replacement="@Act", x=this.transcript)
     
     transcript.split <- stringr::str_split_fixed(this.transcript, pattern = ":\t", n=2)
-    speaker <- transcript.split[, 1]
-    utterance <- transcript.split[, 2]
+    speaker <- transcript.split[, 1] # the content before the :\t in each line (e.g. *MOT)
+    utterance <- transcript.split[, 2] # the content after the :\t in each line (e.g. Is that your train?)
     
     data <- data.frame(speaker=speaker, utterance=utterance)
     data$LineNum <- as.numeric(row.names(data))
     
     # Add utterance numbers
+    # create a temp dataframe that's just the lines with utterances (speaker has an * in it)
     temp <- dplyr::filter(data, grepl("*", speaker, fixed=TRUE))
+    # number the utterances 1 to the end of the data frame
     temp$UttNum <- 1:nrow(temp)
+    # merge the temp dataframe back in with the rest of it, to line up the UttNums with the LineNums in the full transcript
+    # note that any lines that don't have an utterance (such as comments and header material) will have NA for UttNum
     data <- merge(data, temp, by=c("LineNum", "speaker", "utterance"), all=T, sort=T)
-    head(data)
     
     # print(sort(unique(data$speaker))) # check
     
@@ -52,6 +55,7 @@ clean_transcripts <- function(wd="./transcripts/"){
     data$speaker <- factor(data$speaker) # removes the empty levels from speaker
     data$utterance <- as.character(data$utterance)
     
+    # cleaning up the CHAT annotations, to make them a little more readable
     data$speaker <- car::recode(data$speaker, recodes="
                                 '@Com'='(comment)'; 
                                 '@Sit'='(situation)';
