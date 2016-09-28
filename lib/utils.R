@@ -73,3 +73,11 @@ add_stars <- function(tests){
                                       ifelse(tests$p.val < .1, "+", ""))))
   return(tests)
 }
+
+#' @export
+t_df <- function(df, col.names=1){
+  t.df <- t(df[,-col.names])
+  colnames(t.df) <- df[[names(df)[col.names]]]
+  t.df <- as.data.frame(t.df)
+  return(t.df)
+}
