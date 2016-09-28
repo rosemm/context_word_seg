@@ -1,6 +1,10 @@
 #' @export
 blank_doc <- function(wd="./transcripts/", for.coding=TRUE){
   # write blank coding_doc.txt for coders to code from
+  
+  # note that this can also be used just to compile a directory of CHAT files into one clean dataframe
+  # if you don't need the coding information columns, set for.coding=FALSE
+  
   stopifnot(require(dplyr))
   
   # make an empty coding_doc dataframe, which will be filled in by the for loop below
