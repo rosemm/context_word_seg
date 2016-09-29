@@ -1,4 +1,4 @@
-#' @export
+# formatted for use with ACISS / BatchJobs output
 read_batch <- function(dir, quiet=TRUE){
   # dir="nontexts_WL-files"
   jobs <- list.files(paste0(dir, "/jobs"))
@@ -14,7 +14,7 @@ read_batch <- function(dir, quiet=TRUE){
   return(results)
 }
 
-#' @export
+# formatted for use with ACISS / BatchJobs output
 process_batch_results <- function(id, dir, combine=c("rbind", "list")){
   # only works in the original working directory where BatchJobs was run (i.e. on ACISS)
   results <- data.frame(V1=NULL)
@@ -38,7 +38,7 @@ process_batch_results <- function(id, dir, combine=c("rbind", "list")){
   # saveRDS(results, file=paste0("batchresults_WL.rds") )
 }
 
-#' @export
+# formatted for use with ACISS / BatchJobs output
 clean_batch_results <- function(results){
   # combine and organize results
   
@@ -103,144 +103,6 @@ clean_batch_results <- function(results){
   sim.results$dist <- tolower(sim.results$dist)
   
   return(list(sim.results=sim.results, MIs=MIs, TPs=TPs))
-}
-
-#' @export
-plot_context_vs_nontext <- function(context, nontext, global, outcome, Z.score=FALSE, methods.to.use=c("WL", "LDA", "HJ"), print.tests=FALSE, annotate=NULL, xlabs=FALSE, save.to, ...){
-  stopifnot(sort(unique(context$cutoff)) == sort(unique(nontext$cutoff)))
-  if(!is.null(global)) stopifnot(sort(unique(context$cutoff)) == sort(unique(global$cutoff)))
-  stopifnot(require(ggplot2), require(dplyr), require(tidyr))
-  
-  additional_args <- as.data.frame(list(...))
-  additional_args <- paste0(colnames(additional_args), additional_args, collapse="_")
-  
-  facet <- length(levels(context[, colnames(context)==outcome])) > 1 # is there is more than one level for outcome?
-  if(facet){
-    colnames(context)[colnames(context)=="value"] <- "outcome"
-    colnames(nontext)[colnames(nontext)=="value"] <- "outcome"
-    if(!is.null(global)){
-      colnames(global)[colnames(global)=="value"] <- "outcome"
-    }
-  } else {
-    colnames(context)[colnames(context)==outcome] <- "outcome"
-    colnames(nontext)[colnames(nontext)==outcome] <- "outcome"
-    if(!is.null(global)){
-      colnames(global)[colnames(global)==outcome] <- "outcome"
-    }
-  }
-  
-  if(!is.null(annotate)){
-    colnames(context)[colnames(context)==annotate] <- "annotate"
-  }
-  
-  if(Z.score) {
-    nontext <- nontext %>% 
-      group_by(method, context)
-    
-    nontext.sum <- nontext %>% 
-      summarize(nontext.mean=mean(outcome), 
-                nontext.sd=sd(outcome))
-    
-    context <- context %>% 
-      left_join(nontext.sum, by=c("method", "context")) %>% 
-      mutate(outcome=(outcome - nontext.mean)/nontext.sd)
-  
-    nontext <- nontext %>%
-      mutate(outcome=scale(outcome))
-  }
-  
-    
-  colors <- c("#D53E4F", "#67000d", "#006d2c", "#66C2A5", "#3288BD", "#F46D43")
-  names(colors) <- unique(context$method.short)
-  
-    for(m in unique(context$method.short)){
-      con.data <- dplyr::filter(context, method.short==as.character(m))
-      non.data <- dplyr::filter(nontext, method.short==as.character(m))
-      if(!is.null(annotate)){
-        lab.data <- con.data %>% 
-          dplyr::select(method, method.short, context, outcome, annotate) %>% 
-          unique()
-      }
-      
-      if(Z.score){
-        p <- ggplot(non.data, aes(x=outcome)) + 
-          geom_histogram() +
-          geom_vline(data=con.data, aes(xintercept=outcome), color=colors[[as.character(m)]], size=4, show.legend=FALSE) + 
-          theme(axis.text.y = element_blank())
-      } else{
-        p <- ggplot(non.data, aes(x=reorder(context, N.utts), y=outcome)) + 
-          geom_boxplot() +
-          geom_point(data=con.data, color=colors[[as.character(m)]], size=4, show.legend=FALSE) + 
-          theme(axis.text.x = element_blank())
-        if(xlabs) p <- p + theme(axis.text.x = element_text(angle=330, vjust=1, hjust=0))
-        if(!is.null(global)) p <- p +  geom_hline(data=global, aes(yintercept=outcome), linetype = 2, size=1.5) 
-      }
-      
-      p <- p + theme(text = element_text(size=30), axis.ticks = element_blank()) +
-        labs(x=NULL, y=NULL, title=paste(m, outcome)) 
-      if(facet) p <- p + facet_wrap(~measure)
-      if(!is.null(annotate)) p <- p + geom_text(data=lab.data, aes(label=annotate,x=reorder(context, N.utts), y=outcome), size=4)
-      
-      
-      print(p)
-      
-      ggsave(p, filename=paste0(save.to, "/", outcome, "_", m, "_", additional_args ,".png"), width=8, height=8, units="in")
-    } # end for loop for method
-  
-  if(print.tests) {
-    tests <- test_context_vs_nontext(context, nontext, outcome="outcome")
-    message(paste("two-tailed p values for", outcome))
-    View(tests)
-  }
-}
-
-#' @export
-test_context_vs_nontext <- function(context, nontext, outcome){
-  # rename the outcome variable as "outcome"
-  facet <- length(levels(context[, colnames(context)==outcome])) > 1 # is there is more than one level for outcome?
-  if(facet){
-    colnames(context)[colnames(context)=="value"] <- "outcome"
-    colnames(nontext)[colnames(nontext)=="value"] <- "outcome"
-    context_ests <- context %>% 
-      dplyr::select(criterion, method, context, measure, value) %>% 
-      rename(context.est=value)
-  } else {
-    colnames(context)[colnames(context)==outcome] <- "outcome"
-    colnames(nontext)[colnames(nontext)==outcome] <- "outcome"
-    context_ests <- context %>% 
-      dplyr::select(criterion, method, context, outcome) %>% 
-      rename(context.est=outcome)
-   }
-  
-  full_results <- left_join(nontext, context_ests, by=c("criterion", "method", "context")) # add context estimates
-  
-  # bootstrap p-values
-  full_results$above.est <- ifelse(full_results$outcome > full_results$context.est, 1, 0)
-  full_results$below.est <- ifelse(full_results$outcome < full_results$context.est, 1, 0)
-  
-  if(facet){
-    tests.contexts <- full_results %>%
-      group_by(method, context, criterion, measure)
-  } else{
-    tests.contexts <- full_results %>%
-      group_by(method, context, criterion)
-  }
-  tests.contexts <- tests.contexts %>%
-    summarize(nontext.mean=mean(outcome), 
-              nontext.sd=sd(outcome), 
-              context.est=mean(context.est), 
-              Z=(context.est - nontext.mean)/nontext.sd, 
-              p.val.high = mean(above.est)*2, 
-              p.val.low = mean(below.est)*2, 
-              p.val=min(p.val.high, p.val.low)) %>% 
-    dplyr::select(method, context, nontext.mean, context.est, Z, p.val) %>% 
-    add_stars() # from analysis_functions.r
-  # 
-  # tests.methods <- full_results %>%
-  #   group_by(method, criterion, measure) %>%
-  #   summarize(p.val = mean(above.est)) %>% 
-  #   add_stars() # from analysis_functions.r
-  return(tests.contexts)
 }
 
 #' @export
@@ -440,88 +302,4 @@ network_plot <- function(data=NULL, context=NULL, title=""){
   
   plot(bsk.network, vertex.label=ifelse(V(bsk.network)$name=="'tV", "'tV", ""))
   return(plot.igraph(bsk.network, vertex.label="", main=title))
-}
-
-#' @export
-add_stars <- function(tests){
-  # add stars for significance to a table with p values
-  tests$stars <- ifelse(tests$p.val < .001, "***",
-                  ifelse(tests$p.val < .01, "**",
-                         ifelse(tests$p.val < .05, "*", 
-                                ifelse(tests$p.val < .1, "+", ""))))
-  return(tests)
-}
-
-#' @export
-syllable_dist <- function(df, dict, method="global", save.to=NULL, global=FALSE){
-  stopifnot(require(dplyr), require(tidyr))
-  
-  if(ncol(df) == 3) {
-    df$global <- 1
-    global=TRUE
-    message("analyzing as global")
-  }
-  
-  dists <- vector("list", (ncol(df)-3))
-  names(dists) <- colnames(df)[4:ncol(df)]
-  
-  for(k in 4:ncol(df)){
-    this.df <- df[df[,k] > 0, ] # only use rows that have > 0 for this context column
-    
-    phon.utts <- this.df$phon
-    
-    # replace word-internal syllable boundaries "-" with space, the same as between-word boundaries
-    phon.utts <- gsub(pattern="-", replacement=" ", x=phon.utts, fixed=T) 
-    # collapse phonological utterances into one continuous stream
-    phon.stream <- unlist(strsplit(phon.utts, " "))
-    # delete "syllables" that are just empty space
-    phon.stream <- phon.stream[ !grepl(pattern="^[[:space:]]*$", x=phon.stream) ]
-    
-    dist <- as.data.frame(table(phon.stream), stringsAsFactors=FALSE)
-    colnames(dist) <- c("syllable", "frequency")
-    
-    examples <- dplyr::select(dict, word=word, example.phon=phon)
-    dist <- left_join(dist, examples, by=c("syllable"="example.phon"))
-    
-    fill.in <- dplyr::filter(dist, is.na(word))
-    fill.in$example.word <- NA
-    fill.in$example.phon <- NA
-    fill.in$word <- NULL
-    for(i in 1:nrow(fill.in)){
-      this.syl <- paste(paste0("[", strsplit(fill.in$syllable[i], split="")[[1]], "]"), collapse = "")
-      example.b <- examples[grep(pattern=paste0("^", this.syl, "-"), x=examples$example.phon) , ]
-      example.m <- examples[grep(pattern=paste0("-", this.syl, "-"), x=examples$example.phon) , ]
-      example.e <- examples[grep(pattern=paste0("-", this.syl, "$"), x=examples$example.phon) , ]
-      e <- rbind(example.b, example.m, example.e)
-      if(nrow(e) > 0){
-        # if there's more than one, select the shortest
-        e$len <- nchar(e$example.phon)
-        e <- e[which.min(e$len),] 
-        
-        fill.in$example.word[i] <- e$word
-        fill.in$example.phon[i] <- e$example.phon 
-      } else {
-        fill.in$example.word[i] <- NA
-        fill.in$example.phon[i] <- NA
-      }
-    } # end of i for loop
-    dist <- left_join(dist, fill.in, by=c("syllable", "frequency"))
-    
-    dist <- arrange(dist, desc(frequency))
-    
-    dist[is.na(dist)] <- ""
-    dist <- unite(dist, col=example.word, word, example.word, sep="" )
-    
-    context <- paste0("_", colnames(df)[k])
-    if(global) context <- ""
-    
-    if(!is.null(save.to)){
-      write.csv(dist, paste0(save.to, "/", method, context, ".csv"), row.names=FALSE)
-    }
-    dists[[(k-3)]] <- dist
-  } # end of k for loop
-  
-  if(global) dists <- dists[[1]]
-  
-  return(dists)
 }
