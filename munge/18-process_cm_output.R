@@ -44,13 +44,14 @@ cm_results <- results %>%
   dplyr::as.tbl() %>% 
   tidyr::extract(col=context, into=c("context", "iter"), regex = "([[:alnum:]]+[[:alpha:]])([[:digit:]]*)") %>% 
   tidyr::gather(key = "measure", value="value", token_f.score:boundary_recall) %>% 
-  dplyr::left_join(context_est, by=c("context", "measure")) # add context results to nontext results
+  dplyr::left_join(context_est, by=c("context", "measure")) %>% # add context results to nontext results
+  tidyr::extract(col=context, into=c("method", "context"), regex="([[:upper:]]{2,3})([[:lower:]]+)")
 cache('cm_results')
 
 # calculate p vlaues for each context and measure
 cm_boot_tests <- cm_results %>% 
   dplyr::mutate(above=ifelse(value >= context_est, 1, ifelse(value < context_est, 0, NA))) %>% 
-  dplyr::group_by(context, measure, context_est) %>% 
+  dplyr::group_by(method, context, measure, context_est) %>% 
   dplyr::summarize(iters = n(), 
                    p.val = mean(above)) %>% 
   add_stars()
