@@ -1,7 +1,6 @@
 #' @title Print for computational models
 #' 
-#' @description
-#' Prepares (saves to text files) phonetic approximations of transcript utterances for use by computational models.
+#' @description Prepares (saves to text files) phonetic approximations of transcript utterances for use by computational models.
 #' 
 #' @details
 #' For use with dpseg-1.2.1, corpus should be represented in the following way:

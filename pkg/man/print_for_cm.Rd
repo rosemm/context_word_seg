@@ -2,22 +2,28 @@
 % Please edit documentation in R/print_for_cm.R
 \name{print_for_cm}
 \alias{print_for_cm}
-\title{Prepare transcript files for use by computational models.}
+\title{Print for computational models}
 \usage{
 print_for_cm(df, nontext, dir = getwd(), save.to = "computational_models",
   r = 0, quiet = TRUE)
 }
 \description{
-For use with dpseg-1.2.1, corpus should be represented in the following way:
-one utterance per line
-a space bewteen each word
-words represented with dictionary pronunciations with one character per phoneme
+Prepares (saves to text files) phonetic approximations of transcript utterances for use by computational models.
 }
 \details{
+For use with dpseg-1.2.1, corpus should be represented in the following way:
+\itemize{
+  \item one utterance per line
+  \item a space bewteen each word
+  \item words represented with dictionary pronunciations with one character per phoneme
+}
+
 For use with py-cfg via colingFinal, corpus should be represented in the following way:
-one utterance per line
-spaces between each phoneme
-tabs between each word
-words represented with dictionary pronunciations using a limited set of possible characters (just alpha, I think). A single phoneme may be represented with more than one character.
+\itemize{
+  \item one utterance per line
+  \item spaces between each phoneme
+  \item tabs between each word
+  \item words represented with dictionary pronunciations using a limited set of possible characters (just alpha, I think). A single phoneme may be represented with more than one character.
+}
 }
 
