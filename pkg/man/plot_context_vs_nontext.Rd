@@ -4,9 +4,8 @@
 \alias{plot_context_vs_nontext}
 \title{Creates a boxplot showing bootstrapped null distirbutions with context estimates as colored dots.}
 \usage{
-plot_context_vs_nontext(context, nontext, global, outcome, Z.score = FALSE,
-  methods.to.use = c("WL", "LDA", "STM", "HJ"), annotate = NULL,
-  xlabs = FALSE, save.to, ...)
+plot_context_vs_nontext(results, outcome, xlabs = FALSE, Z.score = FALSE,
+  methods_wrap = FALSE, save.to, ...)
 }
 \arguments{
 \item{argument_name}{description of the argument}

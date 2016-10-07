@@ -96,7 +96,7 @@ print_for_coling <- function(df, nontext, dir = getwd(), save.to="computational_
   # By shuffling the context names, the files that get run first will vary iteration to iteration.
   # It won't make any difference to the final output, except if the process is interupted before it completes.
   
-  commands <- paste0("make NAME=", context.names, r, " OUTPUTPREFIX=r", r)
+  commands <- paste0("make NAME=", context.names, r, " PYNS=500 OUTPUTPREFIX=r", r)
   
   write(c("cd colingFinal", commands, paste0("rm *", r ,"Tmp/*"), "cd .."), file = file.path(dir, "cm_contexts.sh"))
 }
