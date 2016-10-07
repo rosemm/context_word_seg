@@ -98,7 +98,7 @@ print_for_coling <- function(df, nontext, dir = getwd(), save.to="computational_
   
   commands <- paste0("make NAME=", context.names, r, " PYNS=500 OUTPUTPREFIX=r", r)
   
-  write(c("cd colingFinal", commands, paste0("rm *", r ,"Tmp/*"), "cd .."), file = file.path(dir, "cm_contexts.sh"))
+  write(c("cd colingFinal", commands, "cd .."), file = file.path(dir, "cm_contexts.sh"))
 }
 
 
