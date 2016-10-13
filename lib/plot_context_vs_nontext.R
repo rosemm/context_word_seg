@@ -105,11 +105,13 @@ plot_context_vs_nontext <- function(results, outcome, xlabs=FALSE, Z.score=FALSE
       
       p <- p + ggtitle(paste(c, "\n", this.method, outcome))
       
+      # remove extra periods from the file name as it interfers with LaTex's ability to identify the file extension
+      outcome <- gsub(x=outcome, pattern=".", replacement = "", fixed=TRUE)
+      
       print(p)
       ggsave(p, filename=paste0(save.to, "/", c, "_", outcome, "_", this.method, "_", additional_args ,".png"), width=width, height=height, units="in")
       
       if(methods_wrap) m <- length(methods) # jump to the last iteration of the for loop
-      
     }
   }
 }
