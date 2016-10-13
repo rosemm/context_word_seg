@@ -60,3 +60,4 @@ simulations.R
 .httr-oauth
 reports/*_cache
 reports/*_files
+aws-key.pem
