@@ -59,6 +59,10 @@ print_for_cm <- function(df, nontext, dir = getwd(), save.to="computational_mode
   write(c("cd colingFinal", commands, "cd .."), file = file.path(dir, "cm_contexts.sh"))
 }
 
+#' @title Print for coling computational model
+#' 
+#' @description Prepares (saves to text files) phonetic approximations of transcript utterances for use by coling computational models.
+#' 
 #' @inheritParams print_for_cm
 #' @export
 print_for_coling <- function(df, nontext, dir = getwd(), save.to="computational_models", r=0, quiet = TRUE){
@@ -98,11 +102,14 @@ print_for_coling <- function(df, nontext, dir = getwd(), save.to="computational_
   
   commands <- paste0("make NAME=", context.names, r, " PYNS=500 OUTPUTPREFIX=r", r)
   
-  write(c("cd colingFinal", commands, paste0("rm *", r ,"Tmp/*"), "cd .."), file = file.path(dir, "cm_contexts.sh"))
+  write(c("cd colingFinal", commands, "cd .."), file = file.path(dir, paste0(r, "coling_contexts.sh")))
 }
 
 
-#'
+#' @title Print for dpseg computational model
+#' 
+#' @description Prepares (saves to text files) phonetic approximations of transcript utterances for use by dpseg computational models.
+#' 
 #' @inheritParams print_for_cm
 #' @export
 print_for_dpseg <- function(df, nontext, dir = getwd(), save.to="computational_models", r=0, quiet = TRUE){
@@ -148,5 +155,5 @@ print_for_dpseg <- function(df, nontext, dir = getwd(), save.to="computational_m
   commands <- paste0("segment ", context.names, r, ".in -i5000 -ut > ", context.names, r, ".out")
   
   # save the commands to a file, which can then be called from the command line
-  write(c("cd dpseg_input", commands, "cd .."), file = file.path(dir, "dpseg_contexts.sh"))
+  write(c("cd dpseg_input", commands, "cd .."), file = file.path(dir, paste0(r, "dpseg_contexts.sh")))
 }
