@@ -1,0 +1,375 @@
+---
+title: "Contexts vs. Nontexts"
+author: "Rose Hartman"
+date: "September 29, 2016"
+output: 
+  pdf_document: 
+    fig_caption: yes
+    keep_tex: yes
+---
+
+```{r setup, message=FALSE}
+knitr::opts_knit$set(root.dir = "/Users/TARDIS/Documents/STUDIES/context_word_seg",
+                     cache = FALSE,
+                     message = FALSE,
+                     echo=FALSE,
+                     include = FALSE)
+```
+
+```{r load_project, message=FALSE}
+library(ProjectTemplate)
+load.project()
+library(knitr)
+library(ggplot2)
+
+colors <- c("#984ea3", "#377eb8", "#e41a1c")
+names(colors) <- c("HJ", "STM", "WL")
+```
+
+## Excluding contexts that are too small for computations (fewer than 50 utterances)
+```{r excludes}
+exclude <- ds_results %>% 
+  dplyr::select(method, context, measure, context_est) %>% 
+  dplyr::filter(measure == "N.utts") %>% 
+  unique() %>% 
+  tidyr::spread(key=measure, value=context_est) %>% 
+  arrange(N.utts) %>% 
+  filter(N.utts < 100) 
+kable(exclude, caption="Context subcorpora with fewer than 100 utterances")
+
+
+# exclude contexts with fewer than 100 utterances
+ds_boot_tests <-  dplyr::filter(ds_boot_tests, !context %in% exclude$context)
+
+# exclude contexts with fewer than 100 utterances
+ds_results <- dplyr::filter(ds_results, !context %in% exclude$context) 
+
+cm_boot_tests <- cm_boot_tests %>%
+  # exclude contexts with fewer than 100 utterances
+  dplyr::filter(!context %in% exclude$context) 
+
+# exclude contexts with fewer than 100 utterances
+cm_results <- cm_results %>% 
+  dplyr::filter( !context %in% exclude$context)
+```
+
+## Features of the corpus
+
+
+```{r, eval=FALSE}
+ds_boot_tests %>% 
+  dplyr::filter(measure %in% c("TTR", "N.tokens", "N.types", "prop.one.word.utt", 
+                               "prop.most.freq", "mean.words.per.utt")) %>% 
+  dplyr::select(-iters, -p.val, -stars) %>% 
+  dplyr::arrange(measure) %>% 
+  kable()
+```
+
+```{r descriptives_plots, eval=FALSE}
+ds_results %>%  
+  plot_context_vs_nontext(outcome="TTR", 
+                          xlabs=TRUE, save.to=file.path("graphs", "context_vs_nontext"))
+
+ds_results %>%  
+  plot_context_vs_nontext(outcome="prop.most.freq",
+                          xlabs=TRUE, save.to=file.path("graphs", "context_vs_nontext"))
+
+ds_results %>%
+  plot_context_vs_nontext(outcome="mean.words.per.utt", 
+                          xlabs=TRUE, save.to=file.path("graphs", "context_vs_nontext"))
+
+ds_results %>%
+  plot_context_vs_nontext(outcome="prop.one.word.utt", 
+                          xlabs=TRUE, save.to=file.path("graphs", "context_vs_nontext"))
+
+ds_results %>%  
+  plot_context_vs_nontext(outcome="TTR",
+                          Z.score=TRUE,
+                          methods_wrap=TRUE,
+                          xlabs=TRUE, save.to=file.path("graphs", "context_vs_nontext"))
+
+ds_results %>%  
+  plot_context_vs_nontext(outcome="prop.most.freq",
+                          Z.score=TRUE,
+                          methods_wrap=TRUE,
+                          xlabs=TRUE, save.to=file.path("graphs", "context_vs_nontext"))
+
+ds_results %>%
+  plot_context_vs_nontext(outcome="mean.words.per.utt", 
+                          Z.score=TRUE,
+                          methods_wrap=TRUE,
+                          xlabs=TRUE, save.to=file.path("graphs", "context_vs_nontext"))
+
+ds_results %>%
+  plot_context_vs_nontext(outcome="prop.one.word.utt", 
+                          Z.score=TRUE,
+                          methods_wrap=TRUE,
+                          xlabs=TRUE, save.to=file.path("graphs", "context_vs_nontext"))
+```
+
+
+## Segmentability
+
+
+```{r, eval=FALSE}
+cm_boot_tests %>% 
+  dplyr::ungroup() %>% 
+  dplyr::filter(measure=="token_f.score") %>% 
+  dplyr::select(-measure) %>% 
+  kable()
+
+cm_boot_tests %>% 
+  dplyr::ungroup() %>% 
+  dplyr::filter(measure=="token_precision") %>% 
+  dplyr::select(-measure) %>% 
+  kable()
+
+cm_boot_tests %>% 
+  dplyr::ungroup() %>% 
+  dplyr::filter(measure=="token_recall") %>% 
+  dplyr::select(-measure) %>% 
+  kable()
+
+cm_Z_means <- cm_boot_tests %>% 
+  dplyr::group_by(model, method, measure) %>% 
+  dplyr::summarise(Z_mean=mean(Z_est, na.rm=TRUE)) %>% 
+  tidyr::spread(key=measure, value=Z_mean) 
+```
+
+
+```{r, eval=FALSE}
+cm_results %>%
+  plot_context_vs_nontext(outcome="token_f.score", 
+                          xlabs=TRUE, save.to=file.path("graphs", "context_vs_nontext"))
+
+
+cm_results %>%
+  plot_context_vs_nontext(outcome="token_precision", 
+                          xlabs=TRUE, save.to=file.path("graphs", "context_vs_nontext"))
+
+
+cm_results %>%
+  plot_context_vs_nontext(outcome="token_recall", 
+                          xlabs=TRUE, save.to=file.path("graphs", "context_vs_nontext"))
+
+
+cm_results %>%
+  plot_context_vs_nontext(outcome="token_f.score", 
+                          Z.score=TRUE, 
+                          methods_wrap=TRUE,
+                          xlabs=TRUE, save.to=file.path("graphs", "context_vs_nontext"))
+
+cm_results %>%
+  plot_context_vs_nontext(outcome="token_precision", 
+                          Z.score=TRUE, 
+                          methods_wrap=TRUE,
+                          xlabs=TRUE, save.to=file.path("graphs", "context_vs_nontext"))
+
+cm_results %>%
+  plot_context_vs_nontext(outcome="token_recall", 
+                          Z.score=TRUE, 
+                          methods_wrap=TRUE,
+                          xlabs=TRUE, save.to=file.path("graphs", "context_vs_nontext"))
+```
+
+
+```{r token_f.scores}
+token_f.scores <- cm_boot_tests %>%  
+  dplyr::filter(measure == "token_f.score") %>%
+  dplyr::ungroup() %>%  
+  dplyr::select(model, method, context, context_est, N.utts, mean.words.per.utt, Z_mean.words.per.utt) %>%
+  unique() %>% 
+  tidyr::spread(key=model, value=context_est)
+token_f.scoresZ <- cm_boot_tests %>%  
+  dplyr::filter(measure == "token_f.score") %>% 
+  dplyr::ungroup() %>%  
+  dplyr::select(model, method, context, Z_est, N.utts, mean.words.per.utt, Z_mean.words.per.utt) %>%
+  unique() %>% 
+  tidyr::spread(key=model, value=Z_est)
+```
+
+
+```{r N.utts_segmentability}
+cm_boot_tests %>%  
+  dplyr::filter(measure %in% c("token_precision", "token_recall", "token_f.score")) %>% 
+  ggplot(aes(y=context_est, x=N.utts)) + 
+    geom_point(aes(color=method)) + 
+    stat_smooth(method="lm", color="black") + 
+    facet_grid(model ~ measure) + 
+    scale_color_manual(values=colors) + 
+    scale_y_continuous(breaks=seq(0, 100, 5), limits=c(NA, NA)) + 
+    theme_classic()
+
+(cor_utts_coling_raw  <- cor.test(token_f.scores$N.utts, token_f.scores$Adaptor_Grammar))
+(cor_utts_dpseg_raw   <- cor.test(token_f.scores$N.utts, token_f.scores$HDP))
+(cor_dpseg_coling_raw <- cor.test(token_f.scores$Adaptor_Grammar, token_f.scores$HDP))
+
+cm_boot_tests %>%  
+  dplyr::filter(measure %in% c("token_precision", "token_recall", "token_f.score")) %>% 
+  ggplot(aes(y=Z_est, x=N.utts)) + 
+    geom_point(aes(color=method)) + 
+    stat_smooth(method="lm", color="black") + 
+    facet_grid(model ~ measure) + 
+    scale_color_manual(values=colors) + 
+    scale_y_continuous(breaks=seq(-10, 10, 1), limits=c(NA, NA)) + 
+    labs(y="F-scores standardized against bootstrapped null distributions") + 
+    theme_classic()
+
+cm_boot_tests %>%  
+  dplyr::filter(measure =="token_f.score") %>% 
+  ggplot(aes(y=Z_est, x=N.utts)) + 
+    geom_point(aes(color=method)) + 
+    stat_smooth(method="lm", color="black") + 
+    facet_wrap( ~ model) + 
+    scale_color_manual(name="Conexts defined by:", values=colors) + 
+    scale_y_continuous(breaks=seq(-10, 10, 1), limits=c(NA, NA)) + 
+    labs(y="F-scores \nstandardized against bootstrapped null distributions",
+         x="Number of utterances in subcorpora") + 
+    theme_classic()
+ggsave(file.path("graphs", "context_vs_nontext", "Fscores_N.utts.png"), width=9, height=6, units="in")
+
+(cor_utts_coling_Z  <- cor.test(token_f.scoresZ$N.utts, token_f.scoresZ$Adaptor_Grammar))
+(cor_utts_dpseg_Z   <- cor.test(token_f.scoresZ$N.utts, token_f.scoresZ$HDP))
+(cor_dpseg_coling_Z <- cor.test(token_f.scoresZ$Adaptor_Grammar, token_f.scoresZ$HDP))
+
+```
+
+
+```{r mean.words.per.utt_segmentability}
+
+cm_boot_tests %>%  
+  dplyr::filter(measure %in% c("token_precision", "token_recall", "token_f.score")) %>% 
+  ggplot(aes(y=context_est, x=mean.words.per.utt)) + 
+    geom_point(aes(color=method)) + 
+    stat_smooth(method="lm", color="black") + 
+    facet_grid(model ~ measure) + 
+    scale_color_manual(values=colors) + 
+    scale_y_continuous(breaks=seq(0, 100, 5), limits=c(NA, NA)) + 
+    theme_classic()
+
+(cor_uttlen_coling_raw  <- cor.test(token_f.scores$mean.words.per.utt, token_f.scores$Adaptor_Grammar))
+(cor_uttlen_dpseg_raw   <- cor.test(token_f.scores$mean.words.per.utt, token_f.scores$HDP))
+
+cm_boot_tests %>%  
+  dplyr::filter(measure %in% c("token_precision", "token_recall", "token_f.score")) %>% 
+  ggplot(aes(y=Z_est, x=Z_mean.words.per.utt)) + 
+    geom_point(aes(color=method)) + 
+    stat_smooth(method="lm", color="black") + 
+    facet_grid(model ~ measure) + 
+    scale_color_manual(values=colors) + 
+    scale_y_continuous(breaks=seq(-10, 10, 1), limits=c(NA, NA)) + 
+    labs(y="F-scores standardized against bootstrapped null distributions") + 
+    theme_classic()
+
+cm_boot_tests %>%  
+  dplyr::filter(measure =="token_f.score") %>% 
+  ggplot(aes(y=Z_est, x=Z_mean.words.per.utt)) + 
+    geom_point(aes(color=method)) + 
+    stat_smooth(method="lm", color="black") + 
+    facet_wrap( ~ model) + 
+    scale_color_manual(name="Conexts defined by:", values=colors) + 
+    scale_y_continuous(breaks=seq(-10, 10, 1), limits=c(NA, NA)) + 
+    labs(y="F-scores \nstandardized against bootstrapped null distributions",
+         x="Mean length of utterances in subcorpora \nstandardized against bootstrapped null distributions") + 
+    theme_classic()
+ggsave(file.path("graphs", "context_vs_nontext", "Fscores_Zmeanwordsperutt.png"), width=9, height=6, units="in")
+
+(cor_uttlen_coling_Z  <- cor.test(token_f.scoresZ$Z_mean.words.per.utt, token_f.scoresZ$Adaptor_Grammar))
+(cor_uttlen_dpseg_Z   <- cor.test(token_f.scoresZ$Z_mean.words.per.utt, token_f.scoresZ$HDP))
+
+```
+
+
+# Results
+
+There are some contexts that are made up of only a very small number of utterances, rendering calculations on those context subsets (such as type-token ratio and mean length of utterance) unreliable. 
+Following guidelines in Brown (CITE) and MacWinney (CITE), the analyses reported here are restricted to contexts with at least 50 utterances in them. 
+This excludes the contexts 'TV', 'touching', 'hiccups', 'taking pictures', and 'outside' from the subjective coder judgment approach and 'media' from the word list method approach, composed of between 2 and 23 utterances each.
+
+## Descriptives
+
+I assessed the context subsets on several measures that may be related to how easily a language sample may be correctly segmented into words. 
+These measures included type-token ratio, the proportion of tokens accounted for by the most frequent type (an index of how skewed the frequency distribution is), mean utterance length in number of words, and proportion of isolated words.
+
+Across methods and contexts, there is a substantial difference in lexical diversity (type-token ratio) in context subsets compared to subsets with the same number of utterances taken randomly from the corpus. 
+Type-token ratio is strongly related to corpus size, and so naturally varies substantially from across context subsets (`r round(min(dplyr::filter(ds_results, measure == "TTR")$context_est), 2)` to `r round(max(dplyr::filter(ds_results, measure == "TTR")$context_est), 2)`). 
+In order to aggregate results across context subsets, context estimates are converted into Z-scores using the mean and standard deviation measured in that context's size-matched bootstrapped null distribution. 
+This means that each context is represented according to where it falls within its own bootstrapped sampling distribution; 
+it represents how extreme that context estimate is relative to estimates calculated on random samples of the same number of utterances.
+
+In all three approaches to defining context, context subsets have dramatically lower type-token ratio (less lexical diversity) than size-matched random samples, with Z-scores ranging from `r round(max(dplyr::filter(ds_results, measure == "TTR")$Z_est), 2)` to `r  round(min(dplyr::filter(ds_results, measure == "TTR")$Z_est), 2)`. 
+This underscores the fact that --- across all three approaches to defining contexts --- the resulting context subsets are composed of utterances that are more similar to each other, reusing a smaller number of unique words, than would be expected by chance.
+We would expect this to be the case for the topic modeling contexts and the contexts generated from the occurrence of key words, but it would not necessarily occur in the contexts defined by subjective coder judgments.
+
+```{r echo=FALSE}
+prop.most.freq.Z <- ds_results %>% 
+  dplyr::ungroup() %>% 
+  dplyr::filter(measure == "prop.most.freq") %>% 
+  dplyr::select(method, context, Z_est) %>% 
+  unique() %>% 
+  dplyr::select(Z_est) %>% 
+  dplyr::mutate(small=ifelse(Z_est > 2, 0,
+                    ifelse(Z_est < -2, 0, 1)))
+```
+
+In contrast, there is no systematic difference between context subsets and their size-matched random controls on what proportion of the tokens are the most frequent word. 
+There is some natural variability across the samples, of course, but the context estimate Z-scores are spread across the bootstrapped null distributions, with `r 100*(round(mean(prop.most.freq.Z$small), 2))`% falling within 2 standard deviations of their null distribution mean. 
+The more extreme estimates do not fall above `r  round(max(prop.most.freq.Z$Z_est), 2)` or below `r round(min(prop.most.freq.Z$Z_est), 2)` standard deviations from their means. 
+
+## Segmentability
+
+Performance of the computational models is measured by comparing their segmentation to the actual word boundaries in the sub-corpus analyzed. 
+This comparison is often quantified in two complementary ways: the proportion of tokens correctly segmented out of all tokens segmented by the model (precision), and the proportion of tokens correctly segmented out of all tokens that were available in that sub-corpus (recall). 
+<!-- In other words, precision captures what proportion of the model's decisions are correct, and recall captures how well the model is able to recover the  -->
+Precision and recall balance a model between under-segmenting (which increases precision at the cost of discovering fewer words) and over-segmenting (which, because of the prevalence of monosyllabic words in English, correctly recovers more tokens but penalizes precision by generating multiple incorrect tokens for each over-segmented multisyllabic word).
+The F-score (the harmonic mean of precision and recall) is a useful compromise and is often reported in assessments of word segmentation models (CITE). 
+It incorporates both precision and recall and has the attractive property of naturally penalizing models with a large difference between precision and recall, so models that dramatically under- or over-segment have lower F-scores than models that strike an appropriate balance. 
+
+For the purposes of this study, token F-score from each of the computational models is used as an indicator of 'segmentability' for each sub-corpus.
+This is a novel application of computational models for word segmentation: 
+While there have been several investigations comparing different models (or versions of models) on the same language samples to assess the models (CITE), in this case the focus is on assessing the language samples themselves. 
+Because of this, I made no attempt to modify model parameter settings to maximize performance on this corpus, as is often the case in the computational modeling literature for word segmentation (CITE). 
+These results should not be taken as evidence for the quality or validity of one model over another --- the parameter settings in both cases were left at their defaults, which were tuned with respect to the original corpus studied in each case (both derived from the Bernstein-Ratner-Brent corpus (Brent, 1999)).
+Instead, the segmentation performance for each context should be compared to its bootstrapped null distribution, within each model.
+This provides a rigorous, tightly-controlled hypothesis test to answer the following question: Is the speech from utterances within a given context more segmentable than the same number of utterances randomly sampled from the same corpus, without respect to context?
+The parameter settings for each model are held constant, as is the size of the sample of speech (which can also affect performance, Boerschinger, 2012).
+Because the null distributions are built with samples from the *same* corpus as the context estimates, this method also controls for all corpus factors including infants' age, gender, SES, and a host of potentially influential factors that may be harder to estimate or for which no metadata may exist. 
+If token F-scores are significantly better in context-specific sub-corpora compared to random sub-corpora of the same size, it provides evidence that the act of subsetting the corpus by context increases segmentability.
+<!-- The most striking result perhaps is that, the with these parameter settings on this corpus, the py-cfg model clearly outperforms the HDP model on most measures.  -->
+
+```{r, echo=FALSE}
+token_f.scoresZ <- token_f.scoresZ %>% 
+  dplyr::mutate(coling_small=ifelse(Adaptor_Grammar > 2, 0, ifelse(Adaptor_Grammar < -2, 0, 1)),
+                dpseg_small=ifelse(HDP > 2, 0, ifelse(HDP < -2, 0, 1)))
+```
+
+Results from the Adaptor Grammar (CITE) show no evidence of an advantage for context-specific sub-corpora compared to random samples of the same number of utterances. 
+Just as with the corpus descriptive estimates (type-token ratio, etc.), estimates from context-specific sub-corpora can be expressed as Z-scores, computed using the mean and standard deviations from their bootstrapped sampling distributions. 
+The F-scores from the Adaptor Grammar for context-specific sub-corpora fall well within their bootstrapped null distributions, with all but one of them falling within 2 standard deviations of their null distribution mean. 
+The only exception is one of the contexts from the topic modeling topics (Topic 2), with an F-score `r round(filter(token_f.scoresZ, coling_small==0)$Adaptor_Grammar, 2)` standard deviations above its null distribution mean. 
+
+Results from the Hierarchical Dirichlet Process Model (CITE) are mixed. 
+For contexts from the topic modeling topics or subjective coder judgments, there is no strong evidence of an advantage for context-specific sub-corpora compared to random samples of the same number of utterances.
+The F-scores from the Hierarchical Dirichlet Process Model for context-specific sub-corpora fall well within their bootstrapped null distributions, with `r 100*round(mean(filter(token_f.scoresZ, method != "WL")$dpseg_small), 2)`% of them falling within 2 standard deviations of their null distribution mean. 
+The contexts resulting from tagging utterances by the occurrence of key words show a different pattern, however, with all context F-scores falling above their null distribution means, by `r round(min(filter(token_f.scoresZ, method == "WL")$HDP), 2)` to `r round(max(filter(token_f.scoresZ, method == "WL")$HDP), 2)` standard deviations, and 
+`r length(which(filter(token_f.scoresZ, method == "WL")$dpseg_small==0))` of them falling more than 2 standard deviations above their null distribution means. 
+This may be driven by the fact that the word list approach to defining contexts tends to systematically select for longer utterances, unlike the topic modeling and coder judgment approach, which show no such bias.
+The HDP model 
+<!-- what percent of corpus is 1-word utts? what percent in WL subsets? -->
+
+## Discussion
+The lack of evidence for improved segmentability in context-specific subsets using the Adaptor Grammar may appear surprising in light of other recent findings showing improved token F-scores from the very same model when activity context information is provided in the form of context labels for utterances derived from topic modeling topics (CITE).
+<!-- While there are several differences in the implementation  -->
+Importantly, (CITE) found that while the versions of the model that could build separate context-specific vocabularies did out perform implementations that could not (including the model used in this study), this advantage only appeared after the model had had access to a sufficiently large input corpus, at least about 10,000 utterances from the Naima section of the Providence corpus.
+They interpret this as a natural consequence of the fact that the context-sensitive models have more complex structure to learn (several vocabularies rather than just one), which requires more data. 
+The resulting learned patterns, however, are better able to accurately recover true word boundaries in speech, resulting in higher F-scores compared to models trained without context specific vocabularies, even when no context labels are available in the test sample (CITE).
+In the current study, the models are the same whether applied to context subsets or random subsets; there is no reason that the models should require more input when applied to context subsets relative to random subsets.
+However, it may still be the case that larger corpus samples would reveal a context advantage for the Adaptor Grammar; 
+any difference in segmentability in context-specific sub-corpora compared to random sub-corpora could be reinforced and compounded with larger and larger sample sizes, leading to a clearer difference between segmentability of context-specific sub-corpora and size-matched random sub-corpora. 
+While the correlation between sub-corpus size (number of utterances) and standardized F-scores from the Adaptor Grammar (Z-scores relative to the null means and standard deviations) does not reach significance, r(`r cor_utts_coling_Z$parameter`)=`r cor_utts_coling_Z$estimate`, p=`r cor_utts_coling_Z$p.value`, it is suggestive of a trend that may warrant further investigation in larger corpora. 
+
+
+
+## Variability between approaches to defining context
+
+## Variability within each approach to defining context
