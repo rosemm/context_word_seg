@@ -7,6 +7,19 @@
 print_for_dpseg(df, nontext, dir = getwd(),
   save.to = "computational_models", r = 0, quiet = TRUE)
 }
+\arguments{
+\item{df}{A dataframe with the columns utt, orth, phon and all context columns. See details.}
+
+\item{nontext}{Should utterances be randomly selected for each context column?}
+
+\item{dir}{The directory containing the folder with all model files (colingFinal). This is also the directory where the .sh file will save. Defaults to the working directory.}
+
+\item{save.to}{The name of a directory in which to save the input files.}
+
+\item{r}{A counter variable. This number will appear in the names of input and output files, making it easy to keep track of multiple parallel processes.}
+
+\item{quiet}{Turn on additional messages? Useful for debugging.}
+}
 \description{
 Prepares (saves to text files) phonetic approximations of transcript utterances for use by dpseg computational models.
 }
