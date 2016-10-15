@@ -1,12 +1,33 @@
+#' @title Descriptive statistics on sub-corpora
+#' 
+#' @description Gets a number of measures that may relate to segmentability of a language sample. 
+#' Can easily be run in parallel (highly recommended) for different bootstrap iterations. 
+#'
+#' @param x A list of arguments that control how nontext_descriptives runs. See details.
+#' 
+#' @details x must include at minimum "dataframe" (a data frame or tibble with columns utt, orth, phon, and context columns with 1's and 0's indicating whether each utterance is in each context subcorpus)
+#' and "dict" (a data frame or tibble with columns with all words in the corpus and their phon approximations). 
+#' Note that the order of the columns in dataframe is important --- the first three must be utt, orth, phon, and the 4th through last must be context columns.
+#' Additional arguments can be included in x, but if they are omitted nontext_descriptives will just use their defaults:
+#' #' \itemize{
+#'   \item seg.utts (default TRUE): should utterance boundaries be given as word boundaries?
+#'   \item verbose (default FALSE): include extra output?
+#'   \item nontext (defaults to TRUE): shuffle utterances to randomly select for each context?
+#'   \item quiet (default TRUE): supress extra messages to print while it's running (FALSE is good for debugging)?
+#'   \item date (default NULL): today's date, to be added to output for record keeping. Can be supplied with date().
+#' }
+#' Any additional elements in x will be ignored without warning.
+#'
+#' @export
 nontexts_descriptives <- function(x){
   if (all(c("dataframe", "dict") %in% names(x))) {
     df <- x[["dataframe"]]
     dict <- x[["dict"]]
-    if("seg.utts" %in% names(x)) seg.utts <- x[["seg.utts"]]
-    if("verbose" %in% names(x)) verbose <- x[["verbose"]]
-    if("nontext" %in% names(x)) nontext <- x[["nontext"]]
-    if("quiet" %in% names(x)) quiet <- x[["quiet"]]
-    if("date" %in% names(x)) date <- x[["date"]]
+    if("seg.utts" %in% names(x)) seg.utts <- x[["seg.utts"]] else seg.utts <- TRUE
+    if("verbose" %in% names(x)) verbose <- x[["verbose"]] else verbose <- FALSE
+    if("nontext" %in% names(x)) nontext <- x[["nontext"]] else nontext <- TRUE
+    if("quiet" %in% names(x)) quiet <- x[["quiet"]] else quiet <- FALSE
+    if("date" %in% names(x)) date <- x[["date"]] else date <- NULL
   } else stop("arguments are a list, but does not have components 'dataframe' and 'dict'")
   
   stopifnot(is.data.frame(df))
