@@ -1,10 +1,31 @@
-# e1071::lca can't handle this many variables
+###################################################################################################
+# Use context codes from all three approaches (WL, HJ, STM) to conduct a Latent Class Analysis (LCA)
+# using poLCA() from poLCA package
+###################################################################################################
+# NOTE:
+# Depending on the starting parameters, this algorithm may only locate a local, rather than global, maximum. 
+# This becomes more and more of a problem as nclass increases. 
+# It is therefore highly advisable to run poLCA multiple times until you are relatively certain that you have located the global maximum log-likelihood. 
+# This can be done auotmatically with the nrep command in poLCA()
+# In the code here, nrep increases as needed as the number of latent classes increases
+###################################################################################################
+
+# remove spaces in column names
 colnames(df_all) <- gsub(x=colnames(df_all), pattern = " ", replacement = "_")
+# context columns should be coded as 0 or 1 at this point
+# turn all context columns into factors if they're not already (poLCA needs factors)
 df_all <- df_all %>% 
   mutate_if(is.numeric, as.factor)
 
+#---------------------------------------------------------------
+# run the LCA models
+
+# f is the formula for us in poLCA commands
+# for LCA with no predictors (just estimating the latent classes), the formula is cbind(all outcome vectors) ~ 1
 f <- cbind(WL_bath, WL_bed, WL_body_touch, WL_diaper_dressing, WL_fussing, WL_meal, WL_media, WL_play, HJ_bathtime, HJ_diaper_change, HJ_dressing, HJ_fussing, HJ_hiccups, HJ_housework, HJ_interaction, HJ_mealtime, HJ_outside, HJ_playtime, HJ_sleep, HJ_taking_pictures, HJ_touching, HJ_TV, STM_topic_1, STM_topic_10, STM_topic_11, STM_topic_12, STM_topic_2, STM_topic_3, STM_topic_4, STM_topic_5, STM_topic_6, STM_topic_7, STM_topic_8, STM_topic_9) ~ 1
 
+# create an empty storage variable called lca_models
+# this will be filled up by each call to poLCA below
 lca_models <- list()
 lca_models$lca5 <- poLCA(f, df_all, nclass=5, maxiter = 10000, nrep=5, na.rm=FALSE)
 lca_models$lca6 <- NULL #poLCA(f, df_all, nclass=6, maxiter = 10000, nrep=5, na.rm=FALSE)
@@ -37,11 +58,10 @@ lca_models$lca30 <- NULL #poLCA(f, df_all, nclass=30, maxiter = 10000, nrep=10, 
 
 cache('lca_models')
 
-# NOTE
-# Depending on the starting parameters, this algorithm may only locate a local, rather than global, maximum. 
-# This becomes more and more of a problem as nclass increases. 
-# It is therefore highly advisable to run poLCA multiple times until you are relatively certain that you have located the global maximum log-likelihood. 
+#---------------------------------------------------------------
+# compile the lca model reuslts into a more usable summary data frame:
 
+# create an empty storage data.frame, which will get filled in the for loop below
 lca_results <- data.frame(model=names(lca_models), aic=NA,
                           bic=NA, Chisq=NA, llik=NA, npar=NA, resid.df=NA, numiter=NA)
 for(m in 1:length(lca_models)){
