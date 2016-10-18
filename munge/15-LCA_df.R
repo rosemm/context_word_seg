@@ -8,90 +8,94 @@
 # It is therefore highly advisable to run poLCA multiple times until you are relatively certain that you have located the global maximum log-likelihood. 
 # This can be done auotmatically with the nrep command in poLCA()
 # In the code here, nrep increases as needed as the number of latent classes increases
+# It will estimate the model nrep times and keep the best one, helping to ensure that it doesn't end up with a local maximum
 ###################################################################################################
 
-# remove spaces in column names
-colnames(df_all) <- gsub(x=colnames(df_all), pattern = " ", replacement = "_")
 # context columns should be coded as 0 or 1 at this point
 # turn all context columns into factors if they're not already (poLCA needs factors)
 df_all <- df_all %>% 
-  mutate_if(is.numeric, as.factor)
+  mutate_if(is.numeric, as.factor) 
+
+method_contexts <- df_all %>% 
+  tidyr::gather(key="context", value="value", -utt, -orth, -phon) %>% 
+  tidyr::extract(context, into=c("method", "context"), regex="([[:upper:]]+)_(.*)") %>% 
+  dplyr::filter(value == 1) 
+method_counts <- method_contexts %>% 
+  dplyr::count(utt, orth, phon, method) 
+df_by_method <- method_counts %>% 
+  dplyr::filter(n == 1) %>% 
+  dplyr::select(-n) %>% 
+  left_join(method_contexts, by=c("utt", "orth", "phon", "method")) %>% 
+  dplyr::select(-value) %>% 
+  tidyr::spread(key=method, value=context) %>% 
+  dplyr::select(utt, orth, phon, HJ, STM, WL) %>% # keep context columns for HJ, STM, and WL
+  mutate_at(vars(HJ, STM, WL), as.factor)
 
 #---------------------------------------------------------------
 # run the LCA models
 
 # f is the formula for us in poLCA commands
 # for LCA with no predictors (just estimating the latent classes), the formula is cbind(all outcome vectors) ~ 1
-f <- cbind(WL_bath, WL_bed, WL_body_touch, WL_diaper_dressing, WL_fussing, WL_meal, WL_media, WL_play, HJ_bathtime, HJ_diaper_change, HJ_dressing, HJ_fussing, HJ_hiccups, HJ_housework, HJ_interaction, HJ_mealtime, HJ_outside, HJ_playtime, HJ_sleep, HJ_taking_pictures, HJ_touching, HJ_TV, STM_topic_1, STM_topic_10, STM_topic_11, STM_topic_12, STM_topic_2, STM_topic_3, STM_topic_4, STM_topic_5, STM_topic_6, STM_topic_7, STM_topic_8, STM_topic_9) ~ 1
+all_outcome_vars <- df_all %>% dplyr::select(-utt, -orth, -phon) %>% colnames() %>% paste(collapse = ", ")
+# print all_outcome_vars in the console and then copy it into the formula:
+f <- cbind(WL_bath, WL_bed, WL_body_touch, WL_diaper_dressing, WL_fussing, WL_meal, WL_play, HJ_bathtime, HJ_diaperchange, HJ_dressing, HJ_fussing, HJ_housework, HJ_interaction, HJ_mealtime, HJ_playtime, HJ_sleep, LDA_topic_1, LDA_topic_10, LDA_topic_11, LDA_topic_12, LDA_topic_2, LDA_topic_3, LDA_topic_4, LDA_topic_5, LDA_topic_6, LDA_topic_7, LDA_topic_8, LDA_topic_9, STM_topic_1, STM_topic_10, STM_topic_11, STM_topic_12, STM_topic_2, STM_topic_3, STM_topic_4, STM_topic_5, STM_topic_6, STM_topic_7, STM_topic_8, STM_topic_9) ~ 1
 
-# create an empty storage variable called lca_models
-# this will be filled up by each call to poLCA below
-lca_models <- list()
-lca_models$lca5 <- poLCA(f, df_all, nclass=5, maxiter = 10000, nrep=5, na.rm=FALSE)
-lca_models$lca6 <- NULL #poLCA(f, df_all, nclass=6, maxiter = 10000, nrep=5, na.rm=FALSE)
-lca_models$lca7 <- NULL #poLCA(f, df_all, nclass=7, maxiter = 10000, nrep=5, na.rm=FALSE)
-lca_models$lca8 <- poLCA(f, df_all, nclass=8, maxiter = 10000, nrep=5, na.rm=FALSE)
-lca_models$lca9 <- NULL #poLCA(f, df_all, nclass=9, maxiter = 10000, nrep=5, na.rm=FALSE)
-lca_models$lca10 <- NULL #poLCA(f, df_all, nclass=10, maxiter = 10000, nrep=10, na.rm=FALSE)
-lca_models$lca11 <- poLCA(f, df_all, nclass=11, maxiter = 10000, nrep=10, na.rm=FALSE)
-lca_models$lca12 <- NULL #poLCA(f, df_all, nclass=12, maxiter = 10000, nrep=10, na.rm=FALSE)
-lca_models$lca13 <- NULL #poLCA(f, df_all, nclass=13, maxiter = 10000, nrep=10, na.rm=FALSE)
-lca_models$lca14 <- poLCA(f, df_all, nclass=14, maxiter = 10000, nrep=10, na.rm=FALSE)
-lca_models$lca15 <- NULL #poLCA(f, df_all, nclass=15, maxiter = 10000, nrep=10, na.rm=FALSE)
-lca_models$lca16 <- NULL #poLCA(f, df_all, nclass=16, maxiter = 10000, nrep=10, na.rm=FALSE)
-lca_models$lca17 <- poLCA(f, df_all, nclass=17, maxiter = 10000, nrep=10, na.rm=FALSE)
-lca_models$lca18 <- NULL #poLCA(f, df_all, nclass=18, maxiter = 10000, nrep=10, na.rm=FALSE)
-lca_models$lca19 <- poLCA(f, df_all, nclass=19, maxiter = 10000, nrep=10, na.rm=FALSE)
-lca_models$lca20 <- poLCA(f, df_all, nclass=20, maxiter = 10000, nrep=10, na.rm=FALSE)
-lca_models$lca21 <- poLCA(f, df_all, nclass=21, maxiter = 10000, nrep=10, na.rm=FALSE)
-lca_models$lca22 <- NULL #poLCA(f, df_all, nclass=22, maxiter = 10000, nrep=10, na.rm=FALSE)
-lca_models$lca23 <- poLCA(f, df_all, nclass=23, maxiter = 10000, nrep=10, na.rm=FALSE)
-lca_models$lca24 <- NULL #poLCA(f, df_all, nclass=24, maxiter = 10000, nrep=10, na.rm=FALSE)
-lca_models$lca25 <- poLCA(f, df_all, nclass=25, maxiter = 10000, nrep=10, na.rm=FALSE)
-lca_models$lca26 <- NULL #poLCA(f, df_all, nclass=26, maxiter = 10000, nrep=10, na.rm=FALSE)
-lca_models$lca27 <- NULL #poLCA(f, df_all, nclass=27, maxiter = 10000, nrep=10, na.rm=FALSE)
-lca_models$lca28 <- poLCA(f, df_all, nclass=28, maxiter = 10000, nrep=10, na.rm=FALSE)
-lca_models$lca29 <- NULL #poLCA(f, df_all, nclass=29, maxiter = 10000, nrep=10, na.rm=FALSE)
-lca_models$lca30 <- NULL #poLCA(f, df_all, nclass=30, maxiter = 10000, nrep=10, na.rm=FALSE)
+library(doParallel)
+registerDoParallel()
+lca_models <- foreach(i=5:6, 
+                      .inorder=TRUE,
+                      .verbose=TRUE,
+                      .packages=c("poLCA", "MASS") ) %dopar% poLCA(f, df_all, nclass=i, maxiter = 10000, nrep=i, na.rm=FALSE)
 
-# lca_models$lca21$time # how long did it take to run?
 
-cache('lca_models')
+# cache('lca_models')
 
 #---------------------------------------------------------------
 # compile the lca model reuslts into a more usable summary data frame:
 
 # create an empty storage data.frame, which will get filled in the for loop below
-lca_results <- data.frame(model=names(lca_models), aic=NA,
-                          bic=NA, Chisq=NA, llik=NA, npar=NA, resid.df=NA, numiter=NA)
+lca_results <- data.frame(model=rep(NA, length(lca_models)), AIC=NA,
+                          BIC=NA, Chisq=NA, llik=NA, llik_mean_top3=NA, llik_diff=NA, npar=NA, resid.df=NA, numiter=NA)
 for(m in 1:length(lca_models)){
+  # check that the model didn't stop becuase it hit the maxiter
   if(lca_models[[m]]$maxiter == lca_models[[m]]$numiter) {
-    warning("Did not converge! ", names(lca_models)[m])
+    warning("Did not converge! Model ", m)
   } else {
-    lca_results$aic[m] <- lca_models[[m]]$aic
-    lca_results$bic[m] <- lca_models[[m]]$bic
+    # the name for each model is lca# where # is the number of latent classes
+    # lca_models[[m]]$P is the size of each latent class, so length(lca_models[[m]]$P) is the number of classes
+    this.name <- paste0("lca", length(lca_models[[m]]$P))
+    names(lca_models)[m] <- this.name
+    lca_results$model[m] <- this.name
+    # save important metrics from this model
+    lca_results$AIC[m] <- lca_models[[m]]$aic
+    lca_results$BIC[m] <- lca_models[[m]]$bic
     lca_results$Gsq[m] <- lca_models[[m]]$Gsq # Likelihood ratio/deviance statistic.
     lca_results$Chisq[m] <- lca_models[[m]]$Chisq # Pearson Chi-square goodness of fit statistic for fitted vs. observed multiway tables.
     lca_results$llik[m] <- lca_models[[m]]$llik
+    lca_results$llik_mean_top3[m] <- mean(tail(sort(lca_models[[m]]$attempts), 4)[1:3]) # the mean of the next best three llik values (not including the first best) from nrep attempts
+    lca_results$llik_diff[m] <- lca_results$llik_mean_top3[m] - lca_results$llik[m] # difference between best and next three best models
     lca_results$npar[m] <- lca_models[[m]]$npar  # number of degrees of freedom used by the model (estimated parameters)
     lca_results$resid.df[m] <- lca_models[[m]]$resid.df # number of residual degrees of freedom
     lca_results$numiter[m] <- lca_models[[m]]$numiter
+    lca_results$maxiter[m] <- lca_models[[m]]$maxiter
   }
 }
-lca_results <- lca_results %>% 
-  gather(key=measure, value=value, aic, bic, Gsq, Chisq, llik) %>% 
+lca_results_plot <- lca_results %>% 
+  gather(key=measure, value=value, AIC, BIC, Gsq, Chisq, llik, llik_mean_top3) %>% 
   extract(col=model, into="nclass", regex="([[:digit:]]+)") %>% 
   mutate(nclass=as.numeric(nclass))
-
-ggplot(lca_results, aes(y=value, x=nclass, color=measure))+
-  geom_line()+
+ggplot(filter(lca_results_plot, measure %in% c("llik", "llik_mean_top3")), aes(y=-2*value, x=nclass, color=measure))+
+  geom_line() +
+  scale_x_continuous(breaks = seq(from=min(lca_results_plot$nclass), to=max(lca_results_plot$nclass), by=2)) 
+ggplot(lca_results_plot, aes(y=value, x=nclass, color=measure))+
+  geom_line(show.legend=FALSE) +
   facet_wrap(~ measure, scales = "free") +
-  scale_x_continuous(breaks = seq(from=min(lca_results$nclass), to=max(lca_results$nclass), by=2)) + 
+  scale_x_continuous(breaks = seq(from=min(lca_results_plot$nclass), to=max(lca_results_plot$nclass), by=2)) + 
   theme(text = element_text(size=20))
 ggsave("LCA_fit_measures.png", path=file.path("graphs", "LCA"), width = 16, height = 10, units = "in")
-ggplot(dplyr::filter(lca_results, measure == "bic"), aes(y=value, x=nclass))+
+ggplot(dplyr::filter(lca_results_plot, measure == "BIC"), aes(y=value, x=nclass))+
   geom_line() +
-  scale_x_continuous(breaks = seq(from=min(lca_results$nclass), to=max(lca_results$nclass), by=2)) + 
+  scale_x_continuous(breaks = seq(from=min(lca_results_plot$nclass), to=max(lca_results_plot$nclass), by=2)) + 
   labs(y="BIC", x="Number of classes") +
   theme(text = element_text(size=20))
 ggsave("LCA_fit_BIC.png", path=file.path("graphs", "LCA"), width = 8, height = 8, units = "in")
@@ -118,7 +122,7 @@ lca_class_var_probs <- lca_class_var_probs %>%
   mutate(class=1:19) %>% 
   mutate(class = ifelse(class < 10, paste0("Class 0", class), paste0("Class ", class)))
 
-cache('lca_class_var_probs')
+# cache('lca_class_var_probs')
 
 lca_class_var_probs %>% 
   gather(key=var, value=value, -class) %>% 
@@ -216,7 +220,7 @@ lca.threshold <- threshold_plots(df_LCA_prop, thresholds=seq(.1, .9, .05), metho
 
 df_LCA_bin <- apply_threshold(df_LCA_prop, lca.threshold, 
                               plot=T, method="LCA", save.to=file.path("graphs", "LCA"))
-cache('df_LCA_bin')
+# cache('df_LCA_bin')
 
 # seqplots for LCA classes
 seq_plots(df_LCA_prop, method = "LCA")
