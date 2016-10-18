@@ -43,4 +43,5 @@ df_STM_prop <- doc_loadings(method="stm",
                             df.wn.count) 
 
 write.table(df_STM_prop, file="context_codes/topic_models/df_STM_prop.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
+
 cache('df_STM_prop')

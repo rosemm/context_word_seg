@@ -23,4 +23,5 @@ master_doc_prop <- master_doc_count %>%
 df_HJ_prop <- left_join(df, master_doc_prop, by="utt" ) %>% 
   filter( !grepl(x=utt, pattern="hi.*") ) # remove this child, since the transcripts are so short
 write.table(df_HJ_prop, file=file.path("context_codes", "human_judgments", "contexts_HJ_prop.txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")
+
 cache('df_HJ_prop')

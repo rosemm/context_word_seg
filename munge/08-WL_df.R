@@ -24,4 +24,6 @@ cache('df_WL')
 df_WL_bin <- df_WL %>% 
   mutate_each(funs(ifelse(. > 0, 1, 0)), -utt, -orth, -phon) # make all contexts either 1 or 0 (smoothing over 1.5's from expand_windows)
 
+colnames(df_WL_bin) <- gsub(x=colnames(df_WL_bin), pattern = " ", replacement = "")
+
 cache('df_WL_bin')

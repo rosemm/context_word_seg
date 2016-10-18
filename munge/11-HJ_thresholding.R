@@ -12,4 +12,7 @@ df_HJ_bin <- apply_threshold(df_HJ_prop, .6,
                              plot=T, method="HJ", save.to=file.path("graphs", "HJ"))
 
 write.table(df_HJ_bin, file=file.path("context_codes", "human_judgments", "contexts_HJ_bin.txt"), quote=F, col.names=T, row.names=F, append=F, sep="\t")
+
+colnames(df_HJ_bin) <- gsub(x=colnames(df_HJ_bin), pattern = " ", replacement = "")
+
 cache('df_HJ_bin')
