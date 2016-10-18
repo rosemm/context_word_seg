@@ -1,5 +1,7 @@
 ############################################################################################
 # Reads in the output from the two computational models (coling and dpseg)
+# 
+# saves dataframes cm_results and cm_boot_tests
 #
 # First coling (adaptor grammar) then dpseg (HDP).
 # Collects estimates from running the models on contexts and nontext
