@@ -290,8 +290,13 @@ cm_boot_tests <- cm_results %>%
   add_stars()
 cache('cm_boot_tests')
 
-dplyr::filter(cm_boot_tests, p.boot.unsure > .05 & measure == "token_f.score" & N.utts > 100) # these should be run with more bootstrap iterations
+# a couple checks...
 
 hist(dplyr::filter(cm_boot_tests, measure == "token_f.score")$iters, breaks=30)
 hist(dplyr::filter(cm_results, measure == "token_f.score")$context_iters, breaks=30)
-View(cm_boot_tests)
+
+# these should be run with more bootstrap iterations
+dplyr::filter(cm_boot_tests, p.boot.unsure > .05 & measure == "token_f.score" & N.utts > 100) %>% 
+  ungroup() %>% 
+  dplyr::select(model, method, context, Z_est, iters, starts_with("p"))
+
