@@ -25,7 +25,8 @@ seq_plots <- function(df, method=c("WL", "HJ", "LDA", "STM", "LCA"), min.utts=0)
     ggplot(data) +
       geom_point(aes(x=UttNum, y=context, color=context, alpha=value), size=4, shape="|", show.legend=F) + 
       scale_shape_identity() +
-      labs(y=NULL, x="Utterance number") 
+      labs(y=NULL, x="Utterance number") + 
+      theme_classic()
     ggsave( file.path("graphs", method, paste0("seqplot-", method, f, ".png")), width=9, height=3, units="in" )
   }
 }
