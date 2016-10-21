@@ -31,21 +31,28 @@ df_by_method <- method_counts %>%
   dplyr::select(utt, orth, phon, HJ, STM, WL) %>% # keep context columns for HJ, STM, and WL
   dplyr::mutate_at(vars(HJ, STM, WL), as.factor) # turn all context columns into factors if they're not already (poLCA needs factors)
 
-# f <- cbind(WL_bath, WL_bed, WL_body_touch, WL_diaper_dressing, WL_fussing, WL_meal, WL_play, HJ_bathtime, HJ_diaperchange, HJ_dressing, HJ_fussing, HJ_housework, HJ_interaction, HJ_mealtime, HJ_playtime, HJ_sleep, LDA_topic_1, LDA_topic_10, LDA_topic_11, LDA_topic_12, LDA_topic_2, LDA_topic_3, LDA_topic_4, LDA_topic_5, LDA_topic_6, LDA_topic_7, LDA_topic_8, LDA_topic_9, STM_topic_1, STM_topic_10, STM_topic_11, STM_topic_12, STM_topic_2, STM_topic_3, STM_topic_4, STM_topic_5, STM_topic_6, STM_topic_7, STM_topic_8, STM_topic_9) ~ 1 
-
+# This code takes a very long time to run. 
+# I strongly recommend you run it in parallel on a machine that has enough cores to estimate each model separately
+# It will still take up to a couple days to estimate the larger models (which also have higher nrep)
 library(doParallel)
 registerDoParallel() 
 lca_models <- foreach(i=3:29, 
                       .inorder=TRUE,
                       .errorhandling="pass",
                       .verbose=TRUE,
-                      .packages=c("poLCA", "MASS") ) %dopar% poLCA(cbind(HJ, STM, WL) ~ 1, df_by_method, nclass=i, maxiter = 100000, nrep=i, na.rm=FALSE)
+                      .packages=c("poLCA", "MASS") ) %dopar% poLCA(cbind(HJ, STM, WL) ~ 1, 
+                                                                   df_by_method, 
+                                                                   nclass=i, 
+                                                                   maxiter = 100000, 
+                                                                   nrep=i, # Number of times to estimate the model, using different random starting values.
+                                                                   na.rm=FALSE) # for how poLCA handles cases with missing values on the manifest variables. If TRUE, those cases are removed (listwise deleted) before estimating the model. If FALSE, cases with missing values are retained.
 
-save(lca_models, file="lca_models.RData")
-levels(df_by_method$HJ)
-levels(df_by_method$WL)
-levels(df_by_method$STM)
-# cache('lca_models')
+
+HJ_levels <- levels(df_by_method$HJ)
+WL_levels <- levels(df_by_method$WL)
+STM_levels <- levels(df_by_method$STM)
+
+cache('lca_models')
 
 #---------------------------------------------------------------
 # compile the lca model reuslts into a more usable summary data frame:
@@ -83,141 +90,82 @@ lca_results_plot <- lca_results %>%
   mutate(nclass=as.numeric(nclass))
 ggplot(filter(lca_results_plot, measure %in% c("llik", "llik_mean_top3")), aes(y=-2*value, x=nclass, color=measure))+
   geom_line() +
-  scale_x_continuous(breaks = seq(from=min(lca_results_plot$nclass), to=max(lca_results_plot$nclass), by=2)) 
+  scale_x_continuous(breaks = seq(from=min(lca_results_plot$nclass, na.rm = TRUE), to=max(lca_results_plot$nclass, na.rm=TRUE), by=2)) + 
+  theme_classic()
 ggplot(lca_results_plot, aes(y=value, x=nclass, color=measure))+
   geom_line(show.legend=FALSE) +
   facet_wrap(~ measure, scales = "free") +
-  scale_x_continuous(breaks = seq(from=min(lca_results_plot$nclass), to=max(lca_results_plot$nclass), by=2)) + 
-  theme(text = element_text(size=20))
+  labs(x="Numer of classes", y=NULL) + 
+  scale_x_continuous(breaks = seq(from=min(lca_results_plot$nclass, na.rm = TRUE), to=max(lca_results_plot$nclass, na.rm=TRUE), by=2)) + 
+  theme(text = element_text(size=20)) + 
+  theme_classic()
 ggsave("LCA_fit_measures.png", path=file.path("graphs", "LCA"), width = 16, height = 10, units = "in")
+
+selected_model <- lca_results_plot %>% 
+  dplyr::filter(measure == "BIC") %>% 
+  dplyr::mutate(rank=dplyr::min_rank(value)) %>% 
+  dplyr::filter(rank == 1) # the model with the lowest BIC
+  
 ggplot(dplyr::filter(lca_results_plot, measure == "BIC"), aes(y=value, x=nclass))+
   geom_line() +
-  scale_x_continuous(breaks = seq(from=min(lca_results_plot$nclass), to=max(lca_results_plot$nclass), by=2)) + 
-  labs(y="BIC", x="Number of classes") +
-  theme(text = element_text(size=20))
-ggsave("LCA_fit_BIC.png", path=file.path("graphs", "LCA"), width = 8, height = 8, units = "in")
+  labs(x="Numer of latent classes", y="BIC") + 
+  scale_x_continuous(breaks = seq(from=min(lca_results_plot$nclass, na.rm = TRUE), to=max(lca_results_plot$nclass, na.rm=TRUE), by=1)) + 
+  theme(text = element_text(size=20)) + 
+  geom_vline(xintercept = selected_model$nclass, lty=2) + 
+  theme_classic()
+ggsave("LCA_fit_BIC.png", path=file.path("graphs", "LCA"), width = 5, height = 5, units = "in")
 
 
-model <- lca_models$lca19 # which model to investigate
+model <- lca_models$lca6 # which model to investigate
 
 # Posterior prob for class assignment. What's the prob each utterance is in each latent class?
-df_LCA_prop <- cbind(dplyr::select(df_all, utt, orth, phon), as.data.frame(model$posterior)) %>% 
-  as.tbl()
-df_LCA_prop$predclass <- model$predclass
+df_LCA_prop <- df_by_method %>% 
+  dplyr::select(utt, orth, phon) %>% 
+  ungroup() %>% 
+  cbind(data.frame(model$posterior)) %>% 
+  dplyr::mutate(predclass = model$predclass)
 
 # A list of matrices containing the estimated class-conditional outcome probabilities πˆjrk. 
 # Each item in the list represents one manifest variable; 
 # columns correspond to possible outcomes on each variable, and rows correspond to the latent classes.
-lca_class_var_probs <- matrix(nrow=nrow(model$probs[[1]]), ncol=length(names(model$probs)) ) %>% 
-  as.data.frame()
-colnames(lca_class_var_probs) <- names(model$probs)
 for(v in names(model$probs)){
-  lca_class_var_probs[[v]] <- model$probs[[v]][,2] # the second column is "yes" for that variable, i.e. the probability of 1 for that context
+  if(ncol(model$probs[[v]]) == 2){
+    # if there are only two outcomes for this variable (dichotomous), only keep the second
+    this.probs <- model$probs[[v]][ ,2] # the second column is "yes" for that variable, i.e. the probability of 1 for that context
+    names(this.probs) <- v
+  } else {
+    # if this variable is polytomous, keep all probs
+    this.probs <- model$probs[[v]]
+    colnames(this.probs) <- paste(v, 1:ncol(this.probs), sep="_")
+  }
+  if(v == names(model$probs)[1]){
+    # first time through the loop
+    lca_class_var_probs <- data.frame(this.probs)
+  } else {
+    # all subsequent times
+    lca_class_var_probs <- cbind(lca_class_var_probs, this.probs)
+  }
 }  
   
+
+# make column names line up with actual levels of context codes in each method
+colnames(lca_class_var_probs) <- c(paste("HJ", HJ_levels, sep="_"), 
+                                   paste("STM", STM_levels, sep="_"), 
+                                   paste("WL", WL_levels, sep="_"))
+
 lca_class_var_probs <- lca_class_var_probs %>% 
-  mutate(class=1:19) %>% 
+  mutate(class=1:6) %>% 
   mutate(class = ifelse(class < 10, paste0("Class 0", class), paste0("Class ", class)))
 
-# cache('lca_class_var_probs')
+cache('lca_class_var_probs')
 
-lca_class_var_probs %>% 
-  gather(key=var, value=value, -class) %>% 
-  ggplot(aes(class, var, fill = value)) + 
-  geom_tile() + 
-  scale_fill_gradient(low = "white",  high = "darkblue", guide = guide_legend(title="Class-conditional\nProbability") ) + 
-  labs(x=NULL, y=NULL) + 
-  theme(text=element_text(size=20), axis.text.x = element_text(angle = 45, hjust = 1))
-ggsave("LCA_classcondvars_heatmap.png", path=file.path("graphs", "LCA"), width = 14, height = 20, units = "in")
-
-
-p <- lca_class_var_probs %>% 
-  gather(key=var, value=prob, -class) %>% 
-  extract(col=var, into="method", regex="^([[:upper:]]+)_", remove=FALSE)
-
-ggplot(filter(p, method=="WL"), aes(y=prob, x=class, color=var, fill=var)) + 
-  geom_bar(stat="identity", position = "dodge") + 
-  facet_wrap(~class, scale = "free_x")  +
-  theme(text = element_text(size=20))
-ggsave("LCA_varsWL.png", path=file.path("graphs", "LCA"), width = 16, height = 16, units = "in")
-
-ggplot(filter(p, method=="HJ"), aes(y=prob, x=class, color=var, fill=var)) + 
-  geom_bar(stat="identity", position = "dodge") + 
-  facet_wrap(~class, scale = "free_x")  +
-  theme(text = element_text(size=20))
-ggsave("LCA_varsHJ.png", path=file.path("graphs", "LCA"), width = 16, height = 16, units = "in")
-
-ggplot(filter(p, method=="STM"), aes(y=prob, x=class, color=var, fill=var)) + 
-  geom_bar(stat="identity", position = "dodge") + 
-  facet_wrap(~class, scale = "free_x")  +
-  theme(text = element_text(size=20))
-ggsave("LCA_varsSTM.png", path=file.path("graphs", "LCA"), width = 16, height = 16, units = "in")
-
-colors <- c("#FFFF33", "#FD8D3C", "#FC4E2A","#238B45",
-            brewer.pal(9,"YlGnBu")[c(4,6,8)],
-            brewer.pal(9,"PuRd")[c(5,7)],
-            brewer.pal(9,"BuPu")[c(5,7,9)],
-            brewer.pal(9,"YlOrRd")[c(9)], 
-            brewer.pal(9,"Greens")[c(4,9)],
-            brewer.pal(11,"RdGy")[c(8,10)],
-            brewer.pal(8, "Pastel1"))
-
-ggplot(filter(p, prob > .2), aes(y=prob, x=class, fill=var)) + 
-  geom_bar(stat="identity", position = "dodge") + 
-  facet_wrap(~class, scale = "free_x") + 
-  scale_fill_manual(values=colors) +
-  labs(title="Variables that load on LCA classes above .2 prob",
-       x=NULL) + 
-  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank() )  +
-  theme(text = element_text(size=20))
-ggsave("LCA_classcondvars_bar.png", path=file.path("graphs", "LCA"), width = 16, height = 16, units = "in")
-
-ggplot(filter(p, method=="WL"), aes(y=prob, x=var, fill=class)) + 
-  geom_bar(stat="identity", position = "dodge") + 
-  facet_wrap(~var, scale = "free") + 
-  scale_fill_manual(values=colors) +
-  labs(title="Class-conditional probabilities for each word list context",
-       x=NULL) + 
-  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank() )  +
-  theme(text = element_text(size=20))
-ggsave("LCA_classcondvars_WL_bar.png", path=file.path("graphs", "LCA"), width = 16, height = 16, units = "in")
-
-ggplot(filter(p, method=="HJ"), aes(y=prob, x=var, fill=class)) + 
-  geom_bar(stat="identity", position = "dodge") + 
-  facet_wrap(~var, scale = "free") + 
-  scale_fill_manual(values=colors) +
-  labs(title="Class-conditional probabilities for each coder judgment context",
-       x=NULL) + 
-  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank() )  +
-  theme(text = element_text(size=20))
-ggsave("LCA_classcondvars_HJ_bar.png", path=file.path("graphs", "LCA"), width = 16, height = 16, units = "in")
-
-ggplot(filter(p, method=="STM"), aes(y=prob, x=var, fill=class)) + 
-  geom_bar(stat="identity", position = "dodge") + 
-  facet_wrap(~var, scale = "free") + 
-  scale_fill_manual(values=colors) +
-  labs(title="Class-conditional probabilities for each STM context",
-       x=NULL) + 
-  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank() )  +
-  theme(text = element_text(size=20))
-ggsave("LCA_classcondvars_STM_bar.png", path=file.path("graphs", "LCA"), width = 16, height = 16, units = "in")
-
-ggplot(filter(p, prob > .2), aes(y=prob, x=class)) + 
-  geom_point(alpha=.3) +
-  geom_text_repel(aes(label = var), segment.color=NA) + 
-  facet_wrap(~class, scale = "free_x") + 
-  labs(title="Variables that load on LCA classes above .2 prob",
-       x=NULL) + 
-  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank() )   +
-  theme(text = element_text(size=20))
-ggsave("LCA_classcondvars_labs.png", path=file.path("graphs", "LCA"), width = 16, height = 16, units = "in")
 
 # thresholding
 lca.threshold <- threshold_plots(df_LCA_prop, thresholds=seq(.1, .9, .05), method = "LCA", save.to=file.path("graphs", "LCA"))
 
 df_LCA_bin <- apply_threshold(df_LCA_prop, lca.threshold, 
-                              plot=T, method="LCA", save.to=file.path("graphs", "LCA"))
-# cache('df_LCA_bin')
+                              plot=TRUE, method="LCA", save.to=file.path("graphs", "LCA"))
+cache('df_LCA_bin')
 
 # seqplots for LCA classes
 seq_plots(df_LCA_prop, method = "LCA")
