@@ -15,6 +15,7 @@ apply_threshold <- function(df_prop, threshold, plots=FALSE, method=NULL, save.t
       facet_wrap(~topic) + 
       geom_vline(xintercept=threshold, color="red", lty=2) + 
       theme(text = element_text(size=20)) + 
+      theme_classic() + 
       ggtitle("Topic loadings on utterances\nthreshold shown in red")
     ggsave(filename=paste0(save.to, "/threshold_", method, "_hists_by_context.png"), width=16, height=12, units="in")
     ggplot(dplyr::filter(df.long, loading > 0), aes(x=loading)) + 
@@ -22,6 +23,7 @@ apply_threshold <- function(df_prop, threshold, plots=FALSE, method=NULL, save.t
       facet_wrap(~topic, scales="free_y") + 
       geom_vline(xintercept=threshold, color="red", lty=2) + 
       theme(text = element_text(size=20)) + 
+      theme_classic() + 
       ggtitle("Topic loadings (excluding 0) on utterances\nthreshold shown in red")
     ggsave(filename=paste0(save.to, "/threshold_", method, "_hists_by_context_drop0s.png"), width=16, height=12, units="in")
   }
