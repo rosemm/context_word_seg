@@ -34,6 +34,8 @@ doc.data <- group_by(df.wn.count, wn.count) %>%
   do({
     doc.data <- data.frame(child=.$child[1],
                            age_weeks=.$age_weeks[1],
+                           # up until this point, each utterance has been one row in the df
+                           # now collapse so each row is one window with up to wn utterances (bag of words)
                            documents=paste(.$orth, collapse=" "),
                            stringsAsFactors=FALSE)
   }) 
@@ -50,13 +52,16 @@ df.wn.count <- df.wn.count %>%
 cache('df.wn.count')
 
 # prep
-processed <- textProcessor(doc.data$documents, 
+processed <- stm::textProcessor(doc.data$documents, 
                            metadata = doc.data, 
                            removestopwords=TRUE, 
                            wordLengths=c(1, Inf))
-out <- prepDocuments(processed$documents, processed$vocab, processed$meta,
-                     lower.thresh = 2) 
+out <- stm::prepDocuments(processed$documents, 
+                          processed$vocab, 
+                          processed$meta,
+                          lower.thresh = 2) 
 # removes infrequent terms depending on user-set parameter lower.thresh (the minimum number of documents a word needs to appear in order for the word to be kept within the vocabulary)
+
 docs <- out$documents
 vocab <- out$vocab
 meta <-out$meta
