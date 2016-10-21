@@ -47,7 +47,8 @@ threshold_plots <- function(df_prop, thresholds, method, save.to, ...){
     geom_line(y=1, linetype=2) +
     labs(y=NULL) +
     ggtitle(paste0(method, ": mean number of contexts per utterance")) + 
-    theme(text = element_text(size=20))
+    theme(text = element_text(size=20)) + 
+    theme_classic()
   ggsave(filename=paste0(save.to, "/thresholds_", method, "_means_", additional_args ,".png"), width=12, height=8, units="in")
   
   ggplot(dplyr::filter(plot.data, measure!="mean_num_topics"), aes(x=threshold, y=value, color=measure)) + 
