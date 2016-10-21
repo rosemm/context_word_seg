@@ -277,7 +277,7 @@ cm_boot_tests <- cm_results %>%
   dplyr::group_by(model, method, context, measure, context_est, Z_est, 
                   N.utts, 
                   TTR, mean.words.per.utt, prop.one.word.utt, 
-                  Z_TTR, Z_mean.words.per.utt, Z_prop.one.word.utt) %>% 
+                  Z_TTR, Z_mean.words.per.utt, Z_prop.one.word.utt, Z_prop.most.freq) %>% 
   dplyr::summarize(iters = n(), 
                    n.above = sum(above),
                    n.below = iters - n.above,
