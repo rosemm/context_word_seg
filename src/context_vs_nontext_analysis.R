@@ -179,15 +179,16 @@ for(i in unique(plot.z.data$model)){
       ggsave(plot=p.pnt, filename = paste( i.save, j.save, "point.png", sep="_"), path=file.path("graphs", "context_vs_nontext"), width=8, height = 11, units="in")
   }
 }
+
 # --------------------------------------------------------------------------------------
 # some plots showing how corpus descriptives relate to 
 # the degree to which context sub-corpora distinguish themselves from random sub-coropra
 cm_boot_tests %>% 
   dplyr::filter(measure == "token_f.score") %>% 
   ggplot(aes(x=N.utts, y=Z_est, group=model)) + 
-  geom_point(aes(color=method)) + 
+  geom_point(aes(color=method), size=3) + 
   geom_smooth(method="lm", color="black", se=FALSE) + 
-  scale_color_manual(values = colors) + 
+  scale_color_manual(values = colors, name="Approach to\ndefining context") + 
   scale_y_continuous(breaks = seq(-4, 4, 1), limits = c(-4, 4)) + 
   facet_wrap(~ model) + 
   theme(text = element_text(size=20)) + 
@@ -198,9 +199,9 @@ ggsave("Fscores_Nutts.png", path = file.path("graphs", "context_vs_nontext"), wi
 cm_boot_tests %>% 
   dplyr::filter(measure == "token_f.score") %>% 
   ggplot(aes(x=Z_mean.words.per.utt, y=Z_est, group=model)) + 
-  geom_point(aes(color=method)) + 
+  geom_point(aes(color=method), size=3) + 
   geom_smooth(method="lm", color="black", se=FALSE) + 
-  scale_color_manual(values = colors) + 
+  scale_color_manual(values = colors, name="Approach to\ndefining context") + 
   scale_y_continuous(breaks = seq(-4, 4, 1), limits = c(-4, 4)) + 
   facet_wrap(~ model) + 
   theme(text = element_text(size=20)) + 
@@ -211,9 +212,9 @@ ggsave("Fscores_Zmeanwordsperutt.png", path = file.path("graphs", "context_vs_no
 cm_boot_tests %>% 
   dplyr::filter(measure == "token_f.score") %>% 
   ggplot(aes(x=Z_prop.one.word.utt, y=Z_est, group=model)) + 
-  geom_point(aes(color=method)) + 
+  geom_point(aes(color=method), size=3) + 
   geom_smooth(method="lm", color="black", se=FALSE) + 
-  scale_color_manual(values = colors) + 
+  scale_color_manual(values = colors, name="Approach to\ndefining context") + 
   scale_y_continuous(breaks = seq(-4, 4, 1), limits = c(-4, 4)) + 
   facet_wrap(~ model) + 
   theme(text = element_text(size=20)) + 
@@ -224,9 +225,9 @@ ggsave("Fscores_Zproponewordutt.png", path = file.path("graphs", "context_vs_non
 cm_boot_tests %>% 
   dplyr::filter(measure == "token_f.score") %>% 
   ggplot(aes(x=Z_TTR, y=Z_est, group=model)) + 
-  geom_point(aes(color=method)) + 
+  geom_point(aes(color=method), size=3) + 
   geom_smooth(method="lm", color="black", se=FALSE) + 
-  scale_color_manual(values = colors) + 
+  scale_color_manual(values = colors, name="Approach to\ndefining context") + 
   scale_y_continuous(breaks = seq(-4, 4, 1), limits = c(-4, 4)) + 
   facet_wrap(~ model) + 
   theme(text = element_text(size=20)) + 
@@ -237,12 +238,42 @@ ggsave("Fscores_ZTTR.png", path = file.path("graphs", "context_vs_nontext"), wid
 cm_boot_tests %>% 
   dplyr::filter(measure == "token_f.score") %>% 
   ggplot(aes(x=Z_prop.most.freq, y=Z_est, group=model)) + 
-  geom_point(aes(color=method)) + 
+  geom_point(aes(color=method), size=3) + 
   geom_smooth(method="lm", color="black", se=FALSE) + 
-  scale_color_manual(values = colors) + 
+  scale_color_manual(values = colors, name="Approach to\ndefining context") + 
   scale_y_continuous(breaks = seq(-4, 4, 1), limits = c(-4, 4)) + 
+  facet_wrap(~ model) + 
+  theme_bw() + 
+  theme(text = element_text(size=20)) + 
+  labs(x="Porportion highest frequency syllable\nstandardized on null distributions", y="Segmentability\nstandardized on null distributions")
+ggsave("Fscores_Zpropmostfreq.png", path = file.path("graphs", "context_vs_nontext"), width = 8, height = 4, units="in")
+
+# --------------------------------------------------------------------------------------
+# some plots showing how corpus descriptives relate to 
+# the degree to which context sub-corpora distinguish themselves from random sub-coropra
+# using all nontext samples, not just context sub-corpora
+cm_results %>% 
+  dplyr::filter(measure == "token_f.score") %>% 
+  ggplot(aes(x=N.utts, y=value, group=model)) + 
+  geom_point(alpha=.05, position = position_jitter(width=100, height=0)) + 
+  geom_smooth(color="grey") + 
+  scale_y_continuous(breaks = seq(0, 100, 10), limits = c(0, 80)) +
   facet_wrap(~ model) + 
   theme(text = element_text(size=20)) + 
   theme_bw() + 
-  labs(x="Porportion highest frequency syllable\nstandardized on null distributions", y="Segmentability\nstandardized on null distributions")
-ggsave("Fscores_Zpropmostfreq.png", path = file.path("graphs", "context_vs_nontext"), width = 8, height = 4, units="in")
+  labs(x="Number of utterances in sub-corpus", y="Segmentability\n(token F-score)")
+ggsave("Fscores_Nutts_nontexts.png", path = file.path("graphs", "context_vs_nontext"), width = 8, height = 4, units="in")
+
+cm_results %>% 
+  dplyr::filter(measure == "token_f.score") %>% 
+  ggplot(aes(x=N.utts, y=value, group=model)) + 
+  geom_point(alpha=.05, position = position_jitter(width=100, height=0)) + 
+  geom_smooth(color="grey") + 
+  geom_point(aes(y=context_est, color=method), size=2) +
+  scale_color_manual(values = colors, name="Approach to\ndefining context") + 
+  scale_y_continuous(breaks = seq(0, 100, 10), limits = c(0, 80)) +
+  facet_wrap(~ model) + 
+  theme(text = element_text(size=20)) + 
+  theme_bw() + 
+  labs(x="Number of utterances in sub-corpus", y="Segmentability\n(token F-score)")
+ggsave("Fscores_Nutts_nontexts_with_context_est.png", path = file.path("graphs", "context_vs_nontext"), width = 8, height = 4, units="in")
