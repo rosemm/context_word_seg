@@ -29,6 +29,7 @@ non_dir <- grep(x=outputdirs, pattern = "nontext", value=TRUE)
 
 # read context results
 con_files <- file.path(con_dir, list.files(path=con_dir, pattern=".*[.]trscore", recursive = TRUE))
+con_files <- grep(x=con_files, pattern="n500", value = TRUE) # only keep runs with 500 iterations (as per Synnaeve2014)
 
 contexts <- gsub(x=con_files, pattern = ".*output/(.*)Eval/.*", replacement = "\\1")
 
@@ -55,6 +56,8 @@ context_est_coling <- results_coling %>%
 
 # read nontext results
 non_files <- file.path(non_dir, list.files(path=non_dir, pattern=".*[.]trscore", recursive = TRUE))
+non_files <- grep(x=non_files, pattern = "n500", value=TRUE)  # only keep runs with 500 iterations (as per Synnaeve2014)
+
 nontexts <- gsub(x=non_files, pattern = ".*output/(.*)Eval/.*", replacement = "\\1")
 # read all of the results files and compile into a dataframe with context names
 for(f in 1:length(non_files)){
@@ -121,6 +124,7 @@ for(f in 1:length(con_files)){
       this.result <- t(as.data.frame(values))
       this.result <- cbind(this.result, context=contexts[f])
       row.names(this.result) <- NULL
+      
       if(f == 1){
         results_dpseg <- this.result
       } else {
@@ -145,8 +149,11 @@ message(length(failed), " failed files. ", 100*round(length(failed)/length(conte
 context_est_dpseg <- results_dpseg %>% 
   data.frame(stringsAsFactors=FALSE) %>% 
   dplyr::mutate_at(vars(-context), as.numeric) %>% 
-  dplyr::select(token_f.score=F, token_precision=P, token_recall=R, 
-                boundary_f.score=BF, boundary_precision=BP, boundary_recall=BR,
+  # the F score recorded by dpseg is the geometric mean (F0) instead of harmonic mean
+  # calculate harmonic mean
+  dplyr::mutate(token_f.score = 2*(P*R)/(P + R)) %>% 
+  dplyr::select(token_f.score, token_f0.score=F, token_precision=P, token_recall=R, 
+                boundary_f0.score=BF, boundary_precision=BP, boundary_recall=BR,
                 LP, LR, LF, context) %>% 
   # if there are any trailing numbers, drop them
   tidyr::extract(col=context, into=c("context"), regex = "([[:alnum:]]+[[:alpha:]])[[:digit:]]*") %>% 
@@ -249,7 +256,7 @@ cm_results <- bootstrap_Z(cm_results, value="value", est="context_est", by=c("mo
 ds_ests <- ds_results %>% 
   filter(measure != "highest.freq.syl") %>% 
   # dropping the bootstrapped nontext values (we just want the context estimates here)
-  dplyr::select(method, context, measure, context_est) %>% 
+  dplyr::select(method, context, N.utts, measure, context_est) %>% 
   unique() %>% 
   # reformat to wide, so each context descriptive measure is a column
   tidyr::spread(key=measure, value=context_est)  
