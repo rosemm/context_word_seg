@@ -85,9 +85,9 @@ for(m in 1:length(lca_models)){
   }
 }
 lca_results_plot <- lca_results %>% 
-  gather(key=measure, value=value, AIC, BIC, Gsq, Chisq, llik, llik_mean_top3) %>% 
-  extract(col=model, into="nclass", regex="([[:digit:]]+)") %>% 
-  mutate(nclass=as.numeric(nclass))
+  tidyr::gather(key=measure, value=value, AIC, BIC, Gsq, Chisq, llik, llik_mean_top3) %>% 
+  tidyr::extract(col=model, into="nclass", regex="([[:digit:]]+)") %>% 
+  dplyr::mutate(nclass=as.numeric(nclass))
 ggplot(filter(lca_results_plot, measure %in% c("llik", "llik_mean_top3")), aes(y=-2*value, x=nclass, color=measure))+
   geom_line() +
   scale_x_continuous(breaks = seq(from=min(lca_results_plot$nclass, na.rm = TRUE), to=max(lca_results_plot$nclass, na.rm=TRUE), by=2)) + 
@@ -121,7 +121,7 @@ model <- lca_models$lca6 # which model to investigate
 # Posterior prob for class assignment. What's the prob each utterance is in each latent class?
 df_LCA_prop <- df_by_method %>% 
   dplyr::select(utt, orth, phon) %>% 
-  ungroup() %>% 
+  dplyr::ungroup() %>% 
   cbind(data.frame(model$posterior)) %>% 
   dplyr::mutate(predclass = model$predclass)
 
