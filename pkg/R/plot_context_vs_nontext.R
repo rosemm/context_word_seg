@@ -15,7 +15,6 @@
 #' @examples
 #' plot_context_vs_nontext(context_all_freq, nontext_results_freq, global_results_freq, outcome="precision", xlabs=TRUE, save.to="plots/context_vs_nontext", consider.freq=TRUE)
 #' 
-#' @export
 plot_context_vs_nontext <- function(results, outcome, xlabs=FALSE, Z.score=FALSE, methods_wrap=FALSE, save.to, ...){
   additional_args <- as.data.frame(list(...))
   additional_args <- paste0(colnames(additional_args), additional_args, collapse="_")

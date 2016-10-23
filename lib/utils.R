@@ -81,3 +81,30 @@ t_df <- function(df, col.names=1){
   t.df <- as.data.frame(t.df)
   return(t.df)
 }
+
+#' @title Convert to word
+#' @description Converts single digit numbers (0-9) into words, for use in manuscripts
+#' 
+#' @param x An integer 0-9
+#' @param cap Should the first letter be capitalized? Default is FALSE.
+#' 
+#' @return Returns the word form of x (e.g. 0 returns "zero").
+#' 
+#' @export
+convert_to_word <- function(x, cap=FALSE){
+  word <- NULL
+  if(x == 0) word <- "zero"
+  if(x == 1) word <- "one"
+  if(x == 2) word <- "two"
+  if(x == 3) word <- "three"
+  if(x == 4) word <- "four"
+  if(x == 5) word <- "five"
+  if(x == 6) word <- "six"
+  if(x == 7) word <- "seven"
+  if(x == 8) word <- "eight"
+  if(x == 9) word <- "nine"
+  if(cap) {
+    word <- gsub(x = word, pattern = "(^[[:alpha:]])", replacement = "\\U\\1", perl=TRUE)
+  }
+  return(word)
+}
