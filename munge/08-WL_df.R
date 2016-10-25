@@ -1,3 +1,7 @@
+##############################################################
+# creates the dataframe df_WL_bin
+# which has columns utt, orth, phon, and all WL context columns
+##############################################################
 
 # to speed up processing, only code each unique utterance once (then we'll join it back to the full df)
 temp.codes <- data.frame(orth = unique(df$orth), stringsAsFactors = FALSE)

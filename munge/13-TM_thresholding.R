@@ -1,3 +1,14 @@
+##############################################################
+# creates the dataframe df_STM_bin
+# which has columns utt, orth, phon, and all STM context columns
+# by converting df_STM_prop using a threshold of that maximizes
+# one or two contexts per utterance
+# 
+# creates the dataframe df_LDA_bin
+# which has columns utt, orth, phon, and all LDA context columns
+# by converting df_LDA_prop using a threshold of that maximizes
+# one or two contexts per utterance
+##############################################################
 
 # any additional values to be saved in the plot name can be included as extra arguments
 LDA.threshold <- threshold_plots(df_LDA_prop, 

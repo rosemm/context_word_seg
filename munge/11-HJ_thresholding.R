@@ -1,3 +1,8 @@
+##############################################################
+# creates the dataframe df_HJ_bin
+# which has columns utt, orth, phon, and all HJ context columns
+# by converting df_HJ_prop using a threshold of .6 (3/5 coders)
+##############################################################
 
 # any additional values to be saved in the plot name can be included as extra arguments
 hj.threshold <- threshold_plots(df_HJ_prop, 

@@ -1,3 +1,12 @@
+##############################################################
+# creates the dataframe df_STM_prop
+# which has columns utt, orth, phon, and all STM context columns,
+# represented as loading on each topic (context)
+#
+# creates the dataframe df_LDA_prop
+# which has columns utt, orth, phon, and all LDA context columns,
+# represented as loading on each topic (context)
+#############################################################
 
 # set number of topics
 nK <- 12

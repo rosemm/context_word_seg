@@ -1,3 +1,12 @@
+##############################################################
+# creates the dataframe df_HJ_raw
+# which has columns utt, orth, phon, and all HJ context columns,
+# represented as number of coders who gave each code
+#
+# creates the dataframe df_HJ_prop
+# which has columns utt, orth, phon, and all HJ context columns,
+# represented as proportion out of 5 coders
+##############################################################
 
 master_doc_count <- HJ_contexts %>%
   ungroup() %>% 

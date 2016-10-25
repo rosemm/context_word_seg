@@ -1,3 +1,9 @@
+####################################################################################
+# creates the dataframe df_all
+# which has columns utt, orth, phon, and all context columns from all approaches
+# and drop the very small contexts
+####################################################################################
+
 # combine coding from all methods into one dataframe
 
 # get context columns from each method (also retain utt column, for matching them up later)

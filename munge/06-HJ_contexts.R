@@ -23,8 +23,19 @@ cleanedcategories <- processedcodes %>%
 
 HJ_processedcodes <- cleanedcategories[[1]] %>% 
   ungroup()
+
 cache('HJ_processedcodes')
 
 HJ_contexts <- cleanedcategories[[2]] %>% 
   ungroup()
+
 cache('HJ_contexts')
+
+# utterances that have fewer than min.codes
+thin <- master_doc %>% 
+  count(file, UttNum) %>% 
+  dplyr::filter(n < 5) %>% 
+  dplyr::select(-n) %>% 
+  dplyr::left_join(master_doc, by=c("UttNum", "file"))
+summary(as.factor(thin$coder)) # coders that have already coded thin utterances
+summary(as.factor(thin$file)) # files the utterances are in
