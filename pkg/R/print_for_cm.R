@@ -41,7 +41,7 @@
 #' which is especially useful for running the model on nontexts as the process needs to be repeated so many times.
 #' 
 #' @export
-print_for_coling <- function(df, nontext, dir = getwd(), save.to="computational_models", r=0, quiet = TRUE){
+print_for_coling <- function(df, nontext, dir = getwd(), save.to="computational_models", r=0, quiet = TRUE, iters=500){
   # extract the methods from column names (indicated by upper case letters)
   methods <- gsub(x=colnames(df), pattern = "([[:upper:]]*).*", replacement="\\1") %>% unique()
   methods <- methods[methods != ""] # drop blanks
@@ -78,7 +78,7 @@ print_for_coling <- function(df, nontext, dir = getwd(), save.to="computational_
   # By shuffling the context names, the files that get run first will vary iteration to iteration.
   # It won't make any difference to the final output, except if the process is interupted before it completes.
   
-  commands <- paste0("make NAME=", context.names, r, " PYNS=500 OUTPUTPREFIX=r", r)
+  commands <- paste0("make NAME=", context.names, r, " PYNS=", iters, " OUTPUTPREFIX=r", r)
   
   write(c("cd colingFinal", commands, "cd .."), file = file.path(dir, paste0(r, "coling_contexts.sh")))
 }
@@ -90,7 +90,7 @@ print_for_coling <- function(df, nontext, dir = getwd(), save.to="computational_
 #' 
 #' @inheritParams print_for_coling
 #' @export
-print_for_dpseg <- function(df, nontext, dir = getwd(), save.to="computational_models", r=0, quiet = TRUE){
+print_for_dpseg <- function(df, nontext, dir = getwd(), save.to="computational_models", r=0, quiet = TRUE, iters = 5000){
   # extract the methods from column names (indicated by upper case letters)
   methods <- gsub(x=colnames(df), pattern = "([[:upper:]]*).*", replacement="\\1") %>% unique()
   methods <- methods[methods != ""] # drop blanks
@@ -132,7 +132,7 @@ print_for_dpseg <- function(df, nontext, dir = getwd(), save.to="computational_m
   # the contexts listed first are the ones that get completed.
   # By shuffling the context names, the files that get run first will vary iteration to iteration.
   # It won't make any difference to the final output, except if the process is interupted before it completes.
-  commands <- paste0("segment ", context.names, r, ".in -i5000 -ut > ", context.names, r, ".out")
+  commands <- paste0("segment ", context.names, r, ".in -i", iters, " -ut > ", context.names, r, ".out")
   
   # save the commands to a file, which can then be called from the command line
   write(c("cd dpseg_input", commands, "cd .."), file = file.path(dir, paste0(r, "dpseg_contexts.sh")))
