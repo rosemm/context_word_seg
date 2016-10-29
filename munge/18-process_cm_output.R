@@ -77,7 +77,7 @@ cm_results_coling <- results_coling %>%
   tidyr::gather(key = "measure", value="value", token_f.score:boundary_recall) %>% 
   # add context results to nontext results
   dplyr::left_join(context_est_coling, by=c("context", "measure")) %>% 
-  tidyr::extract(col=context, into=c("method", "context"), regex="([[:upper:]]{2,3})([[:alnum:]]+)") %>% 
+  tidyr::extract(col=context, into=c("method", "context"), regex="([[:upper:]]+)([[:alnum:]]+)") %>% 
   mutate(model="coling")
 
 #----------------------------
@@ -239,6 +239,7 @@ cm_results <- rbind(cm_results_dpseg, cm_results_coling)
 
 cm_results$value <- as.numeric(cm_results$value)
 cm_results$iter <- as.numeric(cm_results$iter)
+cm_results$context_est <- as.numeric(cm_results$context_est)
 cm_results$measure <- as.factor(cm_results$measure)
 cm_results$context <- as.factor(cm_results$context)
 cm_results$method <- as.factor(cm_results$method)
@@ -275,6 +276,10 @@ cm_results <- cm_results %>%
   left_join(ds_Zs, by=c("method", "context")) %>% 
   ungroup() %>% 
   dplyr::mutate(model=factor(model, levels=c("coling", "dpseg"), labels=c("Adaptor_Grammar", "HDP")))
+
+# for size tests, extract N.utts from the name
+cm_results$N.utts <- ifelse(cm_results$method == "V", 
+                            as.numeric(gsub(x=cm_results$context, pattern = "([[:digit:]]+)n", replacement = "\\1")), cm_results$N.utts)
 
 cache('cm_results')
 
