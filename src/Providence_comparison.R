@@ -48,11 +48,11 @@ lda <- lda::lda.collapsed.gibbs.sampler(docs.lda,
                                         compute.log.likelihood=TRUE)
 
 loadings <- t(lda$document_sums) / colSums(lda$document_sums)
-colnames(loadings) <- paste0("topic_", 1:ncol(loadings))
+colnames(loadings) <- paste0("LDAtopic_", 1:ncol(loadings))
 loadings <- cbind(meta, loadings)
 loadings <- dplyr::select(loadings, -documents)
 df_prov_prop <- left_join(df_prov, loadings, by=c( "wn.count" )) %>% 
-  dplyr::select(utt, orth, phon, starts_with("topic_"))
+  dplyr::select(utt, orth, phon, starts_with("LDAtopic_"))
 
 
 # any additional values to be saved in the plot name can be included as extra arguments
