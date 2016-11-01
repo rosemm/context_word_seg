@@ -18,6 +18,65 @@ HJ.bin <- df_all_keep %>%
 
 LCA.bin <- df_LCA_bin
 
+# ----------------------------------------------
+# descriptives
+# number of utterances per context sub-corpus
+df_all_keep %>% 
+  # keep the context columns
+  dplyr::select(starts_with("WL"), starts_with("STM"), starts_with("HJ")) %>% 
+  # reformat to long
+  tidyr::gather(key="context", value="value") %>% 
+  dplyr::group_by(context) %>% 
+  # count number of 1's for each context (total number of utterances in that sub-corpus)
+  dplyr::summarize(n=sum(value, na.rm=TRUE)) %>% 
+  # remove underscores in context names, but not between method and context (e.g. only the second "_" in HJ_bath_time)
+  dplyr::mutate(context=gsub(x=context, pattern="([[:lower:]])_", replacement = "\\1")) %>% 
+  # use underscores between method and context to split the column
+  tidyr::separate(context, c("method", "context"), sep="_") %>% 
+  # change HJ to CJ for consistency with other plots
+  dplyr::mutate(method = factor(method, levels=c("WL", "STM", "HJ"), labels=c("WL", "STM", "CJ"))) %>% 
+  # plot
+  ggplot(aes(y=n, x=reorder(as.factor(context), n), fill=method)) + 
+  geom_bar(stat = 'identity', show.legend = FALSE) + 
+  facet_wrap(~method, scales = "free", ncol=1) + 
+  theme_classic() + 
+  scale_fill_manual(values=colors, name="Approach to\ndefining context") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  labs(x=NULL, y=NULL) 
+ggsave(filename ="utts_per_context.png" , path = file.path("graphs","descriptives"), width = 5, height = 14, units="in")
+
+# check that contexts are distributed across families and transcripts
+contexts_by_transcript <- df_all %>% 
+  tidyr::gather(key = "key", value = "value", -utt, -orth, -phon) %>% 
+  tidyr::extract(col = key, into = c("method", "context"), regex = "(^[[:upper:]]{2,3})_(.*)$", remove = FALSE) %>% 
+  tidyr::extract(col = utt, into = c("child", "age", "utt"), regex = "(^[[:alpha:]]{2})([[:digit:]]+)[.]cha_([[:digit:]]+)$", convert = TRUE) %>% 
+  dplyr::mutate(child = paste0("Child: ", toupper(child))) %>% 
+  dplyr::group_by(child, age, method, context) %>% 
+  dplyr::summarize(N.utts = sum(value, na.rm = TRUE),
+                   occurs = N.utts > 0) 
+
+context_occurs_transcript <- contexts_by_transcript %>% 
+  dplyr::group_by(method, context) %>% 
+  dplyr::summarise(n=sum(occurs), max.possible=n()) 
+# contexts that occur in only one transcript
+context_occurs_transcript %>% 
+  dplyr::filter(n == 1)
+# contexts that occur in at least half of the transcripts
+context_occurs_transcript %>% 
+  dplyr::filter(n >= max.possible/2)
+# contexts that occur in every transcript
+context_occurs_transcript %>% 
+  dplyr::filter(n == max.possible)
+
+context_occurs_family <- contexts_by_transcript %>% 
+  dplyr::group_by(child, method, context) %>% 
+  dplyr::summarize(N.utts = sum(N.utts, na.rm = TRUE),
+                   occurs = N.utts > 0) %>% 
+  dplyr::group_by(method, context) %>% 
+  dplyr::summarise(n=sum(occurs), max.possible=n()) 
+# contexts that occur in only one family
+context_occurs_family %>% 
+  dplyr::filter(n == 1)
 
 # http://www.people.vcu.edu/~pdattalo/702SuppRead/MeasAssoc/NominalAssoc.html
 # Cramer's V is the most popular of the chi-square-based measures of nominal association because it gives good norming from 0 to 1 regardless of table size, when row marginals equal column marginals. 
@@ -52,15 +111,25 @@ cache('cat_LCA_STM')
 colnames(lca_class_var_probs) <- gsub(x=colnames(lca_class_var_probs), pattern = "HJ_", replacement = "CJ_")
 
 lca_class_var_probs %>% 
-  gather(key=var, value=value, -class) %>% 
-  ggplot(aes(class, var, fill = value)) + 
-  geom_tile() + 
-  scale_fill_gradient(low = "white",  high = "darkblue", guide = guide_legend(title="Class-conditional\nProbability") ) + 
+  # reformat to long
+  tidyr::gather(key="context", value="value", -class) %>%  
+  # remove underscores in context names
+  dplyr::mutate(context=gsub(x=context, pattern="_", replacement = " ")) %>%
+  tidyr::extract(col=context, into="topic.n", regex="([[:digit:]]+)", remove=FALSE, convert = TRUE) %>%
+  
+  dplyr::mutate(topic.n = ifelse(is.na(topic.n), "", 
+                                 ifelse(topic.n < 10, paste0("0", topic.n), 
+                                        ifelse(topic.n >= 10, paste0(topic.n), NA))),
+                context = gsub(x=context, pattern = " [[:digit:]]+", replacement = "")) %>%
+  tidyr::unite(col=context, context, topic.n, sep="") %>% 
+  ggplot(aes(x=class, y=context)) + 
+  geom_tile(aes(fill = value)) +
+  scale_fill_gradient(low = "white",  high = "darkblue", name="Class-conditional\nProbability") + 
   labs(x=NULL, y=NULL) + 
   theme_classic() + 
   theme(text=element_text(size=20), axis.text.x = element_text(angle = 45, hjust = 1))
 ggsave("LCA_classcondvars_heatmap.png", path=file.path("graphs", "LCA"), width = 14, height = 20, units = "in")
-
+  
 
 p <- lca_class_var_probs %>% 
   gather(key=var, value=prob, -class) %>% 
