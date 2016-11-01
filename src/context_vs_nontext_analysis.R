@@ -79,7 +79,7 @@ plot.z.data <- ds_results %>%
 for(i in unique(plot.z.data$measure)){
     p.bar <- plot.z.data %>% 
       dplyr::filter(measure == i) %>% 
-      ggplot(aes(y=Z_est, x=reorder(context, N.utts), fill=method)) + 
+      ggplot(aes(y=Z_est, x=context, fill=method)) + 
       geom_bar(stat = "identity", show.legend = FALSE) + 
       geom_hline(yintercept = 0, lty=2) + 
       facet_wrap(~ method, ncol=1, scales="free") + 
@@ -91,7 +91,7 @@ for(i in unique(plot.z.data$measure)){
       theme(axis.text.x = element_text(angle=40, vjust=1, hjust=1))
     p.pnt <- plot.z.data %>% 
       dplyr::filter(measure == i) %>% 
-      ggplot(aes(x=Z_est, y=reorder(context, N.utts), fill=method)) + 
+      ggplot(aes(x=Z_est, y=context, fill=method)) + 
       geom_point(aes(color=method), size=4, show.legend = FALSE) + 
       geom_vline(xintercept = 0, lty=2) + 
       facet_wrap(~ method, ncol=1, scales="free") + 
@@ -109,6 +109,8 @@ for(i in unique(plot.z.data$measure)){
 }
 
 # segmentability ---------------------------------------------------------------------
+cm_results <- cm_results %>% 
+  dplyr::filter(method %in% names(colors))
 cm_results %>%
   plot_context_vs_nontext(outcome="token_f.score", 
                           xlabs=TRUE, save.to=file.path("graphs", "context_vs_nontext"))
@@ -148,7 +150,7 @@ for(i in unique(plot.z.data$model)){
   for(j in unique(plot.z.data$measure)){
       p.bar <- plot.z.data %>% 
         dplyr::filter(model == i, measure == j) %>% 
-        ggplot(aes(y=Z_est, x=reorder(context, N.utts), fill=method)) + 
+        ggplot(aes(y=Z_est, x=context, fill=method)) + 
         geom_bar(stat = "identity", show.legend = FALSE) + 
         geom_hline(yintercept = 0, lty=2) + 
         facet_wrap(~ method, ncol=1, scales="free") + 
@@ -160,7 +162,7 @@ for(i in unique(plot.z.data$model)){
         theme(axis.text.x = element_text(angle=40, vjust=1, hjust=1))
       p.pnt <- plot.z.data %>% 
         dplyr::filter(model == i, measure == j) %>% 
-        ggplot(aes(x=Z_est, y=reorder(context, N.utts), fill=method)) + 
+        ggplot(aes(x=Z_est, y=context, fill=method)) + 
         # geom_bar(stat = "identity", show.legend = FALSE) + 
         geom_point(aes(color=method), size=4, show.legend = FALSE) + 
         geom_vline(xintercept = 0, lty=2) + 
