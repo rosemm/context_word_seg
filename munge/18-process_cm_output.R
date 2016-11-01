@@ -21,6 +21,7 @@ dir <- "computational_models" # the folder where the output folders are
 
 #----------------------------
 ## get colingFinal output
+message("processing adaptor grammar output")
 
 outputdirs <- file.path(dir, grep(x=list.files(dir), pattern = "coling.*output", value=TRUE))
 
@@ -29,7 +30,7 @@ non_dir <- grep(x=outputdirs, pattern = "nontext", value=TRUE)
 
 # read context results
 con_files <- file.path(con_dir, list.files(path=con_dir, pattern=".*[.]trscore", recursive = TRUE))
-con_files <- grep(x=con_files, pattern="n500", value = TRUE) # only keep runs with 500 iterations (as per Synnaeve2014)
+con_files <- grep(x=con_files, pattern="n500_", value = TRUE) # only keep runs with 500 iterations (as per Synnaeve2014)
 
 contexts <- gsub(x=con_files, pattern = ".*output/(.*)Eval/.*", replacement = "\\1")
 
@@ -56,7 +57,7 @@ context_est_coling <- results_coling %>%
 
 # read nontext results
 non_files <- file.path(non_dir, list.files(path=non_dir, pattern=".*[.]trscore", recursive = TRUE))
-non_files <- grep(x=non_files, pattern = "n500", value=TRUE)  # only keep runs with 500 iterations (as per Synnaeve2014)
+non_files <- grep(x=non_files, pattern = "n500_", value=TRUE)  # only keep runs with 500 iterations (as per Synnaeve2014)
 
 nontexts <- gsub(x=non_files, pattern = ".*output/(.*)Eval/.*", replacement = "\\1")
 # read all of the results files and compile into a dataframe with context names
@@ -82,6 +83,7 @@ cm_results_coling <- results_coling %>%
 
 #----------------------------
 ## get dpseg-1.2.1 output
+message("processing HPD output")
 
 outputdirs <- file.path(dir, grep(x=list.files(dir), pattern = "dpseg.*output", value=TRUE))
 
