@@ -2,6 +2,9 @@
 # creates the dataframe df_all
 # which has columns utt, orth, phon, and all context columns from all approaches
 # and drop the very small contexts
+# 
+# generates another dataframe df_all_noambig that excludes utterances with more than one
+# context within an approach (for use in xtab analysis)
 ####################################################################################
 
 # combine coding from all methods into one dataframe
