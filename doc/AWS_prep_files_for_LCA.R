@@ -7,7 +7,6 @@ devtools::source_url("https://raw.githubusercontent.com/rosemm/context_word_seg/
 # download data and dict
 load_url("https://github.com/rosemm/context_word_seg/raw/master/cache/df_all.RData")
 
-
 library(dplyr)
 library(tidyr)
 
@@ -21,17 +20,16 @@ method_counts <- method_contexts %>%
   dplyr::count(utt, orth, phon, method) # returns number of occurrences per method per utterance as n
 df_by_method <- method_counts %>% 
   # only keeping occurrences where there is exactly one context listed per method
+  # if an approach has more than one context for a given utterance, this drops that approach (but not the others) for that utterance
   dplyr::filter(n == 1) %>% 
   dplyr::select(-n) %>% 
   # join the contexts themselves back in
   dplyr::left_join(method_contexts, by=c("utt", "orth", "phon", "method")) %>% 
   dplyr::select(-value) %>% 
-  # reformat to wide
+  # reformat to wide with approach as columns (HJ, STM, WL) and context as content in columns
   tidyr::spread(key=method, value=context) %>% 
   dplyr::select(utt, orth, phon, HJ, STM, WL) %>% # keep context columns for HJ, STM, and WL
   dplyr::mutate_at(vars(HJ, STM, WL), as.factor) # turn all context columns into factors if they're not already (poLCA needs factors)
-
-# f <- cbind(WL_bath, WL_bed, WL_body_touch, WL_diaper_dressing, WL_fussing, WL_meal, WL_play, HJ_bathtime, HJ_diaperchange, HJ_dressing, HJ_fussing, HJ_housework, HJ_interaction, HJ_mealtime, HJ_playtime, HJ_sleep, LDA_topic_1, LDA_topic_10, LDA_topic_11, LDA_topic_12, LDA_topic_2, LDA_topic_3, LDA_topic_4, LDA_topic_5, LDA_topic_6, LDA_topic_7, LDA_topic_8, LDA_topic_9, STM_topic_1, STM_topic_10, STM_topic_11, STM_topic_12, STM_topic_2, STM_topic_3, STM_topic_4, STM_topic_5, STM_topic_6, STM_topic_7, STM_topic_8, STM_topic_9) ~ 1 
 
 library(doParallel)
 registerDoParallel() 

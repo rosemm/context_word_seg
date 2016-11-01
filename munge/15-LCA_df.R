@@ -11,48 +11,19 @@
 # It will estimate the model nrep times and keep the best one, helping to ensure that it doesn't end up with a local maximum
 ###################################################################################################
 
-# context columns should be coded as 0 or 1 at this point
-method_contexts <- df_all %>% 
-  tidyr::gather(key="context", value="value", -utt, -orth, -phon) %>% 
-  tidyr::extract(context, into=c("method", "context"), regex="([[:upper:]]+)_(.*)") %>% 
-  # only keep positive context codes (1 means context is occuring, 0 means not)
-  dplyr::filter(value == 1) 
-method_counts <- method_contexts %>% 
-  dplyr::count(utt, orth, phon, method) # returns number of occurrences per method per utterance as n
-df_by_method <- method_counts %>% 
-  # only keeping occurrences where there is exactly one context listed per method
-  dplyr::filter(n == 1) %>% 
-  dplyr::select(-n) %>% 
-  # join the contexts themselves back in
-  dplyr::left_join(method_contexts, by=c("utt", "orth", "phon", "method")) %>% 
-  dplyr::select(-value) %>% 
-  # reformat to wide
-  tidyr::spread(key=method, value=context) %>% 
-  dplyr::select(utt, orth, phon, HJ, STM, WL) %>% # keep context columns for HJ, STM, and WL
-  dplyr::mutate_at(vars(HJ, STM, WL), as.factor) # turn all context columns into factors if they're not already (poLCA needs factors)
 
-# This code takes a very long time to run. 
+# The code to estimate the LCA models takes a very long time to run. 
 # I strongly recommend you run it in parallel on a machine that has enough cores to estimate each model separately
 # It will still take up to a couple days to estimate the larger models (which also have higher nrep)
-library(doParallel)
-registerDoParallel() 
-lca_models <- foreach(i=3:29, 
-                      .inorder=TRUE,
-                      .errorhandling="pass",
-                      .verbose=TRUE,
-                      .packages=c("poLCA", "MASS") ) %dopar% poLCA(cbind(HJ, STM, WL) ~ 1, 
-                                                                   df_by_method, 
-                                                                   nclass=i, 
-                                                                   maxiter = 100000, 
-                                                                   nrep=i, # Number of times to estimate the model, using different random starting values.
-                                                                   na.rm=FALSE) # for how poLCA handles cases with missing values on the manifest variables. If TRUE, those cases are removed (listwise deleted) before estimating the model. If FALSE, cases with missing values are retained.
 
+# here is all of the code for running the LCA models:
+source('~/Documents/STUDIES/context_word_seg/doc/AWS_prep_files_for_LCA.R')
+
+# if run on another server, use sftp to get the file lca_models.RData back onto your local machine before proceeding
 
 HJ_levels <- levels(df_by_method$HJ)
 WL_levels <- levels(df_by_method$WL)
 STM_levels <- levels(df_by_method$STM)
-
-cache('lca_models')
 
 #---------------------------------------------------------------
 # compile the lca model reuslts into a more usable summary data frame:
