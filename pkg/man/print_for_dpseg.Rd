@@ -5,7 +5,7 @@
 \title{Print for dpseg computational model}
 \usage{
 print_for_dpseg(df, nontext, dir = getwd(),
-  save.to = "computational_models", r = 0, quiet = TRUE)
+  save.to = "computational_models", r = 0, quiet = TRUE, iters = 5000)
 }
 \arguments{
 \item{df}{A dataframe with the columns utt, orth, phon and all context columns. See details.}

@@ -5,7 +5,7 @@
 \title{Print for coling computational model}
 \usage{
 print_for_coling(df, nontext, dir = getwd(),
-  save.to = "computational_models", r = 0, quiet = TRUE)
+  save.to = "computational_models", r = 0, quiet = TRUE, iters = 500)
 }
 \arguments{
 \item{df}{A dataframe with the columns utt, orth, phon and all context columns. See details.}
