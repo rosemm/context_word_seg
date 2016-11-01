@@ -62,9 +62,6 @@ out <- stm::prepDocuments(processed$documents,
                           lower.thresh = 2) 
 # removes infrequent terms depending on user-set parameter lower.thresh (the minimum number of documents a word needs to appear in order for the word to be kept within the vocabulary)
 
-docs <- out$documents
-vocab <- out$vocab
-meta <-out$meta
 
 TM_doc_prep_out <- out
 cache('TM_doc_prep_out')

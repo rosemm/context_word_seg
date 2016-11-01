@@ -11,6 +11,11 @@
 # set number of topics
 nK <- 12
 
+
+docs <- TM_doc_prep_out$documents
+vocab <- TM_doc_prep_out$vocab
+meta <-TM_doc_prep_out$meta
+
 # Need to reindex docs to start counting vocab at 0 instead of 1 for lda package
 docs.lda <- TM_doc_prep_out$documents
 for(i in 1:length(docs.lda)){
@@ -19,7 +24,7 @@ for(i in 1:length(docs.lda)){
   if(dim(docs.lda[[i]])[2] < 1) message(paste("wrong number of columns in document", i))
 }
 
-lda <- lda.collapsed.gibbs.sampler(docs.lda,
+lda <- lda::lda.collapsed.gibbs.sampler(docs.lda,
                                    K=nK,
                                    vocab=vocab,
                                    num.iterations = 500, # 25 is the number used in the lda demo
