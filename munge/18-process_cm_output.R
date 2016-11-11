@@ -254,7 +254,7 @@ cm_results$context_est <- ifelse(cm_results$context_est < 1, 100*cm_results$cont
    
 # add Z scored versions of context_est and bootstrap values, for easier comparison across contexts and methods
 cm_results <- bootstrap_Z(cm_results, value="value", est="context_est", by=c("model", "method", "context", "measure"))
-                
+
 # add in some information about each context subset
 ds_ests <- ds_results %>% 
   filter(measure != "highest.freq.syl") %>% 

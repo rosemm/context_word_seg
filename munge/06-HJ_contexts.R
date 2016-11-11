@@ -8,6 +8,7 @@
 # doc_doctor()
 # 
 # master_doc <- collect_codes()
+# # save master_doc to local machine for processing
 # setwd("/Users/TARDIS/Documents/STUDIES/context_word_seg")
 # write.table(master_doc, file="context_codes/human_judgments/master_doc.txt", quote=F, col.names=T, row.names=F, append=F, sep="\t")
 
@@ -36,6 +37,6 @@ thin <- master_doc %>%
   count(file, UttNum) %>% 
   dplyr::filter(n < 5) %>% 
   dplyr::select(-n) %>% 
-  dplyr::left_join(master_doc, by=c("UttNum", "file"))
+  dplyr::left_join(master_doc, by=c("file", "UttNum"))
 summary(as.factor(thin$coder)) # coders that have already coded thin utterances
 summary(as.factor(thin$file)) # files the utterances are in
