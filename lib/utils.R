@@ -77,7 +77,7 @@ load_url <- function (url, ..., sha1 = NULL) {
 #'   Note that if x contains numbers other than 0 and 1, it will just treat 1 as
 #'   a success and all other values (including NA) as failure.
 #'   
-#' @example 
+#' @examples 
 #' # quarters in which presidental approval dropped below 50% 
 #' x <- as.numeric(presidents < 50) 
 #' within_k(x, k=4, "lag") # quarters that follow quarters with approval below 50% by 1 to 4 quarters 

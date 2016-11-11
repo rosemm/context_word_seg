@@ -20,7 +20,7 @@ process_codes <- function(doc, min.codes=10, max.codes=10, unique.coders){
   message("\nRAs have coded this many utterances (raw coding):\n") ; print(as.data.frame(RA_info))
   
   if(unique.coders){
-    # for utterances with more than 1 coding event from the same coder, randonly select 1 of them
+    # for utterances with more than 1 coding event from the same coder, randomly select 1 of them
     doc.unique <- doc %>% 
       group_by(utt, coder) %>% 
       sample_n(1) %>% # group_by() and then sample_n() takes random samples from each group (utt, coder)

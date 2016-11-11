@@ -64,6 +64,52 @@ load_url <- function (url, ..., sha1 = NULL) {
   load(temp_file, envir = .GlobalEnv)
 }
 
+#' Tests for lag (or lead) within k spaces away
+#' 
+#' @param x a vector where entries are all 1's or 0's (or NA's)
+#' @param k the distance over which to calculate lag or lead
+#' @param type should be "lag" or "lead", which call \code{\link[dplyr]{lag}} or
+#'   \code{\link[dplyr]{lead}} respectively, or "either", which calls both.
+#'   
+#' @return A vector of the same length as x, indicating whether there is a 1 in 
+#'   x anywhere up to k entries before (for type = "lag"), after (for type = 
+#'   "lead") or in either direction (for type ="either"). Will not return NAs.
+#'   Note that if x contains numbers other than 0 and 1, it will just treat 1 as
+#'   a success and all other values (including NA) as failure.
+#'   
+#' @examples 
+#' # quarters in which presidental approval dropped below 50% 
+#' x <- as.numeric(presidents < 50) 
+#' within_k(x, k=4, "lag") # quarters that follow quarters with approval below 50% by 1 to 4 quarters 
+#' within_k(x, k=4, "either") # quarters that fall within 4 quarters from one with an approval below 50%
+#' 
+#' @export
+within_k <- function(x, k, type){
+  stopifnot(require(dplyr))
+  x <- as.numeric(x == 1)
+  if(type == "lag" | type == "either"){
+    lags <- NULL
+    for(crit in 1:k){
+      lags <- cbind(lags, dplyr::lag(x, crit))
+    }
+    lag <- as.numeric(rowSums(lags, na.rm = TRUE) > 0)
+  }  
+  if(type == "lead" | type == "either"){
+    leads <- NULL
+    for(crit in 1:k){
+      leads <- cbind(leads, dplyr::lead(x, crit))
+    }
+    lead <- as.numeric(rowSums(leads, na.rm = TRUE) > 0)
+  } 
+  if (type == "either"){
+    either <- as.numeric(rowSums(cbind(lead, lag), na.rm = TRUE) > 0)
+  }
+  
+  if (type == "lag") return(lag)
+  if (type == "lead") return(lead)
+  if (type == "either") return(either)
+}
+
 #' @export
 add_stars <- function(tests){
   # add stars for significance to a table with p values

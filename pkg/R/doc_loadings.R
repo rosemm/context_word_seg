@@ -11,10 +11,10 @@ doc_loadings <- function(method=c("lda", "stm"), model, meta, df.wn.count){
   
   colnames(loadings) <- paste0("topic_", 1:ncol(loadings))
   loadings <- cbind(meta, loadings)
-  loadings <- select(loadings, -documents)
+  loadings <- dplyr::select(loadings, -documents)
   
   df.loadings <- left_join(df.wn.count, loadings, by=c( "child", "age_weeks", "wn.count" )) %>% 
-    select(utt, orth, phon, starts_with("topic_"))
+    dplyr::select(utt, orth, phon, starts_with("topic_"))
   
   return(df.loadings)
 }
