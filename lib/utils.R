@@ -154,3 +154,8 @@ convert_to_word <- function(x, cap=FALSE){
   }
   return(word)
 }
+
+shuffle <- function(x){
+  y <- base::sample(x, size=length(x), replace = FALSE)
+  return(y)
+}
