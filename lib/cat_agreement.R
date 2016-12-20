@@ -1,10 +1,10 @@
 #' @export
 # agreement analysis functions
-cat_agreement <- function(cat.codes, adj=TRUE){
+cat_agreement <- function(cat.codes, adj=TRUE, quiet = FALSE){
   
   stopifnot(length(cat.codes) == 2, require(dplyr), require(tidyr), require(vcd), require(MRCV))
   
-  message("Assessing agreement between ", paste(c(names(cat.codes)[1],names(cat.codes)[2]), collapse=" and "))
+  if(!quiet) message("Assessing agreement between ", paste(c(names(cat.codes)[1],names(cat.codes)[2]), collapse=" and "))
   
   cat1 <- cat.codes[[1]]
   cat2 <- cat.codes[[2]]
